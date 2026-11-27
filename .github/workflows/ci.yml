@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install LuaJIT and luacheck
+        run: sudo apt-get update && sudo apt-get install -y luajit lua-check zip
+      - name: Lint
+        run: luacheck .
+      - name: Test
+        run: luajit tests/run.lua
+      - name: Check bundled data
+        run: tools/check_data.sh "$RUNNER_TEMP/norgannondb"
+      - name: Package
+        run: tools/package.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Aeternum
+          path: dist/*.zip

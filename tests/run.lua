@@ -1,1228 +1,1242 @@
--- SPDX-License-Identifier: GPL-3.0-only
--- Headless Lua 5.1 test suite for Aeternum (run with `luajit tests/run.lua` or `lua tests/run.lua`).
+-- Headless tests: luajit tests/run.lua (from the repository root).
+local testDirectory = arg[0]:match("^(.*)/") or "."
+package.path = testDirectory .. "/?.lua;" .. package.path
+local Wow = require("wow")
 
-_G.unpack = _G.unpack or table.unpack
-local loadstring = loadstring or load
-
+local ADDON = "Aeternum"
 local passed, failed = 0, 0
-local failures = {}
 
-local function check(condition, message)
-    if not condition then
-        error(message or "assertion failed", 2)
-    end
-end
-
-local function checkEqual(actual, expected, label)
-    if actual ~= expected then
-        error(("%s: expected %s, got %s"):format(label or "mismatch", tostring(expected), tostring(actual)), 2)
-    end
-end
-
-local function checkNear(actual, expected, tolerance, label)
-    if type(actual) ~= "number" or math.abs(actual - expected) > (tolerance or 1e-4) then
-        error(("%s: expected ~%s, got %s"):format(label or "mismatch", tostring(expected), tostring(actual)), 2)
-    end
-end
-
-local function test(name, fn)
-    local ok, err = pcall(fn)
+local function test(name, body)
+    local ok, problem = xpcall(body, debug.traceback)
     if ok then
         passed = passed + 1
     else
         failed = failed + 1
-        failures[#failures + 1] = { name = name, err = tostring(err) }
+        print("FAIL " .. name .. "\n" .. problem)
     end
 end
 
--- ============================================================================
--- Minimal WoW API Harness (WoW Forever 1.60.1 / MapCanvas / Widgets)
--- ============================================================================
-
-local printedMessages = {}
-local realPrint = print
-_G.print = function(...)
-    local parts = {}
-    for i = 1, select("#", ...) do
-        parts[i] = tostring(select(i, ...))
+local function check(condition, message)
+    if not condition then
+        error(message or "check failed", 2)
     end
-    printedMessages[#printedMessages + 1] = table.concat(parts, " ")
 end
 
-local mockState = {
-    inCombat = false,
-    inInstance = false,
-    faction = "Alliance",
-    rotateMinimap = false,
-    playerFacing = 0,
-    playerMapID = 1436,
-    playerPos = { x = 0.40, y = 0.60 },
-    viewRadius = 150,
-    secretValues = setmetatable({}, { __mode = "k" }),
-    itemNames = {},
-    itemLinks = {},
-    itemQualities = {},
-    itemCached = {},
-    itemRequests = {},
-    nativeArt = {},
-    failTextureAt = nil,
-    texturesLoaded = true,
-    timers = {},
-    showUIPanelCalls = 0,
-    modifiedClickHandled = false,
-    modifiedClicks = {},
-    itemRefs = {},
-    unknownEvents = {},
-    mapNames = {
-        [1420] = "Tirisfal Glades",
-        [1427] = "Searing Gorge",
-        [1436] = "Westfall",
-        [1453] = "Stormwind City",
-        [1454] = "Orgrimmar",
-        [1455] = "Ironforge",
-    },
-}
-
-_G.issecretvalue = function(v)
-    return v ~= nil and mockState.secretValues[v] == true
+local function equal(actual, expected, message)
+    if actual ~= expected then
+        error(("%s: expected %s, got %s"):format(message or "value", tostring(expected), tostring(actual)), 2)
+    end
 end
 
-_G.canaccesstable = function(t)
-    return type(t) == "table" and not mockState.secretValues[t]
-end
-
-_G.strtrim = function(s)
-    return (s:gsub("^%s*(.-)%s*$", "%1"))
-end
-
-_G.InCombatLockdown = function()
-    return mockState.inCombat
-end
-
-_G.IsInInstance = function()
-    return mockState.inInstance
-end
-
-_G.UnitFactionGroup = function()
-    return mockState.faction
-end
-
-_G.GetPlayerFacing = function()
-    return mockState.playerFacing
-end
-
-_G.CreateVector2D = function(x, y)
-    return { x = x, y = y }
-end
-
-_G.Mixin = function(target, ...)
-    for i = 1, select("#", ...) do
-        local src = select(i, ...)
-        for k, v in pairs(src) do
-            target[k] = v
+local function tocFiles()
+    local files = {}
+    for line in io.lines(ADDON .. ".toc") do
+        if line ~= "" and not line:match("^##") then
+            files[#files + 1] = line
         end
     end
-    return target
+    return files
 end
 
-_G.CreateFromMixins = function(...)
-    return Mixin({}, ...)
-end
+local dataChunk = assert(loadfile("Data.lua"))
 
-_G.ITEM_QUALITY_COLORS = {
-    [0] = { r = 0.62, g = 0.62, b = 0.62 },
-    [1] = { r = 1.00, g = 1.00, b = 1.00 },
-    [2] = { r = 0.12, g = 1.00, b = 0.00 },
-    [3] = { r = 0.00, g = 0.44, b = 0.87 },
-    [4] = { r = 0.64, g = 0.21, b = 0.93 },
-}
-
-_G.C_CVar = {
-    GetCVarBool = function(key)
-        if key == "rotateMinimap" then
-            return mockState.rotateMinimap
-        end
-        return false
-    end,
-}
-
-_G.C_Minimap = {
-    GetViewRadius = function()
-        return mockState.viewRadius
-    end,
-    IsRotateMinimapIgnored = function()
-        return false
-    end,
-}
-
--- Realistic WoW world coordinates: continent 0 = Eastern Kingdoms (mapID 1420, 1427, 1436, 1453),
--- continent 1 = Kalimdor (mapID 1454). World X points North, World Y points West (rotated axes).
-local mapContinents = {
-    [1420] = 0,
-    [1427] = 0,
-    [1436] = 0,
-    [1453] = 0,
-    [1454] = 1,
-    [1455] = 0,
-}
-
-_G.C_Map = {
-    GetMapInfo = function(mapID)
-        local name = mockState.mapNames[mapID]
-        return name and { name = name, mapID = mapID } or nil
-    end,
-    GetBestMapForUnit = function()
-        return mockState.playerMapID
-    end,
-    GetPlayerMapPosition = function()
-        return mockState.playerPos
-    end,
-    GetWorldPosFromMapPos = function(mapID, pos)
-        local continent = mapContinents[mapID]
-        if not continent then
-            return nil
-        end
-        -- Realistic WoW zone scale: 3500 yd E-W, 2333 yd N-S. Positive map X -> East (-worldY), negative map Y -> North (+worldX).
-        local worldX = (0.5 - pos.y) * 2333
-        local worldY = (0.5 - pos.x) * 3500
-        return continent, { x = worldX, y = worldY }
-    end,
-    GetMapArtLayers = function(mapID)
-        local art = mockState.nativeArt[mapID]
-        return art and { art.layer } or nil
-    end,
-    GetMapArtLayerTextures = function(mapID)
-        local art = mockState.nativeArt[mapID]
-        return art and art.textures or nil
-    end,
-}
-
-_G.C_Item = {
-    GetItemNameByID = function(itemID)
-        return mockState.itemNames[itemID]
-    end,
-    GetItemInfo = function(itemID)
-        local name = mockState.itemNames[itemID]
-        if not name then
-            return nil
-        end
-        return name, mockState.itemLinks[itemID], mockState.itemQualities[itemID]
-    end,
-    GetItemQualityByID = function(itemID)
-        return mockState.itemQualities[itemID]
-    end,
-    IsItemDataCachedByID = function(itemID)
-        return mockState.itemCached[itemID] == true
-    end,
-    RequestLoadItemDataByID = function(itemID)
-        mockState.itemRequests[itemID] = (mockState.itemRequests[itemID] or 0) + 1
-    end,
-}
-
-_G.C_Timer = {
-    NewTimer = function(delay, callback)
-        local timer = {
-            delay = delay,
-            callback = callback,
-            cancelled = false,
-            Cancel = function(self)
-                self.cancelled = true
-            end,
-        }
-        mockState.timers[#mockState.timers + 1] = timer
-        return timer
-    end,
-}
-
-_G.HandleModifiedItemClick = function(link)
-    mockState.modifiedClicks[#mockState.modifiedClicks + 1] = link
-    return mockState.modifiedClickHandled
-end
-
-_G.SetItemRef = function(link, text, button)
-    mockState.itemRefs[#mockState.itemRefs + 1] = { link = link, text = text, button = button }
-end
-
--- Widget factory
-local allEventFrames = {}
-
-local function newWidget(kind, parent)
-    local w = {
-        _kind = kind,
-        _parent = parent,
-        _shown = true,
-        _enabled = true,
-        _width = 200,
-        _height = 200,
-        _frameLevel = 1,
-        _scripts = {},
-        _events = {},
-        _children = {},
-        _textures = {},
-        _fontStrings = {},
-        _lines = {},
-        _text = "",
-        _checked = false,
-        _verticalScroll = 0,
-        _points = {},
-    }
-    if parent and parent._children then
-        parent._children[#parent._children + 1] = w
-    end
-
-    function w:Show()
-        local was = self._shown
-        self._shown = true
-        if not was then
-            self:_fire("OnShow")
-        end
-    end
-    function w:Hide()
-        local was = self._shown
-        self._shown = false
-        if was then
-            self:_fire("OnHide")
-        end
-    end
-    function w:SetShown(v)
-        if v then self:Show() else self:Hide() end
-    end
-    function w:IsShown() return self._shown end
-    function w:IsVisible()
-        if not self._shown then return false end
-        if self._parent and self._parent.IsVisible then
-            return self._parent:IsVisible()
-        end
-        return true
-    end
-    function w:SetEnabled(v) self._enabled = not not v end
-    function w:IsEnabled() return self._enabled end
-    function w:SetSize(width, height)
-        local changed = (width ~= self._width) or (height ~= self._height)
-        self._width, self._height = width, height
-        if changed then
-            self:_fire("OnSizeChanged", width, height)
-        end
-    end
-    function w:GetSize() return self._width, self._height end
-    function w:SetWidth(width)
-        local changed = width ~= self._width
-        self._width = width
-        if changed then self:_fire("OnSizeChanged", width, self._height) end
-    end
-    function w:GetWidth() return self._width end
-    function w:SetHeight(height)
-        local changed = height ~= self._height
-        self._height = height
-        if changed then self:_fire("OnSizeChanged", self._width, height) end
-    end
-    function w:GetHeight() return self._height end
-    function w:SetPoint(...) self._points[#self._points + 1] = { ... } end
-    function w:SetAllPoints() end
-    function w:ClearAllPoints() self._points = {} end
-    function w:SetFrameStrata(s) self._strata = s end
-    function w:SetFrameLevel(l) self._frameLevel = l end
-    function w:GetFrameLevel() return self._frameLevel end
-    function w:SetClampedToScreen(v) self._clamped = v end
-    function w:EnableMouse(v) self._mouse = v end
-    function w:SetText(t)
-        local prev = self._text
-        self._text = t or ""
-        if self._kind == "EditBox" and self._text ~= prev then
-            self:_fire("OnTextChanged", false)
-        end
-    end
-    function w:GetText() return self._text end
-    function w:SetTextColor(r, g, b, a) self._textColor = { r, g, b, a } end
-    function w:SetJustifyH(j) self._justifyH = j end
-    function w:SetWordWrap(v) self._wordWrap = v end
-    function w:SetMaxLines(n) self._maxLines = n end
-    function w:SetAutoFocus(v) self._autoFocus = v end
-    function w:SetMaxLetters(n) self._maxLetters = n end
-    function w:ClearFocus() self._focused = false end
-    function w:SetChecked(v) self._checked = not not v end
-    function w:GetChecked() return self._checked end
-    function w:SetScrollChild(child) self._scrollChild = child end
-    function w:UpdateScrollChildRect() self._rectUpdated = (self._rectUpdated or 0) + 1 end
-    function w:GetVerticalScroll() return self._verticalScroll end
-    function w:SetVerticalScroll(offset)
-        self._verticalScroll = offset
-        self:_fire("OnVerticalScroll", offset)
-    end
-    function w:SetScript(name, fn)
-        self._scripts[name] = fn and { fn } or {}
-    end
-    function w:HookScript(name, fn)
-        self._scripts[name] = self._scripts[name] or {}
-        self._scripts[name][#self._scripts[name] + 1] = fn
-    end
-    function w:_fire(name, ...)
-        local list = self._scripts[name]
-        if not list then return end
-        for _, fn in ipairs(list) do
-            fn(self, ...)
-        end
-    end
-    function w:Click(button)
-        self:_fire("OnClick", button or "LeftButton")
-    end
-    function w:RegisterEvent(event)
-        if mockState.unknownEvents[event] then
-            error("Attempt to register unknown event \"" .. tostring(event) .. "\"")
-        end
-        self._events[event] = true
-        allEventFrames[self] = true
-    end
-    function w:CreateTexture()
-        local tex = newWidget("Texture", self)
-        function tex:SetColorTexture(r, g, b, a)
-            self._color = { r, g, b, a }
-        end
-        function tex:SetTexture(id)
-            if id ~= nil and mockState.failTextureAt and mockState.failTextureAt == id then
-                return false
-            end
-            self._texture = id
-            return true
-        end
-        function tex:SetTexCoord(...) self._texCoord = { ... } end
-        function tex:IsObjectLoaded() return mockState.texturesLoaded end
-        self._textures[#self._textures + 1] = tex
-        return tex
-    end
-    function w:CreateFontString()
-        local fs = newWidget("FontString", self)
-        self._fontStrings[#self._fontStrings + 1] = fs
-        return fs
-    end
-    function w:CreateLine()
-        local line = newWidget("Line", self)
-        function line:SetThickness(t) self._thickness = t end
-        function line:SetColorTexture(r, g, b, a) self._color = { r, g, b, a } end
-        function line:SetStartPoint(point, rel, x, y) self._start = { x, y } end
-        function line:SetEndPoint(point, rel, x, y) self._end = { x, y } end
-        self._lines[#self._lines + 1] = line
-        return line
-    end
-    return w
-end
-
-_G.CreateFrame = function(kind, _, parent)
-    return newWidget(kind, parent)
-end
-
-_G.UIParent = newWidget("Frame")
-_G.UIParent:SetSize(1280, 720)
-
-_G.Minimap = newWidget("Frame", UIParent)
-_G.Minimap:SetSize(140, 140)
-
-_G.GameTooltip = {
-    owner = nil,
-    shown = false,
-    lines = {},
-    hyperlink = nil,
-    SetOwner = function(self, owner)
-        self.owner = owner
-        self.lines = {}
-        self.hyperlink = nil
-    end,
-    IsOwned = function(self, owner)
-        return self.owner == owner
-    end,
-    SetText = function(self, text)
-        self.lines[#self.lines + 1] = text
-    end,
-    AddLine = function(self, text)
-        self.lines[#self.lines + 1] = text
-    end,
-    SetHyperlink = function(self, link)
-        self.hyperlink = link
-    end,
-    Show = function(self) self.shown = true end,
-    Hide = function(self)
-        self.shown = false
-        self.owner = nil
-    end,
-}
-
-_G.MapCanvasDataProviderMixin = {
-    OnAdded = function(self, map) self.owningMap = map end,
-    GetMap = function(self) return self.owningMap end,
-}
-
-_G.MapCanvasPinMixin = {
-    UseFrameLevelType = function() end,
-    SetPosition = function(self, x, y) self._posX, self._posY = x, y end,
-    OnReleased = function(self) self:Hide() end,
-}
-
-_G.WorldMapFrame = newWidget("Frame", UIParent)
-_G.WorldMapFrame:SetSize(1000, 700)
-_G.WorldMapFrame._shown = false
-_G.WorldMapFrame._mapID = 1436
-_G.WorldMapFrame._providers = {}
-_G.WorldMapFrame._pins = {}
-
-function _G.WorldMapFrame:GetMapID() return self._mapID end
-function _G.WorldMapFrame:SetMapID(mapID)
-    self._mapID = mapID
-    for _, p in ipairs(self._providers) do
-        if p.RefreshAllData then p:RefreshAllData() end
-    end
-end
-function _G.WorldMapFrame:AddDataProvider(p)
-    p:OnAdded(self)
-    self._providers[#self._providers + 1] = p
-end
-function _G.WorldMapFrame:AcquirePin(tmpl, ...)
-    local pin = newWidget("Frame", self)
-    Mixin(pin, AeternumMapPinMixin)
-    pin._template = tmpl
-    if pin.OnLoad then pin:OnLoad() end
-    if pin.OnAcquired then pin:OnAcquired(...) end
-    self._pins[#self._pins + 1] = pin
-    return pin
-end
-function _G.WorldMapFrame:RemovePin(pin)
-    for i, existing in ipairs(self._pins) do
-        if existing == pin then
-            table.remove(self._pins, i)
-            if pin.OnReleased then pin:OnReleased() end
-            return
-        end
-    end
-end
-function _G.WorldMapFrame:RemoveAllPinsByTemplate(tmpl)
-    local kept = {}
-    for _, pin in ipairs(self._pins) do
-        if pin._template == tmpl then
-            if pin.OnReleased then pin:OnReleased() end
+-- Loads the addon into a fresh client. state sets the character and saved data.
+local function load(state)
+    state = state or {}
+    local env = Wow.new(state)
+    local addon = {}
+    for _, file in ipairs(tocFiles()) do
+        if file:match("%.lua$") then
+            local chunk = file == "Data.lua" and dataChunk or assert(loadfile(file))
+            setfenv(chunk, env)
+            chunk(ADDON, addon)
         else
-            kept[#kept + 1] = pin
+            check(file == "WorldMap.xml", "unexpected TOC file " .. file)
         end
     end
-    self._pins = kept
+    Wow.fire("ADDON_LOADED", ADDON)
+    Wow.fire("PLAYER_LOGIN")
+    return addon, env, state
 end
-function _G.WorldMapFrame:EnumeratePinsByTemplate(tmpl)
-    local i = 0
-    local list = self._pins
-    return function()
-        while i < #list do
-            i = i + 1
-            if list[i]._template == tmpl then
-                return list[i]
+
+local function slash(env, text)
+    env.SlashCmdList.AETERNUM(text or "")
+end
+
+local function pins(env)
+    local result = {}
+    for _, template in ipairs({"AeternumMapPinTemplate", "AeternumEntrancePinTemplate"}) do
+        for pin in env.WorldMapFrame:EnumeratePinsByTemplate(template) do result[#result + 1] = pin end
+    end
+    return result
+end
+
+local function findEntry(entries, predicate)
+    for _, entry in ipairs(entries) do
+        if predicate(entry) then
+            return entry
+        end
+    end
+end
+
+local function questPin(addon, mapID, questID, role)
+    return findEntry(addon.Entries(mapID, false, ""), function(entry)
+        return entry.questID == questID and entry.role == role
+    end)
+end
+
+test("bundled data is consistent", function()
+    local addon = load()
+    local data = addon.Data
+    equal(#data.dungeons, 34, "dungeons")
+    local packedPins, records = 0, 0
+    for mapID, packed in pairs(data.questPins) do
+        local _, count = packed:gsub(";", "")
+        packedPins = packedPins + count
+        for _, entry in ipairs(addon.MapRecords(mapID)) do
+            if entry.questID then
+                records = records + 1
+                check(addon.Quest(entry.questID), "quest pin without a quest record " .. entry.questID)
+                check(entry.x >= 0 and entry.x <= 1 and entry.y >= 0 and entry.y <= 1, "pin outside its map")
             end
         end
     end
+    equal(packedPins, 11100, "packed quest pins")
+    equal(records, 11100, "decoded quest pins")
+    for id in pairs(data.quests) do
+        local quest = addon.Quest(id)
+        check(quest.name and quest.name ~= "", "quest name " .. id)
+        if quest.requiredSkill then
+            check(data.professions[quest.requiredSkill[1]], "unnamed profession")
+        end
+    end
+    for _, dungeon in ipairs(data.dungeons) do
+        for _, boss in ipairs(dungeon.bosses) do
+            for _, itemID in ipairs(boss.loot) do
+                check(data.items[itemID], "loot without a name " .. itemID)
+            end
+        end
+        for _, itemID in ipairs(dungeon.keys) do
+            check(data.items[itemID], "key without a name " .. itemID)
+        end
+        for _, questID in ipairs(dungeon.quests) do
+            check(addon.Quest(questID), "dungeon quest without a record " .. questID)
+        end
+    end
+end)
+
+test("packed quest rules decode to the source fields", function()
+    local addon = load()
+    -- Quest 2: level 30, from level 20, Horde races, after quest 6383.
+    local quest = addon.Quest(2)
+    equal(quest.name, "Sharptalon's Claw", "name")
+    equal(quest.level, 30, "level")
+    equal(quest.minLevel, 20, "minimum level")
+    equal(quest.races, 8589934770, "race mask beyond 2^32")
+    equal(quest.prerequisites.any[1], 6383, "prerequisite")
+    check(not quest.prerequisites.all, "no required-all list")
+    check(addon.Quest(999999) == nil, "unknown quest")
+end)
+
+test("unknown slash commands print help", function()
+    local _, env, state = load()
+    slash(env, "nonsense")
+    check(#state.messages > 0, "help printed")
+end)
+
+test("quest pins follow the character's progress", function()
+    local addon, env, state = load({ level = 1 })
+    slash(env)
+    check(questPin(addon, 1429, 783, "start"), "first quest available")
+    check(not questPin(addon, 1429, 7, "start"), "follow-up locked")
+    check(not questPin(addon, 1429, 783, "turnin"), "turn-in hidden before accepting")
+
+    state.log[783] = 1
+    addon.Quests:Invalidate()
+    check(not questPin(addon, 1429, 783, "start"), "start hidden once accepted")
+    check(questPin(addon, 1429, 783, "turnin"), "turn-in shown while active")
+    equal(addon.Quests:State(783), "active", "active")
+    state.complete[783] = true
+    addon.Quests:Invalidate()
+    equal(addon.Quests:State(783), "ready", "ready to turn in")
+
+    state.log[783], state.completed[783] = nil, true
+    addon.Quests:Invalidate()
+    check(not questPin(addon, 1429, 783, "turnin"), "turn-in hidden once done")
+    equal(addon.Quests:State(783), "done", "done")
+    check(questPin(addon, 1429, 7, "start"), "follow-up unlocked")
+end)
+
+test("level, class, and race rules apply", function()
+    local addon, _, state = load({ level = 1 })
+    local data = addon.Data
+    local highLevel, mageOnly, raceID95
+    for id in pairs(data.quests) do
+        local quest = addon.Quest(id)
+        if not highLevel and quest.minLevel and quest.minLevel >= 30 and not quest.races and not quest.classes
+            and not quest.prerequisites and not quest.event and not quest.exclusiveTo then
+            highLevel = id
+        end
+        if not mageOnly and quest.classes == data.classMasks.MAGE and not quest.prerequisites
+            and not quest.exclusiveTo and (not quest.races or quest.races % 2 == 1) then
+            mageOnly = id
+        end
+        if not raceID95 and quest.races and quest.races >= 2 ^ 32 then
+            raceID95 = id
+        end
+    end
+    check(highLevel and mageOnly and raceID95, "sample quests found")
+    equal(addon.Quests:State(highLevel), "locked", "too low")
+    equal(addon.Quests:State(mageOnly), "unavailable", "warrior")
+    state.class, state.level = "MAGE", 60
+    addon.Quests:Invalidate()
+    check(addon.Quests:State(mageOnly) ~= "unavailable", "mage")
+    check(addon.Quests:State(highLevel) == "available" or addon.Quests:State(highLevel) == "trivial", "level 60")
+    local quest = addon.Quest(raceID95)
+    local allowed95 = quest.races % (2 * data.raceMasks[95]) >= data.raceMasks[95]
+    state.raceID = 95
+    addon.Quests:Invalidate()
+    equal(addon.Quests:State(raceID95) ~= "unavailable", allowed95, "race above 2^32")
+end)
+
+test("faction-specific pins stay with their faction", function()
+    local addon = load({ faction = "Horde", level = 10 })
+    addon.settings.questMode = "all"
+    for _, entry in ipairs(addon.Entries(1429, false, "")) do
+        check(entry.faction ~= "Alliance", "no Alliance-only pins for Horde")
+    end
+end)
+
+test("pins show quest marks coloured by state", function()
+    local _, env = load({ level = 1 })
+    slash(env)
+    local found
+    for _, pin in ipairs(pins(env)) do
+        for _, entry in ipairs(pin.entries) do
+            if entry.questID == 783 and entry.role == "start" and pin.entry == entry then
+                found = pin
+            end
+        end
+    end
+    check(found, "quest start pin")
+    equal(found.icon.texture, 132049, "Blizzard available-quest mark")
+    found:OnMouseEnter()
+    check(env.GameTooltip:IsOwned(found), "tooltip")
+    check(env.GameTooltip.lines[2]:find("Available", 1, true), "state in tooltip")
+end)
+
+test("the arrow points at the target on a fixed minimap", function()
+    local addon, _, state = load()
+    state.playerMap, state.playerX, state.playerY = 1429, .5, .5
+    check(addon.Navigation:Start("North point", { mapID = 1429, x = .5, y = .15 }), "started")
+    local overlay = addon.Navigation.overlay
+    check(overlay and overlay:IsShown(), "arrow shown")
+    local location = overlay.arrow.points[1]
+    check(math.abs(location[4]) < .01 and location[5] > 0, "north is up")
+    equal(overlay.arrow.atlas, "Navigation-Tracked-Arrow", "game's edge arrow")
+    equal(overlay.arrow.rotation, 0, "points up")
+    check(overlay.arrow:IsVisible() and not overlay.marker:IsVisible(), "only the edge arrow for a distant point")
+    check(addon.Navigation:GetStatus():find("North point", 1, true), "status names target")
+end)
+
+test("the arrow turns with a rotating minimap", function()
+    local addon, _, state = load()
+    state.playerMap, state.playerX, state.playerY = 1429, .5, .5
+    state.rotate, state.facing = true, -math.pi / 2 -- facing east
+    addon.Navigation:Start("North point", { mapID = 1429, x = .5, y = .15 })
+    local arrow = addon.Navigation.overlay.arrow
+    local location = arrow.points[1]
+    check(location[4] < 0 and math.abs(location[5]) < .01, "north is to the left when facing east")
+    check(math.abs(arrow.rotation - math.pi / 2) < .01, "arrowhead points left")
+end)
+
+test("guidance follows approach points and stops on arrival", function()
+    local addon, _, state = load()
+    local destination = {
+        mapID = 1429, x = .5, y = .9, label = "Entrance",
+        waypoints = { { mapID = 1429, x = .5, y = .5, label = "Road" } },
+    }
+    state.playerMap, state.playerX, state.playerY = 1429, .5, .1
+    addon.Navigation:Start("Test dungeon", destination)
+    check(addon.Navigation:GetStatus():find("^Road"), "heads for the approach point first")
+    state.playerY = .7
+    addon.Navigation.step = nil
+    addon.Navigation:Update()
+    check(addon.Navigation:GetStatus():find("^Test dungeon"), "skips a passed approach point")
+    state.playerY = .9
+    addon.Navigation:Update()
+    check(not addon.Navigation:IsActive(), "stopped")
+    equal(addon.Navigation:GetStatus(), "Arrived near Test dungeon.", "arrival")
+end)
+
+test("guidance pauses on another continent and inside instances", function()
+    local addon, _, state = load()
+    state.playerMap, state.playerX, state.playerY = 1454, .5, .5
+    addon.Navigation:Start("Goldshire", { mapID = 1429, x = .4, y = .6 })
+    check(addon.Navigation:GetStatus():find("continent", 1, true), "continent pause")
+    state.inInstance = true
+    addon.Navigation:Update()
+    check(addon.Navigation:GetStatus():find("instance", 1, true), "instance pause")
+    check(addon.Navigation:IsActive(), "still active")
+end)
+
+test("guidance rejects points without coordinates", function()
+    local addon = load()
+    check(not addon.Navigation:Start("Nowhere", { mapID = 1429 }), "rejected")
+    check(not addon.Navigation:IsActive(), "inactive")
+end)
+
+test("a quest in the log stays turn-in-able whatever its offer rules say", function()
+    local addon, _, state = load({ level = 60 })
+    local seasonal
+    for id in pairs(addon.Data.quests) do
+        local quest = addon.Quest(id)
+        if quest.event and not quest.races and not quest.classes then
+            seasonal = id
+            break
+        end
+    end
+    check(seasonal, "sample quest")
+    equal(addon.Quests:State(seasonal), "unavailable", "not offered")
+    state.log[seasonal] = 1
+    addon.Quests:Invalidate()
+    equal(addon.Quests:State(seasonal), "active", "in the log")
+end)
+
+test("a new level from PLAYER_LEVEL_UP survives later quest events", function()
+    -- Quest 783 is level 1; with a green range of 5 it turns grey at level 7.
+    local addon, _, state = load({ level = 6 })
+    equal(addon.Quests:State(783), "available", "level 6")
+    Wow.fire("PLAYER_LEVEL_UP", 7)
+    Wow.fire("QUEST_LOG_UPDATE")
+    equal(addon.Quests:State(783), "trivial", "level 7 before UnitLevel catches up")
+    state.level = 7
+    Wow.fire("QUEST_LOG_UPDATE")
+    equal(addon.Quests:State(783), "trivial", "level 7")
+end)
+
+test("the edge arrow becomes a waypoint at the target's true minimap distance", function()
+    local addon, _, state = load()
+    -- Elwynn is 2000 yards tall, so .05 of the map is 100 yards: half the 200-yard view radius.
+    state.playerMap, state.playerX, state.playerY = 1429, .5, .7
+    addon.Navigation:Start("North point", { mapID = 1429, x = .5, y = .45 })
+    local overlay = addon.Navigation.overlay
+    check(overlay.arrow:IsVisible(), "outside the minimap")
+    state.playerY = .5
+    addon.Navigation:Update()
+    local point = overlay.marker.points[1]
+    check(overlay.marker:IsVisible() and not overlay.arrow:IsVisible(), "one waypoint inside the minimap")
+    equal(overlay.marker.atlas, "waypoint-mappin-minimap-tracked", "stock minimap waypoint")
+    check(math.abs(point[5] - 35) < .01, "35 pixels on a 140-pixel minimap, got " .. point[5])
+end)
+
+test("completed quests read as completed in reference mode", function()
+    local addon, _, state = load({ level = 60 })
+    local seasonal
+    for id in pairs(addon.Data.quests) do
+        local quest = addon.Quest(id)
+        if quest.event and not quest.races and not quest.classes and not quest.repeatable then
+            seasonal = id
+            break
+        end
+    end
+    state.completed[seasonal] = true
+    equal(addon.Quests:State(seasonal), "done", "done, not unavailable")
+end)
+
+test("opening the map refreshes the pins once", function()
+    local addon, env = load({ savedVariables = { pinsWithPanelClosed = true } })
+    local refreshes = 0
+    local original = addon.Entries
+    addon.Entries = function(...)
+        refreshes = refreshes + 1
+        return original(...)
+    end
+    env.WorldMapFrame:Show()
+    equal(refreshes, 1, "one refresh")
+end)
+
+
+local function dungeonNamed(addon, id)
+    return assert(findEntry(addon.Data.dungeons, function(dungeon) return dungeon.id == id end))
 end
 
-_G.ShowUIPanel = function(frame)
-    mockState.showUIPanelCalls = mockState.showUIPanelCalls + 1
-    frame:Show()
-end
-
-_G.SlashCmdList = {}
-
-local function fireEvent(event, ...)
-    for frame in pairs(allEventFrames) do
-        if frame._events[event] then
-            frame:_fire("OnEvent", event, ...)
+local function locate(env, predicate)
+    for _, pin in ipairs(pins(env)) do
+        for _, entry in ipairs(pin.entries) do
+            if predicate(entry) then return pin, entry end
         end
     end
 end
 
--- ============================================================================
--- Load Addon in Exact TOC Order & Check Global Hygiene
--- ============================================================================
-
-local globalsBefore = {}
-for k in pairs(_G) do globalsBefore[k] = true end
-
-local tocFiles = {}
-do
-    local fh = assert(io.open("Aeternum.toc", "r"), "Run tests from repository root")
-    for line in fh:lines() do
-        local trimmed = line:match("^%s*(.-)%s*$")
-        if trimmed ~= "" and not trimmed:match("^#") then
-            tocFiles[#tocFiles + 1] = trimmed
-        end
-    end
-    fh:close()
+local function menuRow(menu, name)
+    return findEntry(menu.children, function(row) return row.label:find(name, 1, true) end)
 end
 
-local addon = {}
-for _, filename in ipairs(tocFiles) do
-    if filename:match("%.lua$") then
-        local chunk, err = loadfile(filename)
-        assert(chunk, "Failed to compile " .. filename .. ": " .. tostring(err))
-        chunk("Aeternum", addon)
-    end
+local function openDeadmines()
+    local addon, env, state = load({mapID=1436})
+    env.WorldMapFrame:Show()
+    local pin = locate(env, function(entry) return entry.title == "The Deadmines" end)
+    env.WorldMapFrame:ClickPin(pin, "LeftButton")
+    return addon, env, state
 end
 
-local expectedGlobals = {
-    AeternumDB = true,
-    AeternumMapPinMixin = true,
-    SLASH_AETERNUM1 = true,
-}
-
-test("TOC loads cleanly with no accidental global leaks", function()
-    local leaked = {}
-    for k in pairs(_G) do
-        if not globalsBefore[k] and not expectedGlobals[k] then
-            leaked[#leaked + 1] = k
-        end
-    end
-    checkEqual(#leaked, 0, "unexpected globals: " .. table.concat(leaked, ", "))
-    check(type(addon.Data) == "table", "addon.Data missing")
-    check(type(addon.Navigation) == "table", "addon.Navigation missing")
-    check(type(addon.DungeonMap) == "table", "addon.DungeonMap missing")
-    check(type(addon.UI) == "table", "addon.UI missing")
+test("M shows dungeon entrances and relevant map pins without any launcher", function()
+    local addon, env = load({mapID=1436, savedVariables={panelOpen=true, showMapPins=false}})
+    env.WorldMapFrame:Show()
+    check(locate(env, function(entry) return entry.title == "The Deadmines" end), "entrance visible on first visit")
+    check(not addon.DungeonMap.frame and not addon.Navigation.overlay, "outdoors opens no extra surface")
+    for _, entry in ipairs(Wow.trackingMenu().children) do check(entry.label ~= "Aeternum", "no addon submenu") end
+    equal(#env.WorldMapFrame.ScrollContainer.points, 0, "game canvas anchors unchanged")
+    check(addon.settings.showMapPins == nil and addon.settings.panelOpen == nil, "obsolete launcher options migrated")
 end)
 
-test("WorldMap.xml references expected template and mixin", function()
-    local fh = assert(io.open("WorldMap.xml", "r"))
-    local xml = fh:read("*a")
-    fh:close()
-    check(xml:find('name="AeternumMapPinTemplate"', 1, true), "missing template name")
-    check(xml:find('mixin="AeternumMapPinMixin"', 1, true), "missing mixin name")
+test("outdoor wheel zoom fills single-layer ranges and preserves native multi-layer zoom", function()
+    local _, env = load()
+    local scroll = env.WorldMapFrame.ScrollContainer
+    equal(scroll.wheelMode, 2, "native wheel enabled")
+    equal(#scroll.zoomLevels, 5, "single-layer zoom stops")
+    scroll:CreateZoomLevels()
+    equal(#scroll.zoomLevels, 5, "rebuild does not duplicate stops")
+    equal(scroll.zoomLevels[5].scale, 4, "4x detail")
+    local native = {{scale=.5, layerIndex=1}, {scale=2, layerIndex=2}}
+    local _, second = load({zoomLevels=native})
+    equal(second.WorldMapFrame.ScrollContainer.zoomLevels, native, "native levels kept")
+    equal(#native, 2, "extra layers unaffected")
 end)
 
--- ============================================================================
--- Core.lua Tests
--- ============================================================================
-
-test("Core: Trim handles nil, non-string, and whitespace with or without strtrim", function()
-    checkEqual(addon.Trim("  hello world  "), "hello world")
-    checkEqual(addon.Trim("   "), "")
-    checkEqual(addon.Trim(nil), "")
-    checkEqual(addon.Trim(42), "")
-    local saved = _G.strtrim
-    _G.strtrim = nil
-    checkEqual(addon.Trim("\t foo bar \n"), "foo bar")
-    _G.strtrim = saved
+test("dungeon right-click offers directions and does not zoom the map", function()
+    local addon, env, state = load({mapID=1436, playerMap=1436, playerX=.2, playerY=.2, inCombat=true})
+    env.WorldMapFrame:Show()
+    local pin = locate(env, function(entry) return entry.source.id == "deadmines" end)
+    env.WorldMapFrame:ClickPin(pin, "RightButton")
+    check(not env.WorldMapFrame.zoomedOut and not addon.Navigation:IsActive(), "menu first")
+    state.menu:Find("Show path to The Deadmines"):Click()
+    equal(addon.Navigation:GetTarget(), "The Deadmines entrance", "clicked entrance")
+    equal(#addon.Navigation.points, 2, "recorded outdoor approach included")
+    check(addon.Navigation.overlay:IsShown() and not addon.DungeonMap.frame, "minimap only")
+    env.WorldMapFrame:ClickPin(pin, "RightButton")
+    state.menu:Find("Stop directions"):Click()
+    check(not addon.Navigation:IsActive(), "stopped in place")
 end)
 
-test("Core: CategoryEnabled is safe before LoadSettings and honors saved filters", function()
-    addon.settings = nil
-    checkEqual(addon.CategoryEnabled("dungeon"), true)
-    addon.LoadSettings()
-    AeternumDB.filters.quest = false
-    checkEqual(addon.CategoryEnabled("quest"), false)
-    checkEqual(addon.CategoryEnabled("dungeon"), true)
-    AeternumDB.filters.quest = true
+test("shared entrances retain the chosen wing for both buttons", function()
+    local addon, env, state = load({mapID=1420, playerMap=1420, playerX=.2, playerY=.2})
+    env.WorldMapFrame:Show()
+    local pin = locate(env, function(entry) return entry.source.id == "sm-armory" end)
+    equal(#pin.entries, 4, "one pin")
+    env.WorldMapFrame:ClickPin(pin, "RightButton")
+    state.menu:Find("Show path to Scarlet Monastery - Library"):Click()
+    equal(addon.Navigation:GetTarget(), "Scarlet Monastery - Library entrance", "wing route")
+    equal(env.AeternumRouteDB.x, .8538); equal(env.AeternumRouteDB.y, .3246)
+    equal(env.AeternumRouteDB.waypoints[1].label, "Monastery entrance")
+    env.WorldMapFrame:ClickPin(pin, "RightButton")
+    check(not menuRow(state.menu, "Show path to Scarlet Monastery - Library"), "route to selected wing is active")
+    state.menu:Find("Show path to Scarlet Monastery - Armory")
+    env.WorldMapFrame:ClickPin(pin, "LeftButton")
+    state.menu:Find("Scarlet Monastery - Cathedral"):Click()
+    Wow.flushTimers()
+    equal(addon.DungeonMap.dungeon.id, "sm-cathedral", "chosen wing opens on the map")
 end)
 
-test("Core: FactionAllowed keeps faction-tagged entries for Neutral/nil factions", function()
-    local ally = { faction = "Alliance" }
-    local horde = { faction = "Horde" }
-    local neutral = {}
-    checkEqual(addon.FactionAllowed(ally, "Alliance"), true)
-    checkEqual(addon.FactionAllowed(horde, "Alliance"), false)
-    checkEqual(addon.FactionAllowed(ally, "Horde"), false)
-    checkEqual(addon.FactionAllowed(horde, "Horde"), true)
-    checkEqual(addon.FactionAllowed(neutral, "Alliance"), true)
-    checkEqual(addon.FactionAllowed(ally, "Neutral"), true)
-    checkEqual(addon.FactionAllowed(horde, "Neutral"), true)
-    checkEqual(addon.FactionAllowed(ally, nil), true)
-    checkEqual(addon.FactionAllowed(horde, nil), true)
+test("Dire Maul wing portals agree with the zone map and alternate doors carry distinct directions", function()
+    local addon, env, state = load({mapID=1444, playerMap=1444, playerX=.2, playerY=.2})
+    local east = addon.DungeonEntrances(dungeonNamed(addon, "dm-east"))
+    local north = addon.DungeonEntrances(dungeonNamed(addon, "dm-north"))
+    equal(#east, 3); equal(east[1].x, .6486); equal(north[1].x, .6292)
+    env.WorldMapFrame:Show()
+    local west = locate(env, function(e) return e.source.id == "dm-west" end)
+    env.WorldMapFrame:ClickPin(west, "RightButton")
+    local second = assert(menuRow(state.menu, "60.3, 29.7"))
+    second:Click()
+    equal(env.AeternumRouteDB.y, .2968)
+    state.viewWidth = .25
+    env.WorldMapFrame.providers[1]:OnCanvasScaleChanged()
+    Wow.flushTimers()
+    local a = locate(env, function(e) return e.source.id == "dm-west" and e.y == .2968 end)
+    local b = locate(env, function(e) return e.source.id == "dm-west" and e.y == .3175 end)
+    check(a ~= b and a.tracked:IsShown() and not b.tracked:IsShown(), "zoom separates the two doorways")
 end)
 
-test("Core: multi-word and boss-name search finds matching dungeons in Atlas and zone maps", function()
-    local vancleefAtlas = addon.Entries(1436, true, "vancleef")
-    checkEqual(#vancleefAtlas, 1, "vancleef atlas match count")
-    checkEqual(vancleefAtlas[1].source.id, "deadmines")
-
-    local herodMulti = addon.Entries(1420, true, "scarlet herod")
-    checkEqual(#herodMulti, 1, "scarlet herod match count")
-    checkEqual(herodMulti[1].source.id, "sm-armory")
-
-    local vancleefZone = addon.Entries(1436, false, "  edwin   vancleef  ")
-    check(#vancleefZone >= 1, "should match Deadmines on Westfall map")
-    checkEqual(vancleefZone[1].source.id, "deadmines")
+test("a live dungeon map ID identifies the wing before a localized room name is available", function()
+    local addon, env, state = load({inInstance=true, instanceID=189, playerMap=303})
+    env.WorldMapFrame:Show()
+    equal(addon.DungeonMap.dungeon.id, "sm-library")
+    check(not state.menu, "no wing picker required")
+    state.instanceID, state.playerMap = 36, 292
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    equal(addon.DungeonMap.dungeon.id, "deadmines")
+    equal(addon.DungeonMap.index, 2)
+    state.subzone = "Mastraum"
+    Wow.fire("ZONE_CHANGED_INDOORS")
+    equal(addon.DungeonMap.index, 1, "identified current room overrides a stale map ID")
 end)
 
-test("Core: ItemName, ItemLink, ItemColor, and ItemCached handle cached and uncached items", function()
-    mockState.itemNames = {}
-    mockState.itemLinks = {}
-    mockState.itemQualities = {}
-    mockState.itemCached = {}
-
-    checkEqual(addon.ItemName(nil), "Item ")
-    checkEqual(addon.ItemLink(nil), nil)
-    checkEqual(addon.ItemColor(nil), nil)
-    checkEqual(addon.ItemCached(nil), true)
-
-    -- Uncached item falls back to bundled Data.items
-    local sampleID, sampleName = next(addon.Data.items)
-    check(sampleID and sampleName, "bundled Data.items should not be empty")
-    checkEqual(addon.ItemCached(sampleID), false)
-    checkEqual(addon.ItemName(sampleID), sampleName)
-    checkEqual(addon.ItemLink(sampleID), ("|Hitem:%d|h[%s]|h"):format(sampleID, sampleName))
-    checkEqual(addon.ItemColor(sampleID), nil)
-
-    -- Cached item uses client hyperlink and quality color (including quality 0)
-    mockState.itemCached[sampleID] = true
-    mockState.itemNames[sampleID] = "Client " .. sampleName
-    mockState.itemLinks[sampleID] = ("|cff0070dd|Hitem:%d|h[Client %s]|h|r"):format(sampleID, sampleName)
-    mockState.itemQualities[sampleID] = 3
-    checkEqual(addon.ItemCached(sampleID), true)
-    checkEqual(addon.ItemName(sampleID), "Client " .. sampleName)
-    checkEqual(addon.ItemLink(sampleID), mockState.itemLinks[sampleID])
-    local rareColor = addon.ItemColor(sampleID)
-    check(rareColor ~= nil, "rare color should exist")
-    checkNear(rareColor[3], 0.87, 1e-3, "rare blue channel")
-
-    mockState.itemQualities[sampleID] = 0
-    local poorColor = addon.ItemColor(sampleID)
-    check(poorColor ~= nil, "poor quality (0) color must not be treated as falsy")
-    checkNear(poorColor[1], 0.62, 1e-3, "poor gray channel")
+test("clicking an entrance uses only the existing viewport and named floors", function()
+    local addon, env = openDeadmines()
+    local floors, frame = addon.DungeonMap, addon.DungeonMap.frame
+    equal(floors.dungeon.id, "deadmines", "map opened from pin")
+    equal(frame:GetParent(), env.WorldMapFrame, "part of the map")
+    equal(frame.points[1][2], env.WorldMapFrame.ScrollContainer, "fits existing canvas")
+    equal(frame.tiles[1].texture, 449591, "native first-floor art")
+    frame.dropdown:OpenMenu():Find("Ironclad Cove"):Click()
+    equal(frame.tiles[1].texture, 449603, "second-floor art")
+    Wow.pressEscape()
+    check(not floors.dungeon and env.WorldMapFrame:IsShown(), "first Escape returns to zone")
+    check(not frame.tiles[1].texture, "closed floor releases tiles")
+    Wow.pressEscape()
+    check(not env.WorldMapFrame:IsShown(), "native map closes next")
 end)
 
--- ============================================================================
--- Navigation.lua Tests
--- ============================================================================
+test("a boss skull opens the correct drop list with modified clicks and native tooltips", function()
+    local addon, _, state = openDeadmines()
+    local frame = addon.DungeonMap.frame
+    check(not state.requested, "viewing a floor requests no loot")
+    frame.dropdown:OpenMenu():Find("Ironclad Cove"):Click()
+    local skull = findEntry(frame.pins, function(pin) return pin.boss and pin.boss.id == 639 end)
+    check(skull and skull:IsVisible(), "VanCleef has a floor-bound skull")
+    equal(skull.normal, 137025, "Blizzard skull")
+    skull:Click()
+    check(state.requested[5191] and not state.requested[5443], "only VanCleef's loot requested")
+    equal(state.menu.children[1].label, "Edwin VanCleef", "correct boss")
+    local barb = menuRow(state.menu, "Cruel Barb")
+    local _, env = addon, Wow.env
+    barb.tooltip(env.GameTooltip)
+    equal(env.GameTooltip.lines[1], "item:5191", "Blizzard item tooltip")
+    state.modified = true
+    barb:Click()
+    check(state.modifiedClick:find("Hitem:5191", 1, true), "chat or dressing-room link")
+end)
 
-local function findDungeon(id)
+test("floor zoom follows the cursor and dragging stays within its viewport", function()
+    local addon, _, state = openDeadmines()
+    local frame = addon.DungeonMap.frame
+    state.cursorX, state.cursorY, frame.top = 650, 340, 540
+    local before = (650 - frame.x) / frame.art.scale
+    frame:Fire("OnMouseWheel", 2)
+    check(frame.zoom > 1, "wheel zoom")
+    check(math.abs((650 - frame.x) / frame.art.scale - before) < .01, "point under cursor stays put")
+    frame:Fire("OnDragStart")
+    state.cursorX = 590
+    frame:Fire("OnUpdate")
+    check(frame.x <= 0, "pan clamped")
+    frame:Fire("OnDragStop")
+    check(not frame:GetScript("OnUpdate"), "idle map has no drag update")
+    frame:Fire("OnMouseWheel", 99)
+    equal(frame.zoom, 4, "upper bound")
+    frame:Fire("OnMouseWheel", -99)
+    equal(frame.zoom, 1, "lower bound")
+end)
+
+test("all dungeon floor references and boss stops resolve to their own dungeon", function()
+    local addon = load()
+    local floors, stops, sketches = 0, 0, 0
     for _, d in ipairs(addon.Data.dungeons) do
-        if d.id == id then return d end
-    end
-    error("dungeon not found: " .. id)
-end
-
-test("Navigation: starts on waypoint, advances smoothly, and completes at entrance", function()
-    local deadmines = findDungeon("deadmines")
-    local entrance = deadmines.entrances[1]
-    local wp = entrance.waypoints[1]
-
-    mockState.inInstance = false
-    mockState.rotateMinimap = false
-    mockState.playerFacing = 0
-    mockState.playerMapID = entrance.mapID
-    mockState.viewRadius = 150
-    Minimap:SetSize(140, 140)
-    printedMessages = {}
-
-    local statusChanges = 0
-    addon.Navigation.onChange = function() statusChanges = statusChanges + 1 end
-
-    -- Start far away north of Moonbrook road waypoint (clearly closer to waypoint than entrance)
-    mockState.playerPos = { x = wp.x, y = wp.y - 0.08 }
-    checkEqual(addon.Navigation:Start(deadmines, entrance), true)
-    checkEqual(addon.Navigation:IsActive(), true)
-    checkEqual(addon.Navigation.step, 1, "should target approach waypoint first")
-    check(addon.Navigation:GetStatus():find("Moonbrook road", 1, true), "status should name approach point")
-    check(statusChanges >= 1, "onChange should fire on start")
-
-    -- Move within STEP_RADIUS (28 yd) of waypoint -> advances to step 2 (entrance)
-    mockState.playerPos = { x = wp.x, y = wp.y - 0.005 }
-    addon.Navigation:Update()
-    checkEqual(addon.Navigation.step, 2, "should advance to entrance")
-    check(addon.Navigation:GetStatus():find("Entrance bearing", 1, true), "status should switch to entrance bearing")
-
-    -- Arrive within ENTRANCE_RADIUS (18 yd) of entrance -> auto-stops & notifies chat
-    mockState.playerPos = { x = entrance.x + 0.002, y = entrance.y }
-    addon.Navigation:Update()
-    checkEqual(addon.Navigation:IsActive(), false)
-    check(addon.Navigation:GetStatus():find("Near The Deadmines entrance", 1, true), "arrival status")
-    check(#printedMessages >= 1 and printedMessages[#printedMessages]:find("Near The Deadmines entrance", 1, true), "chat arrival notice")
-end)
-
-test("Navigation: starting past waypoint does not send player backwards, and bypassing completes arrival", function()
-    local deadmines = findDungeon("deadmines")
-    local entrance = deadmines.entrances[1]
-    local wp = entrance.waypoints[1]
-
-    mockState.playerMapID = entrance.mapID
-    -- Place player between waypoint and entrance, closer to entrance (outside 18 yd arrival radius)
-    local dx, dy = entrance.x - wp.x, entrance.y - wp.y
-    local dist = math.sqrt((dx * 3500) ^ 2 + (dy * 2333) ^ 2)
-    check(dist > 45, "Deadmines waypoint and entrance should be separated by >45 yd")
-    mockState.playerPos = { x = entrance.x - dx * 0.4, y = entrance.y - dy * 0.4 }
-    addon.Navigation:Start(deadmines, entrance)
-    checkEqual(addon.Navigation.step, 2, "must target entrance directly instead of backtracking to waypoint")
-
-    -- Restart north of waypoint (step 1), then move straight to entrance bypassing waypoint
-    mockState.playerPos = { x = wp.x, y = wp.y - 0.08 }
-    addon.Navigation:Start(deadmines, entrance)
-    checkEqual(addon.Navigation.step, 1)
-    mockState.playerPos = { x = entrance.x, y = entrance.y + 0.002 }
-    addon.Navigation:Update()
-    checkEqual(addon.Navigation:IsActive(), false, "arriving directly at entrance must stop guidance even from step 1")
-end)
-
-test("Navigation: non-square minimap preserves true bearing, clamps min offset, and shows gold entrance breadcrumb", function()
-    local deadmines = findDungeon("deadmines")
-    local entrance = deadmines.entrances[1]
-    local wp = entrance.waypoints[1]
-
-    mockState.playerMapID = entrance.mapID
-    mockState.rotateMinimap = false
-    mockState.viewRadius = 500
-    Minimap:SetSize(260, 140) -- non-square minimap, edgeRadius = min(260,140)/2 - 12 = 58
-
-    -- Put player 45 degrees NW of waypoint (target is SE: +100 yd East, -100 yd North), clearly closer to wp than entrance
-    mockState.playerPos = { x = wp.x - 100 / 3500, y = wp.y - 100 / 2333 }
-    addon.Navigation:Start(deadmines, entrance)
-    checkEqual(addon.Navigation.step, 1)
-    local tip = addon.Navigation.overlay.arrow[1]._end
-    checkNear(tip[1], -tip[2], 1e-3, "45-degree SE bearing must stay exact 45 degrees on non-square minimap")
-
-    -- Entrance (step 2) is within 500 yd viewRadius, so dot 1 should be shown in gold
-    local dot1 = addon.Navigation.overlay.dots[1]
-    checkEqual(dot1:IsShown(), true, "entrance breadcrumb dot should be shown")
-    checkNear(dot1._color[1], 1.0, 1e-2, "entrance breadcrumb gold R")
-    checkNear(dot1._color[2], 0.82, 1e-2, "entrance breadcrumb gold G")
-
-    -- Test minimum arrow offset when very close to entrance (20 yd West of entrance, outside 18 yd arrival, 500 yd viewRadius)
-    mockState.playerPos = { x = entrance.x - 20 / 3500, y = entrance.y }
-    addon.Navigation:Start(deadmines, entrance)
-    checkEqual(addon.Navigation:IsActive(), true)
-    local closeTip = addon.Navigation.overlay.arrow[1]._end
-    local closeTail = addon.Navigation.overlay.arrow[1]._start
-    local tipDist = math.sqrt(closeTip[1] ^ 2 + closeTip[2] ^ 2)
-    check(tipDist >= 15.99, "arrow tip should clamp to >= 16px so tail does not flip behind player")
-    check(closeTail[1] > 0, "arrow tail should remain in front of minimap center")
-
-    -- Test rotateMinimap: player faces West (pi/2 CCW from North), target due West -> points UP (+Y)
-    mockState.rotateMinimap = true
-    mockState.playerFacing = math.pi / 2
-    mockState.playerPos = { x = entrance.x + 60 / 3500, y = entrance.y } -- entrance is due West of player
-    addon.Navigation:Update()
-    local rotTip = addon.Navigation.overlay.arrow[1]._end
-    checkNear(rotTip[1], 0, 1e-2, "rotated east component should be ~0")
-    check(rotTip[2] > 15, "rotated north component should point up")
-
-    addon.Navigation:Stop()
-    Minimap:SetSize(140, 140)
-    mockState.rotateMinimap = false
-end)
-
-test("Navigation: pauses safely for instance, wrong continent, secret values, and missing entrances", function()
-    local deadmines = findDungeon("deadmines")
-    local entrance = deadmines.entrances[1]
-    mockState.playerMapID = entrance.mapID
-    mockState.playerPos = { x = entrance.x + 0.05, y = entrance.y }
-    addon.Navigation:Start(deadmines, entrance)
-
-    mockState.inInstance = true
-    addon.Navigation:Update()
-    check(addon.Navigation:GetStatus():find("paused inside an instance", 1, true))
-    checkEqual(addon.Navigation.overlay:IsShown(), false)
-    mockState.inInstance = false
-
-    mockState.playerMapID = 1454 -- Kalimdor (continent 1) vs EK (continent 0)
-    addon.Navigation:Update()
-    check(addon.Navigation:GetStatus():find("continent", 1, true))
-
-    -- Secret value guard
-    local secretPos = { x = 0.5, y = 0.5 }
-    mockState.secretValues[secretPos] = true
-    mockState.playerMapID = entrance.mapID
-    mockState.playerPos = secretPos
-    addon.Navigation:Update()
-    check(addon.Navigation:GetStatus():find("readable player map position", 1, true))
-    mockState.secretValues[secretPos] = nil
-
-    -- Missing entrance coordinates (alcaz-prison)
-    local alcaz = findDungeon("alcaz-prison")
-    checkEqual(addon.Navigation:Start(alcaz), false)
-    check(addon.Navigation:GetStatus():find("no entrance coordinates", 1, true))
-end)
-
--- ============================================================================
--- DungeonMap.lua Tests
--- ============================================================================
-
-test("DungeonMap: zero-size layout waits quietly, resize draws all 12 tiles, partial failure hides all tiles", function()
-    local host = CreateFrame("Frame", nil, UIParent)
-    local dm = addon.DungeonMap.Create(host)
-    -- Locate internal widgets by role rather than brittle child indices
-    local view, prevBtn, nextBtn, worldMapBtn
-    for _, child in ipairs(dm._children) do
-        if child.tiles then
-            view = child
-        elseif child._kind == "Button" then
-            if child:GetText() == "<" then prevBtn = child
-            elseif child:GetText() == ">" then nextBtn = child
-            elseif child:GetText() == "World Map" then worldMapBtn = child end
-        end
-    end
-    check(view and prevBtn and nextBtn and worldMapBtn, "DungeonMap internal controls should exist")
-    local titleFS = dm._fontStrings[1]
-    local captionFS = dm._fontStrings[2]
-    local emptyFS = view._fontStrings[1]
-
-    local deadmines = findDungeon("deadmines")
-    view._width, view._height = 0, 0
-    dm:SetDungeon(deadmines)
-    checkEqual(emptyFS:IsShown(), false, "must not flash unavailable error before layout bounds arrive")
-    checkEqual(titleFS:GetText(), "Floor 1 / 2")
-    checkEqual(prevBtn:IsEnabled(), false)
-    checkEqual(nextBtn:IsEnabled(), true)
-
-    -- Simulate layout sizing
-    mockState.texturesLoaded = true
-    view:SetSize(400, 300)
-    checkEqual(#view.tiles, 12, "reference floor draws 12 tiles")
-    for i = 1, 12 do
-        checkEqual(view.tiles[i]:IsShown(), true, "tile " .. i .. " should be shown")
-    end
-    checkEqual(captionFS:GetText(), "Legacy client reference")
-    checkEqual(emptyFS:IsShown(), false)
-
-    -- Next floor button
-    nextBtn:Click()
-    checkEqual(titleFS:GetText(), "Floor 2 / 2")
-    checkEqual(prevBtn:IsEnabled(), true)
-    checkEqual(nextBtn:IsEnabled(), false)
-
-    -- Mid-loop texture failure hides ALL tiles (including 1..4) and shows unavailable
-    mockState.failTextureAt = 449610 -- tile #5 on Deadmines floor 2
-    view:SetSize(401, 300)
-    for i = 1, 12 do
-        checkEqual(view.tiles[i]:IsShown(), false, "tile " .. i .. " must be hidden after mid-loop failure")
-        checkEqual(view.tiles[i]._texture, nil, "tile " .. i .. " texture must be cleared")
-    end
-    checkEqual(emptyFS:IsShown(), true)
-    checkEqual(emptyFS:GetText(), "Client floor map unavailable.")
-    mockState.failTextureAt = nil
-
-    -- Pending load timer gets cancelled on Hide
-    mockState.texturesLoaded = false
-    mockState.timers = {}
-    view:SetSize(400, 300)
-    checkEqual(#mockState.timers, 1, "should schedule async tile check timer")
-    checkEqual(mockState.timers[1].cancelled, false)
-    dm:Hide()
-    checkEqual(mockState.timers[1].cancelled, true, "OnHide must cancel pending loadTimer")
-    mockState.texturesLoaded = true
-
-    -- World Map button respects InCombatLockdown
-    local nativeDungeon = {
-        id = "test-native",
-        name = "Test Native",
-        floors = { { mapID = 1436, name = "Upper Hall" } },
-    }
-    mockState.nativeArt[1436] = {
-        layer = { layerWidth = 512, layerHeight = 512, tileWidth = 256, tileHeight = 256 },
-        textures = { 101, 102, 103, 104 },
-    }
-    dm:Show()
-    dm:SetDungeon(nativeDungeon)
-    checkEqual(worldMapBtn:IsShown(), true)
-    checkEqual(titleFS:GetText(), "Upper Hall")
-
-    local beforeShows = mockState.showUIPanelCalls
-    mockState.inCombat = true
-    printedMessages = {}
-    worldMapBtn:Click()
-    checkEqual(mockState.showUIPanelCalls, beforeShows, "must not call ShowUIPanel in combat")
-    check(#printedMessages >= 1 and printedMessages[#printedMessages]:find("combat", 1, true))
-
-    mockState.inCombat = false
-    worldMapBtn:Click()
-    checkEqual(mockState.showUIPanelCalls, beforeShows + 1, "should call ShowUIPanel out of combat")
-    mockState.nativeArt[1436] = nil
-end)
-
--- ============================================================================
--- WorldMap.lua + UI.lua Integration Tests
--- ============================================================================
-
-test("WorldMap + UI: attach, combat-safe slash command, search query, and stop/help commands", function()
-    fireEvent("ADDON_LOADED", "Aeternum")
-    fireEvent("PLAYER_LOGIN")
-    check(addon.UI.sidebar ~= nil, "sidebar should attach on PLAYER_LOGIN")
-
-    -- Combat lockdown prevents ShowUIPanel when WorldMapFrame is hidden
-    WorldMapFrame:Hide()
-    mockState.inCombat = true
-    local beforeShows = mockState.showUIPanelCalls
-    printedMessages = {}
-    SlashCmdList.AETERNUM("")
-    checkEqual(mockState.showUIPanelCalls, beforeShows, "/aeternum must not call ShowUIPanel during combat")
-    check(#printedMessages >= 1 and printedMessages[#printedMessages]:find("combat", 1, true))
-
-    -- /aeternum help and /aeternum stop
-    printedMessages = {}
-    SlashCmdList.AETERNUM("help")
-    check(printedMessages[#printedMessages]:find("/aeternum", 1, true))
-
-    printedMessages = {}
-    SlashCmdList.AETERNUM("stop")
-    check(printedMessages[#printedMessages]:find("not active", 1, true))
-
-    -- Out of combat: /aeternum vancleef opens map, sidebar, and filters
-    mockState.inCombat = false
-    WorldMapFrame._mapID = 1436
-    SlashCmdList.AETERNUM("  vancleef  ")
-    checkEqual(WorldMapFrame:IsShown(), true)
-    checkEqual(addon.UI:IsOpen(), true)
-    checkEqual(addon.UI:GetSearch(), "vancleef")
-    checkEqual(addon.UI.sidebar.clearSearch:IsShown(), true)
-
-    -- Clear button resets search
-    addon.UI.sidebar.clearSearch:Click()
-    checkEqual(addon.UI:GetSearch(), "")
-    checkEqual(addon.UI.sidebar.clearSearch:IsShown(), false)
-end)
-
-test("WorldMap: stacked Scarlet Monastery pin cycles all 4 wings on right-click and opens cycled wing on left-click", function()
-    mockState.faction = "Horde"
-    WorldMapFrame:Show()
-    addon.UI:SetSearch("")
-    addon.UI:SetAtlas(false)
-    WorldMapFrame:SetMapID(1420) -- Tirisfal Glades
-
-    local smPin
-    for pin in WorldMapFrame:EnumeratePinsByTemplate("AeternumMapPinTemplate") do
-        if pin.entries and #pin.entries >= 4 and pin.entries[1].category == "dungeon" then
-            smPin = pin
-            break
-        end
-    end
-    check(smPin ~= nil, "expected stacked Scarlet Monastery pin on Tirisfal Glades")
-    checkEqual(#smPin.entries, 4, "all 4 Scarlet Monastery wings share the entrance location")
-
-    local firstTitle = smPin.entry.title
-    smPin:OnMouseEnter()
-    local sawCycleHint = false
-    for _, line in ipairs(GameTooltip.lines) do
-        if line:find("Right-click to cycle (1/4)", 1, true) then
-            sawCycleHint = true
-        end
-    end
-    check(sawCycleHint, "tooltip should show cycle indicator (1/4)")
-
-    -- Right-click to cycle to wing 2
-    smPin:OnMouseClickAction("RightButton")
-    checkEqual(smPin.activeIndex, 2)
-    check(smPin.entry.title ~= firstTitle, "active entry should advance to wing 2")
-    local secondDungeon = smPin.entry.source
-
-    -- Left-click opens wing 2 specifically
-    smPin:OnMouseClickAction("LeftButton")
-    check(addon.UI.detail and addon.UI.detail:IsShown(), "left-click should open detail frame")
-    checkEqual(addon.UI.detail.dungeon, secondDungeon, "detail frame should open the cycled wing")
-
-    -- Cycle remaining steps wraps cleanly back to 1
-    smPin:OnMouseClickAction("RightButton")
-    checkEqual(smPin.activeIndex, 3)
-    smPin:OnMouseClickAction("RightButton")
-    checkEqual(smPin.activeIndex, 4)
-    smPin:OnMouseClickAction("RightButton")
-    checkEqual(smPin.activeIndex, 1)
-end)
-
-test("WorldMap: dense Stormwind map caps pins at 100, reports count, and HighlightPin creates/cleans temporary focusPin", function()
-    mockState.faction = "Alliance"
-    addon.UI:SetAtlas(false)
-    addon.UI:SetSearch("")
-    WorldMapFrame:SetMapID(1453) -- Stormwind City (134 unique pin positions)
-
-    local pinCount = 0
-    local pinnedEntries = {}
-    for pin in WorldMapFrame:EnumeratePinsByTemplate("AeternumMapPinTemplate") do
-        pinCount = pinCount + 1
-        for _, e in ipairs(pin.entries or {}) do
-            pinnedEntries[e] = true
-        end
-    end
-    checkEqual(pinCount, 100, "Stormwind should cap regular pins at 100")
-    check(addon.UI.sidebar.selection:GetText():find("100 map pins", 1, true), "footer should report truncated map pin count")
-
-    -- Find an entry omitted by pinLimit
-    local allEntries = addon.Entries(1453, false, "")
-    local omitted
-    for _, e in ipairs(allEntries) do
-        if e.x and e.y and e.category ~= "dungeon" and not pinnedEntries[e] then
-            omitted = e
-            break
-        end
-    end
-    check(omitted ~= nil, "expected at least one omitted entry on Stormwind")
-
-    addon.UI:Select(omitted)
-    local afterFocus = 0
-    local focusFound
-    for pin in WorldMapFrame:EnumeratePinsByTemplate("AeternumMapPinTemplate") do
-        afterFocus = afterFocus + 1
-        if pin.entry == omitted then focusFound = pin end
-    end
-    checkEqual(afterFocus, 101, "selecting omitted entry should acquire temporary focus pin")
-    check(focusFound and focusFound.highlighted and focusFound:GetWidth() == 24, "focus pin should be highlighted at 24x24")
-
-    -- Selecting a regular pinned entry removes the temporary focus pin
-    local regular
-    for _, e in ipairs(allEntries) do
-        if e.x and e.y and e.category ~= "dungeon" and pinnedEntries[e] then
-            regular = e
-            break
-        end
-    end
-    addon.UI:Select(regular)
-    local afterRegular = 0
-    for _ in WorldMapFrame:EnumeratePinsByTemplate("AeternumMapPinTemplate") do
-        afterRegular = afterRegular + 1
-    end
-    checkEqual(afterRegular, 100, "temporary focus pin must be removed when selecting another entry")
-end)
-
-test("UI: negative scroll clamp, loot tooltip/hyperlink/async refresh without loop, 0-entrance guard, and Show zone", function()
-    -- Test negative scroll clamp on sidebar list
-    addon.UI.sidebar.list:SetVerticalScroll(-120)
-    check(true, "negative vertical scroll should not crash")
-
-    -- Prepare an uncached loot item and a cached loot item on Deadmines boss #1
-    local deadmines = findDungeon("deadmines")
-    local boss1 = deadmines.bosses[1]
-    local item1 = boss1.loot[1]
-    local item2 = boss1.loot[2]
-    mockState.itemCached = {}
-    mockState.itemNames = {}
-    mockState.itemLinks = {}
-    mockState.itemQualities = {}
-    mockState.itemRequests = {}
-    mockState.itemCached[item2] = true
-    mockState.itemNames[item2] = "Cached Test Item"
-
-    -- Open Deadmines via Atlas mode
-    addon.UI:SetAtlas(true)
-    addon.UI:SetSearch("")
-    local atlasEntries = addon.Entries(1453, true, "deadmines")
-    addon.UI:Select(atlasEntries[1])
-
-    local detail = addon.UI.detail
-    check(detail and detail:IsShown())
-    checkEqual(mockState.itemRequests[item1], 1, "uncached item should be requested once")
-    checkEqual(mockState.itemRequests[item2], nil, "already-cached item should not be requested")
-
-    -- Simulate a scrollable loot viewport, scroll down, then async ITEM_DATA_LOAD_RESULT arrives for item1
-    detail.loot:SetHeight(20)
-    detail.loot:SetVerticalScroll(23)
-    mockState.itemCached[item1] = true
-    mockState.itemNames[item1] = "Loaded Client Loot"
-    mockState.itemLinks[item1] = "|cff0070dd|Hitem:" .. item1 .. "|h[Loaded Client Loot]|h|r"
-    mockState.itemQualities[item1] = 3
-    fireEvent("ITEM_DATA_LOAD_RESULT", item1, true)
-    checkEqual(mockState.itemRequests[item1], 1, "async refresh must not re-request item (no infinite loop)")
-    checkEqual(detail.loot:GetVerticalScroll(), 23, "async refresh should preserve scroll offset")
-    detail.loot:SetHeight(200)
-
-    -- Hover and click first visible loot row
-    local firstLootRow = detail.loot._scrollChild._children[1]
-    check(firstLootRow and firstLootRow.entry, "loot row should exist")
-    firstLootRow:_fire("OnEnter")
-    checkEqual(GameTooltip.hyperlink, "item:" .. firstLootRow.entry.itemID)
-    firstLootRow:_fire("OnLeave")
-    checkEqual(GameTooltip.shown, false)
-
-    -- Shift-click handled via HandleModifiedItemClick
-    mockState.modifiedClickHandled = true
-    mockState.modifiedClicks = {}
-    mockState.itemRefs = {}
-    firstLootRow:Click("LeftButton")
-    checkEqual(#mockState.modifiedClicks, 1)
-    check(mockState.modifiedClicks[1]:find("|Hitem:", 1, true), "modified click must receive valid item hyperlink")
-    checkEqual(#mockState.itemRefs, 0, "should not also call SetItemRef when HandleModifiedItemClick handled it")
-
-    -- Normal click calls SetItemRef with hyperlink
-    mockState.modifiedClickHandled = false
-    firstLootRow:Click("LeftButton")
-    checkEqual(#mockState.itemRefs, 1)
-    checkEqual(mockState.itemRefs[1].link, "item:" .. firstLootRow.entry.itemID)
-    check(mockState.itemRefs[1].text:find("|Hitem:", 1, true), "SetItemRef must receive valid item hyperlink")
-
-    -- Stop button sync with Navigation
-    addon.Navigation:Stop()
-    checkEqual(detail.stop:IsEnabled(), false, "Stop button disabled when guidance inactive")
-    mockState.playerMapID = deadmines.entrances[1].mapID
-    mockState.playerPos = { x = 0.50, y = 0.50 }
-    detail.route:Click()
-    checkEqual(detail.stop:IsEnabled(), true, "Stop button enabled when guidance active")
-    addon.Navigation:Stop()
-    checkEqual(detail.stop:IsEnabled(), false, "Stop button auto-disabled via Navigation.onChange")
-
-    -- Show zone button respects combat lockdown, then switches map & exits atlas out of combat
-    mockState.inCombat = true
-    local prevMap = WorldMapFrame:GetMapID()
-    detail.showZone:Click()
-    checkEqual(WorldMapFrame:GetMapID(), prevMap, "Show zone must not switch map in combat")
-
-    mockState.inCombat = false
-    detail.showZone:Click()
-    checkEqual(WorldMapFrame:GetMapID(), deadmines.entrances[1].mapID, "Show zone switches map to entrance zone")
-    checkEqual(addon.UI:IsAtlas(), false, "Show zone exits atlas mode")
-    checkEqual(detail:IsShown(), false, "Show zone closes detail window")
-
-    -- 0-entrance dungeon (alcaz-prison) safely disables buttons and nextEntrance click doesn't NaN
-    addon.UI:SetAtlas(true)
-    local alcazEntries = addon.Entries(1436, true, "alcaz")
-    addon.UI:Select(alcazEntries[1])
-    checkEqual(detail.route:IsEnabled(), false)
-    checkEqual(detail.showZone:IsEnabled(), false)
-    checkEqual(detail.nextEntrance:IsEnabled(), false)
-    detail.nextEntrance:Click()
-    checkEqual(detail.entranceIndex, 0, "nextEntrance on 0 entrances must not produce NaN")
-end)
-
--- ============================================================================
--- tools/import_norgannon.lua Tests
--- ============================================================================
-
-test("tools/import_norgannon.lua: valid Lua 5.1 syntax and safe serializer logic", function()
-    local chunk, err = loadfile("tools/import_norgannon.lua")
-    check(chunk ~= nil, "tools/import_norgannon.lua syntax error: " .. tostring(err))
-
-    local fh = assert(io.open("tools/import_norgannon.lua", "r"))
-    local src = fh:read("*a")
-    fh:close()
-
-    -- Extract keys + reservedKeywords + isSequence + literal and execute them directly
-    local keysCode = assert(src:match("(local function keys%b().-\nend)"))
-    local literalBlock = assert(src:match("(local reservedKeywords = %b{}.-local function literal%b().-\nend)"))
-    local helperChunk = assert(loadstring(keysCode .. "\n" .. literalBlock .. "\nreturn keys, literal"))
-    local keysFn, literalFn = helperChunk()
-
-    -- Mixed key types must sort without crashing
-    local sorted = keysFn({ [2] = "b", [1] = "a", ["z"] = 1, ["a"] = 2 })
-    checkEqual(#sorted, 4)
-
-    -- Round-trip booleans, reserved keywords, hyphenated keys, dense and sparse arrays
-    local cases = {
-        true,
-        false,
-        { 10, 20, 30 },
-        { [1] = "a", [3] = "b" },
-        { [1] = "a", [3] = "b", [5] = "c" },
-        { ["end"] = true, ["dm-east"] = 42, normal = "ok" },
-    }
-    for idx, sample in ipairs(cases) do
-        local encoded = literalFn(sample)
-        local decoded = assert(loadstring("return " .. encoded), "invalid generated Lua: " .. encoded)()
-        if type(sample) == "table" then
-            for k, v in pairs(sample) do
-                checkEqual(decoded[k], v, "round-trip case " .. idx .. " key " .. tostring(k))
+        local geo = addon.floorData[d.id]
+        check(geo.instance > 0 and #geo.floors > 0, d.name)
+        for _, floor in ipairs(geo.floors) do
+            floors = floors + 1
+            if floor.tiles then equal(#floor.tiles, 12, d.name)
+            elseif floor.pieces then check(#floor.pieces > 0 and #floor.pieces[1] == 14, "client minimap geometry")
+            else check(#floor.paths > 0, "surveyed route sketch"); sketches = sketches + 1 end
+            for _, stop in ipairs(floor.bosses) do
+                check(findEntry(d.bosses, function(b) return b.id == stop[1] end), d.name .. " boss identity")
+                check(stop[2]>=0 and stop[2]<=1 and stop[3]>=0 and stop[3]<=1, "coordinates inside floor")
+                stops = stops + 1
             end
-            for k, v in pairs(decoded) do
-                checkEqual(sample[k], v, "round-trip extra key in case " .. idx .. " key " .. tostring(k))
-            end
-        else
-            checkEqual(decoded, sample, "round-trip scalar case " .. idx)
         end
+    end
+    equal(floors, 71, "floors")
+    equal(stops, 260, "recorded boss positions")
+    equal(sketches, 1, "documented fallback sketch")
+end)
+
+test("opening M inside a dungeon automatically shows its floor and leaving restores the zone", function()
+    local addon, env, state = load({inInstance=true, instanceID=36, subzone="Ironclad Cove"})
+    env.WorldMapFrame:Show()
+    equal(addon.DungeonMap.dungeon.id, "deadmines", "inside instance")
+    equal(addon.DungeonMap.index, 2, "correct named floor")
+    state.inInstance = false
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    check(not addon.DungeonMap.dungeon and env.WorldMapFrame:IsShown(), "outdoors restored")
+end)
+
+test("an ambiguous instance ID asks for its wing only until one can be identified", function()
+    local addon, env, state = load({inInstance=true, instanceID=189})
+    env.WorldMapFrame:Show()
+    check(not addon.DungeonMap.dungeon, "never guesses a wing")
+    state.menu:Find("Scarlet Monastery - Library"):Click()
+    equal(addon.DungeonMap.dungeon.id, "sm-library", "player's choice")
+    env.WorldMapFrame:Hide()
+    state.subzone = "Cathedral"
+    env.WorldMapFrame:Show()
+    equal(addon.DungeonMap.dungeon.id, "sm-cathedral", "match on reopen")
+end)
+
+test("Forever-only floors draw client minimap tiles and Dalaran's unmapped floor draws its recorded route", function()
+    local addon, env = load()
+    env.WorldMapFrame:Show()
+    addon.DungeonMap:Open(dungeonNamed(addon, "hall-of-thanes"))
+    local frame = addon.DungeonMap.frame
+    check(#frame.tiles >= 30 and #frame.tiles[1].texCoord == 8, "client minimap mosaic")
+    addon.DungeonMap:Open(dungeonNamed(addon, "city-of-dalaran"), nil, 2)
+    check(#frame.lines > 0 and frame.lines[1]:IsShown(), "documented fallback")
+    check(frame.dropdown:GetText():find("route sketch", 1, true), "sketch identified")
+    env.WorldMapFrame:SetMapID(1436)
+    check(not addon.DungeonMap.dungeon and not frame:IsShown(), "stock map navigation dismisses dungeon layer")
+end)
+
+test("unplaced bosses and dungeon quest starts are reachable from the floor itself", function()
+    local addon, env, state = openDeadmines()
+    local frame = addon.DungeonMap.frame
+    local menu = frame.dropdown:OpenMenu()
+    menu:Find("Boss loot"):Find("Goblin Woodcarver"):Click()
+    Wow.flushTimers()
+    equal(state.menu.children[1].label, "Goblin Woodcarver", "encounter list opens loot")
+    local d = addon.DungeonMap.dungeon
+    local id = findEntry(d.quests, function(q) return addon.QuestStart(q) ~= nil end)
+    local start = addon.QuestStart(id)
+    menu:Find("Dungeon quests"):Find(addon.Quest(id).name):Click()
+    equal(env.WorldMapFrame:GetMapID(), start.mapID, "quest start shown in the world map")
+    check(not frame:IsShown(), "back outdoors")
+    check(locate(env, function(e) return e == start end), "quest start pin even when normally filtered")
+end)
+
+test("class and sparse profession slots select relevant trainers and react to skill changes", function()
+    local _, env, state = load({mapID=1453, class="MAGE", professionIndices={[4]=17}, professionSkills={[17]=171}})
+    env.WorldMapFrame:Show()
+    check(locate(env, function(e) return e.source.classToken == "MAGE" end), "mage trainers")
+    check(not locate(env, function(e) return e.source.classToken == "WARRIOR" end), "other classes hidden")
+    check(locate(env, function(e) return e.source.skillID == 171 end), "alchemy in a sparse profession slot")
+    check(not locate(env, function(e) return e.source.skillID == 164 end), "blacksmiths hidden")
+    state.professionSkills[17] = 164
+    Wow.fire("SKILL_LINES_CHANGED")
+    check(locate(env, function(e) return e.source.skillID == 164 end), "learned profession")
+    check(not locate(env, function(e) return e.source.skillID == 171 end), "abandoned profession")
+    Wow.trackingMenu():Find("Trainers"):Find("Other classes and professions"):Click()
+    check(locate(env, function(e) return e.source.classToken == "WARRIOR" end), "optional native tracking override")
+end)
+
+test("a profession trainer shows NPC-specific recipe prices and skill requirements", function()
+    local addon, env, state = load({mapID=1453, professionIndices={1}, professionSkills={171},
+        professionRanks={[171]=25}})
+    env.WorldMapFrame:Show()
+    local pin = locate(env, function(e) return e.source.id == 5499 end)
+    check(pin, "Lilyssia Nightbreeze")
+    env.WorldMapFrame:ClickPin(pin, "LeftButton")
+    if #pin.entries > 1 then state.menu:Find("Lilyssia Nightbreeze"):Click(); Wow.flushTimers() end
+    local potion = assert(menuRow(state.menu, "Minor Mana Potion"))
+    check(potion.label:find("100 copper", 1, true), "price at this NPC")
+    potion.tooltip(env.GameTooltip)
+    check(findEntry(env.GameTooltip.lines, function(line) return line == "Alchemy 25" end), "recipe skill required")
+    local function cost(npcID)
+        return findEntry(addon.Trainers:Lessons(npcID), function(lesson) return lesson.id == 2159 end).cost
+    end
+    equal(cost(4212), 250, "first leatherworker")
+    equal(cost(1385), 550, "same recipe, different teacher")
+end)
+
+test("weapon masters teach only class-appropriate proficiencies by default", function()
+    local addon, env = load({mapID=1455, class="PALADIN"})
+    env.WorldMapFrame:Show()
+    check(locate(env, function(e) return e.source.id == 11865 end), "Buliwyf teaches paladins")
+    check(not locate(env, function(e) return e.source.id == 13084 end), "Bixi has no paladin proficiency")
+    local lessons = addon.Trainers:Lessons(11867)
+    local swords = findEntry(lessons, function(row) return row.id == 201 end)
+    equal(swords.cost, 1000, "Woo Ping sword skill price")
+    equal(swords.source, "Classic reference", "price provenance")
+    check(not findEntry(lessons, function(row) return row.id == 5011 end), "paladin cannot learn crossbows")
+    Wow.trackingMenu():Find("Trainers"):Find("Other classes and professions"):Click()
+    check(locate(env, function(e) return e.source.id == 13084 end), "reference mode includes Bixi")
+end)
+
+test("observed trainer prices override references for that NPC and that character only", function()
+    local addon, env, state = load({npcGUID="Creature-0-1-1-1-11867-000A", services={
+        {name="One-Handed Swords", spell=201, cost=900}, {name="Private Lesson", cost=0},
+    }})
+    Wow.fire("TRAINER_SHOW")
+    local function sword()
+        return findEntry(addon.Trainers:Lessons(11867), function(lesson) return lesson.id == 201 end)
+    end
+    equal(sword().source, "Last visit", "personal price takes priority")
+    equal(sword().cost, 900, "discounted local quote")
+    state.services = {{name="Private Lesson", cost=0}}
+    Wow.fire("TRAINER_UPDATE")
+    equal(sword().cost, 900, "filtered trainer view never removes earlier observations")
+    local row = findEntry(addon.Trainers:Lessons(11867), function(lesson) return lesson.name == "Private Lesson" end)
+    equal(row.cost, 0, "free and unknown prices differ")
+    local saved = env.AeternumTrainerDB
+    local reload = load({savedTrainerData=saved})
+    equal(findEntry(reload.Trainers:Lessons(11867), function(l) return l.id == 201 end).cost, 900, "after reload")
+    local other = load()
+    equal(findEntry(other.Trainers:Lessons(11867), function(l) return l.id == 201 end).cost, 1000, "other character")
+end)
+
+test("class skills have ranks, levels and prices before a first visit", function()
+    local addon = load()
+    local spell = findEntry(addon.Trainers:Lessons(328), function(l) return l.name == "Frostbolt" end)
+    check(spell and spell.rank == "Rank 1" and spell.level > 0 and spell.cost == 100, "mage lesson")
+    local druid = findEntry(addon.Trainers:Lessons(5504), function(l) return l.source == "Bundled trainer record" end)
+    check(druid and druid.id and druid.cost ~= nil, "observed Forever class data wins over reference")
+end)
+
+test("non-dungeon pins pass right-click through even when recycled in combat", function()
+    local _, env, state = load({mapID=1453})
+    env.WorldMapFrame:Show()
+    state.inCombat = true
+    env.WorldMapFrame:SetMapID(1429)
+    local pin = locate(env, function(e) return e.category ~= "dungeon" end)
+    env.WorldMapFrame:ClickPin(pin, "RightButton")
+    check(env.WorldMapFrame.zoomedOut and not state.menu, "Blizzard's zoom-out handler")
+end)
+
+test("quest pins restyle in place and redraw only when the quest list changes", function()
+    local _, env, state = load({level=1})
+    env.WorldMapFrame:Show()
+    local fn = function(e) return e.questID == 783 and e.role == "start" end
+    local start = locate(env, fn)
+    Wow.fire("QUEST_LOG_UPDATE"); Wow.flushTimers()
+    equal(locate(env, fn), start, "same pin after an unrelated log update")
+    state.log[783] = 1
+    Wow.fire("QUEST_ACCEPTED", 783); Wow.flushTimers()
+    check(not locate(env, fn), "accepted start removed")
+    check(locate(env, function(e) return e.questID == 783 and e.role == "turnin" end), "turn-in drawn")
+end)
+
+test("unrecorded or missing prices are never reported as free", function()
+    local addon = load({npcGUID="Creature-0-1-1-1-11867-000B", services={{name="Unknown cost"}}})
+    Wow.fire("TRAINER_UPDATE")
+    equal(findEntry(addon.Trainers:Lessons(11867), function(l) return l.name == "Unknown cost" end).cost, nil)
+end)
+
+test("continent entrance pins project into the parent map and route to their original zone", function()
+    local addon, env, state = load({mapID=1415, playerMap=1436, playerX=.2, playerY=.2})
+    env.Enum.UIMapType = {World=0, Continent=1}
+    env.C_Map.GetMapInfo = function(id)
+        if id == 1415 then return {mapType=1, name="Eastern Kingdoms"} end
+        return {mapType=3, parentMapID=id == 1436 and 1415 or 0, name="Westfall"}
+    end
+    env.C_Map.GetMapRectOnMap = function(id, parent)
+        equal(id, 1436); equal(parent, 1415)
+        return .1, .5, .2, .6
+    end
+    env.WorldMapFrame:Show()
+    local pin, door = locate(env, function(e) return e.source.id == "deadmines" end)
+    equal(door.mapID, 1415, "displayed on continent")
+    equal(door.point.mapID, 1436, "route in Westfall")
+    check(math.abs(door.x - (.1 + door.point.x * .4)) < .00001, "projected coordinate")
+    check(not locate(env, function(e) return e.source.id == "ragefire-chasm" end), "other continent excluded")
+    env.WorldMapFrame:ClickPin(pin, "RightButton")
+    state.menu:Find("Show path to The Deadmines"):Click()
+    equal(#addon.Navigation.points, 2, "Westfall approach")
+end)
+
+test("focusing a second map location restores the first pin's style and size", function()
+    local addon, env = load({mapID=1453})
+    env.WorldMapFrame:Show()
+    local points = {}
+    for _, pin in ipairs(pins(env)) do
+        if pin.entry.category ~= "dungeon" then points[#points + 1] = pin end
+    end
+    local first, second = points[1], points[2]
+    addon.FocusLocation(first.entries[#first.entries])
+    equal(first:GetWidth(), 23)
+    addon.FocusLocation(second.entry)
+    equal(first:GetWidth(), 17, "old pin restored")
+    equal(first.entry, first.entries[1])
+    equal(second:GetWidth(), 23)
+    addon.FocusLocation(nil)
+    equal(second:GetWidth(), 17)
+end)
+
+test("dungeon floors follow unambiguous localized rooms until the player chooses a floor", function()
+    local addon, env, state = load({inInstance=true, instanceID=36, subzone="Mastraum"})
+    env.WorldMapFrame:Show()
+    equal(addon.DungeonMap.index, 1)
+    state.subzone = "Crique du cuirassé"
+    Wow.fire("ZONE_CHANGED_INDOORS")
+    equal(addon.DungeonMap.index, 2, "localized room identifies next floor")
+    addon.DungeonMap.frame.dropdown:OpenMenu():Find("Deadmines"):Click()
+    Wow.fire("ZONE_CHANGED")
+    equal(addon.DungeonMap.index, 1, "manual choice survives a room change")
+end)
+
+test("locale with missing legacy art draws the equivalent client minimap mosaic", function()
+    local addon, env = load({inInstance=true, instanceID=36, locale="esMX"})
+    env.WorldMapFrame:Show()
+    local floor = addon.floorData.deadmines.floors[1]
+    local texture = addon.DungeonMap.frame.tiles[1]
+    equal(texture.texture, tonumber(floor.fallback:match("^%d+")))
+    equal(#texture.texCoord, 8, "rotated client minimap fragment")
+end)
+
+test("a name-only trainer quote gains its spell ID and latest price without duplicate lessons", function()
+    local addon, _, state = load({npcGUID="Creature-0-1-1-1-11867-000A",
+        services={{name="One-Handed Swords", cost=950}}})
+    Wow.fire("TRAINER_SHOW")
+    state.services = {{name="One-Handed Swords", spell=201, cost=900}}
+    Wow.fire("TRAINER_UPDATE")
+    state.services = {{name="One-Handed Swords", status="used", cost=0}}
+    Wow.fire("TRAINER_UPDATE")
+    local count = 0
+    for _, lesson in ipairs(addon.Trainers:Lessons(11867)) do
+        if lesson.name == "One-Handed Swords" then
+            equal(lesson.id, 201); equal(lesson.cost, 900)
+            count = count + 1
+        end
+    end
+    equal(count, 1, "one last-visit lesson")
+end)
+
+test("optional drop search opens the same map floor and loot as a boss pin", function()
+    local addon, env, state = load()
+    slash(env, "dungeons Cruel Barb")
+    menuRow(state.menu, "Cruel Barb"):Click()
+    Wow.flushTimers()
+    equal(addon.DungeonMap.dungeon.id, "deadmines", "selected dungeon")
+    equal(addon.DungeonMap.index, 2, "boss floor")
+    equal(state.menu.children[1].label, "Edwin VanCleef")
+end)
+
+test("every dungeon has an exterior door and recorded approaches reach the selected entrance", function()
+    local addon, env, state = load({mapID=1449, playerMap=1449, playerX=.8, playerY=.8})
+    local count, routes = 0, 0
+    for _, d in ipairs(addon.Data.dungeons) do
+        local doors = addon.DungeonEntrances(d)
+        check(#doors > 0, d.name)
+        for _, entry in ipairs(doors) do
+            check(findEntry(addon.MapRecords(entry.mapID), function(e) return e == entry end), d.name)
+            count = count + 1
+            if entry.point.waypoints then routes = routes + 1 end
+        end
+    end
+    equal(count, 41); equal(routes, 10)
+    env.WorldMapFrame:Show()
+    local pin = locate(env, function(e) return e.source.id == "shapers-terrace" end)
+    env.WorldMapFrame:ClickPin(pin, "RightButton")
+    state.menu:Find("Show path to Shaper's Terrace"):Click()
+    equal(addon.Navigation.points[1].label, "Stone staircase")
+    equal(#addon.Navigation.points, 2)
+    check(pin.tracked:IsShown(), "active door marked on the map")
+    env.WorldMapFrame:ClickPin(pin, "LeftButton")
+    local doorMenu = addon.DungeonMap.frame.dropdown:OpenMenu():Find("Entrances")
+    doorMenu:Find("Stop directions"):Click()
+    doorMenu:Find("Show on zone map"):Click()
+    equal(env.WorldMapFrame.panX, .482); equal(env.WorldMapFrame.panY, .057)
+    check(not addon.DungeonMap.dungeon and not env.AeternumRouteDB, "back at the actual portal")
+end)
+
+test("directions survive a reload and an unrelated instance, then finish on entry to the destination", function()
+    local addon, env = load({playerMap=1436, playerX=.05, playerY=.05})
+    local dungeon = dungeonNamed(addon, "deadmines")
+    check(addon.Navigation:Start(dungeon.name, dungeon.entrances[1], dungeon.id))
+    local saved = env.AeternumRouteDB
+    check(not addon.Navigation:Start("Unknown portal", {mapID=1436}), "invalid replacement rejected")
+    equal(env.AeternumRouteDB, saved, "previous route intact")
+    local nextAddon, client, state = load({savedRoute=saved, inInstance=true, instanceID=189})
+    equal(nextAddon.Navigation:GetTarget(), dungeon.name)
+    equal(nextAddon.Navigation:GetStatus(), "Guidance is paused inside an instance.")
+    state.inInstance, state.playerMap, state.playerX, state.playerY = false, 1436, .05, .05
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    check(nextAddon.Navigation.overlay:IsShown() and client.AeternumRouteDB, "route resumed outdoors")
+    state.inInstance, state.instanceID, state.subzone = true, 36, "Ironclad Cove"
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    check(not nextAddon.Navigation:IsActive() and not client.AeternumRouteDB, "destination reached")
+    check(nextAddon.Navigation:GetStatus():find("Arrived", 1, true))
+    local other = load()
+    check(not other.Navigation:IsActive(), "another character has no route")
+    local corrupt, clean = load({savedRoute={mapID=1436, x=.1, y=.2, name="Old", waypoints=true}})
+    check(not corrupt.Navigation:IsActive() and not clean.AeternumRouteDB, "invalid saved route discarded")
+end)
+
+test("alternate wing routes restore distinct boss positions and group an arena's loot by combatant", function()
+    local addon, env, state = load()
+    for key, expected in pairs({maraudon=9, stratholme=17, ["dm-north"]=7}) do
+        local ids, count = {}, 0
+        for _, floor in ipairs(addon.floorData[key].floors) do
+            equal(#floor.toMap, 6)
+            for _, stop in ipairs(floor.bosses) do
+                check(not ids[stop[1]], "duplicate alternate-route stop")
+                ids[stop[1]], count = true, count + 1
+            end
+        end
+        equal(count, expected, key)
+    end
+    env.WorldMapFrame:Show()
+    addon.DungeonMap:Open(dungeonNamed(addon, "blackrock-depths"))
+    local arena = findEntry(addon.DungeonMap.frame.pins, function(p)
+        return p.stop and p.stop.label == "Ring of Law"
+    end)
+    equal(#arena.members, 6, "one skull for all possible opponents")
+    arena:Click()
+    state.menu:Find("Gorosh the Dervish"):Click()
+    Wow.flushTimers()
+    equal(state.menu.children[1].label, "Gorosh the Dervish")
+    check(menuRow(state.menu, "Savage Gladiator Chain"), "selected boss's own loot")
+end)
+
+test("Forever-specific named drops fill previously empty boss menus", function()
+    local addon, env, state = load()
+    env.WorldMapFrame:Show()
+    local dungeon = dungeonNamed(addon, "alcaz-prison")
+    addon.DungeonMap:Open(dungeon)
+    for boss, id in pairs({["Katerina the Cleaner"]=276738, Blazeroar=276744}) do
+        addon.DungeonMap.frame.dropdown:OpenMenu():Find("Boss loot"):Find(boss):Click()
+        Wow.flushTimers()
+        check(menuRow(state.menu, addon.Data.items[id]), boss)
+        equal(state.menu.children[1].label, boss)
     end
 end)
 
--- ============================================================================
--- Summary
--- ============================================================================
+test("the indoor player arrow uses the current floor and hides when the client restricts position", function()
+    local addon, env, state = load({inInstance=true, instanceID=36, subzone="Ironclad Cove",
+        playerNorth=-101.09, playerWest=-766.99})
+    env.WorldMapFrame:Show()
+    local map, frame = addon.DungeonMap, addon.DungeonMap.frame
+    local arrow = frame.playerArrow
+    check(arrow:IsVisible() and frame.positionUpdates:IsVisible())
+    check(math.abs(arrow.points[1][4] / 1002 - .5) < .001, "east-west placement")
+    check(math.abs(-arrow.points[1][5] / 668 - .5) < .001, "north-south placement")
+    frame:Fire("OnMouseWheel", 2)
+    check(math.abs(arrow:GetWidth() * frame.art.scale - 22) < .01, "screen size held while zooming")
+    frame.dropdown:OpenMenu():Find("Deadmines"):Click()
+    check(not arrow:IsShown() and not frame.positionUpdates:IsShown(), "viewing another floor")
+    map:SetFloor(2)
+    state.positionInstance = 189
+    frame.positionUpdates:Fire("OnUpdate", .25)
+    check(not arrow:IsShown(), "mismatched instance")
+    state.positionInstance, state.playerNorth = 36, {}
+    env.issecretvalue = function(value) return value == state.playerNorth end
+    frame.positionUpdates:Fire("OnUpdate", .25)
+    check(not arrow:IsShown(), "unreadable coordinates")
+end)
 
-_G.print = realPrint
-for _, item in ipairs(failures) do
-    print("FAIL: " .. item.name .. "\n  " .. item.err)
-end
-print(("Aeternum tests: %d passed, %d failed"):format(passed, failed))
-if failed > 0 then
-    os.exit(1)
-end
+test("only successful encounters or client lockouts dim the appropriate boss skull", function()
+    local addon, env, state = load({inInstance=true, instanceID=36, subzone="Ironclad Cove"})
+    env.WorldMapFrame:Show()
+    local function skull(id)
+        return findEntry(addon.DungeonMap.frame.pins, function(p) return p.boss and p.boss.id == id end)
+    end
+    Wow.fire("ENCOUNTER_END", 2747, "Edwin VanCleef", 1, 5, 0)
+    equal(skull(639).alpha, 1, "wipe leaves boss up")
+    Wow.fire("ENCOUNTER_END", 2747, "Edwin VanCleef", 1, 5, 1)
+    check(skull(639).complete and not skull(647).complete)
+    skull(639):Fire("OnEnter")
+    check(findEntry(env.GameTooltip.lines, function(text) return text == "Encounter complete" end))
+    Wow.fire("BOSS_KILL", 2744, "Captain Greenskin")
+    check(skull(647).complete)
+    state.lockedEncounters = {[2747]=true}
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    check(skull(639).complete and not skull(647).complete, "new visit consults the current lockout")
+end)
+
+test("dungeon keys report bag ownership and alternate doors remain individually selectable", function()
+    local addon, env = load({inventory={[11000]=1}})
+    env.WorldMapFrame:Show()
+    addon.DungeonMap:Open(dungeonNamed(addon, "blackrock-depths"))
+    local keys = addon.DungeonMap.frame.dropdown:OpenMenu():Find("Dungeon keys")
+    check(menuRow(keys, addon.Data.items[11000]).label:find("In bags", 1, true))
+    check(not menuRow(keys, addon.Data.items[11140]).label:find("In bags", 1, true))
+    addon.DungeonMap:Open(dungeonNamed(addon, "uldaman"))
+    local doors = addon.DungeonMap.frame.dropdown:OpenMenu():Find("Entrances")
+    equal(#doors.children, 2)
+    check(doors.children[1].label ~= doors.children[2].label, "two doors in the same zone")
+    doors.children[2]:Find("Show on zone map"):Click()
+    equal(env.WorldMapFrame:GetMapID(), 1418)
+    equal(env.WorldMapFrame.panX, .652)
+end)
+
+test("quest starts, turn-ins and dungeon quest links lead to the correct named contact", function()
+    local addon, env, state = load({mapID=1429, log={[783]=1, [166]=2}, complete={[783]=true, [166]=true}})
+    equal(addon.QuestLocation(783, "start").contact, "Deputy Willem")
+    equal(addon.QuestLocation(783, "turnin").contact, "Marshal McBride")
+    env.WorldMapFrame:Show()
+    local pin = locate(env, function(e) return e.questID == 783 and e.role == "turnin" end)
+    check(pin)
+    local dungeon = dungeonNamed(addon, "deadmines")
+    addon.DungeonMap:Open(dungeon)
+    local turnin = addon.QuestLocation(166, "turnin", env.WorldMapFrame:GetMapID())
+    addon.DungeonMap.frame.dropdown:OpenMenu():Find("Dungeon quests"):Find(addon.Quest(166).name):Click()
+    equal(env.WorldMapFrame:GetMapID(), turnin.mapID)
+    equal(env.WorldMapFrame.panX, turnin.x)
+    equal(env.GameTooltip.lines[1], turnin.title)
+    check(findEntry(env.GameTooltip.lines, function(line) return line == turnin.contact end))
+    state.log[166], state.completed[166] = nil, true
+    Wow.fire("QUEST_TURNED_IN", 166); Wow.flushTimers()
+    check(not locate(env, function(e) return e == turnin end), "completed quest releases its highlighted pin")
+end)
+
+test("only the focused quest's unfinished objectives appear and defer to Blizzard's map pins and filter", function()
+    local addon, env, state = load({mapID=1429, log={[7]=1, [33]=2}, watched={[33]=1}, superQuest=7,
+        objectives={[7]={{text="Kobold Vermin slain: 0/10", finished=false}}}})
+    env.WorldMapFrame:Show()
+    local function site(id) return locate(env, function(e) return e.questID == id and e.role == "objective" end) end
+    local pin, entry = site(7)
+    equal(entry.title, "Kobold Vermin")
+    equal(pin.icon.atlas, "Quest-In-Progress-Icon-yellow")
+    check(not site(33), "one quest at a time")
+    pin:OnMouseEnter()
+    check(findEntry(env.GameTooltip.lines, function(v) return v == state.objectives[7][1].text end))
+    state.nativePOI = {[1429]={{questID=7, mapID=1429, x=.4, y=.55, isQuestStart=false}}}
+    Wow.fire("QUEST_POI_UPDATE"); Wow.flushTimers()
+    check(not site(7), "Blizzard already has a pin")
+    state.nativePOI = nil
+    state.questPOI = false
+    Wow.fire("CVAR_UPDATE", "questPOI"); Wow.flushTimers()
+    check(not site(7), "stock map filter")
+    state.questPOI = true
+    state.objectives[7][1].finished = true
+    Wow.fire("QUEST_LOG_UPDATE"); Wow.flushTimers()
+    check(not site(7), "objective finished")
+    state.superQuest = nil
+    Wow.fire("SUPER_TRACKING_CHANGED"); Wow.flushTimers()
+    check(site(33), "falls back to the first watched quest")
+    addon.UI:Pick(env.WorldMapFrame, addon.QuestLocation(7, "turnin"))
+    state.menu:Find("Focus quest"):Click()
+    equal(state.superQuest, 7, "map action uses Blizzard quest focus")
+    state.menu:Find("Track quest"):Click()
+    equal(state.watched[7], 1)
+end)
+
+test("packed objective sites resolve to their quest, map and named source", function()
+    local addon = load()
+    local quests, count = 0, 0
+    for id, packed in pairs(addon.Data.objectiveSites) do
+        check(addon.Quest(id), "unknown quest " .. id)
+        quests = quests + 1
+        local unique = {}
+        for site in packed:gmatch("([^;]+);") do
+            local n, zone, x, y, target = site:match("^(%d+):(%d+):(%d+),(%d+)([noz]%d+)[AH]?$")
+            check(n and tonumber(n) > 0 and tonumber(zone) > 0, site)
+            check(tonumber(x) <= 10000 and tonumber(y) <= 10000, site)
+            check(target == "z0" or addon.Data.questContacts[target], "no name for " .. target)
+            check(not unique[site], "duplicate site")
+            unique[site], count = true, count + 1
+        end
+    end
+    equal(quests, 2097); equal(count, 5207)
+end)
+
+test("profession ranks gate quest offers and sort trainer lessons as the character learns", function()
+    local addon, env, state = load({mapID=1453, level=8, professionIndices={1}, professionSkills={171},
+        professionRanks={[171]=19}})
+    equal(addon.Quests:State(1581), "locked", "requires Alchemy 20")
+    local trainer = findEntry(addon.MapRecords(1453), function(e) return e.source.id == 5499 end)
+    local function lessons() addon.UI:Trainer(env.WorldMapFrame, trainer); return state.menu end
+    check(menuRow(lessons():Find("Later training"), "Minor Mana Potion"), "requires Alchemy 25")
+    state.professionRanks[171] = 25
+    Wow.fire("SKILL_LINES_CHANGED")
+    equal(addon.Quests:State(1581), "available")
+    check(menuRow(lessons(), "Minor Mana Potion"), "available at this rank")
+    local spell = findEntry(addon.Trainers:Lessons(5499), function(l) return l.name == "Minor Mana Potion" end)
+    state.knownSpells = {[spell.id]=true}
+    Wow.fire("LEARNED_SPELL_IN_SKILL_LINE")
+    check(menuRow(lessons():Find("Learned"), "Minor Mana Potion"))
+    state.professionRanks[171], state.log[1581], state.complete[1581] = 1, 1, true
+    Wow.fire("SKILL_LINES_CHANGED")
+    equal(addon.Quests:State(1581), "ready", "accepted quest can still be turned in")
+end)
+
+test("crowded maps retain every location and separate nearby pins as the player zooms", function()
+    local addon, env, state = load()
+    local entries = {}
+    for i = 1, 220 do
+        local x, y = .1 + ((i - 1) % 40) * .005, .1 + math.floor((i - 1) / 40) * .01
+        local point = {mapID=1429, x=x, y=y}
+        entries[i] = {category="class", title="Trainer " .. i, subtitle="Mage Trainer", source={}, point=point,
+            x=x, y=y, mapID=1429}
+    end
+    addon.Entries = function() return entries end
+    env.WorldMapFrame:Show()
+    local function count()
+        local all, total = pins(env), 0
+        for _, p in ipairs(all) do total = total + #p.entries end
+        equal(total, #entries, "every record reachable from the map")
+        return #all
+    end
+    local grouped = count()
+    check(grouped < 100, "crowded overview")
+    local pin = locate(env, function(e) return e == entries[220] end)
+    env.WorldMapFrame:ClickPin(pin, "LeftButton")
+    state.menu:Find("Trainer 220")
+    state.viewWidth = .25
+    env.WorldMapFrame.providers[1]:OnCanvasScaleChanged()
+    Wow.flushTimers()
+    check(count() > grouped, "more detail at higher zoom")
+end)
+
+test("recorded alternate entrances survive the data format migration", function()
+    require("dungeon_entrances")(load())
+end)
+
+test("a clicked door takes precedence over the viewed zone and the primary entrance", function()
+    local addon, env, state = load({mapID=1428, playerMap=1428, playerX=.1, playerY=.1})
+    env.WorldMapFrame:Show()
+    local depths = dungeonNamed(addon, "blackrock-depths")
+    addon.DungeonMap:Open(depths)
+    local function doors() return addon.DungeonMap.frame.dropdown:OpenMenu():Find("Entrances").children end
+    check(doors()[1].label:find("29.4, 38.3", 1, true), "viewing Burning Steppes")
+    doors()[1]:Find("Directions to entrance"):Click()
+    equal(env.AeternumRouteDB.mapID, 1428)
+    env.WorldMapFrame:SetMapID(1418)
+    local pin = locate(env, function(e) return e.source.id == "uldaman" and e.x == .652 end)
+    env.WorldMapFrame:ClickPin(pin, "LeftButton")
+    check(doors()[1].label:find("65.2, 43.5", 1, true), "back door clicked in Badlands")
+    doors()[1]:Find("Show on zone map"):Click()
+    equal(env.WorldMapFrame.panX, .652)
+    local other = addon.DungeonEntrances(depths)[2]
+    other.faction = "Horde"
+    equal(#addon.DungeonEntrances(depths, other.point, 1428), 1, "ineligible door filtered before preference")
+    state.faction = "Neutral"
+    equal(addon.DungeonEntrances(depths, other.point, 1428)[1], other)
+end)
+
+test("mixed boss, item and dungeon names work in the slash shortcut and zone search", function()
+    local addon, env, state = load()
+    equal(#addon.Entries(nil, true, "  herod  SCARLET  "), 1)
+    equal(addon.Entries(1436, false, "Edwin Deadmines")[1].source.id, "deadmines")
+    slash(env, "  barb  vancleef ")
+    assert(menuRow(state.menu, "Cruel Barb")):Click()
+    Wow.flushTimers()
+    equal(addon.DungeonMap.index, 2)
+    equal(state.menu.children[1].label, "Edwin VanCleef")
+    env.WorldMapFrame:Hide()
+    slash(env, "help")
+    check(state.messages[#state.messages]:find("/aeternum", 1, true))
+    state.inCombat = true
+    slash(env, "VanCleef")
+    check(not env.WorldMapFrame:IsShown() and state.messages[#state.messages]:find("combat", 1, true))
+    equal(addon.Trim(nil), ""); equal(addon.Trim(99), "")
+    env.strtrim = nil
+    equal(addon.Trim("  Blackrock "), "Blackrock")
+    addon.settings = nil
+    check(addon.CategoryEnabled("dungeon"), "safe before saved variables load")
+end)
+
+test("a route finishes when the player bypasses an approach and leaves no saved directions", function()
+    local addon, env, state = load({playerMap=1429, playerX=.5, playerY=.1})
+    addon.Navigation:Start("Entrance", {mapID=1429, x=.5, y=.9,
+        waypoints={{mapID=1429, x=.5, y=.3}, {mapID=1429, x=.5, y=.6}}})
+    equal(addon.Navigation.step, 1)
+    state.playerY = .6
+    addon.Navigation:Update()
+    equal(addon.Navigation.step, 3, "reaching a later recorded landmark advances the route")
+    addon.Navigation:Stop()
+    state.playerY = .1
+    addon.Navigation:Start("Entrance", {mapID=1429, x=.5, y=.9, waypoints={{mapID=1429, x=.5, y=.3}}})
+    state.playerY = .9
+    addon.Navigation:Update()
+    check(not addon.Navigation:IsActive() and not env.AeternumRouteDB, "arrival clears route")
+end)
+
+test("rectangular minimaps preserve bearings and distinguish the upcoming entrance", function()
+    local addon, env = load({playerMap=1429, playerX=.5, playerY=.5})
+    env.Minimap:SetSize(220, 140)
+    addon.Navigation:Start("Northeast", {mapID=1429, x=.6, y=.35})
+    local overlay = addon.Navigation.overlay
+    local pos = overlay.arrow.points[1]
+    check(math.abs(pos[4] - pos[5]) < .001, "equal world distances use equal pixel distances")
+    addon.Navigation:Start("Nearby door", {mapID=1429, x=.5, y=.41,
+        waypoints={{mapID=1429, x=.5, y=.46}}})
+    check(overlay.marker:IsShown())
+    check(overlay.dots[1]:IsShown() and overlay.dots[1].atlas == "waypoint-mappin-minimap-tracked")
+end)
+
+test("the open loot menu updates a cached item once and ignores late replies after closing", function()
+    local addon, env, state = openDeadmines()
+    local boss = findEntry(addon.DungeonMap.dungeon.bosses, function(b) return b.id == 639 end)
+    addon.UI:Boss(addon.DungeonMap.frame, boss)
+    local proxy = state.menuProxy
+    local item = assert(menuRow(state.menu, "Cruel Barb"))
+    state.cached[5191] = true
+    Wow.fire("ITEM_DATA_LOAD_RESULT", 5191, true)
+    Wow.fire("ITEM_DATA_LOAD_RESULT", 5191, true)
+    Wow.flushTimers()
+    equal(proxy.refreshes, 1)
+    check(item.label:find("Cached 5191", 1, true) and item.label:find("|cff", 1, true))
+    state.modified = true
+    item:Click()
+    check(state.modifiedClick:find("[Cached 5191]", 1, true))
+    Wow.fire("ITEM_DATA_LOAD_RESULT", boss.loot[1], true)
+    proxy.closed()
+    Wow.flushTimers()
+    equal(proxy.refreshes, 1, "a closed menu is never refreshed")
+    check(not addon.UI.openLoot and not env.GameTooltip:IsVisible())
+end)
+
+test("missing floor textures clear incomplete artwork and keep boss controls available", function()
+    local addon, env = load({mapID=1436, missingTextures={[449604]=true}})
+    env.WorldMapFrame:Show()
+    addon.DungeonMap:Open(dungeonNamed(addon, "deadmines"), nil, 2)
+    local frame = addon.DungeonMap.frame
+    check(frame.artNotice:IsShown())
+    for _, texture in ipairs(frame.tiles) do check(not texture:IsShown()) end
+    check(findEntry(frame.pins, function(pin) return pin:IsShown() and pin.boss.id == 639 end))
+    addon.DungeonMap:SetFloor(1)
+    check(not frame.artNotice:IsShown() and frame.tiles[1]:IsShown(), "normal floor recovers")
+end)
+
+test("generated Lua round-trips sparse tables, mixed keys, reserved names and large race masks", function()
+    local _, literal = dofile(testDirectory .. "/../tools/lua_literal.lua")
+    local sample = {[1]="first", [3]="third", [false]="flag", ["end"]=true, ["dm-east"]=8589934770}
+    local decoded = assert(loadstring("return " .. literal(sample)))()
+    for key, value in pairs(sample) do equal(decoded[key], value, tostring(key)) end
+    for key, value in pairs(decoded) do equal(sample[key], value, tostring(key)) end
+end)
+
+test("all shipped floors open and every boss menu shows that boss's recorded drops", function()
+    local addon, env, state = load()
+    env.WorldMapFrame:Show()
+    local map = addon.DungeonMap
+    local floors, bosses = 0, 0
+    for _, dungeon in ipairs(addon.Data.dungeons) do
+        addon.UI:Pick(env.WorldMapFrame, {category="dungeon", source=dungeon})
+        for i, floor in ipairs(addon.floorData[dungeon.id].floors) do
+            map:SetFloor(i)
+            check(not map.frame.artNotice:IsShown(), dungeon.name .. " / " .. floor.name)
+            local members = 0
+            for _, skull in ipairs(map.frame.pins) do
+                if skull:IsShown() then members = members + #skull.members end
+            end
+            equal(members, #floor.bosses, dungeon.name .. " / " .. floor.name)
+            floors = floors + 1
+        end
+        local list = map.frame.dropdown:OpenMenu():Find("Boss loot")
+        for _, boss in ipairs(dungeon.bosses) do
+            list:Find(boss.name):Click()
+            Wow.flushTimers()
+            equal(state.menu.children[1].label, boss.name)
+            equal(#state.menu.children - 1, math.max(1, #boss.loot), boss.name)
+            bosses = bosses + 1
+        end
+    end
+    equal(floors, 71); equal(bosses, 287)
+end)
+
+test("every trainer location opens its lesson list and every eligible reference pin survives grouping", function()
+    local addon, env, state = load({level=60, faction="Neutral", savedVariables={questMode="all", otherTrainers=true}})
+    env.WorldMapFrame:Show()
+    local maps, trainers = {}, 0
+    for id in pairs(addon.Data.questPins) do maps[id] = true end
+    for _, trainer in ipairs(addon.Data.trainers) do maps[trainer.mapID] = true end
+    for id in pairs(maps) do
+        env.WorldMapFrame:SetMapID(id)
+        local drawn = {}
+        for _, pin in ipairs(pins(env)) do
+            for _, entry in ipairs(pin.entries) do
+                check(not drawn[entry], "duplicate pin on map " .. id)
+                drawn[entry] = true
+                if entry.category == "class" or entry.category == "profession" or entry.category == "weapon" then
+                    addon.UI:Pick(pin, entry)
+                    equal(state.menu.children[1].label, entry.title)
+                    trainers = trainers + 1
+                end
+            end
+        end
+        for _, entry in ipairs(addon.Entries(id, false)) do check(drawn[entry], entry.title) end
+    end
+    equal(trainers, 562)
+end)
+
+print(("%d passed, %d failed"):format(passed, failed))
+os.exit(failed == 0 and 0 or 1)

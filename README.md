@@ -1,41 +1,55 @@
 # Aeternum
 
-A world map and dungeon companion for World of Warcraft: Forever 1.60.1.
-It runs with the bundled database and the game’s own interface and artwork.
+Press **M**. Aeternum adds dungeon floors, boss loot, trainers, quests and entrance directions to the World of Warcraft: Forever map. It uses Blizzard’s artwork, menus and tooltips. The data ships with the addon and works offline.
 
-## Use it in game
+## On the map
 
-1. Put the `Aeternum` folder in `World of Warcraft/_forever_/Interface/AddOns/`.
-   `Aeternum.toc` should be directly inside that folder.
-2. Restart WoW, open the world map with **M**, and click **Aeternum**. You can
-   also open the panel with `/aeternum` (or `/aeternum <search>`).
-3. Search (including multi-word queries and boss names) or filter the current
-   map for dungeon entrances, class trainers, profession trainers, and quest
-   starts and turn-ins. Select a row to highlight its location. Map pins at the
-   same location share a tooltip; right-click a stacked pin to cycle entries.
-4. Choose a dungeon pin or find a dungeon under **All dungeons**. Browse its
-   reference floors, switch bosses to view their loot, hover items for tooltips,
-   and click (or Shift/Ctrl-click) an item to inspect or link it in game.
-5. Choose an entrance and click **Guide me** (or **Show zone** to jump the world
-   map to its entrance). The minimap arrow points to the next recorded approach
-   point or the entrance. Stop guidance with the **Stop** button or
-   `/aeternum stop`.
+| Where | What to do |
+| --- | --- |
+| Zone or continent | Click a dungeon entrance to see the floors. Right-click for minimap directions to a specific wing or door. Nearby locations share a pin while zoomed out. Scroll in to separate them or click to choose. |
+| Inside a dungeon | Press **M**. The map follows recognized rooms and floor IDs. An arrow shows your position when the client supplies coordinates for that floor. Click the floor name to change floors, check keys in your bags, or find an outdoor entrance. Scroll to zoom and drag to pan. **Back**, **Escape**, or right-clicking empty floor space returns to the zone map. |
+| Boss skull | Click for drops. If several bosses fight in the same spot, choose whose loot to see. Defeated encounters dim. Hover an item for its tooltip, Shift-click to link it, or Ctrl-click to preview it. **Boss loot** also lists bosses whose positions are unknown. |
+| Trainer | Your class, faction, professions and eligible weapon skills determine which trainers appear. Click a trainer to see lessons and prices. **Later training** and **Learned** hold lessons with unmet requirements and skills you already know. Hover a lesson for its requirements and price source. |
+| Quest | Exclamation marks show available starts. Question marks turn gold when you can hand the quest in. Hover for the NPC or object and your live progress. Click to track the quest or get directions. **Dungeon quests** takes you to the giver before acceptance and the turn-in afterward. |
 
-## Seed coverage
+The quest you focus in the game can show objective locations for its unfinished steps. Without a focus, Aeternum uses your first watched quest. Blizzard’s own objective marker takes precedence. The map’s existing tracking menu controls quest objectives, low-level quests and additional trainers.
 
-- 34 dungeon and wing entries, 287 bosses, and 1,335 loot items.
-- 34 entrance records across 30 dungeons and wings. Use **Next entrance** to
-  switch between Uldaman's two Badlands entrances or the Searing Gorge and
-  Burning Steppes approaches to Blackrock Mountain. Selecting a map pin uses
-  its coordinates. **All dungeons** prefers the map you're viewing.
-- The Deadmines and Ragefire Chasm have recorded approach
-  points. The other mapped entrances show a direct bearing. It can point
-  across terrain and does not account for walls, tunnels, or elevations.
-- 25 classic dungeon and wing entries have client floor-map references. Older
-  layouts are labeled as references. Some Forever dungeons lack equivalent
-  client floor art.
-- 554 trainer pins and 11,100 quest start and turn-in pins across 53 world maps.
-  Quest availability still depends on the character and game state.
+Directions survive a UI reload on the same character. They pause on another continent or inside an unrelated instance and end when you reach the destination. Use **Stop directions** on the map to cancel.
 
-See [data sources and regeneration](DATA_SOURCES.md) for the pinned local
-database, attribution, and import command. [GPL-3.0](LICENSE).
+A price from your character’s last trainer visit takes precedence. Otherwise the map uses the NPC’s bundled Forever record, then a labeled **Classic** reference where available. An unknown price is displayed as **Price unknown**. Visits are saved per character.
+
+## Coverage
+
+- 34 dungeon and wing entries, 71 floors, 287 bosses and 1,408 distinct loot items. 260 bosses have recorded floor positions. Dalaran’s Underbelly uses a labeled route sketch.
+- 41 outdoor entrance records across all 34 entries. Ten have a recorded approach waypoint, covering the Deadmines, Ragefire Chasm, the four Scarlet Monastery wings, Alcaz Prison, Blackmaw Hold, Krol’dok Stronghold and Shaper’s Terrace. Other doors show a direct bearing. Dire Maul East and West have multiple selectable portals.
+- 562 trainer locations, including eight weapon masters. Quest data covers 5,323 quests, 11,100 start and turn-in records, and 5,207 representative objective sites for 2,097 quests. Availability uses level, race, class, profession rank, quest chains and progress. Reputation and specialization can also affect offers in game.
+
+## Install
+
+Download `Aeternum-<version>.zip` from a release or the **Aeternum** CI artifact and extract it into `World of Warcraft/_forever_/Interface/AddOns/`. The resulting path should be `Interface/AddOns/Aeternum/Aeternum.toc`. Reload the interface or start the game. Aeternum requires no other addons.
+
+## Optional commands
+
+| Command | Action |
+| --- | --- |
+| `/aeternum` | Open the world map |
+| `/aeternum <search words>` | Search by dungeon, boss or drop. Words can appear in any order, as in `/aeternum Herod Scarlet`. |
+| `/aeternum dungeons [name]` | Find a dungeon, boss or drop on the map. For example, `/aeternum dungeons Cruel Barb` opens a result for Edwin VanCleef. |
+| `/aeternum help` | Show the available map commands |
+| `/aeternum stop` | End minimap directions |
+| `/aeternum reset` | Reset map filters |
+
+## Development
+
+Run these from the repository root with LuaJIT or Lua 5.1, luacheck, Python 3, Git, curl and zip.
+
+```sh
+luacheck .
+luajit tests/run.lua
+tools/check_data.sh
+tools/package.sh
+```
+
+The headless tests exercise the map, stock menu interactions, trainer observations, quest states and minimap directions. CI also regenerates the bundled databases and builds the installable ZIP. See the [Forever interface source](https://github.com/Gethe/wow-ui-source/tree/d9c22e32cb240afb82bb2ecefbb78ef935333f59) and [data sources and regeneration](DATA_SOURCES.md).
+
+Aeternum is licensed under [GPL-3.0](LICENSE).

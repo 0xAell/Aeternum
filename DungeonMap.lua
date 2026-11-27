@@ -1,376 +1,441 @@
 local _, addon = ...
-
 local DungeonMap = {}
 addon.DungeonMap = DungeonMap
+local WIDTH, HEIGHT = 1002, 668
+local missingLegacyArt = {ruRU=true, esMX=true, itIT=true}
+local byInstance = {}
+local killed = {}
+for _, dungeon in ipairs(addon.Data.dungeons) do
+    local id = addon.floorData[dungeon.id].instance
+    byInstance[id] = byInstance[id] or {}
+    table.insert(byInstance[id], dungeon)
+end
 
--- FileDataIDs for reference art already in the client, ordered by tile.
--- Client file names were resolved using the wowdev community listfile.
--- Reference floors have no UiMapIDs or position transforms.
-local referenceTiles = {
-    BlackfathomDeeps = {
-        [1] = { 447578, 447582, 447583, 447584, 447585, 447586, 447587, 447588, 447589, 447579, 447580, 447581 },
-        [2] = { 447590, 447594, 447595, 447596, 447597, 447598, 447599, 447600, 447601, 447591, 447592, 447593 },
-        [3] = { 447602, 447606, 447607, 447608, 447609, 447610, 447611, 447612, 447613, 447603, 447604, 447605 },
-    },
-    BlackrockDepths = {
-        [1] = { 447638, 447642, 447643, 447644, 447645, 447646, 447647, 447648, 447649, 447639, 447640, 447641 },
-        [2] = { 447650, 447654, 447655, 447656, 447657, 447658, 447659, 447660, 447661, 447651, 447652, 447653 },
-    },
-    BlackrockSpire = {
-        [1] = { 447662, 447666, 447667, 447668, 447669, 447670, 447671, 447672, 447673, 447663, 447664, 447665 },
-        [2] = { 447674, 447678, 447679, 447680, 447681, 447682, 447683, 447684, 447685, 447675, 447676, 447677 },
-        [3] = { 447686, 447690, 447691, 447692, 447693, 447694, 447695, 447696, 447697, 447687, 447688, 447689 },
-        [4] = { 447698, 447702, 447703, 447704, 447705, 447706, 447707, 447708, 447709, 447699, 447700, 447701 },
-        [5] = { 447710, 447714, 447715, 447716, 447717, 447718, 447719, 447720, 447721, 447711, 447712, 447713 },
-        [6] = { 447722, 447726, 447727, 447728, 447729, 447730, 447731, 447732, 447733, 447723, 447724, 447725 },
-        [7] = { 447734, 447738, 447739, 447740, 447741, 447742, 447743, 447744, 447745, 447735, 447736, 447737 },
-    },
-    DireMaul = {
-        [1] = { 449508, 449512, 449513, 449514, 449515, 449516, 449517, 449518, 449519, 449509, 449510, 449511 },
-        [2] = { 449520, 449524, 449525, 449526, 449527, 449528, 449529, 449530, 449531, 449521, 449522, 449523 },
-        [3] = { 449532, 449536, 449537, 449538, 449539, 449540, 449541, 449542, 449543, 449533, 449534, 449535 },
-        [4] = { 449544, 449548, 449549, 449550, 449551, 449552, 449553, 449554, 449555, 449545, 449546, 449547 },
-        [5] = { 449556, 449560, 449561, 449562, 449563, 449564, 449565, 449566, 449567, 449557, 449558, 449559 },
-        [6] = { 449568, 449572, 449573, 449574, 449575, 449576, 449577, 449578, 449579, 449569, 449570, 449571 },
-    },
-    Gnomeregan = {
-        [1] = { 449580, 449584, 449585, 449586, 449587, 449588, 449589, 449590, 449627, 449581, 449582, 449583 },
-        [2] = { 449628, 449632, 449633, 449634, 449635, 449636, 449637, 449638, 449639, 449629, 449630, 449631 },
-        [3] = { 449640, 449644, 449645, 449646, 449647, 449648, 449649, 449650, 449651, 449641, 449642, 449643 },
-        [4] = { 449652, 449656, 449657, 449658, 449659, 449660, 449661, 449662, 449663, 449653, 449654, 449655 },
-    },
-    Maraudon = {
-        [1] = { 449676, 449680, 449681, 449682, 449683, 449684, 449685, 449686, 449687, 449677, 449678, 449679 },
-        [2] = { 449688, 449692, 449693, 449694, 449695, 449696, 449697, 449698, 449699, 449689, 449690, 449691 },
-    },
-    Ragefire = {
-        [1] = { 449736, 449740, 449741, 449742, 449743, 449744, 449745, 449746, 449747, 449737, 449738, 449739 },
-    },
-    RazorfenDowns = {
-        [1] = { 448094, 448098, 448099, 448100, 448101, 448102, 448103, 448104, 448105, 448095, 448096, 448097 },
-    },
-    RazorfenKraul = {
-        [1] = { 448106, 448110, 448111, 448112, 448113, 448114, 448115, 448116, 448117, 448107, 448108, 448109 },
-    },
-    ScarletMonasteryOLD = {
-        [1] = { 5333983, 5333984, 5333985, 5333986, 5333987, 5333988, 5333989, 5333990, 5333991, 5333992, 5333993, 5333994 },
-        [2] = { 5333996, 5333997, 5333998, 5333999, 5334000, 5334001, 5334002, 5334003, 5334004, 5334005, 5334006, 5334007 },
-        [3] = { 5334009, 5334010, 5334011, 5334012, 5334013, 5334014, 5334015, 5334016, 5334017, 5334018, 5334019, 5334020 },
-        [4] = { 5334037, 5334038, 5334040, 5334041, 5334043, 5334044, 5334046, 5334047, 5334049, 5334050, 5334052, 5334053 },
-    },
-    ScholomanceOLD = {
-        [1] = { 5332424, 5332428, 5332429, 5332430, 5332431, 5332432, 5332433, 5332434, 5332435, 5332425, 5332426, 5332427 },
-        [2] = { 5332436, 5332440, 5332441, 5332442, 5332443, 5332444, 5332445, 5332446, 5332447, 5332437, 5332438, 5332439 },
-        [3] = { 5332448, 5332452, 5332453, 5332454, 5332455, 5332456, 5332457, 5332458, 5332459, 5332449, 5332450, 5332451 },
-        [4] = { 5332460, 5332464, 5332465, 5332466, 5332467, 5332468, 5332469, 5332470, 5332471, 5332461, 5332462, 5332463 },
-    },
-    ShadowfangKeep = {
-        [1] = { 448226, 448230, 448231, 448232, 448233, 448234, 448235, 448236, 448237, 448227, 448228, 448229 },
-        [2] = { 448238, 448242, 448243, 448244, 448245, 448246, 448247, 448248, 448249, 448239, 448240, 448241 },
-        [3] = { 448250, 448254, 448255, 448256, 448257, 448258, 448259, 448260, 448261, 448251, 448252, 448253 },
-        [4] = { 448262, 448266, 448267, 448268, 448269, 448270, 448271, 448272, 448273, 448263, 448264, 448265 },
-        [5] = { 448274, 448278, 448279, 448280, 448281, 448282, 448283, 448284, 448285, 448275, 448276, 448277 },
-        [6] = { 448286, 448290, 448291, 448292, 448293, 448294, 448295, 448296, 448297, 448287, 448288, 448289 },
-        [7] = { 448298, 448302, 448303, 448304, 448305, 448306, 448307, 448308, 448309, 448299, 448300, 448301 },
-    },
-    Stratholme = {
-        [1] = { 448322, 448326, 448327, 448328, 448329, 448330, 448331, 448332, 448333, 448323, 448324, 448325 },
-        [2] = { 448334, 448338, 448339, 448340, 448341, 448342, 448343, 448344, 448345, 448335, 448336, 448337 },
-    },
-    TheDeadmines = {
-        [1] = { 449591, 449595, 449596, 449597, 449598, 449599, 449600, 449601, 449602, 449592, 449593, 449594 },
-        [2] = { 449603, 449607, 449608, 449609, 449610, 449611, 449612, 449613, 449614, 449604, 449605, 449606 },
-    },
-    TheStockade = {
-        [1] = { 455959, 455963, 455964, 455965, 455966, 455967, 455968, 455969, 455970, 455960, 455961, 455962 },
-    },
-    TheTempleOfAtalHakkar = {
-        [1] = { 452514, 452518, 452519, 452520, 452521, 452522, 452523, 452524, 452525, 452515, 452516, 452517 },
-    },
-    Uldaman = {
-        [1] = { 448430, 448434, 448435, 448436, 448437, 448438, 448439, 448440, 448441, 448431, 448432, 448433 },
-        [2] = { 448442, 448446, 448447, 448448, 448449, 448450, 448451, 448452, 448453, 448443, 448444, 448445 },
-    },
-    WailingCaverns = {
-        [1] = { 448454, 448458, 448459, 448460, 448461, 448462, 448463, 448464, 448465, 448455, 448456, 448457 },
-    },
-    ZulFarrak = {
-        [1] = { 449820, 449824, 449825, 449826, 449827, 449828, 449829, 449830, 449831, 449821, 449822, 449823 },
-    },
-}
+local function clamp(x, low, high) return math.max(low, math.min(x, high)) end
 
-local referenceMaps = {
-    ["blackfathom-deeps"] = { referenceTiles.BlackfathomDeeps, 1, 3 },
-    ["blackrock-depths"] = { referenceTiles.BlackrockDepths, 1, 2 },
-    ["deadmines"] = { referenceTiles.TheDeadmines, 1, 2 },
-    ["dm-east"] = { referenceTiles.DireMaul, 5, 6 },
-    ["dm-north"] = { referenceTiles.DireMaul, 1, 1 },
-    ["dm-west"] = { referenceTiles.DireMaul, 2, 4 },
-    ["gnomeregan"] = { referenceTiles.Gnomeregan, 1, 4 },
-    ["lbrs"] = { referenceTiles.BlackrockSpire, 1, 7 },
-    ["maraudon"] = { referenceTiles.Maraudon, 1, 2 },
-    ["ragefire-chasm"] = { referenceTiles.Ragefire, 1, 1 },
-    ["razorfen-downs"] = { referenceTiles.RazorfenDowns, 1, 1 },
-    ["razorfen-kraul"] = { referenceTiles.RazorfenKraul, 1, 1 },
-    ["scholomance"] = { referenceTiles.ScholomanceOLD, 1, 4 },
-    ["shadowfang-keep"] = { referenceTiles.ShadowfangKeep, 1, 7 },
-    ["sm-armory"] = { referenceTiles.ScarletMonasteryOLD, 3, 3 },
-    ["sm-cathedral"] = { referenceTiles.ScarletMonasteryOLD, 4, 4 },
-    ["sm-graveyard"] = { referenceTiles.ScarletMonasteryOLD, 1, 1 },
-    ["sm-library"] = { referenceTiles.ScarletMonasteryOLD, 2, 2 },
-    ["stockade"] = { referenceTiles.TheStockade, 1, 1 },
-    ["stratholme"] = { referenceTiles.Stratholme, 1, 2 },
-    ["sunken-temple"] = { referenceTiles.TheTempleOfAtalHakkar, 1, 1 },
-    ["ubrs"] = { referenceTiles.BlackrockSpire, 1, 7 },
-    ["uldaman"] = { referenceTiles.Uldaman, 1, 2 },
-    ["wailing-caverns"] = { referenceTiles.WailingCaverns, 1, 1 },
-    ["zulfarrak"] = { referenceTiles.ZulFarrak, 1, 1 },
-}
+local function cursor(frame)
+    local x, y = GetCursorPosition()
+    local scale = frame:GetEffectiveScale()
+    return x / scale - (frame:GetLeft() or 0), (frame:GetTop() or 0) - y / scale
+end
 
-local function getFloors(dungeon)
-    if not dungeon then return {} end
-    if dungeon.floors and #dungeon.floors > 0 then return dungeon.floors end
+local function place(frame)
+    local w, h = frame:GetSize()
+    if w <= 0 or h <= 0 then return end
+    local scale = math.min(w / WIDTH, h / HEIGHT) * frame.zoom
+    local aw, ah = WIDTH * scale, HEIGHT * scale
+    frame.x = aw <= w and (w - aw) / 2 or clamp(frame.x, w - aw, 0)
+    frame.y = ah <= h and (h - ah) / 2 or clamp(frame.y, h - ah, 0)
+    frame.art:SetScale(scale)
+    frame.art:SetPoint("TOPLEFT", frame, "TOPLEFT", frame.x / scale, -frame.y / scale)
+    -- Keep skulls the size of a normal map icon at every zoom.
+    for _, pin in ipairs(frame.pins) do pin:SetSize(20 / scale, 20 / scale) end
+    frame.playerArrow:SetSize(22 / scale, 22 / scale)
+end
 
-    local reference = referenceMaps[dungeon.id]
-    local floors = {}
-    if reference then
-        local tiles, first, last = unpack(reference)
-        for number = first, last do
-            floors[#floors + 1] = { tileIDs = tiles[number] }
+local function zoom(frame, delta)
+    local old = frame.zoom
+    frame.zoom = clamp(old * 1.35 ^ delta, 1, 4)
+    if frame.zoom == old then return end
+    local x, y = cursor(frame)
+    frame.x, frame.y = x - (x - frame.x) * frame.zoom / old, y - (y - frame.y) * frame.zoom / old
+    place(frame)
+end
+
+local function clearFloor(frame)
+    for _, texture in ipairs(frame.tiles) do texture:Hide(); texture:SetTexture(nil) end
+    for _, line in ipairs(frame.lines) do line:Hide() end
+    for _, pin in ipairs(frame.pins) do
+        if GameTooltip:IsOwned(pin) then GameTooltip:Hide() end
+        pin:Hide()
+        pin.boss, pin.members, pin.stop, pin.complete = nil, nil, nil, nil
+    end
+end
+
+local function playerPosition()
+    local self = DungeonMap
+    local frame = self.frame
+    local floor = self.dungeon and addon.floorData[self.dungeon.id].floors[self.index]
+    local arrow = frame.playerArrow
+    arrow:Hide()
+    if not (UnitPosition and floor and floor.toMap and self.dungeon == self.playerDungeon
+        and self.index == self.playerFloor) then return end
+    local north, west, _, instance = UnitPosition("player")
+    if not addon.IsReadableNumber(north) or not addon.IsReadableNumber(west)
+        or not addon.IsReadableNumber(instance) or instance ~= self.playerInstance then return end
+    local m = floor.toMap
+    local x, y = m[1]*north + m[2]*west + m[3], m[4]*north + m[5]*west + m[6]
+    if x < 0 or y < 0 or x > 1 or y > 1 then return end
+    local facing = GetPlayerFacing()
+    if not addon.IsReadableNumber(facing) then return end
+    local n, w = math.cos(facing), math.sin(facing)
+    arrow:SetPoint("CENTER", frame.art, "TOPLEFT", x * WIDTH, -y * HEIGHT)
+    arrow:SetRotation(-math.atan2((m[1]*n + m[2]*w)*WIDTH, -(m[4]*n + m[5]*w)*HEIGHT))
+    arrow:Show()
+end
+
+function DungeonMap:UpdatePlayer()
+    if not self.frame then return end
+    local active = self.dungeon ~= nil and self.playerDungeon == self.dungeon and self.playerFloor == self.index
+    self.frame.positionUpdates:SetShown(active)
+    playerPosition()
+end
+
+function DungeonMap:RefreshKills()
+    if not self.dungeon then return end
+    local instance = addon.floorData[self.dungeon.id].instance
+    for _, pin in ipairs(self.frame.pins) do
+        local complete = false
+        if pin.stop and self.playerInstance == instance then
+            for _, encounter in ipairs(pin.stop.encounters or {}) do
+                local locked = C_RaidLocks and C_RaidLocks.IsEncounterComplete
+                    and C_RaidLocks.IsEncounterComplete(instance, encounter, self.difficulty)
+                if killed[encounter] or ((not issecretvalue or not issecretvalue(locked)) and locked) then
+                    complete = true
+                    break
+                end
+            end
         end
+        pin.complete = complete
+        pin:SetAlpha(complete and .5 or 1)
     end
-    return floors
 end
 
-local function getNativeArt(mapID)
-    if type(mapID) ~= "number" or not C_Map
-        or not C_Map.GetMapArtLayers or not C_Map.GetMapArtLayerTextures then
-        return
+function DungeonMap:RecordKill(encounter)
+    if self.playerInstance and addon.IsReadableNumber(encounter) then
+        killed[encounter] = true
+        self:RefreshKills()
     end
+end
 
-    local layers = C_Map.GetMapArtLayers(mapID)
-    local layer = layers and layers[1]
-    if layer and layer.layerWidth > 0 and layer.layerHeight > 0
-        and layer.tileWidth > 0 and layer.tileHeight > 0 then
-        local columns = math.ceil(layer.layerWidth / layer.tileWidth)
-        local rows = math.ceil(layer.layerHeight / layer.tileHeight)
-        local textures = C_Map.GetMapArtLayerTextures(mapID, 1)
-        if textures and columns * rows <= 128 and #textures >= columns * rows then
-            return layer.layerWidth, layer.layerHeight, layer.tileWidth, layer.tileHeight, textures
+function DungeonMap:NewVisit()
+    wipe(killed)
+    self.chosenWing = nil
+end
+
+local function tile(frame, index, file, x, y, w, h, level, ...)
+    local texture = frame.tiles[index]
+    if not texture then
+        texture = frame.art:CreateTexture(nil, "ARTWORK")
+        frame.tiles[index] = texture
+    end
+    texture:SetDrawLayer("ARTWORK", clamp(level, -8, 7))
+    local loaded = texture:SetTexture(file)
+    texture:SetTexCoord(...)
+    texture:SetSize(w, h)
+    texture:SetPoint("TOPLEFT", frame.art, "TOPLEFT", x, -y)
+    texture:Show()
+    return loaded ~= false
+end
+
+local function mosaicTile(frame, i, part)
+    return tile(frame, i, part[1], part[2], part[3], part[4], part[5], part[14], unpack(part, 6, 13))
+end
+
+local function drawFloor(frame, floor)
+    local useFallback = floor.fallback and missingLegacyArt[GetLocale()]
+    if floor.tiles then
+        if not useFallback then
+            for i, file in ipairs(floor.tiles) do
+                local x, y = (i - 1) % 4 * 256, math.floor((i - 1) / 4) * 256
+                local w, h = math.min(256, WIDTH - x), math.min(256, HEIGHT - y)
+                if not tile(frame, i, file, x, y, w, h, 0, 0, w / 256, 0, h / 256) then
+                    if not floor.fallback then return false end
+                    useFallback = true
+                    break
+                end
+            end
         end
-    end
-end
-
-local function hideTiles(tiles, first)
-    for index = first, #tiles do
-        tiles[index]:Hide()
-        tiles[index]:SetTexture(nil)
-    end
-end
-
-local function drawTiles(view, width, height, tileWidth, tileHeight, textures)
-    local availableWidth, availableHeight = view:GetSize()
-    if not availableWidth or not availableHeight or availableWidth <= 0 or availableHeight <= 0 then
-        hideTiles(view.tiles, 1)
-        return false
-    end
-
-    local scale = math.min(availableWidth / width, availableHeight / height)
-    local offsetX = (availableWidth - width * scale) / 2
-    local offsetY = (availableHeight - height * scale) / 2
-    local columns = math.ceil(width / tileWidth)
-    local count = columns * math.ceil(height / tileHeight)
-
-    for index = 1, count do
-        local column = (index - 1) % columns
-        local row = math.floor((index - 1) / columns)
-        local x, y = column * tileWidth, row * tileHeight
-        local visibleWidth = math.min(tileWidth, width - x)
-        local visibleHeight = math.min(tileHeight, height - y)
-
-        local tile = view.tiles[index]
-        if not tile then
-            tile = view:CreateTexture(nil, "ARTWORK")
-            view.tiles[index] = tile
+        if useFallback then
+            for _, texture in ipairs(frame.tiles) do texture:Hide() end
+            local index = 0
+            for record in floor.fallback:gmatch("[^;]+") do
+                local part = {}
+                for value in record:gmatch("[^,]+") do part[#part + 1] = tonumber(value) end
+                index = index + 1
+                if not mosaicTile(frame, index, part) then return false end
+            end
         end
-        local fileID = textures[index]
-        if type(fileID) ~= "number" or fileID <= 0 or tile:SetTexture(fileID) == false then
-            hideTiles(view.tiles, 1)
-            return nil
+    elseif floor.pieces then
+        for i, part in ipairs(floor.pieces) do
+            if not mosaicTile(frame, i, part) then return false end
         end
-
-        tile:ClearAllPoints()
-        tile:SetPoint("TOPLEFT", view, "TOPLEFT", offsetX + x * scale, -offsetY - y * scale)
-        tile:SetSize(visibleWidth * scale, visibleHeight * scale)
-        tile:SetTexCoord(0, visibleWidth / tileWidth, 0, visibleHeight / tileHeight)
-        tile:Show()
-    end
-    hideTiles(view.tiles, count + 1)
-    return count
-end
-
-local function drawArt(view, floor)
-    local width, height, tileWidth, tileHeight, textures = getNativeArt(floor.mapID)
-    if textures then
-        local count = drawTiles(view, width, height, tileWidth, tileHeight, textures)
-        if count ~= nil then return count, false end
-    end
-    if floor.tileIDs then
-        return drawTiles(view, 1002, 668, 256, 256, floor.tileIDs), true
-    end
-end
-
-local function tilesLoaded(view, count)
-    for index = 1, count do
-        local tile = view.tiles[index]
-        if tile.IsObjectLoaded and not tile:IsObjectLoaded() then
-            return false
+    else
+        local index = 0
+        for _, path in ipairs(floor.paths) do
+            for i = 3, #path, 2 do
+                index = index + 1
+                local line = frame.lines[index] or frame.art:CreateLine(nil, "ARTWORK")
+                frame.lines[index] = line
+                line:SetThickness(3)
+                line:SetColorTexture(.83, .72, .49, .85)
+                line:SetStartPoint("TOPLEFT", frame.art, path[i - 2] * WIDTH, -path[i - 1] * HEIGHT)
+                line:SetEndPoint("TOPLEFT", frame.art, path[i] * WIDTH, -path[i + 1] * HEIGHT)
+                line:Show()
+            end
         end
     end
     return true
 end
 
-local function floorTitle(floor, index, count)
-    if not floor then
-        return "Dungeon map"
-    end
-    if floor.name then
-        if count > 1 then
-            return ("%s (%d/%d)"):format(floor.name, index, count)
+local function bossPin(frame, index)
+    local pin = frame.pins[index]
+    if pin then return pin end
+    pin = CreateFrame("Button", nil, frame.art)
+    frame.pins[index] = pin
+    pin:SetNormalTexture(137025) -- Blizzard's target-frame skull
+    pin:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
+    pin:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText(#self.members > 1 and (self.stop.label or "Bosses") or self.boss.name)
+        if #self.members > 1 then
+            for _, member in ipairs(self.members) do GameTooltip:AddLine(member.name) end
         end
-        return floor.name
-    end
-    if count > 1 then
-        return ("Floor %d / %d"):format(index, count)
-    end
-    return "Dungeon map"
+        if self.complete then GameTooltip:AddLine("Encounter complete", .55, .8, .55) end
+        GameTooltip:AddLine("Click for loot", 1, .82, 0)
+        GameTooltip:Show()
+    end)
+    pin:SetScript("OnLeave", function(self) if GameTooltip:IsOwned(self) then GameTooltip:Hide() end end)
+    pin:SetScript("OnClick", function(self)
+        if #self.members == 1 then addon.UI:Boss(self, self.boss)
+        else addon.UI:BossGroup(self, self.members, self.stop.label) end
+    end)
+    pin:EnableMouseWheel(true)
+    pin:SetScript("OnMouseWheel", function(_, delta) zoom(frame, delta) end)
+    return pin
 end
 
-function DungeonMap.Create(parent)
-    local panel = CreateFrame("Frame", nil, parent)
-    panel.floors = {}
-    panel.floorIndex = 1
-
-    local previous = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-    previous:SetSize(26, 20)
-    previous:SetPoint("TOPLEFT")
-    previous:SetText("<")
-
-    local nextFloor = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-    nextFloor:SetSize(26, 20)
-    nextFloor:SetPoint("TOPRIGHT")
-    nextFloor:SetText(">")
-
-    local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-    title:SetPoint("TOPLEFT", panel, "TOPLEFT", 30, -3)
-    title:SetPoint("TOPRIGHT", panel, "TOPRIGHT", -30, -3)
-    title:SetJustifyH("CENTER")
-
-    local view = CreateFrame("Frame", nil, panel)
-    view:SetPoint("TOPLEFT", panel, "TOPLEFT", 0, -23)
-    view:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", 0, 17)
-    view.tiles = {}
-
-    local shade = view:CreateTexture(nil, "BACKGROUND")
-    shade:SetAllPoints()
-    shade:SetColorTexture(0.035, 0.045, 0.055, 0.9)
-
-    local empty = view:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    empty:SetPoint("LEFT", 12, 0)
-    empty:SetPoint("RIGHT", -12, 0)
-    empty:SetJustifyH("CENTER")
-
-    local caption = panel:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
-    caption:SetPoint("BOTTOMLEFT", 1, 1)
-
-    local worldMap = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-    worldMap:SetSize(92, 18)
-    worldMap:SetPoint("BOTTOMRIGHT")
-    worldMap:SetText("World Map")
-    worldMap:SetScript("OnClick", function()
-        local floor = panel.floors[panel.floorIndex]
-        if not (floor and floor.mapID and WorldMapFrame and WorldMapFrame.SetMapID) then
-            return
+function DungeonMap:SetFloor(index)
+    local frame, dungeon = self.frame, self.dungeon
+    local floor = addon.floorData[dungeon.id].floors[index]
+    self.index = index
+    frame.zoom, frame.x, frame.y = 1, 0, 0
+    clearFloor(frame)
+    local drawn = drawFloor(frame, floor)
+    if not drawn then
+        for _, texture in ipairs(frame.tiles) do texture:Hide() end
+    end
+    frame.artNotice:SetShown(not drawn)
+    local name = dungeon.name
+    if floor.name ~= name then name = name .. " · " .. floor.name end
+    if floor.paths then name = name .. " (route sketch)" end
+    frame.dropdown:OverrideText(name)
+    local lookup, locations, count = {}, {}, 0
+    for _, boss in ipairs(dungeon.bosses) do lookup[boss.id] = boss end
+    for _, point in ipairs(floor.bosses) do
+        local key = ("%s:%s"):format(point[2], point[3])
+        local pin = locations[key]
+        if not pin then
+            count = count + 1
+            pin = bossPin(frame, count)
+            locations[key] = pin
+            pin.boss, pin.stop, pin.members = lookup[point[1]], point, {}
+            pin:SetPoint("CENTER", frame.art, "TOPLEFT", point[2] * WIDTH, -point[3] * HEIGHT)
+            pin:Show()
         end
-        if InCombatLockdown and InCombatLockdown() then
-            if type(print) == "function" then
-                print("Aeternum: cannot open the world map during combat.")
+        pin.members[#pin.members + 1] = lookup[point[1]]
+    end
+    place(frame)
+    self:RefreshKills()
+    self:UpdatePlayer()
+end
+
+local function bossFloor(dungeon, boss)
+    for index, floor in ipairs(addon.floorData[dungeon.id].floors) do
+        for _, point in ipairs(floor.bosses) do if point[1] == boss.id then return index end end
+    end
+end
+
+local function floorMenu(_, menu)
+    local dungeon = DungeonMap.dungeon
+    if not dungeon then return end
+    menu:SetScrollMode(310)
+    menu:CreateTitle(dungeon.name)
+    for i, floor in ipairs(addon.floorData[dungeon.id].floors) do
+        menu:CreateRadio(floor.name, function() return i == DungeonMap.index end, function()
+            DungeonMap.followInstance = nil
+            DungeonMap:SetFloor(i)
+        end)
+    end
+    local family = byInstance[addon.floorData[dungeon.id].instance]
+    if #family > 1 then
+        local wings = menu:CreateButton("Wings")
+        for _, wing in ipairs(family) do
+            wings:CreateButton(wing.name, function() DungeonMap:Open(wing) end)
+        end
+    end
+    menu:CreateDivider()
+    local bosses = menu:CreateButton("Boss loot")
+    bosses:SetScrollMode(300)
+    for _, boss in ipairs(dungeon.bosses) do
+        bosses:CreateButton(boss.name, function()
+            C_Timer.After(0, function()
+                if DungeonMap.dungeon ~= dungeon then return end
+                local index = bossFloor(dungeon, boss)
+                if index and index ~= DungeonMap.index then DungeonMap:SetFloor(index) end
+                addon.UI:Boss(DungeonMap.frame, boss)
+            end)
+        end)
+    end
+    if #dungeon.quests > 0 then addon.UI:QuestMenu(menu:CreateButton("Dungeon quests"), dungeon) end
+    if #dungeon.keys > 0 then addon.UI:Keys(menu:CreateButton("Dungeon keys"), dungeon) end
+    addon.UI:EntranceMenu(menu:CreateButton("Entrances"), dungeon)
+    menu:CreateButton("Return to zone map", function() DungeonMap:Close() end)
+end
+
+function DungeonMap:EnsureFrame()
+    if self.frame then return self.frame end
+    local map = addon.UI.map
+    local frame = CreateFrame("Frame", nil, map)
+    self.frame = frame
+    frame:Hide()
+    frame:SetAllPoints(map.ScrollContainer)
+    frame:SetFrameLevel(map.ScrollContainer:GetFrameLevel() + 1)
+    frame:SetClipsChildren(true)
+    frame:EnableMouse(true)
+    frame:EnableMouseWheel(true)
+    frame:RegisterForDrag("LeftButton")
+    local background = frame:CreateTexture(nil, "BACKGROUND")
+    background:SetAllPoints()
+    background:SetColorTexture(.055, .048, .04, 1)
+    frame.art = CreateFrame("Frame", nil, frame)
+    frame.art:SetSize(WIDTH, HEIGHT)
+    frame.art:EnableMouse(false)
+    frame.artNotice = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    frame.artNotice:SetPoint("BOTTOM", frame, "BOTTOM", 0, 8)
+    frame.artNotice:SetText("Floor artwork unavailable")
+    frame.artNotice:Hide()
+    frame.playerArrow = frame.art:CreateTexture(nil, "OVERLAY")
+    frame.playerArrow:SetTexture("Interface\\Minimap\\MinimapArrow")
+    frame.playerArrow:Hide()
+    frame.positionUpdates = CreateFrame("Frame", nil, frame)
+    frame.positionUpdates:Hide()
+    local elapsedPosition = 0
+    frame.positionUpdates:SetScript("OnUpdate", function(_, elapsed)
+        elapsedPosition = elapsedPosition + elapsed
+        if elapsedPosition >= .2 then elapsedPosition = 0; playerPosition() end
+    end)
+    frame.tiles, frame.lines, frame.pins = {}, {}, {}
+    frame.zoom, frame.x, frame.y = 1, 0, 0
+    frame.back = CreateFrame("Button", nil, frame)
+    frame.back:SetSize(28, 28)
+    frame.back:SetPoint("TOPLEFT", 5, -4)
+    frame.back:SetFrameLevel(frame.art:GetFrameLevel() + 3)
+    frame.back:SetNormalTexture("Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Up")
+    frame.back:SetPushedTexture("Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Down")
+    frame.back:SetScript("OnClick", function() self:Close() end)
+    frame.back:SetScript("OnEnter", function(button)
+        GameTooltip:SetOwner(button, "ANCHOR_RIGHT"); GameTooltip:SetText("Return to zone map"); GameTooltip:Show()
+    end)
+    frame.back:SetScript("OnLeave", function(button) if GameTooltip:IsOwned(button) then GameTooltip:Hide() end end)
+    frame.dropdown = CreateFrame("DropdownButton", nil, frame, "WowStyle1DropdownTemplate")
+    frame.dropdown:SetWidth(276)
+    frame.dropdown:SetFrameLevel(frame.back:GetFrameLevel())
+    frame.dropdown:SetPoint("LEFT", frame.back, "RIGHT", 3, 0)
+    frame.dropdown:SetupMenu(floorMenu)
+    frame:SetScript("OnMouseWheel", zoom)
+    frame:SetScript("OnDragStart", function()
+        local x, y = cursor(frame)
+        frame.dragX, frame.dragY = x - frame.x, y - frame.y
+        frame:SetScript("OnUpdate", function()
+            local cx, cy = cursor(frame)
+            frame.x, frame.y = cx - frame.dragX, cy - frame.dragY
+            place(frame)
+        end)
+    end)
+    frame:SetScript("OnDragStop", function() frame:SetScript("OnUpdate", nil) end)
+    frame:SetScript("OnMouseUp", function(_, button) if button == "RightButton" then self:Close() end end)
+    frame:SetScript("OnSizeChanged", place)
+    frame:SetScript("OnHide", function()
+        frame:SetScript("OnUpdate", nil)
+        clearFloor(frame)
+    end)
+    if RegisterGameMenuEscHandler then
+        RegisterGameMenuEscHandler(GameMenuEscPriority.AddOn, function()
+            if not self.dungeon then return false end
+            self:Close()
+            return true
+        end)
+    end
+    return frame
+end
+
+function DungeonMap:Open(dungeon, bossIndex, preferredFloor, entrance)
+    local frame = self:EnsureFrame()
+    local strata = addon.UI.map:GetFrameStrata()
+    frame:SetFrameStrata((strata == "FULLSCREEN" or strata == "FULLSCREEN_DIALOG") and "FULLSCREEN_DIALOG" or "DIALOG")
+    self.dungeon, self.followInstance, self.entrance = dungeon, nil, entrance
+    local boss = bossIndex and dungeon.bosses[bossIndex]
+    local index = preferredFloor or (boss and bossFloor(dungeon, boss)) or 1
+    frame:Show()
+    self:SetFloor(index)
+end
+
+function DungeonMap:Close()
+    self.dungeon, self.followInstance, self.entrance = nil, nil, nil
+    if self.frame then self.frame:Hide() end
+end
+
+function DungeonMap:IsInside(key)
+    return self.playerDungeon and self.playerDungeon.id == key
+end
+
+function DungeonMap:OpenInstance(onlyFollowing)
+    self.playerInstance, self.playerDungeon, self.playerFloor = nil, nil, nil
+    if not IsInInstance() or not GetInstanceInfo then self:UpdatePlayer(); return end
+    local name, _, difficulty, _, _, _, _, id = GetInstanceInfo()
+    if issecretvalue and issecretvalue(id) then self:UpdatePlayer(); return end
+    local wings = byInstance[id]
+    if not wings then self:UpdatePlayer(); return end
+    self.playerInstance = id
+    self.difficulty = addon.IsReadableNumber(difficulty) and difficulty or nil
+    local area = GetSubZoneText and GetSubZoneText()
+    if issecretvalue and issecretvalue(area) then area = nil end
+    if issecretvalue and issecretvalue(name) then name = nil end
+    local namedWing
+    for _, wing in ipairs(wings) do
+        if wing.name == name then namedWing = wing end
+    end
+    local match = area and area ~= "" and ("|" .. area .. "|")
+    local mapID = C_Map.GetBestMapForUnit("player")
+    if not addon.IsReadableNumber(mapID) then mapID = nil end
+    local choice, index, matches = nil, nil, 0
+    local mapWing, mapFloor, mapMatches = nil, nil, 0
+    for _, wing in ipairs(wings) do
+        if not namedWing or namedWing == wing then
+            for i, floor in ipairs(addon.floorData[wing.id].floors) do
+                if match and floor.zones:find(match, 1, true) then
+                    choice, index, matches = wing, i, matches + 1
+                end
+                if mapID and floor.mapID == mapID then mapWing, mapFloor, mapMatches = wing, i, mapMatches + 1 end
             end
-            return
-        end
-        ShowUIPanel(WorldMapFrame)
-        WorldMapFrame:SetMapID(floor.mapID)
-    end)
-
-    local function cancelLoadTimer()
-        if view.loadTimer then
-            view.loadTimer:Cancel()
-            view.loadTimer = nil
         end
     end
-
-    local function showUnavailable()
-        hideTiles(view.tiles, 1)
-        caption:SetText("")
-        empty:SetText(panel.dungeon and "Client floor map unavailable." or "Select a dungeon to view its map.")
-        empty:Show()
+    if matches ~= 1 then
+        local previous = self.chosenWing
+        if previous and addon.floorData[previous.id].instance ~= id then previous = nil end
+        if mapMatches == 1 then choice, index = mapWing, mapFloor
+        else choice, index = namedWing or (#wings == 1 and wings[1]) or previous, nil end
     end
-
-    local function render()
-        cancelLoadTimer()
-        local count = #panel.floors
-        local floor = panel.floors[panel.floorIndex]
-        previous:SetShown(count > 1)
-        nextFloor:SetShown(count > 1)
-        previous:SetEnabled(panel.floorIndex > 1)
-        nextFloor:SetEnabled(panel.floorIndex < count)
-        local hasWorldMap = floor and type(floor.mapID) == "number" and WorldMapFrame
-            and type(WorldMapFrame.SetMapID) == "function" and type(ShowUIPanel) == "function"
-        worldMap:SetShown(hasWorldMap and true or false)
-        title:SetText(floorTitle(floor, panel.floorIndex, count))
-
-        local drawn, isReference
-        if floor then drawn, isReference = drawArt(view, floor) end
-        if type(drawn) == "number" and drawn > 0 then
-            empty:Hide()
-            caption:SetText(isReference and "Legacy client reference" or "")
-            if C_Timer and C_Timer.NewTimer and not tilesLoaded(view, drawn) then
-                -- Loading is asynchronous even when SetTexture reports success.
-                view.loadTimer = C_Timer.NewTimer(5, function()
-                    view.loadTimer = nil
-                    if view:IsVisible() and not tilesLoaded(view, drawn) then
-                        showUnavailable()
-                    end
-                end)
-            end
-        elseif drawn == false then
-            -- Frame has not received layout bounds yet; wait for OnSizeChanged without flashing an error.
-            caption:SetText("")
-            empty:Hide()
-        else
-            showUnavailable()
+    if choice then
+        self.playerDungeon = choice
+        self.playerFloor = index or (#addon.floorData[choice.id].floors == 1 and 1 or nil)
+    end
+    self:UpdatePlayer()
+    local map = addon.UI.map
+    if not map or not map:IsShown() or (onlyFollowing and not self.followInstance) then return end
+    if choice then
+        if self.dungeon ~= choice or (index and self.index ~= index) then self:Open(choice, nil, index) end
+        self.followInstance = true
+        return
+    end
+    if self.followInstance then return end
+    -- Several wings share one instance ID. Let the player pick if the client
+    -- hasn't given a unique wing or floor name.
+    MenuUtil.CreateContextMenu(map, function(_, menu)
+        menu:CreateTitle("Choose a dungeon wing")
+        for _, wing in ipairs(wings) do
+            menu:CreateButton(wing.name, function() self.chosenWing = wing; self:OpenInstance() end)
         end
-    end
-
-    function panel:SetDungeon(dungeon)
-        if self.dungeon == dungeon then return end
-        self.dungeon = dungeon
-        self.floors = getFloors(dungeon)
-        self.floorIndex = 1
-        render()
-    end
-
-    previous:SetScript("OnClick", function()
-        panel.floorIndex = math.max(1, panel.floorIndex - 1)
-        render()
     end)
-    nextFloor:SetScript("OnClick", function()
-        panel.floorIndex = math.min(math.max(1, #panel.floors), panel.floorIndex + 1)
-        render()
-    end)
-    view:SetScript("OnSizeChanged", render)
-    panel:SetScript("OnShow", render)
-    panel:SetScript("OnHide", cancelLoadTimer)
-    render()
-    return panel
 end

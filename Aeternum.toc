@@ -1,15 +1,21 @@
 ## Interface: 16001
 ## Title: Aeternum
-## Notes: Dungeon maps, boss loot, trainers, quests, and entrance guidance for WoW Forever.
+## Notes: Dungeon maps, boss loot, trainers, quests, and minimap guidance for WoW Forever.
 ## Author: Ael
-## Version: 0.1.0
+## Version: 0.5.1
 ## X-WoW-Flavor: Forever
 ## SavedVariables: AeternumDB
+## SavedVariablesPerCharacter: AeternumTrainerDB, AeternumRouteDB
 
 Data.lua
+FloorData.lua
+ClassicTraining.lua
 Core.lua
+Quests.lua
+Trainers.lua
 Navigation.lua
 DungeonMap.lua
 UI.lua
 WorldMap.lua
 WorldMap.xml
+Main.lua
