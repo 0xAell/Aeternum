@@ -29,8 +29,9 @@ local function itemLabel(id, bags)
     return text
 end
 
-local function itemRows(menu, items, bags, pending)
-    for _, id in ipairs(items) do
+local function itemRows(menu, items, bags, pending, first, last)
+    for index = first or 1, last or #items do
+        local id = items[index]
         local row = menu:CreateButton(itemLabel(id, bags), function() showLink("item", id, addon.ItemName(id)) end)
         row:SetTooltip(function(tooltip) tooltip:SetItemByID(id) end)
         if pending and not addon.ItemCached(id) then
@@ -39,11 +40,28 @@ local function itemRows(menu, items, bags, pending)
     end
 end
 
+local lootSections = {
+    {"other", "Other recorded drops", "Players looted these items from this NPC. They may also drop elsewhere."},
+    {"encounter", "Encounter rolls", "Players rolled on these items during this encounter."},
+    {"guide", "Guide-listed drops", "Forever dungeon guides list these items. A matching player drop is unverified."},
+}
+
 function UI:Boss(owner, boss)
     local pending = {}
     local openMenu = menuAt(owner, boss.name, function(menu)
-        if #boss.loot == 0 then menu:CreateTitle("No recorded drops") end
-        itemRows(menu, boss.loot, false, pending)
+        if boss.event then menu:CreateTitle(boss.event .. " event") end
+        if #boss.loot == 0 then menu:CreateTitle("No documented drops") end
+        local parent, first = menu, 1
+        for _, section in ipairs(lootSections) do
+            local start = boss.lootSections and boss.lootSections[section[1]]
+            if start then
+                itemRows(parent, boss.loot, false, pending, first, start-1)
+                parent, first = menu:CreateButton(section[2]), start
+                parent:SetScrollMode(320)
+                parent:SetTooltip(function(tooltip) tooltip:SetText(section[3], nil, nil, nil, nil, true) end)
+            end
+        end
+        itemRows(parent, boss.loot, false, pending, first)
     end)
     if openMenu and next(pending) then
         local loot = {menu=openMenu, rows=pending}

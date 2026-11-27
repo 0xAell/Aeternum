@@ -1,6 +1,7 @@
 -- SPDX-License-Identifier: GPL-3.0-only
 -- Run from the repository root with Lua 5.1 (or LuaJIT) and the pinned source checkout.
-local source, output, entranceFile = ...
+local source, output, entranceFile, auditDir = ...
+auditDir = auditDir or "docs/boss-audit"
 assert(source and output and entranceFile, "Usage: lua tools/import_norgannon.lua SOURCE_DIR Data.lua ENTRANCES_LUA")
 
 local SOURCE_COMMIT = "d3d144a8b2d32ae7fb6a0390141f35b3aa55d216"
@@ -346,47 +347,61 @@ local function dungeonEntrances(id, row)
     return entrances
 end
 
--- Forever's new encounters also have named equipment in NPC drop records.
--- Keep a direct drop only when the item independently names the same NPC.
-local function extraDrops(npc, npcID, seen, loot)
-    for _, id in ipairs(keys(npc.drops)) do
-        local item = not seen[id] and db:Peek("items", id)
-        if item and (item.class == 2 or item.class == 4 or item.class == 9)
-            and item.drops and item.drops.npcs and item.drops.npcs[npcID] ~= nil and itemName(id) then
-            loot[#loot + 1] = id
-            seen[id] = true
-        end
+-- Keep the reviewed relationships in source order within each evidence section.
+local function auditRows(name, consume)
+    local file = assert(io.open(auditDir .. "/" .. name .. ".tsv"))
+    file:read("*l")
+    for line in file:lines() do
+        local fields = {}
+        for value in (line .. "\t"):gmatch("(.-)\t") do fields[#fields + 1] = value end
+        consume(fields)
     end
+    file:close()
 end
 
-local function bosses(row)
-    local result = {}
-    for _, sourceBoss in ipairs(row.bosses) do
-        local sourceNPC = sourceBoss.id and entity("npcs", sourceBoss.id)
-        if sourceNPC and sourceNPC.name then
-            local boss = {id = sourceBoss.id, name = sourceNPC.name, loot = {}}
-            local seen = {}
-            for _, itemID in ipairs(sourceBoss.loot or {}) do
-                if not seen[itemID] and itemName(itemID) then
-                    seen[itemID] = true
-                    boss.loot[#boss.loot + 1] = itemID
-                end
+local function auditedBosses()
+    local dungeons, byNPC = {}, {}
+    auditRows("bosses", function(row)
+        local dungeon, id, name, status = row[1], assert(tonumber(row[2])), row[3], row[4]
+        if status == "keep" or status == "add" then
+            local boss = {id=id, name=name, loot={}}
+            if row[7] ~= "" then boss.routeAlias = row[7] end
+            if row[8]:find("Scourge Invasion", 1, true) then boss.event = "Scourge Invasion" end
+            dungeons[dungeon] = dungeons[dungeon] or {}
+            table.insert(dungeons[dungeon], boss)
+            assert(not byNPC[id], name)
+            byNPC[id] = {boss=boss, dungeon=dungeon, featured={}, other={}, encounter={}, guide={}}
+        end
+    end)
+    auditRows("drops", function(row)
+        local group = row[5]
+        if group == "withheld" then return end
+        local b, id = assert(byNPC[tonumber(row[2])]), assert(tonumber(row[3]))
+        assert(b.dungeon == row[1] and row[4] ~= "", row[2])
+        table.insert(assert(b[group]), id)
+        items[id] = row[4]
+    end)
+    for _, record in pairs(byNPC) do
+        local boss = record.boss
+        for _, group in ipairs({"featured", "other", "encounter", "guide"}) do
+            if group ~= "featured" and #record[group] > 0 then
+                boss.lootSections = boss.lootSections or {}
+                boss.lootSections[group] = #boss.loot + 1
             end
-            if row.forever then extraDrops(sourceNPC, sourceBoss.id, seen, boss.loot) end
-            result[#result + 1] = boss
+            for _, id in ipairs(record[group]) do table.insert(boss.loot, id) end
         end
     end
-    return result
+    return dungeons
 end
 
 local function importDungeons(quests)
-    local dungeons = {}
+    local dungeons, bossLists = {}, auditedBosses()
     for _, id in ipairs(keys(db.instances)) do
         local row = db.instances[id]
         local name = dungeonName(row)
         if name and not row.raid and #(row.bosses or {}) > 0 then
             local dungeon = {
-                id = id, name = name, entrances = dungeonEntrances(id, row), bosses = bosses(row),
+                id = id, name = name, entrances = dungeonEntrances(id, row), bosses = assert(bossLists[id], id),
                 levelMin = row.levels and row.levels.min, levelMax = row.levels and row.levels.max,
                 size = row.size, note = row.note, keys = {}, quests = {},
             }

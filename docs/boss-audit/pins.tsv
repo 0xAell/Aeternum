@@ -1,0 +1,309 @@
+dungeon	npc	boss	floor	floor_name	ui_map	route_x	route_y	encounters	distinct_pulls_xy	builds_with_positions	median_offset_yd	ez_reference	ez_offset_yd	position_evidence	action	display_x	display_y
+alcaz-prison	255391	Overseer Wrex	1	Alcaz Prison		0.6504	0.3367	3403	3	1	15.0			within 35 yd	retain	0.6504	0.3367
+alcaz-prison	255702	Blazeroar	2	Maximum Security		0.6582	0.7086	3409	2	1	11.5			within 35 yd	retain	0.6582	0.7086
+alcaz-prison	255997	Tidemistress Ca'zass	1	Alcaz Prison		0.3389	0.6881	3410	1	1	5.1			within 35 yd	retain	0.3389	0.6881
+alcaz-prison	256236	The Questioner	1	Alcaz Prison		0.2461	0.1449	3415	1	1	7.1			within 35 yd	retain	0.2461	0.1449
+alcaz-prison	257016	Katerina the Cleaner	2	Maximum Security		0.3809	0.5344	3418	1	1	40.1			offset over 35 yd	estimate	0.3809	0.5344
+blackfathom-deeps	4829	Aku'mai	2	Moonshrine Sanctum	222	0.8593	0.865	2767,2891,2910	4	3	53.3	classic-spawn-reference	3.1	offset over 35 yd	estimate	0.8593	0.865
+blackfathom-deeps	4830	Old Serra'kis	3	The Forgotten Pool	223	0.5881	0.3077	2765,2912	3	2	38.1	classic-spawn-reference	5.3	offset over 35 yd	estimate	0.5881	0.3077
+blackfathom-deeps	4831	Lady Sarevess	1	The Pool of Ask'Ar	221	0.1119	0.3942	2699,2762,2915	2	2	7.8	classic-spawn-reference	10.9	within 35 yd	retain	0.1119	0.3942
+blackfathom-deeps	4832	Twilight Lord Kelris	2	Moonshrine Sanctum	222	0.5245	0.7801	2766,2825,2911	4	3	23.4	classic-spawn-reference	22.0	within 35 yd	retain	0.5245	0.7801
+blackfathom-deeps	4887	Ghamoo-ra	1	The Pool of Ask'Ar	221	0.3301	0.6068	2697,2761,2916	2	2	3.8	classic-spawn-reference	3.0	within 35 yd	retain	0.3301	0.6068
+blackfathom-deeps	6243	Gelihast	1	The Pool of Ask'Ar	221	0.545	0.5692	2704,2763,2914	2	3	45.5	classic-spawn-reference	22.5	offset over 35 yd	estimate	0.545	0.5692
+blackfathom-deeps	12902	Lorgus Jett	2	Moonshrine Sanctum	222	0.3806	0.3959	2710,2764,2913	0	0		classic-spawn-reference	115.4	route only	estimate	0.3806	0.3959
+blackmaw-hold	247195	Withermaw	2	Festering Grotto		0.2344	0.4773	3315	1	1	97.0			offset over 35 yd	estimate	0.2344	0.4773
+blackmaw-hold	247198	Bonesnout the Unbroken	1	Blackmaw Hold		0.6387	0.5769	3322	1	1	131.1			offset over 35 yd	estimate	0.6387	0.5769
+blackmaw-hold	247206	Impaan the Imprisoner	1	Blackmaw Hold		0.4307	0.7116	3316	1	1	72.8			offset over 35 yd	hide		
+blackmaw-hold	247207	Blackmaw Behemoth	5	Depths of the Burrow		0.5645	0.3514	3323	1	1	14.3			within 35 yd	retain	0.5645	0.3514
+blackmaw-hold	247209	Elder Shaman Bloodmane	4	Depths of the Elders		0.4307	0.3529	3327	1	1	17.6			within 35 yd	retain	0.4307	0.3529
+blackmaw-hold	247231	Unbound Spirit	3	Depths of the Fallen Grove		0.5547	0.3031	3336	1	1	16.0			within 35 yd	retain	0.5547	0.3031
+blackmaw-hold	247234	Varrox Bleakhoof	6	Depths of Forbidden Magic		0.582	0.5681	3334	1	1	11.7			within 35 yd	retain	0.582	0.5681
+blackmaw-hold	250034	Tunnelweb Matriarch							0	0				unplaced			
+blackmaw-hold	269104	Moontouched Wanderer	1	Blackmaw Hold		0.668	0.675		0	0				route only	estimate	0.668	0.675
+blackmaw-hold	269111	Gortek the Apprentice	6	Depths of Forbidden Magic		0.5967	0.6501		0	0				route only	estimate	0.5967	0.6501
+blackrock-depths	8923	Panzor the Invincible	2	Shadowforge City	243	0.4761	0.3441		0	0				route only	estimate	0.4761	0.3441
+blackrock-depths	8929	Princess Moira Bronzebeard	2	Shadowforge City	243	0.915	0.146	2789	0	0				route only	estimate	0.915	0.146
+blackrock-depths	8983	Golem Lord Argelmach	2	Shadowforge City	243	0.3628	0.6456	237	0	0				route only	estimate	0.3628	0.6456
+blackrock-depths	9016	Bael'Gar	1	Detention Block	242	0.2532	0.5258	235	0	0				route only	estimate	0.2532	0.5258
+blackrock-depths	9017	Lord Incendius	1	Detention Block	242	0.5636	0.3093	232	0	0				route only	estimate	0.5636	0.3093
+blackrock-depths	9018	High Interrogator Gerstahn	1	Detention Block	242	0.4757	0.921	227	0	0				route only	estimate	0.4757	0.921
+blackrock-depths	9019	Emperor Dagran Thaurissan	2	Shadowforge City	243	0.9165	0.1145	2790	0	0				route only	estimate	0.9165	0.1145
+blackrock-depths	9024	Pyromancer Loregrain	2	Shadowforge City	243	0.5405	0.9677	231	0	0				route only	estimate	0.5405	0.9677
+blackrock-depths	9025	Lord Roccor	1	Detention Block	242	0.5576	0.6691	228	0	0				route only	estimate	0.5576	0.6691
+blackrock-depths	9027	Gorosh the Dervish	1	Detention Block	242	0.5089	0.6547	230	0	0				route only	estimate	0.5089	0.6547
+blackrock-depths	9028	Grizzle	1	Detention Block	242	0.5089	0.6547	230	0	0				route only	estimate	0.5089	0.6547
+blackrock-depths	9029	Eviscerator	1	Detention Block	242	0.5089	0.6547	230	0	0				route only	estimate	0.5089	0.6547
+blackrock-depths	9030	Ok'thor the Breaker	1	Detention Block	242	0.5089	0.6547	230	0	0				route only	estimate	0.5089	0.6547
+blackrock-depths	9031	Anub'shiah	1	Detention Block	242	0.5089	0.6547	230	0	0				route only	estimate	0.5089	0.6547
+blackrock-depths	9032	Hedrum the Creeper	1	Detention Block	242	0.5089	0.6547	230	0	0				route only	estimate	0.5089	0.6547
+blackrock-depths	9033	General Angerforge	2	Shadowforge City	243	0.3648	0.833	236	0	0				route only	estimate	0.3648	0.833
+blackrock-depths	9039	Doom'rel	2	Shadowforge City	243	0.5357	0.2446	243	0	0				route only	estimate	0.5357	0.2446
+blackrock-depths	9041	Warder Stilgiss	2	Shadowforge City	243	0.6025	0.6603	233	0	0				route only	estimate	0.6025	0.6603
+blackrock-depths	9042	Verek	2	Shadowforge City	243	0.6025	0.6603	233	0	0				route only	estimate	0.6025	0.6603
+blackrock-depths	9056	Fineous Darkvire	1	Detention Block	242	0.6339	0.2069	234	0	0				route only	estimate	0.6339	0.2069
+blackrock-depths	9156	Ambassador Flamelash	2	Shadowforge City	243	0.5415	0.4832	242	0	0				route only	estimate	0.5415	0.4832
+blackrock-depths	9319	Houndmaster Grebmar	1	Detention Block	242	0.5285	0.5815	229	0	0				route only	estimate	0.5285	0.5815
+blackrock-depths	9476	Watchman Doomgrip	2	Shadowforge City	243	0.6113	0.6764	2791	0	0				route only	estimate	0.6113	0.6764
+blackrock-depths	9499	Plugger Spazzring	2	Shadowforge City	243	0.4775	0.6574	241	0	0				route only	estimate	0.4775	0.6574
+blackrock-depths	9502	Phalanx	2	Shadowforge City	243	0.5283	0.6208	239	0	0				route only	estimate	0.5283	0.6208
+blackrock-depths	9537	Hurley Blackbreath	2	Shadowforge City	243	0.5132	0.6735	238	0	0				route only	estimate	0.5132	0.6735
+blackrock-depths	9543	Ribbly Screwspigot	2	Shadowforge City	243	0.4961	0.6325	240	0	0				route only	estimate	0.4961	0.6325
+blackrock-depths	9938	Magmus	2	Shadowforge City	243	0.8032	0.1159	244	0	0				route only	estimate	0.8032	0.1159
+city-of-dalaran	245999	Arcane Anomaly	1	City of Dalaran		0.5322	0.8375	3298	2	2	10.1			within 35 yd	retain	0.5322	0.8375
+city-of-dalaran	246003	Fel Ancient	1	City of Dalaran		0.5186	0.5534	3299	2	2	5.8			within 35 yd	retain	0.5186	0.5534
+city-of-dalaran	246008	Mana Devourer	1	City of Dalaran		0.4141	0.7262	3300	2	2	3.4			within 35 yd	retain	0.4141	0.7262
+city-of-dalaran	246016	Arcanic Enigma	1	City of Dalaran		0.6738	0.5051	3301	2	2	19.1			within 35 yd	retain	0.6738	0.5051
+city-of-dalaran	246017	Unstable Sentinel	1	City of Dalaran		0.6152	0.4187	3302	2	2	4.1			within 35 yd	retain	0.6152	0.4187
+city-of-dalaran	246020	Shade of the Archmage	1	City of Dalaran		0.5127	0.2196	3303	2	2	52.0			offset over 35 yd	estimate	0.5127	0.2196
+city-of-dalaran	246931	Mana Wraith						3312	0	0				unplaced			
+city-of-dalaran	247032	Lyn the Ignored	2	The Underbelly		0.6855	0.1757	3310	1	1	17.8			within 35 yd	retain	0.6855	0.1757
+city-of-dalaran	247126	Atrexis the Grave Knight	2	The Underbelly		0.5371	0.5124	3311	2	2	32.5			within 35 yd	retain	0.5371	0.5124
+deadmines	639	Edwin VanCleef	2	Ironclad Cove	292	0.6067	0.4487	2747	3	3	3.4	classic-spawn-reference	3.4	within 35 yd	retain	0.6067	0.4487
+deadmines	641	Goblin Woodcarver							0	0				omit			
+deadmines	642	Sneed's Shredder	1	Deadmines	291	0.5025	0.8664	2742	6	3	17.5			within 35 yd	retain	0.5025	0.8664
+deadmines	643	Sneed	1	Deadmines	291	0.5025	0.8664	2742	6	3	17.5			within 35 yd	retain	0.5025	0.8664
+deadmines	644	Rhahk'Zor	1	Deadmines	291	0.3653	0.6173	2741	5	3	7.9	classic-spawn-reference	11.9	within 35 yd	retain	0.3653	0.6173
+deadmines	645	Cookie	2	Ironclad Cove	292	0.6758	0.4012	2746	2	2	8.9	classic-spawn-reference	4.8	within 35 yd	retain	0.6758	0.4012
+deadmines	646	Mr. Smite	2	Ironclad Cove	292	0.5527	0.2548	2745	5	3	34.5	classic-spawn-reference	5.2	within 35 yd	retain	0.5527	0.2548
+deadmines	647	Captain Greenskin	2	Ironclad Cove	292	0.6055	0.3765	2744	4	3	16.7	classic-spawn-reference	13.9	within 35 yd	retain	0.6055	0.3765
+deadmines	1763	Gilnid	1	Deadmines	291	0.6121	0.5957	2743	5	3	10.6	classic-spawn-reference	9.3	within 35 yd	retain	0.6121	0.5957
+deadmines	3586	Miner Johnson	1	Deadmines	291	0.5266	0.5019	3676	0	0		classic-spawn-reference	1.3	route only	estimate	0.5266	0.5019
+dm-east	11490	Zevrim Thornhoof	2	The Shrine of Eldretharr	240	0.5716	0.7414	343	1	1	6.1	spawn-reference	4.4	within 35 yd	retain	0.5716	0.7414
+dm-east	11492	Alzzin the Wildshaper	2	The Shrine of Eldretharr	240	0.5584	0.2842	346	2	1	9.4	spawn-reference	10.6	within 35 yd	retain	0.5584	0.2842
+dm-east	13280	Hydrospawn	2	The Shrine of Eldretharr	240	0.5333	0.7152	344	1	1	18.0	spawn-reference	19.8	within 35 yd	retain	0.5333	0.7152
+dm-east	14327	Lethtendris	1	Warpwood Quarter	239	0.4397	0.4773	345	1	1	8.5	spawn-reference	10.9	within 35 yd	retain	0.4397	0.4773
+dm-east	14354	Pusillin	1	Warpwood Quarter	239	0.7839	0.4493	2792	1	1	19.9	spawn-reference	534.4	within 35 yd	retain	0.7839	0.4493
+dm-north	11501	King Gordok	1	Gordok Commons	235	0.3164	0.2648	368	0	0				route only	estimate	0.3164	0.2648
+dm-north	14321	Guard Fengus	1	Gordok Commons	235	0.495	0.7781	364	0	0		spawn-reference	31.9	route only	estimate	0.495	0.7781
+dm-north	14322	Stomper Kreeg	1	Gordok Commons	235	0.6078	0.6808	363	0	0		spawn-reference	25.0	route only	estimate	0.6078	0.6808
+dm-north	14323	Guard Slip'kik	1	Gordok Commons	235	0.2615	0.5566	365	0	0		spawn-reference	33.5	route only	estimate	0.2615	0.5566
+dm-north	14324	Cho'Rush the Observer	1	Gordok Commons	235	0.32	0.304	367	0	0				route only	estimate	0.32	0.304
+dm-north	14325	Captain Kromcrush	1	Gordok Commons	235	0.3174	0.4998	366	0	0		run-video	42.0	route only	estimate	0.3174	0.4998
+dm-north	14326	Guard Mol'dar	1	Gordok Commons	235	0.6946	0.7571	362	0	0		spawn-reference	6.6	route only	estimate	0.6946	0.7571
+dm-west	11467	Tsu'zee	2	Court of the Highborne	237	0.3291	0.216	2794	0	0		spawn-reference	24.1	route only	estimate	0.3291	0.216
+dm-west	11486	Prince Tortheldrin	3	Prison of Immol'Thar	238	0.616	0.2296	361	0	0		spawn-reference	13.2	route only	estimate	0.616	0.2296
+dm-west	11487	Magister Kalendris	2	Court of the Highborne	237	0.3354	0.4454	348	0	0		spawn-reference	20.5	route only	estimate	0.3354	0.4454
+dm-west	11488	Illyanna Ravenoak	1	Capital Gardens	236	0.2087	0.7794	347	0	0		spawn-reference	12.1	route only	estimate	0.2087	0.7794
+dm-west	11489	Tendris Warpwood	1	Capital Gardens	236	0.3318	0.531	350	0	0		spawn-reference	0.2	route only	estimate	0.3318	0.531
+dm-west	11496	Immol'thar	3	Prison of Immol'Thar	238	0.3477	0.5727	349	0	0		spawn-reference	2.5	route only	estimate	0.3477	0.5727
+dm-west	14506	Lord Hel'nurath	3	Prison of Immol'Thar	238	0.36	0.605	2793	0	0				route only	estimate	0.36	0.605
+dm-west	14690	Revanchion							0	0				unplaced			
+drowned-city	258905	Zul'Alai	1	The Drowned City		0.7178	0.5622	3474	4	2	18.8			within 35 yd	retain	0.7178	0.5622
+drowned-city	258924	Var'Taka	1	The Drowned City		0.5146	0.7057	3475	3	2	41.1			offset over 35 yd	estimate	0.5146	0.7057
+drowned-city	260042	Captain Dreadrise	1	The Drowned City		0.5449	0.3602	3476	4	2	10.3			within 35 yd	retain	0.5449	0.3602
+drowned-city	260202	Deathless Marrow							0	0				unplaced			
+drowned-city	260213	Deathless Guardians	1	The Drowned City		0.3467	0.5168	3478	1	2	1.2			within 35 yd	retain	0.3467	0.5168
+drowned-city	260243	Min'loth the Serpent	1	The Drowned City		0.2002	0.5051	3479	3	2	16.5			within 35 yd	retain	0.2002	0.5051
+drowned-city	260274	Min'loth the Serpent						3479	0	0				alias			
+drowned-city	260468	"Pyromancer" Braxton	1	The Drowned City		0.5156	0.347		0	0				route only	estimate	0.5156	0.347
+drowned-city	263742	Zin'aka							0	0				candidate			
+drowned-city	263886	Primeval Elemental	2	Ataal'Byzal		0.6719	0.5578	3511	1	2	17.1			within 35 yd	retain	0.6719	0.5578
+drowned-city	264172	Umbra							0	0				unplaced			
+drowned-city	264177	Gill	1	The Drowned City		0.6016	0.6164		0	0				route only	estimate	0.6016	0.6164
+excavation-site-wetlands	260322	Saltspine	1	Excavation Site: Wetlands		0.5469	0.3953	3480	1	1	80.9			offset over 35 yd	estimate	0.5469	0.3953
+excavation-site-wetlands	260325	Shadetooth	1	Excavation Site: Wetlands		0.3174	0.4714	3481	1	1	25.2			within 35 yd	retain	0.3174	0.4714
+excavation-site-wetlands	260326	Relic Guardian	1	Excavation Site: Wetlands		0.3369	0.6589	3482	1	1	10.1			within 35 yd	retain	0.3369	0.6589
+excavation-site-wetlands	260808	Highland Horror	1	Excavation Site: Wetlands		0.0811	0.3734	3644	0	0				route only	estimate	0.0811	0.3734
+gnomeregan	6228	Dark Iron Ambassador	4	Tinkers' Court	229	0.277	0.6259		0	0				route only	estimate	0.277	0.6259
+gnomeregan	6229	Crowd Pummeler 9-60	3	Launch Bay	228	0.4331	0.8811	2771,2899	1	1	10.3			within 35 yd	retain	0.4331	0.8811
+gnomeregan	6235	Electrocutioner 6000	2	The Dormitory	227	0.2443	0.6798	2770,2927	2	2	7.3			within 35 yd	retain	0.2443	0.6798
+gnomeregan	7079	Viscous Fallout	2	The Dormitory	227	0.7589	0.4599	2769,2928	2	2	46.3			offset over 35 yd	estimate	0.7589	0.4599
+gnomeregan	7361	Grubbis	1	The Hall of Gears	226	0.7747	0.6708	2768,2925	2	2	22.0			within 35 yd	retain	0.7747	0.6708
+gnomeregan	7800	Mekgineer Thermaplugg	4	Tinkers' Court	229	0.3123	0.2962	2772,2940	2	2	2.4			within 35 yd	retain	0.3123	0.2962
+hall-of-thanes	261306	Faldrim Anvilmar	1	The Hall of Thanes		0.5029	0.6662	3493	1	1	12.4			within 35 yd	retain	0.5029	0.6662
+hall-of-thanes	261311	Plunder	1	The Hall of Thanes		0.5088	0.5183	3494	1	1	12.6			within 35 yd	retain	0.5088	0.5183
+hall-of-thanes	261316	Magmatus	1	The Hall of Thanes		0.7207	0.4729	3495	1	1	9.8			within 35 yd	retain	0.7207	0.4729
+hall-of-thanes	261319	Durgen Dirgehammer	1	The Hall of Thanes		0.5078	0.164	3496	1	1	25.1			within 35 yd	retain	0.5078	0.164
+kroldok-stronghold	258964	Nar'gurk	1	Krol'dok Stronghold		0.374	0.5725	3449	3	3	3.7			within 35 yd	retain	0.374	0.5725
+kroldok-stronghold	258966	Slavecrusher Grox	1	Krol'dok Stronghold		0.2939	0.7365	3450	3	3	26.6			within 35 yd	retain	0.2939	0.7365
+kroldok-stronghold	258968	Overlord Mugg	1	Krol'dok Stronghold		0.6797	0.1523	3451	3	3	18.5			within 35 yd	retain	0.6797	0.1523
+kroldok-stronghold	258972	Twilight Commander Zarmok	1	Krol'dok Stronghold		0.415	0.716	3452	3	3	14.6			within 35 yd	retain	0.415	0.716
+kroldok-stronghold	259281	War Handler Ashka	1	Krol'dok Stronghold		0.6299	0.5534	3453	3	3	45.4			offset over 35 yd	estimate	0.6299	0.5534
+kroldok-stronghold	264773	Bossman Toof	1	Krol'dok Stronghold		0.6113	0.4495		0	0				route only	estimate	0.6113	0.4495
+lbrs	9196	Highlord Omokk	3	Hordemar City	252	0.3857	0.5892	267	0	0				route only	estimate	0.3857	0.5892
+lbrs	9217	Spirestone Lord Magus							0	0				unplaced			
+lbrs	9218	Spirestone Battle Lord							0	0				unplaced			
+lbrs	9219	Spirestone Butcher	3	Hordemar City	252	0.4966	0.5771		0	0				route only	estimate	0.4966	0.5771
+lbrs	9236	Shadow Hunter Vosh'gajin	2	Skitterweb Tunnels	251	0.555	0.6977	268	0	0				route only	estimate	0.555	0.6977
+lbrs	9237	War Master Voone	2	Skitterweb Tunnels	251	0.5234	0.549	269	0	0				route only	estimate	0.5234	0.549
+lbrs	9568	Overlord Wyrmthalak	6	Chamber of Battle	255	0.5758	0.6093	275	0	0				route only	estimate	0.5758	0.6093
+lbrs	9596	Bannok Grimaxe	4	Hall of Blackhand	253	0.4552	0.6083		0	0				route only	estimate	0.4552	0.6083
+lbrs	9718	Ghok Bashguud	5	Halycon's Lair	254	0.3415	0.6861		0	0				route only	estimate	0.3415	0.6861
+lbrs	9736	Quartermaster Zigris	5	Halycon's Lair	254	0.5394	0.8432	272	0	0				route only	estimate	0.5394	0.8432
+lbrs	10220	Halycon	5	Halycon's Lair	254	0.3782	0.8392	274	0	0				route only	estimate	0.3782	0.8392
+lbrs	10263	Burning Felguard							0	0				unplaced			
+lbrs	10268	Gizrul the Slavener	5	Halycon's Lair	254	0.414	0.7761	273	0	0				route only	estimate	0.414	0.7761
+lbrs	10376	Crystal Fang	2	Skitterweb Tunnels	251	0.6445	0.7233		0	0				route only	estimate	0.6445	0.7233
+lbrs	10584	Urok Doomhowl	4	Hall of Blackhand	253	0.4508	0.5452	271	0	0				route only	estimate	0.4508	0.5452
+lbrs	10596	Mother Smolderweb	2	Skitterweb Tunnels	251	0.6211	0.7408	270	0	0				route only	estimate	0.6211	0.7408
+maraudon	12201	Princess Theradras	2	Zaetar's Grave	281	0.2545	0.7894	429	3	3	47.0			offset over 35 yd	estimate	0.2545	0.7894
+maraudon	12203	Landslide	2	Zaetar's Grave	281	0.4125	0.4822	426	2	3	11.3			within 35 yd	retain	0.4125	0.4822
+maraudon	12225	Celebras the Cursed	2	Zaetar's Grave	281	0.2456	0.1385	425	1	3	6.2			within 35 yd	retain	0.2456	0.1385
+maraudon	12236	Lord Vyletongue	1	Caverns of Maraudon	280	0.3773	0.7011	424	1	3	4.6			within 35 yd	retain	0.3773	0.7011
+maraudon	12237	Meshlok the Harvester	1	Caverns of Maraudon	280	0.2361	0.6305		0	0				route only	estimate	0.2361	0.6305
+maraudon	12258	Razorlash	1	Caverns of Maraudon	280	0.1663	0.3392	423	2	3	2.2			within 35 yd	retain	0.1663	0.3392
+maraudon	13282	Noxxion	1	Caverns of Maraudon	280	0.3575	0.098	422	2	3	9.8			within 35 yd	retain	0.3575	0.098
+maraudon	13596	Rotgrip	2	Zaetar's Grave	281	0.4124	0.8145	428	3	3	20.7			within 35 yd	retain	0.4124	0.8145
+maraudon	13601	Tinkerer Gizlock	2	Zaetar's Grave	281	0.5384	0.6666	427	1	3	91.5			offset over 35 yd	estimate	0.5384	0.6666
+ragefire-chasm	11517	Oggleflint	1	Ragefire Chasm	213	0.6953	0.6484	2732	5	4	162.7	classic-spawn-reference	211.1	offset over 35 yd	pull	0.5654	0.3816
+ragefire-chasm	11518	Jergosh the Invoker	1	Ragefire Chasm	213	0.3418	0.8167	2734	5	4	16.5	classic-spawn-reference	16.7	within 35 yd	retain	0.3418	0.8167
+ragefire-chasm	11519	Bazzalan	1	Ragefire Chasm	213	0.4199	0.8635	2735	5	4	17.5	classic-spawn-reference	3.5	within 35 yd	retain	0.4199	0.8635
+ragefire-chasm	11520	Taragaman the Hungerer	1	Ragefire Chasm	213	0.4072	0.5737	2733	4	4	2.5	classic-spawn-reference	2.6	within 35 yd	retain	0.4072	0.5737
+razorfen-downs	7354	Ragglesnout	1	Razorfen Downs	300	0.528	0.6945	2783	0	0		classic-spawn-reference	10.5	route only	estimate	0.528	0.6945
+razorfen-downs	7355	Tuten'kash	1	Razorfen Downs	300	0.5918	0.3384	2780	4	2	22.4	classic-script-reference	3.1	within 35 yd	retain	0.5918	0.3384
+razorfen-downs	7356	Plaguemaw the Rotting	1	Razorfen Downs	300	0.4801	0.2007	2781	3	2	18.4	classic-script-reference	15.7	within 35 yd	retain	0.4801	0.2007
+razorfen-downs	7357	Mordresh Fire Eye	1	Razorfen Downs	300	0.8593	0.4491	2782	1	2	3.7	classic-spawn-reference	3.7	within 35 yd	retain	0.8593	0.4491
+razorfen-downs	7358	Amnennar the Coldbringer	1	Razorfen Downs	300	0.4431	0.6003	2785	1	2	6.7	classic-spawn-reference	6.7	within 35 yd	retain	0.4431	0.6003
+razorfen-downs	8567	Glutton	1	Razorfen Downs	300	0.3473	0.6721	2784	3	2	38.4	classic-spawn-reference	107.3	offset over 35 yd	estimate	0.3473	0.6721
+razorfen-downs	14686	Lady Falther'ess							0	0				unplaced			
+razorfen-kraul	4420	Overlord Ramtusk	1	Razorfen Kraul	301	0.5719	0.3085	2776	2	3	5.7	classic-spawn-reference	5.5	within 35 yd	retain	0.5719	0.3085
+razorfen-kraul	4421	Charlga Razorflank	1	Razorfen Kraul	301	0.2186	0.2965	2778	3	3	24.9	classic-spawn-reference	10.8	within 35 yd	retain	0.2186	0.2965
+razorfen-kraul	4422	Agathelos the Raging	1	Razorfen Kraul	301	0.0798	0.6826	2777	3	3	10.4	classic-spawn-reference	31.1	within 35 yd	retain	0.0798	0.6826
+razorfen-kraul	4424	Aggem Thorncurse	1	Razorfen Kraul	301	0.8074	0.515	2774	2	3	12.3	classic-spawn-reference	14.5	within 35 yd	retain	0.8074	0.515
+razorfen-kraul	4425	Blind Hunter	1	Razorfen Kraul	301	0.0988	0.2786		0	0		classic-spawn-reference	14.5	route only	estimate	0.0988	0.2786
+razorfen-kraul	4428	Death Speaker Jargba	1	Razorfen Kraul	301	0.8743	0.4178	2775	1	3	4.3	classic-spawn-reference	4.3	within 35 yd	retain	0.8743	0.4178
+razorfen-kraul	4438	Razorfen Spearhide	1	Razorfen Kraul	301	0.6118	0.2846		0	0				route only	estimate	0.6118	0.2846
+razorfen-kraul	4842	Earthcaller Halmgar	1	Razorfen Kraul	301	0.4831	0.4387		0	0		classic-spawn-reference	17.5	route only	estimate	0.4831	0.4387
+razorfen-kraul	6168	Roogug	1	Razorfen Kraul	301	0.6637	0.4417	2773	1	2	177.5	classic-spawn-reference	15.3	offset over 35 yd	estimate	0.6637	0.4417
+ruins-of-lordaeron	250483	Witherfang	1	Ruins of Lordaeron		0.7012	0.3953	3353	2	2	55.7			offset over 35 yd	estimate	0.7012	0.3953
+ruins-of-lordaeron	250631	The Abandoned	1	Ruins of Lordaeron		0.4082	0.5198	3357	2	2	10.0			within 35 yd	retain	0.4082	0.5198
+ruins-of-lordaeron	250657	Rath'mael	1	Ruins of Lordaeron		0.4639	0.6223	3354	2	2	12.3			within 35 yd	retain	0.4639	0.6223
+ruins-of-lordaeron	250660	The Baron	1	Ruins of Lordaeron		0.5889	0.7013	3355	3	2	13.8			within 35 yd	retain	0.5889	0.7013
+ruins-of-lordaeron	255699	Lordaeron Captain	1	Ruins of Lordaeron		0.3418	0.3777	3408	0	0				route only	estimate	0.3418	0.3777
+ruins-of-lordaeron	256035	Viktor the Vile	1	Ruins of Lordaeron		0.376	0.6442	3411	2	2	17.7			within 35 yd	retain	0.376	0.6442
+ruins-of-lordaeron	256097	Bjork	1	Ruins of Lordaeron		0.4023	0.3514	3412	3	2	30.5			within 35 yd	retain	0.4023	0.3514
+scholomance	1853	Darkmaster Gandling	4	Headmaster's Study	309	0.6914	0.2928	2801	1	1	6.7			within 35 yd	retain	0.6914	0.2928
+scholomance	10432	Vectus	2	Chamber of Summoning	307	0.5273	0.7613	2813	0	0				route only	estimate	0.5273	0.7613
+scholomance	10433	Marduk Blackpool	2	Chamber of Summoning	307	0.4443	0.6325	2809	0	0				route only	estimate	0.4443	0.6325
+scholomance	10502	Lady Illucia Barov	4	Headmaster's Study	309	0.6729	0.1537	2806	2	1	25.2			within 35 yd	retain	0.6729	0.1537
+scholomance	10503	Jandice Barov	3	The Upper Study	308	0.542	0.1391	2804	1	1	16.2			within 35 yd	retain	0.542	0.1391
+scholomance	10504	Lord Alexei Barov	4	Headmaster's Study	309	0.792	0.3016	2807	2	1	10.9			within 35 yd	retain	0.792	0.3016
+scholomance	10505	Instructor Malicia	3	The Upper Study	308	0.7266	0.7072	2803	1	1	19.4			within 35 yd	retain	0.7266	0.7072
+scholomance	10506	Kirtonos the Herald	2	Chamber of Summoning	307	0.4854	0.1054	2805	1	1	8.9			within 35 yd	retain	0.4854	0.1054
+scholomance	10507	The Ravenian	4	Headmaster's Study	309	0.6748	0.4861	2812	1	1	12.3			within 35 yd	retain	0.6748	0.4861
+scholomance	10508	Ras Frostwhisper	4	Headmaster's Study	309	0.4043	0.8126	2810	2	1	36.7			offset over 35 yd	estimate	0.4043	0.8126
+scholomance	10901	Lorekeeper Polkelt	3	The Upper Study	308	0.7236	0.224	2808	2	1	24.3			within 35 yd	retain	0.7236	0.224
+scholomance	11261	Doctor Theolen Krastinov	3	The Upper Study	308	0.8887	0.4612	2802	1	1	17.5			within 35 yd	retain	0.8887	0.4612
+scholomance	11622	Rattlegore	3	The Upper Study	308	0.3223	0.6398	2811	2	1	26.6			within 35 yd	retain	0.3223	0.6398
+scholomance	14516	Death Knight Darkreaver							0	0				unplaced			
+scholomance	14695	Lord Blackwood							0	0				unplaced			
+scholomance	16118	Kormok	4	Headmaster's Study	309	0.4238	0.7965	3055	0	0				route only	estimate	0.4238	0.7965
+shadowfang-keep	3864	Fel Steed							0	0				unplaced			
+shadowfang-keep	3872	Deathsworn Captain	7	The Wall Walk	316	0.5639	0.5079		0	0				route only	estimate	0.5639	0.5079
+shadowfang-keep	3886	Razorclaw the Butcher	2	Dining Hall	311	0.4973	0.2387	2749	2	2	6.9			within 35 yd	retain	0.4973	0.2387
+shadowfang-keep	3887	Baron Silverlaine	2	Dining Hall	311	0.3006	0.768	2750	2	2	4.1			within 35 yd	retain	0.3006	0.768
+shadowfang-keep	3914	Rethilgore	1	The Courtyard	310	0.6641	0.7219	2748	2	2	1.4			within 35 yd	retain	0.6641	0.7219
+shadowfang-keep	3927	Wolf Master Nandos	6	Lord Godfrey's Chamber	315	0.5622	0.6259	2754	2	2	7.2			within 35 yd	retain	0.5622	0.6259
+shadowfang-keep	4274	Fenrus the Devourer	4	Lower Observatory	313	0.5423	0.5291	2753	2	2	10.1			within 35 yd	retain	0.5423	0.5291
+shadowfang-keep	4275	Archmage Arugal	6	Lord Godfrey's Chamber	315	0.6803	0.3313	2755	2	2	18.1			within 35 yd	retain	0.6803	0.3313
+shadowfang-keep	4278	Commander Springvale	1	The Courtyard	310	0.2792	0.6045	2751	2	2	9.0			within 35 yd	retain	0.2792	0.6045
+shadowfang-keep	4279	Odo the Blindwatcher	7	The Wall Walk	316	0.5975	0.8192	2752	2	2	13.2			within 35 yd	retain	0.5975	0.8192
+shadowfang-keep	4627	Arugal's Voidwalker							0	0				unplaced			
+shapers-terrace	253201	Titanosaur	1	The Shaper's Terrace		0.1836	0.4422	3498	0	0				route only	estimate	0.1836	0.4422
+shapers-terrace	253214	Ravasaur Hunters	1	The Shaper's Terrace		0.6396	0.3807	3499	0	0				route only	estimate	0.6396	0.3807
+shapers-terrace	253218	Izha'Rel							0	0				superseded			
+shapers-terrace	261809	Nanaya	1	The Shaper's Terrace		0.7334	0.5695	3502	0	0				route only	estimate	0.7334	0.5695
+shapers-terrace	261812	Thunderhoof	1	The Shaper's Terrace		0.6338	0.7174	3500	0	0				route only	estimate	0.6338	0.7174
+shapers-terrace	261813	Venomridge	1	The Shaper's Terrace		0.4219	0.6691	3501	0	0				route only	estimate	0.4219	0.6691
+shapers-terrace	261974	Cinder	1	The Shaper's Terrace		0.1582	0.675	3503	0	0				route only	estimate	0.1582	0.675
+shapers-terrace	261993	King Op	1	The Shaper's Terrace		0.9326	0.8785	3504	0	0				route only	hide		
+shapers-terrace	262081	Bolt	1	The Shaper's Terrace		0.4414	0.6471	3505	0	0				route only	estimate	0.4414	0.6471
+shapers-terrace	262127	Direhorn Matriarch	1	The Shaper's Terrace		0.8369	0.5886	3507	0	0				route only	estimate	0.8369	0.5886
+shapers-terrace	262297	Snowtalon	1	The Shaper's Terrace		0.1328	0.1977	3597	0	0				route only	estimate	0.1328	0.1977
+shapers-terrace	272561	Vitrix	1	The Shaper's Terrace		0.5283	0.3119	3600	0	0				route only	estimate	0.5283	0.3119
+sm-armory	3975	Herod	1	Armory	304	0.7864	0.1078	448	2	2	3.7	classic-spawn-reference	0.1	within 35 yd	retain	0.7864	0.1078
+sm-cathedral	3976	Scarlet Commander Mograine	1	Cathedral	305	0.488	0.2785	450	5	2	24.3	classic-spawn-reference	4.0	within 35 yd	retain	0.488	0.2785
+sm-cathedral	3977	High Inquisitor Whitemane	1	Cathedral	305	0.488	0.2785	450	5	2	24.3	classic-spawn-reference	51.4	within 35 yd	retain	0.488	0.2785
+sm-cathedral	4542	High Inquisitor Fairbanks	1	Cathedral	305	0.5509	0.247	449	1	2	7.0	classic-spawn-reference	7.0	within 35 yd	retain	0.5509	0.247
+sm-graveyard	3983	Interrogator Vishas	1	Graveyard	302	0.7236	0.593	444	2	2	18.2			within 35 yd	retain	0.7236	0.593
+sm-graveyard	4543	Bloodmage Thalnos	1	Graveyard	302	0.2402	0.5637	2779	1	2	23.3	classic-spawn-reference	23.3	within 35 yd	retain	0.2402	0.5637
+sm-graveyard	6488	Fallen Champion	1	Graveyard	302	0.2207	0.5154		0	0				route only	estimate	0.2207	0.5154
+sm-graveyard	6489	Ironspine	1	Graveyard	302	0.4287	0.6852		0	0				route only	estimate	0.4287	0.6852
+sm-graveyard	6490	Azshir the Sleepless	1	Graveyard	302	0.2471	0.694		0	0				route only	estimate	0.2471	0.694
+sm-library	3974	Houndmaster Loksey	1	Library	303	0.293	0.8433	446	2	2	8.4	classic-spawn-reference	8.8	within 35 yd	retain	0.293	0.8433
+sm-library	6487	Arcanist Doan	1	Library	303	0.833	0.7467	447	2	2	7.4	classic-spawn-reference	0.5	within 35 yd	retain	0.833	0.7467
+stockade	1663	Dextren Ward	1	Stormwind Stockade	225	0.2192	0.2552	2759	2	1	17.4	classic-spawn-reference	44.1	within 35 yd	retain	0.2192	0.2552
+stockade	1666	Kam Deepfury	1	Stormwind Stockade	225	0.6922	0.2984	2757	1	1	9.5	classic-spawn-reference	2.8	within 35 yd	retain	0.6922	0.2984
+stockade	1696	Targorr the Dread	1	Stormwind Stockade	225	0.5021	0.2075	2756	2	1	45.1	classic-spawn-reference	91.5	offset over 35 yd	estimate	0.5021	0.2075
+stockade	1716	Bazil Thredd	1	Stormwind Stockade	225	0.8545	0.5123	2760	1	1	23.6	classic-spawn-reference	1.2	within 35 yd	retain	0.8545	0.5123
+stockade	1717	Hamhock	1	Stormwind Stockade	225	0.7828	0.4582	2758	1	1	8.2	classic-spawn-reference	0.6	within 35 yd	retain	0.7828	0.4582
+stockade	1720	Bruegal Ironknuckle	1	Stormwind Stockade	225	0.2873	0.4459		0	0		classic-spawn-reference	124.6	route only	estimate	0.2873	0.4459
+stratholme	10393	Skul	1	Crusader's Square	317	0.5728	0.6518	2799	0	0				route only	estimate	0.5728	0.6518
+stratholme	10435	Magistrate Barthilas	2	The Gauntlet	318	0.5684	0.1537	482	1	1	2.2			within 35 yd	retain	0.5684	0.1537
+stratholme	10436	Baroness Anastari	2	The Gauntlet	318	0.7415	0.4578	479	1	1	10.8			within 35 yd	retain	0.7415	0.4578
+stratholme	10437	Nerub'enkan	2	The Gauntlet	318	0.5751	0.4578	480	1	1	9.1			within 35 yd	retain	0.5751	0.4578
+stratholme	10438	Maleki the Pallid	2	The Gauntlet	318	0.677	0.2135	481	1	1	10.7			within 35 yd	retain	0.677	0.2135
+stratholme	10439	Ramstein the Gorger	2	The Gauntlet	318	0.4531	0.1959	483	1	1	41.1			offset over 35 yd	estimate	0.4531	0.1959
+stratholme	10440	Baron Rivendare	2	The Gauntlet	318	0.391	0.203	484	1	1	13.7			within 35 yd	retain	0.391	0.203
+stratholme	10516	The Unforgiven	1	Crusader's Square	317	0.731	0.179	472	0	0				route only	estimate	0.731	0.179
+stratholme	10558	Hearthsinger Forresten	1	Crusader's Square	317	0.6056	0.3231	473	0	0				route only	estimate	0.6056	0.3231
+stratholme	10808	Timmy the Cruel	1	Crusader's Square	317	0.35	0.2511	474	0	0				route only	estimate	0.35	0.2511
+stratholme	10809	Stonespine	2	The Gauntlet	318	0.6641	0.5105	2800	0	0				route only	estimate	0.6641	0.5105
+stratholme	10811	Archivist Galford	1	Crusader's Square	317	0.2774	0.7397	477	0	0				route only	estimate	0.2774	0.7397
+stratholme	10813	Balnazzar	1	Crusader's Square	317	0.2047	0.8205	478	0	0				route only	estimate	0.2047	0.8205
+stratholme	10997	Cannon Master Willey	1	Crusader's Square	317	0.0382	0.4954	475	0	0				route only	estimate	0.0382	0.4954
+stratholme	11032	Malor the Zealous	1	Crusader's Square	317	0.2984	0.4102	476	0	0				route only	estimate	0.2984	0.4102
+stratholme	11058	Ezra Grimm	1	Crusader's Square	317	0.5728	0.7045	2797	0	0				route only	estimate	0.5728	0.7045
+stratholme	11120	Crimson Hammersmith	1	Crusader's Square	317	0.078	0.46	2796	0	0				route only	estimate	0.078	0.46
+stratholme	11121	Black Guard Swordsmith	2	The Gauntlet	318	0.72	0.495	2795	0	0				route only	estimate	0.72	0.495
+stratholme	11143	Postmaster Malown	1	Crusader's Square	317	0.708	0.396	2798	0	0				route only	estimate	0.708	0.396
+stratholme	14684	Balzaphon							0	0				unplaced			
+sunken-temple	5708	Spawn of Hakkar							0	0				unplaced			
+sunken-temple	5709	Shade of Eranikus	1	Sunken Temple	220	0.6641	0.8741	493,2959,3584	1	1	6.8			within 35 yd	retain	0.6641	0.8741
+sunken-temple	5710	Jammal'an the Prophet	1	Sunken Temple	220	0.7588	0.4568	488,3589	1	1	40.1			offset over 35 yd	estimate	0.7588	0.4568
+sunken-temple	5711	Ogom the Wretched							0	0				unplaced			
+sunken-temple	5712	Zolo							0	0				unplaced			
+sunken-temple	5713	Gasher							0	0				unplaced			
+sunken-temple	5714	Loro							0	0				unplaced			
+sunken-temple	5715	Hukku							0	0				unplaced			
+sunken-temple	5716	Zul'Lor							0	0				unplaced			
+sunken-temple	5717	Mijan							0	0				unplaced			
+sunken-temple	5719	Morphaz	1	Sunken Temple	220	0.4932	0.8463	490,3586	1	1	12.9			within 35 yd	retain	0.4932	0.8463
+sunken-temple	5720	Weaver	1	Sunken Temple	220	0.4883	0.3602	487,3587	1	1	146.0			offset over 35 yd	estimate	0.4883	0.3602
+sunken-temple	5721	Dreamscythe	1	Sunken Temple	220	0.457	0.4012	486,3588	0	0				route only	estimate	0.457	0.4012
+sunken-temple	5722	Hazzas	1	Sunken Temple	220	0.4932	0.8873	491,3585	0	0				route only	estimate	0.4932	0.8873
+sunken-temple	8440	Avatar of Hakkar	1	Sunken Temple	220	0.2393	0.451	492,2956,3583	1	1	8.3			within 35 yd	retain	0.2393	0.451
+sunken-temple	8443	Avatar of Hakkar						492,2956,3583	0	0				alias			
+sunken-temple	8580	Atal'alarion	1	Sunken Temple	220	0.5	0.4832	2814,2952,3582	1	1	24.8			within 35 yd	retain	0.5	0.4832
+ubrs	9816	Pyroguard Emberseer	2	Hall of Binding	1002296	0.2996	0.2698	3062	0	0				route only	estimate	0.2996	0.2698
+ubrs	10264	Solakar Flamewreath	2	Hall of Binding	1002296	0.3844	0.3747		0	0				route only	estimate	0.3844	0.3747
+ubrs	10339	Gyth	3	Blackrock Stadium	1002297	0.4842	0.2551	3063	0	0				route only	estimate	0.4842	0.2551
+ubrs	10363	General Drakkisath	3	Blackrock Stadium	1002297	0.3462	0.5019	3069	0	0				route only	estimate	0.3462	0.5019
+ubrs	10429	Warchief Rend Blackhand	3	Blackrock Stadium	1002297	0.4842	0.2551	3063	0	0				route only	estimate	0.4842	0.2551
+ubrs	10430	The Beast	3	Blackrock Stadium	1002297	0.6349	0.3102	3068	0	0				route only	estimate	0.6349	0.3102
+ubrs	10509	Jed Runewatcher	3	Blackrock Stadium	1002297	0.3707	0.2516		0	0				route only	estimate	0.3707	0.2516
+ubrs	10899	Goraluk Anvilcrack	3	Blackrock Stadium	1002297	0.3278	0.249		0	0				route only	estimate	0.3278	0.249
+ubrs	16042	Lord Valthalak	3	Blackrock Stadium	1002297	0.6458	0.3736	3070	0	0				route only	estimate	0.6458	0.3736
+uldaman	2748	Archaedas	2	Khaz'Goroth's Seat	231	0.554	0.5093	554	3	3	3.0	run-video	2.1	within 35 yd	retain	0.554	0.5093
+uldaman	4854	Grimlok	1	Hall of the Keepers	230	0.2205	0.2604	553	1	3	10.5	classic-spawn-reference	10.4	within 35 yd	retain	0.2205	0.2604
+uldaman	4857	Stone Keeper							0	0				omit			
+uldaman	6906	Baelog	1	Hall of the Keepers	230	0.5838	0.9217	548	2	3	15.0			within 35 yd	retain	0.5838	0.9217
+uldaman	6907	Eric "The Swift"	1	Hall of the Keepers	230	0.5838	0.9217	548	2	3	15.0			within 35 yd	retain	0.5838	0.9217
+uldaman	6908	Olaf	1	Hall of the Keepers	230	0.5838	0.9217	548	2	3	15.0			within 35 yd	retain	0.5838	0.9217
+uldaman	6910	Revelosh	1	Hall of the Keepers	230	0.5339	0.7242	547	3	3	9.0	classic-spawn-reference	7.0	within 35 yd	retain	0.5339	0.7242
+uldaman	7023	Obsidian Sentinel	1	Hall of the Keepers	230	0.2894	0.6	1887	2	2	6.9	classic-spawn-reference	4.2	within 35 yd	retain	0.2894	0.6
+uldaman	7206	Ancient Stone Keeper	1	Hall of the Keepers	230	0.477	0.4429	551	3	3	5.0	classic-spawn-reference	7.7	within 35 yd	retain	0.477	0.4429
+uldaman	7228	Ironaya	1	Hall of the Keepers	230	0.3703	0.7347	549	3	3	29.4	classic-script-reference	5.1	within 35 yd	retain	0.3703	0.7347
+uldaman	7291	Galgann Firehammer	1	Hall of the Keepers	230	0.2655	0.3202	552	3	3	22.1	classic-spawn-reference	8.1	within 35 yd	retain	0.2655	0.3202
+wailing-caverns	3653	Kresh	1	Wailing Caverns	279	0.3057	0.3558	587	4	2	117.8	classic-spawn-reference	72.1	offset over 35 yd	estimate	0.3057	0.3558
+wailing-caverns	3654	Mutanus the Devourer	1	Wailing Caverns	279	0.3418	0.1332	592	3	2	18.6	classic-script-reference	30.0	within 35 yd	retain	0.3418	0.1332
+wailing-caverns	3669	Lord Cobrahn	1	Wailing Caverns	279	0.1612	0.5681	586	1	2	11.7	classic-spawn-reference	11.7	within 35 yd	retain	0.1612	0.5681
+wailing-caverns	3670	Lord Pythas	1	Wailing Caverns	279	0.8594	0.2855	588	1	2	3.3	classic-spawn-reference	3.3	within 35 yd	retain	0.8594	0.2855
+wailing-caverns	3671	Lady Anacondra	1	Wailing Caverns	279	0.3116	0.4421	585	4	2	108.8	classic-spawn-reference	147.8	offset over 35 yd	estimate	0.3116	0.4421
+wailing-caverns	3673	Lord Serpentis	1	Wailing Caverns	279	0.6153	0.5359	590	2	2	9.4	classic-spawn-reference	9.6	within 35 yd	retain	0.6153	0.5359
+wailing-caverns	3674	Skum	1	Wailing Caverns	279	0.9278	0.7863	589	2	2	9.8	classic-spawn-reference	7.3	within 35 yd	retain	0.9278	0.7863
+wailing-caverns	5775	Verdan the Everliving	1	Wailing Caverns	279	0.5547	0.4729	591	3	2	8.9	classic-spawn-reference	8.8	within 35 yd	retain	0.5547	0.4729
+wailing-caverns	5912	Deviate Faerie Dragon	1	Wailing Caverns	279	0.6729	0.3704		0	0		classic-spawn-reference	29.7	route only	estimate	0.6729	0.3704
+zulfarrak	7267	Chief Ukorz Sandscalp	1	Zul'Farrak	219	0.4248	0.3338	600	2	2	22.8			within 35 yd	retain	0.4248	0.3338
+zulfarrak	7271	Witch Doctor Zum'rah	1	Zul'Farrak	219	0.4424	0.1757	597	1	2	22.5			within 35 yd	retain	0.4424	0.1757
+zulfarrak	7272	Theka the Martyr	1	Zul'Farrak	219	0.5429	0.2664	596	2	2	22.0			within 35 yd	retain	0.5429	0.2664
+zulfarrak	7273	Gahz'rilla	1	Zul'Farrak	219	0.3125	0.407	594	1	1	32.7			within 35 yd	retain	0.3125	0.407
+zulfarrak	7275	Shadowpriest Sezz'ziz	1	Zul'Farrak	219	0.315	0.178	599	1	1	13.0			within 35 yd	retain	0.315	0.178
+zulfarrak	7604	Sergeant Bly	1	Zul'Farrak	219	0.2207	0.1596		0	0				route only	estimate	0.2207	0.1596
+zulfarrak	7795	Hydromancer Velratha	1	Zul'Farrak	219	0.2949	0.3807	593	2	2	24.5			within 35 yd	retain	0.2949	0.3807
+zulfarrak	7796	Nekrum Gutchewer	1	Zul'Farrak	219	0.2969	0.1625	598	1	1	22.2			within 35 yd	retain	0.2969	0.1625
+zulfarrak	7797	Ruuzlu							0	0				unplaced			
+zulfarrak	8127	Antu'sul	1	Zul'Farrak	219	0.6445	0.2738	595	2	2	10.2			within 35 yd	retain	0.6445	0.2738
+zulfarrak	10080	Sandarr Dunereaver	1	Zul'Farrak	219	0.456	0.549		0	0				route only	estimate	0.456	0.549
+zulfarrak	10081	Dustwraith	1	Zul'Farrak	219	0.2959	0.4304		0	0				route only	estimate	0.2959	0.4304
+zulfarrak	10082	Zerillis	1	Zul'Farrak	219	0.5215	0.4231		0	0				route only	estimate	0.5215	0.4231

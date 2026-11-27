@@ -1,0 +1,2332 @@
+dungeon	npc	item	item_name	display	sources
+alcaz-prison	255391	276734	Wrex's Pinky Ring	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+alcaz-prison	255391	276732	Alcaz Willcrusher	guide	ATT,EzWoW,Norgannon
+alcaz-prison	255391	276733	Grips of Control	featured	ATT,Everloot,EzWoW,Norgannon
+alcaz-prison	255391	263992	Overseer's Keyring	featured	ATT,Scout
+alcaz-prison	255391	274028	Blood Red Bandana	withheld	EG-corpse
+alcaz-prison	256236	276742	Girdle of Extracted Answers	guide	ATT,EzWoW,Norgannon
+alcaz-prison	256236	276743	Fingerbreaker Stamp	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+alcaz-prison	256236	276741	Defias Enforcer's Shoulderpads	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+alcaz-prison	256236	274029	Ornate Shackle Key	featured	EG-corpse,EzWoW,Scout
+alcaz-prison	255997	276736	Seascale Bracers	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+alcaz-prison	255997	276735	Tidesong Wand	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+alcaz-prison	255997	276737	Cloak of the Tidemistress	guide	ATT,EzWoW,Norgannon
+alcaz-prison	255997	273883	Ca'zass's Head	featured	EG-corpse,EzWoW,Scout
+alcaz-prison	257016	276738	Katerina's Shanker	encounter	ATT,EG-roll,EzWoW,Norgannon
+alcaz-prison	257016	276739	Cutthroat Chestguard	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+alcaz-prison	257016	276740	Sentimental Locket	guide	ATT,EzWoW,Norgannon
+alcaz-prison	255702	276744	Zarla's Snack Pouch	featured	ATT,Everloot,EzWoW,Norgannon
+alcaz-prison	255702	276745	Beastbond Robe	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+alcaz-prison	255702	276746	Defias Enforcer's Legguards	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+alcaz-prison	255702	276890	Zarla's Journal	featured	EzWoW,Scout
+blackfathom-deeps	4887	6907	Tortoise Armor	guide	ATT,EzWoW,Norgannon
+blackfathom-deeps	4887	6908	Ghamoo-ra's Bind	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+blackfathom-deeps	4887	273839	Spiked Shell Band	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+blackfathom-deeps	4887	251382	Plans: Protector's Silvered Chain Helm	withheld	Norgannon
+blackfathom-deeps	4887	252801	Pattern: Totemic Leather Hood	withheld	Norgannon
+blackfathom-deeps	4887	253940	Pattern: Filigreed Silky Leggings	withheld	Norgannon
+blackfathom-deeps	4887	253942	Pattern: Filigreed Flame Leggings	withheld	Norgannon
+blackfathom-deeps	4887	3712	Turtle Meat	withheld	EG-corpse,Everloot
+blackfathom-deeps	4887	4555	Thick Scaly Tail	withheld	EG-corpse
+blackfathom-deeps	4887	5524	Thick-shelled Clam	withheld	Everloot
+blackfathom-deeps	4887	253938	Pattern: Filigreed Pristine Leggings	other	EG-corpse,EG-roll
+blackfathom-deeps	4831	888	Naga Battle Gloves	featured	ATT,Everloot,EzWoW,Norgannon
+blackfathom-deeps	4831	3078	Naga Heartpiercer	featured	ATT,Everloot,EzWoW,Norgannon
+blackfathom-deeps	4831	11121	Darkwater Talwar	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+blackfathom-deeps	4831	252799	Pattern: Trapper's Leather Hood	withheld	Norgannon
+blackfathom-deeps	4831	252798	Pattern: Brawler's Leather Hood	guide	ATT,Norgannon
+blackfathom-deeps	4831	251382	Plans: Protector's Silvered Chain Helm	withheld	Norgannon
+blackfathom-deeps	4831	251383	Plans: Acolyte's Silvered Chain Helm	withheld	Norgannon
+blackfathom-deeps	4831	253944	Pattern: Filigreed Shadow Leggings	withheld	Norgannon
+blackfathom-deeps	4831	1822	Cedar Walking Stick	withheld	EG-corpse
+blackfathom-deeps	4831	5524	Thick-shelled Clam	withheld	EG-corpse
+blackfathom-deeps	4831	17057	Shiny Fish Scales	withheld	EG-corpse
+blackfathom-deeps	4831	17058	Fish Oil	withheld	EG-corpse
+blackfathom-deeps	4831	252795	Pattern: Totemic Leather Pants	other	Everloot
+blackfathom-deeps	6243	6905	Reef Axe	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon
+blackfathom-deeps	6243	6906	Algae Fists	guide	ATT,EzWoW,Norgannon
+blackfathom-deeps	6243	273141	Blueprint: Fishing Rack	featured	ATT,Everloot,EzWoW,Norgannon
+blackfathom-deeps	6243	273840	Cursed Murloc Eye	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon
+blackfathom-deeps	6243	1470	Murloc Skin Bag	guide	ATT,EzWoW,Norgannon
+blackfathom-deeps	6243	251375	Plans: Veteran's Silvered Chain Leggings	withheld	Norgannon
+blackfathom-deeps	6243	251377	Plans: Protector's Silvered Chain Leggings	withheld	Norgannon
+blackfathom-deeps	6243	252820	Pattern: Brawler's Leather Legguards	withheld	Norgannon
+blackfathom-deeps	6243	252821	Pattern: Trapper's Leather Legguards	withheld	Norgannon
+blackfathom-deeps	6243	252825	Pattern: Wisdom's Leather Leggings	withheld	Norgannon
+blackfathom-deeps	6243	253978	Pattern: Filigreed Silky Circlet	withheld	Norgannon
+blackfathom-deeps	6243	253980	Pattern: Filigreed Flame Circlet	withheld	Norgannon
+blackfathom-deeps	6243	15120	Robust Girdle	withheld	Everloot
+blackfathom-deeps	6243	253984	Pattern: Filigreed Pearly Circlet	other	Everloot
+blackfathom-deeps	12902	273841	Twilight Maul	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon
+blackfathom-deeps	12902	273842	Treacherous Treads	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon
+blackfathom-deeps	12902	273843	Fallenroot Longbow	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon
+blackfathom-deeps	12902	253978	Pattern: Filigreed Silky Circlet	withheld	Norgannon
+blackfathom-deeps	12902	253982	Pattern: Filigreed Shadow Circlet	withheld	Norgannon
+blackfathom-deeps	12902	251377	Plans: Protector's Silvered Chain Leggings	withheld	Norgannon
+blackfathom-deeps	12902	4306	Silk Cloth	withheld	Everloot
+blackfathom-deeps	12902	251354	Plans: Crusader's Chain Helm	other	Everloot
+blackfathom-deeps	4830	6901	Glowing Thresher Cape	featured	ATT,Everloot,EzWoW,Norgannon
+blackfathom-deeps	4830	6902	Bands of Serra'kis	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+blackfathom-deeps	4830	6904	Bite of Serra'kis	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+blackfathom-deeps	4830	251375	Plans: Veteran's Silvered Chain Leggings	withheld	Norgannon
+blackfathom-deeps	4830	252825	Pattern: Wisdom's Leather Leggings	withheld	Norgannon
+blackfathom-deeps	4830	253978	Pattern: Filigreed Silky Circlet	withheld	Norgannon
+blackfathom-deeps	4830	253982	Pattern: Filigreed Shadow Circlet	withheld	Norgannon
+blackfathom-deeps	4830	2608	Threshadon Ambergris	withheld	Everloot
+blackfathom-deeps	4830	5516	Threshadon Fang	withheld	EG-corpse
+blackfathom-deeps	4830	5524	Thick-shelled Clam	withheld	Everloot
+blackfathom-deeps	4830	6308	Raw Bristle Whisker Catfish	withheld	EG-corpse
+blackfathom-deeps	4830	11995	Ivory Band	withheld	Everloot
+blackfathom-deeps	4830	17057	Shiny Fish Scales	withheld	Everloot
+blackfathom-deeps	4830	211784	Scroll: WUBBA WUBBA	withheld	EG-corpse
+blackfathom-deeps	4830	248686	Waylaid Crate: Journeyman Herbs	withheld	EG-corpse
+blackfathom-deeps	4832	5881	Head of Kelris	other	EG-corpse,Norgannon
+blackfathom-deeps	4832	1155	Rod of the Sleepwalker	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+blackfathom-deeps	4832	6903	Gaze Dreamer Pants	featured	ATT,EG-roll,Everloot,EzWoW,Norgannon
+blackfathom-deeps	4832	273846	Twilight Lord Girdle	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+blackfathom-deeps	4832	252820	Pattern: Brawler's Leather Legguards	withheld	Norgannon
+blackfathom-deeps	4832	252821	Pattern: Trapper's Leather Legguards	withheld	Norgannon
+blackfathom-deeps	4832	252822	Pattern: Defender's Leather Kilt	withheld	Norgannon
+blackfathom-deeps	4832	252823	Pattern: Totemic Leather Leggings	withheld	Norgannon
+blackfathom-deeps	4832	252825	Pattern: Wisdom's Leather Leggings	withheld	Norgannon
+blackfathom-deeps	4832	253982	Pattern: Filigreed Shadow Circlet	withheld	Norgannon
+blackfathom-deeps	4832	2592	Wool Cloth	withheld	Everloot
+blackfathom-deeps	4829	6909	Strike of the Hydra	featured	ATT,EG-roll,Everloot,EzWoW,Norgannon
+blackfathom-deeps	4829	6910	Leech Pants	featured	ATT,EG-roll,Everloot,EzWoW,Norgannon
+blackfathom-deeps	4829	6911	Moss Cinch	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+blackfathom-deeps	4829	15340	Pathfinder Cloak	withheld	Norgannon
+blackfathom-deeps	4829	251376	Plans: Guard's Silvered Chain Leggings	withheld	Norgannon
+blackfathom-deeps	4829	251377	Plans: Protector's Silvered Chain Leggings	withheld	Norgannon
+blackfathom-deeps	4829	251378	Plans: Acolyte's Silvered Chain Leggings	withheld	Norgannon
+blackfathom-deeps	4829	252821	Pattern: Trapper's Leather Legguards	withheld	Norgannon
+blackfathom-deeps	4829	252824	Pattern: Stormrider's Leather Kilt	withheld	Norgannon
+blackfathom-deeps	4829	253980	Pattern: Filigreed Flame Circlet	withheld	Norgannon
+blackfathom-deeps	4829	253984	Pattern: Filigreed Pearly Circlet	withheld	Norgannon
+blackfathom-deeps	4829	3010	Fine Sand	withheld	Everloot
+blackfathom-deeps	4829	15231	Splitting Hatchet	withheld	EG-corpse,EG-roll
+blackfathom-deeps	4829	17057	Shiny Fish Scales	withheld	Everloot
+blackfathom-deeps	4829	252815	Pattern: Trapper's Leather Helm	encounter	EG-roll
+blackmaw-hold	247206	280056	Flameslash Crescent	guide	ATT,EzWoW,Norgannon
+blackmaw-hold	247206	280057	Robes of Dark Summons	guide	ATT,EzWoW,Norgannon
+blackmaw-hold	247206	280058	Impish Chain Hood	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+blackmaw-hold	247206	274964	Mote of Unstable Magic	withheld	EG-corpse
+blackmaw-hold	247198	280059	Tuskblade Halberd	guide	ATT,EzWoW,Norgannon
+blackmaw-hold	247198	280060	Lucky Shovelnose Tuft	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+blackmaw-hold	247198	280061	Spike Crested Bracers	guide	ATT,EzWoW,Norgannon
+blackmaw-hold	247198	249696	Tusks of the Unbroken	withheld	EG-corpse
+blackmaw-hold	247198	273050	Blackmaw Pouch	withheld	EG-corpse
+blackmaw-hold	269104	280079	Lunarlight Robe	guide	ATT,EzWoW,Norgannon
+blackmaw-hold	269104	280080	Claymore of Two Moons	guide	ATT,EzWoW,Norgannon
+blackmaw-hold	247195	280062	Cloak of the Fleshborer	guide	ATT,EzWoW,Norgannon
+blackmaw-hold	247195	280063	Bloodfur Bulwark	guide	ATT,EzWoW,Norgannon
+blackmaw-hold	247195	280064	Withering Grips	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+blackmaw-hold	247195	249697	Claws of the Great Bear	withheld	EG-corpse
+blackmaw-hold	247209	280068	Bloody Claws of Attack	guide	ATT,EzWoW,Norgannon
+blackmaw-hold	247209	280069	Shamanic Wristguards	guide	ATT,EzWoW,Norgannon
+blackmaw-hold	247209	280070	Veilpiercer Girdle	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+blackmaw-hold	247209	276893	Blackmaw Ritual Totem	withheld	EG-corpse
+blackmaw-hold	247207	280065	Behemoth Bones	guide	ATT,EzWoW,Norgannon
+blackmaw-hold	247207	280066	Trousers of the Ebon Giant	guide	ATT,EzWoW,Norgannon
+blackmaw-hold	247207	280067	Blackmaw Chain Belt	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+blackmaw-hold	247231	280071	Flamebreak Talisman	guide	ATT,EzWoW,Norgannon
+blackmaw-hold	247231	280072	Cowl of Dark Ambition	encounter	ATT,EG-roll,EzWoW,Norgannon
+blackmaw-hold	247231	280073	Burnished Pridescales	guide	ATT,EzWoW,Norgannon
+blackmaw-hold	247234	280074	Scalding Flamehoof	guide	ATT,EzWoW,Norgannon
+blackmaw-hold	247234	280075	Bleak Eye Shoulderplates	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+blackmaw-hold	247234	280076	Horns of Varrox	guide	ATT,EzWoW,Norgannon
+blackmaw-hold	247234	249692	Head of Varrox Bleakhoof	guide	EzWoW
+blackmaw-hold	247234	274964	Mote of Unstable Magic	withheld	EG-corpse
+blackrock-depths	9025	11631	Stoneshell Guard	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9025	11632	Earthslag Shoulders	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9025	22234	Mantle of Lost Hope	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9025	22397	Idol of Ferocity	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9025	11813	Formula: Smoking Heart of the Mountain	guide	ATT,Norgannon
+blackrock-depths	9025	11630	Rockshard Pellets	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9319	11623	Spritecaster Cape	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9319	11626	Blackveil Cape	withheld	Norgannon
+blackrock-depths	9319	11627	Fleetfoot Greaves	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9319	11628	Houndmaster's Bow	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9319	11629	Houndmaster's Rifle	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9319	10193	Crusader's Armor	withheld	Norgannon
+blackrock-depths	9018	11623	Spritecaster Cape	withheld	Norgannon
+blackrock-depths	9018	11624	Kentic Amice	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9018	11625	Enthralled Sphere	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9018	11626	Blackveil Cape	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9018	22240	Greaves of Withering Despair	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9018	3973	Smooth Leather Gloves	withheld	Norgannon
+blackrock-depths	9018	11140	Prison Cell Key	guide	ATT,EzWoW
+blackrock-depths	9024	11747	Flamestrider Robes	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9024	11748	Pyric Caduceus	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9024	11749	Searingscale Leggings	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9024	11750	Kindling Stave	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9024	11207	Formula: Enchant Weapon - Fiery Weapon	guide	ATT,Norgannon
+blackrock-depths	9033	11464	Marshal Windsor's Lost Information	guide	ATT,Norgannon
+blackrock-depths	9033	11810	Force of Will	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9033	11815	Hand of Justice	guide	ATT,Norgannon
+blackrock-depths	9033	11816	Angerforge's Battle Axe	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9033	11817	Lord General's Sword	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9033	11820	Royal Decorated Armor	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9033	11821	Warstrife Leggings	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9016	11802	Lavacrest Leggings	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9016	11803	Force of Magma	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9016	11805	Rubidium Hammer	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9016	11807	Sash of the Burning Heart	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9016	11230	Encased Fiery Essence	withheld	Norgannon
+blackrock-depths	9017	11126	Tablet of Kurniya	guide	ATT,Norgannon
+blackrock-depths	9017	21987	Incendicite of Incendius	withheld	Norgannon
+blackrock-depths	9017	11768	Incendic Bracers	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9017	11764	Cinderhide Armsplints	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9017	11765	Pyremail Wristguards	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9017	11766	Flameweave Cuffs	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9017	11767	Emberplate Armguards	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9017	2824	Hurricane	withheld	Norgannon
+blackrock-depths	9017	3075	Eye of Flame	withheld	Norgannon
+blackrock-depths	9017	14552	Stockade Pauldrons	withheld	Norgannon
+blackrock-depths	9017	19268	Ace of Elementals	guide	ATT,EzWoW
+blackrock-depths	9056	10999	Ironfel	withheld	Norgannon
+blackrock-depths	9056	11839	Chief Architect's Monocle	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9056	11841	Senior Designer's Pantaloons	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9056	11842	Lead Surveyor's Mantle	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9056	22223	Foreman's Head Protector	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9056	11840	Master Builder's Shirt	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9041	11782	Boreal Mantle	guide	ATT,Norgannon
+blackrock-depths	9041	11783	Chillsteel Girdle	guide	ATT,Norgannon
+blackrock-depths	9041	11784	Arbiter's Blade	guide	ATT,Norgannon
+blackrock-depths	9041	22241	Dark Warder's Pauldrons	guide	ATT,Norgannon
+blackrock-depths	9041	11755	Verek's Collar	withheld	Norgannon
+blackrock-depths	9041	22242	Verek's Leash	withheld	Norgannon
+blackrock-depths	9042	11755	Verek's Collar	guide	ATT,Norgannon
+blackrock-depths	9042	22242	Verek's Leash	guide	ATT,Norgannon
+blackrock-depths	9042	276884	Verek's Loyal Wraps	guide	ATT,Norgannon
+blackrock-depths	8983	11268	Head of Argelmach	guide	ATT,Norgannon
+blackrock-depths	8983	11465	Marshal Windsor's Lost Information	guide	ATT,Norgannon
+blackrock-depths	8983	11669	Naglering	guide	ATT,EzWoW,Norgannon
+blackrock-depths	8983	11819	Second Wind	guide	ATT,EzWoW,Norgannon
+blackrock-depths	8983	11822	Omnicast Boots	guide	ATT,EzWoW,Norgannon
+blackrock-depths	8983	11823	Luminary Kilt	guide	ATT,EzWoW,Norgannon
+blackrock-depths	8983	273113	Blueprint: Master Forge	guide	ATT,Norgannon
+blackrock-depths	8983	273127	Golem Heart	guide	ATT
+blackrock-depths	9543	11313	Ribbly's Head	guide	ATT,Norgannon
+blackrock-depths	9543	11612	Plans: Dark Iron Plate	guide	ATT,Norgannon
+blackrock-depths	9543	10098	Councillor's Cloak	withheld	Norgannon
+blackrock-depths	9543	227901	Plans: Tempered Dark Iron Plate	withheld	Norgannon
+blackrock-depths	9543	2662	Ribbly's Quiver	guide	ATT,EzWoW
+blackrock-depths	9543	2663	Ribbly's Bandolier	guide	ATT,EzWoW
+blackrock-depths	9543	11742	Wayfarer's Knapsack	guide	ATT,EzWoW
+blackrock-depths	9537	11735	Ragefury Eyepatch	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9537	18043	Coal Miner Boots	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9537	18044	Hurley's Tankard	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9537	22275	Firemoss Boots	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9537	11312	Lost Thunderbrew Recipe	guide	ATT
+blackrock-depths	9502	11746	Golem Skull Helm	guide	ATT,Norgannon
+blackrock-depths	9502	11743	Rockfist	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9502	11744	Bloodfist	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9502	11745	Fists of Phalanx	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9502	22212	Golem Fitted Pauldrons	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9502	3075	Eye of Flame	withheld	Norgannon
+blackrock-depths	9502	276879	Backroom Bulwark	guide	ATT,Norgannon
+blackrock-depths	9499	12791	Barman Shanker	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9499	12793	Mixologist's Tunic	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9499	18653	Schematic: Goblin Jumper Cables XL	guide	ATT,Norgannon
+blackrock-depths	9499	10099	Councillor's Gloves	withheld	Norgannon
+blackrock-depths	9499	276877	Brewmancer Nightcap	guide	ATT,Norgannon
+blackrock-depths	9499	11325	Dark Iron Ale Mug	guide	ATT
+blackrock-depths	9499	11602	Grim Guzzler Key	guide	EzWoW
+blackrock-depths	9156	11809	Flame Wrath	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9156	11812	Cape of the Fire Salamander	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9156	11814	Molten Fists	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9156	11832	Burst of Knowledge	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9156	11808	Circle of Flame	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9156	273122	Blueprint: Molten Foundry	guide	ATT,Norgannon
+blackrock-depths	9938	11746	Golem Skull Helm	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9938	11935	Magmus Stone	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9938	22208	Lavastone Hammer	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9938	22395	Totem of Rage	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9938	22400	Libram of Truth	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9938	277129	Fragment of the Firelands	guide	EzWoW,Norgannon
+blackrock-depths	9938	22275	Firemoss Boots	guide	ATT
+blackrock-depths	8929	12553	Swiftwalker Boots	guide	ATT,Norgannon
+blackrock-depths	8929	12554	Hands of the Exalted Herald	guide	ATT,Norgannon
+blackrock-depths	8929	12556	High Priestess Boots	guide	ATT,Norgannon
+blackrock-depths	8929	12557	Ebonsteel Spaulders	guide	ATT,Norgannon
+blackrock-depths	9019	21524	Red Winter Hat	withheld	Norgannon
+blackrock-depths	9019	11924	Robes of the Royal Crown	guide	ATT,Norgannon
+blackrock-depths	9019	11928	Thaurissan's Royal Scepter	guide	ATT,Norgannon
+blackrock-depths	9019	11932	Guiding Stave of Wisdom	guide	ATT,Norgannon
+blackrock-depths	9019	11934	Emperor's Seal	guide	ATT,Norgannon
+blackrock-depths	9019	22207	Sash of the Grand Hunt	guide	ATT,Norgannon
+blackrock-depths	9019	11810	Force of Will	withheld	Norgannon
+blackrock-depths	9019	11815	Hand of Justice	withheld	Norgannon
+blackrock-depths	9019	11930	The Emperor's New Cape	guide	ATT,Norgannon
+blackrock-depths	9019	11931	Dreadforge Retaliator	guide	ATT,Norgannon
+blackrock-depths	9019	11933	Imperial Jewel	guide	ATT,Norgannon
+blackrock-depths	9019	16724	Lightforge Gauntlets	guide	ATT,Norgannon
+blackrock-depths	9019	22204	Wristguards of Renown	guide	ATT,Norgannon
+blackrock-depths	9019	11684	Ironfoe	guide	ATT,Norgannon
+blackrock-depths	9019	272019	Bronzebeard Wedding Contract	withheld	Norgannon
+blackrock-depths	9019	12033	Thaurissan Family Jewels	guide	ATT
+blackrock-depths	9019	12553	Swiftwalker Boots	guide	ATT
+blackrock-depths	9019	12556	High Priestess Boots	guide	ATT
+blackrock-depths	9027	22257	Bloodclot Band	guide	ATT,Norgannon
+blackrock-depths	9027	22271	Leggings of Frenzied Magic	guide	ATT,Norgannon
+blackrock-depths	9027	11729	Savage Gladiator Helm	withheld	Norgannon
+blackrock-depths	9027	11730	Savage Gladiator Grips	withheld	Norgannon
+blackrock-depths	9027	22266	Flarethorn	guide	ATT,Norgannon
+blackrock-depths	9027	11726	Savage Gladiator Chain	guide	ATT,Norgannon
+blackrock-depths	9027	11728	Savage Gladiator Leggings	withheld	Norgannon
+blackrock-depths	9027	11731	Savage Gladiator Greaves	withheld	Norgannon
+blackrock-depths	9027	10278	Emerald Girdle	withheld	Norgannon
+blackrock-depths	9028	11610	Plans: Dark Iron Pulverizer	guide	ATT,Norgannon
+blackrock-depths	9028	11702	Grizzle's Skinner	guide	ATT,Norgannon
+blackrock-depths	9028	11703	Stonewall Girdle	guide	ATT,Norgannon
+blackrock-depths	9028	11722	Dregmetal Spaulders	guide	ATT,Norgannon
+blackrock-depths	9028	22270	Entrenching Boots	guide	ATT,Norgannon
+blackrock-depths	9028	277117	Savage Gladiator Shoulders	guide	ATT,Norgannon
+blackrock-depths	9029	11679	Rubicund Armguards	guide	ATT,Norgannon
+blackrock-depths	9029	11685	Splinthide Shoulders	guide	ATT,Norgannon
+blackrock-depths	9029	11686	Girdle of Beastial Fury	guide	ATT,Norgannon
+blackrock-depths	9029	11730	Savage Gladiator Grips	guide	ATT,Norgannon
+blackrock-depths	9030	11662	Ban'thok Sash	guide	ATT,Norgannon
+blackrock-depths	9030	11665	Ogreseer Fists	guide	ATT,Norgannon
+blackrock-depths	9030	11728	Savage Gladiator Leggings	guide	ATT,Norgannon
+blackrock-depths	9030	11824	Cyclopean Band	guide	ATT,Norgannon
+blackrock-depths	9031	11678	Carapace of Anub'shiah	guide	ATT,Norgannon
+blackrock-depths	9031	11675	Shadefiend Boots	guide	ATT,Norgannon
+blackrock-depths	9031	11677	Graverot Cape	guide	ATT,Norgannon
+blackrock-depths	9031	11731	Savage Gladiator Greaves	guide	ATT,Norgannon
+blackrock-depths	9032	11633	Spiderfang Carapace	guide	ATT,Norgannon
+blackrock-depths	9032	11634	Silkweb Gloves	guide	ATT,Norgannon
+blackrock-depths	9032	11635	Hookfang Shanker	guide	ATT,Norgannon
+blackrock-depths	9032	11729	Savage Gladiator Helm	guide	ATT,Norgannon
+blackrock-depths	9032	10108	Wanderer's Cloak	withheld	Norgannon
+blackrock-depths	8923	11785	Rock Golem Bulwark	guide	ATT,EzWoW,Norgannon
+blackrock-depths	8923	11786	Stone of the Earth	guide	ATT,EzWoW,Norgannon
+blackrock-depths	8923	11787	Shalehusk Boots	guide	ATT,EzWoW,Norgannon
+blackrock-depths	8923	22245	Soot Encrusted Footwear	guide	ATT,EzWoW,Norgannon
+blackrock-depths	9039	11920	Wraith Scythe	guide	ATT,Norgannon
+blackrock-depths	9039	11921	Impervious Giant	guide	ATT,Norgannon
+blackrock-depths	9039	11922	Blood-Etched Blade	guide	ATT,Norgannon
+blackrock-depths	9039	11926	Deathdealer Breastplate	guide	ATT,Norgannon
+blackrock-depths	9039	11927	Legplates of the Eternal Guardian	guide	ATT,Norgannon
+blackrock-depths	9039	11923	The Hammer of Grace	guide	ATT
+blackrock-depths	9039	11925	Ghostshroud	guide	ATT
+blackrock-depths	9039	11929	Haunting Specter Leggings	guide	ATT
+city-of-dalaran	247126	273032	Bonebinder's Signet	featured	ATT,Everloot,EzWoW,Norgannon
+city-of-dalaran	247126	273036	Graveweave Bindings	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+city-of-dalaran	247126	273033	Gravespike Repeater	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+city-of-dalaran	245999	273034	Ephemeral Grips	featured	ATT,Everloot,EzWoW,Norgannon
+city-of-dalaran	245999	273031	Runemender's Seal	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+city-of-dalaran	245999	273035	Mana-Warped Chain Shirt	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+city-of-dalaran	246003	273037	Felbough Arm	featured	ATT,EG-roll,Everloot,EzWoW,Norgannon,Scout
+city-of-dalaran	246003	273039	Blightleaf Rope	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+city-of-dalaran	246003	273038	Garb of Fallen Felbark	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+city-of-dalaran	246017	273046	Guardian's Dualblade	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+city-of-dalaran	246017	273047	Unstable Crystalline Shoulderpads	featured	ATT,EG-roll,Everloot,EzWoW,Norgannon
+city-of-dalaran	246017	273048	Refractory Scaleguards	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+city-of-dalaran	246017	273099	Blueprint: Spinning Wheel	guide	ATT,EzWoW,Norgannon
+city-of-dalaran	246008	273041	Slitherwrap Girdle	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+city-of-dalaran	246008	273040	Spine of the Devourer	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+city-of-dalaran	246008	273042	Manascale Treads	featured	ATT,EG-roll,Everloot,EzWoW,Norgannon
+city-of-dalaran	246016	273045	Drape of Shifting Energy	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon
+city-of-dalaran	246016	273044	Violet Sorcerer's Robes	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon,Scout
+city-of-dalaran	246016	273043	Wand of Mana Concentration	featured	ATT,Everloot,EzWoW,Norgannon
+city-of-dalaran	247032	273055	Bonepile Gaze	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+city-of-dalaran	247032	273054	Cartilage Shapers	featured	ATT,Everloot,EzWoW,Norgannon
+city-of-dalaran	247032	273053	Tendonscraper Dagger	featured	ATT,Everloot,EzWoW,Norgannon
+city-of-dalaran	246020	273052	Ponderous Orb	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+city-of-dalaran	246020	273049	Archmagister's Faceted Pendant	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+city-of-dalaran	246020	273051	Violet Sorcerer's Mantle	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+city-of-dalaran	246020	273103	Blueprint: Arcane Salvager	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+city-of-dalaran	246020	251961	Arcane Mote	withheld	EG-corpse,Scout
+deadmines	3586	5444	Miner's Cape	featured	ATT,EzWoW,Norgannon,Scout
+deadmines	3586	5443	Gold-plated Buckler	guide	ATT,EzWoW,Norgannon
+deadmines	3586	6581	Scouting Belt	withheld	Norgannon
+deadmines	644	5187	Rhahk'Zor's Hammer	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+deadmines	644	872	Rockslicer	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+deadmines	644	14166	Buccaneer's Bracers	withheld	Norgannon
+deadmines	644	273289	Ogre Loincloth	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+deadmines	644	251362	Plans: Protector's Gloves	withheld	Norgannon
+deadmines	644	251364	Plans: Crusader's Gloves	withheld	Norgannon
+deadmines	644	253906	Pattern: Filigreed Flame Gown	withheld	Norgannon
+deadmines	644	2287	Haunch of Meat	withheld	Scout
+deadmines	644	15222	Barbed Club	withheld	Everloot
+deadmines	644	251340	Plans: Veteran's Chain Shirt	other	EG-corpse,EG-roll
+deadmines	644	251341	Plans: Guard's Chain Shirt	other	Scout
+deadmines	644	253902	Pattern: Filigreed Pristine Gown	encounter	EG-roll
+deadmines	644	253912	Pattern: Filigreed Shining Gown	other	Everloot
+deadmines	643	5195	Gold-flecked Gloves	featured	ATT,EG-corpse,Norgannon,Scout
+deadmines	643	5194	Taskmaster Axe	featured	ATT,EG-corpse,Norgannon,Scout
+deadmines	643	210178	Schematic: Shredder Autosalvage Unit	guide	ATT,Norgannon
+deadmines	643	273092	Blueprint: Repair Bot	featured	ATT,Norgannon,Scout
+deadmines	643	273293	Bandsaw Wristbands	featured	ATT,Norgannon,Scout
+deadmines	643	251360	Plans: Veteran's Gloves	withheld	Norgannon
+deadmines	643	251364	Plans: Crusader's Gloves	withheld	Norgannon
+deadmines	643	253902	Pattern: Filigreed Pristine Gown	withheld	Norgannon
+deadmines	643	1740	Laced Mail Bracers	withheld	EG-corpse
+deadmines	643	1787	Patched Leather Belt	withheld	EG-corpse
+deadmines	643	2589	Linen Cloth	withheld	Scout
+deadmines	643	6570	Shimmering Sash	withheld	EG-corpse
+deadmines	643	211855	Scroll: STHENIC LUNATE	withheld	EG-corpse
+deadmines	642	7365	Gnoam Sprecklesprocket	featured	ATT,EG-corpse,Norgannon
+deadmines	642	2169	Buzzer Blade	guide	ATT,Norgannon
+deadmines	642	1937	Buzz Saw	featured	ATT,EG-corpse,Norgannon
+deadmines	642	285292	Dull Sawblade	featured	ATT,EG-corpse,Everloot,Norgannon
+deadmines	642	1790	Patched Cloak	withheld	EG-corpse
+deadmines	1763	5199	Smelting Pants	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+deadmines	1763	1156	Lavishly Jeweled Ring	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+deadmines	1763	273086	Blueprint: Anvil	guide	EzWoW,Norgannon
+deadmines	1763	273297	Goblin Hammer	featured	ATT,EzWoW,Norgannon,Scout
+deadmines	1763	252777	Pattern: Brawler's Leather Gloves	withheld	Norgannon
+deadmines	1763	252778	Pattern: Trapper's Leather Gloves	withheld	Norgannon
+deadmines	1763	252780	Pattern: Totemic Leather Gloves	withheld	Norgannon
+deadmines	1763	252782	Pattern: Wisdom's Leather Gloves	withheld	Norgannon
+deadmines	1763	253904	Pattern: Filigreed Silky Gown	withheld	Norgannon
+deadmines	1763	253906	Pattern: Filigreed Flame Gown	withheld	Norgannon
+deadmines	1763	1764	Canvas Shoes	withheld	Everloot
+deadmines	1763	1815	Ornamental Mace	withheld	EG-corpse
+deadmines	1763	2589	Linen Cloth	withheld	EG-corpse,Everloot
+deadmines	1763	2592	Wool Cloth	withheld	EG-corpse
+deadmines	1763	4410	Schematic: Shadow Goggles	encounter	EG-roll
+deadmines	1763	248685	Waylaid Crate: Apprentice Curiosities	withheld	EG-corpse
+deadmines	1763	252772	Pattern: Trapper's Leather Armor	other	Scout
+deadmines	646	5192	Thief's Blade	featured	ATT,EG-roll,EzWoW,Norgannon,Scout
+deadmines	646	5196	Smite's Reaver	featured	ATT,EzWoW,Norgannon,Scout
+deadmines	646	7230	Smite's Mighty Hammer	featured	ATT,EG-roll,Everloot,EzWoW,Norgannon,Scout
+deadmines	646	284715	First Mate Band	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+deadmines	646	251362	Plans: Protector's Gloves	withheld	Norgannon
+deadmines	646	252779	Pattern: Defender's Leather Gloves	withheld	Norgannon
+deadmines	646	252780	Pattern: Totemic Leather Gloves	withheld	Norgannon
+deadmines	646	252781	Pattern: Stormrider's Leather Gloves	withheld	Norgannon
+deadmines	646	252782	Pattern: Wisdom's Leather Gloves	withheld	Norgannon
+deadmines	646	1210	Shadowgem	withheld	Scout
+deadmines	646	1813	Chipped Quarterstaff	withheld	Scout
+deadmines	646	2589	Linen Cloth	withheld	Scout
+deadmines	646	2592	Wool Cloth	withheld	EG-corpse
+deadmines	646	253910	Pattern: Filigreed Pearly Gown	other	Scout
+deadmines	647	5201	Emberstone Staff	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+deadmines	647	5200	Impaling Harpoon	featured	ATT,EG-roll,EzWoW,Norgannon,Scout
+deadmines	647	10403	Blackened Defias Belt	featured	ATT,EG-roll,EzWoW,Norgannon,Scout
+deadmines	647	1179	Ice Cold Milk	withheld	Scout
+deadmines	647	1792	Patched Leather Pants	withheld	EG-corpse
+deadmines	647	2217	Rectangular Shield	withheld	Scout
+deadmines	647	2592	Wool Cloth	withheld	Scout
+deadmines	647	2977	Veteran Armor	withheld	Scout
+deadmines	647	252774	Pattern: Totemic Leather Armor	encounter	EG-roll
+deadmines	639	2874	An Unsent Letter	featured	ATT,EG-corpse,EzWoW,Norgannon,Scout
+deadmines	639	3637	Head of VanCleef	featured	ATT,EG-corpse,Norgannon,Scout
+deadmines	639	5193	Cape of the Brotherhood	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+deadmines	639	5202	Corsair's Overshirt	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+deadmines	639	5191	Cruel Barb	featured	ATT,EG-roll,EzWoW,Norgannon,Scout
+deadmines	639	10399	Blackened Defias Armor	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+deadmines	639	252799	Pattern: Trapper's Leather Hood	withheld	Norgannon
+deadmines	639	252800	Pattern: Defender's Leather Hood	withheld	Norgannon
+deadmines	639	252801	Pattern: Totemic Leather Hood	withheld	Norgannon
+deadmines	639	252803	Pattern: Wisdom's Leather Hood	withheld	Norgannon
+deadmines	639	253938	Pattern: Filigreed Pristine Leggings	withheld	Norgannon
+deadmines	639	253948	Pattern: Filigreed Shining Leggings	withheld	Norgannon
+deadmines	639	414	Dalaran Sharp	withheld	Scout
+deadmines	639	1752	Linked Chain Shoulderpads	withheld	Everloot
+deadmines	639	1819	Gouging Pick	withheld	Scout
+deadmines	639	1822	Cedar Walking Stick	withheld	EG-corpse
+deadmines	639	2592	Wool Cloth	withheld	Everloot
+deadmines	639	2991	Burnished Boots	withheld	EG-corpse,EG-roll
+deadmines	639	251345	Plans: Veteran's Chain Leggings	other	Scout
+deadmines	639	252793	Pattern: Trapper's Leather Pants	other	EG-corpse,EG-roll
+deadmines	645	5197	Cookie's Tenderizer	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+deadmines	645	5198	Cookie's Stirring Rod	featured	ATT,EzWoW,Norgannon,Scout
+deadmines	645	273102	Blueprint: Cookie's Feast	featured	ATT,Everloot,EzWoW,Norgannon
+deadmines	645	273298	Lookie's Spyglass	featured	ATT,EG-roll,Everloot,EzWoW,Norgannon,Scout
+deadmines	645	251360	Plans: Veteran's Gloves	withheld	Norgannon
+deadmines	645	252778	Pattern: Trapper's Leather Gloves	withheld	Norgannon
+deadmines	645	252779	Pattern: Defender's Leather Gloves	withheld	Norgannon
+deadmines	645	253910	Pattern: Filigreed Pearly Gown	withheld	Norgannon
+deadmines	645	253912	Pattern: Filigreed Shining Gown	withheld	Norgannon
+deadmines	645	5784	Slimy Murloc Scale	withheld	Scout
+deadmines	645	6583	Scouting Bracers	withheld	Everloot
+deadmines	645	8490	Cat Carrier (Siamese)	guide	ATT,EzWoW
+deadmines	645	15248	Gleaming Claymore	withheld	EG-roll
+deadmines	645	252774	Pattern: Totemic Leather Armor	other	Scout
+deadmines	641	6994	Whitestone Oak Lumber	withheld	Norgannon
+deadmines	641	1945	Woodworking Gloves	withheld	ATT-zone,Norgannon
+deadmines	641	1179	Ice Cold Milk	withheld	Everloot
+deadmines	641	1210	Shadowgem	withheld	EG-corpse
+deadmines	641	1741	Laced Cloak	withheld	EG-corpse
+deadmines	641	2287	Haunch of Meat	withheld	EG-corpse
+deadmines	641	2589	Linen Cloth	withheld	EG-corpse
+deadmines	641	2592	Wool Cloth	withheld	EG-corpse,Everloot
+deadmines	641	3195	Barbaric Battle Axe	withheld	EG-corpse
+deadmines	641	3211	Burnished Bracers	withheld	EG-corpse
+deadmines	641	6538	Willow Robe	withheld	EG-corpse
+deadmines	641	15926	Spellbinder Orb	withheld	EG-corpse
+deadmines	641	211855	Scroll: STHENIC LUNATE	withheld	EG-corpse
+dm-east	14354	18261	Book of Incantations	featured	ATT,EG-corpse,Norgannon
+dm-east	14354	18267	Recipe: Runn Tum Tuber Surprise	encounter	ATT,EG-roll,Norgannon
+dm-east	14354	18316	Obsidian Bauble	encounter	ATT,EG-roll,Norgannon
+dm-east	14354	18249	Crescent Key	featured	ATT,EG-corpse,EzWoW
+dm-east	14354	18255	Runn Tum Tuber	featured	ATT,EG-corpse
+dm-east	14354	18320	Demondash Spaulders	guide	ATT
+dm-east	14327	18426	Lethtendris's Web	featured	ATT,EG-corpse,Norgannon
+dm-east	14327	18301	Lethtendris's Wand	guide	ATT,EzWoW,Norgannon
+dm-east	14327	18302	Band of Vigor	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+dm-east	14327	18311	Quel'dorai Channeling Rod	guide	ATT,EzWoW,Norgannon
+dm-east	14327	18325	Felhide Cap	guide	ATT,EzWoW,Norgannon
+dm-east	13280	18299	Hydrospawn Essence	featured	ATT,EG-corpse,Norgannon
+dm-east	13280	18305	Breakwater Legguards	guide	ATT,EzWoW,Norgannon
+dm-east	13280	18307	Riptide Shoes	guide	ATT,EzWoW,Norgannon
+dm-east	13280	18317	Tempest Talisman	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+dm-east	13280	18322	Waterspout Boots	guide	ATT,EzWoW,Norgannon
+dm-east	13280	18324	Waveslicer	guide	ATT,EzWoW,Norgannon
+dm-east	13280	19268	Ace of Elementals	guide	ATT,EzWoW
+dm-east	13280	262890	Sealed Artisan's Writ	withheld	EG-corpse,EG-roll
+dm-east	13280	274964	Mote of Unstable Magic	withheld	EG-corpse
+dm-east	11490	18306	Gloves of Shadowy Mist	guide	ATT,EzWoW,Norgannon
+dm-east	11490	18308	Clever Hat	guide	ATT,EzWoW,Norgannon
+dm-east	11490	18313	Helm of Awareness	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+dm-east	11490	18319	Fervent Helm	guide	ATT,EzWoW,Norgannon
+dm-east	11490	18323	Satyr's Bow	guide	ATT,EzWoW,Norgannon
+dm-east	11490	7910	Star Ruby	withheld	EG-corpse,EG-roll
+dm-east	11490	18600	Tome of Arcane Brilliance	other	EG-corpse,EG-roll
+dm-east	11492	18309	Gloves of Restoration	guide	ATT,EzWoW,Norgannon
+dm-east	11492	18310	Fiendish Machete	guide	ATT,EzWoW,Norgannon
+dm-east	11492	18312	Energized Chestplate	guide	ATT,EzWoW,Norgannon
+dm-east	11492	18314	Ring of Demonic Guile	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+dm-east	11492	18315	Ring of Demonic Potency	guide	ATT,EzWoW,Norgannon
+dm-east	11492	18318	Merciful Greaves	guide	ATT,EzWoW,Norgannon
+dm-east	11492	18321	Energetic Rod	guide	ATT,EzWoW,Norgannon
+dm-east	11492	18326	Razor Gauntlets	guide	ATT,EzWoW,Norgannon
+dm-east	11492	18327	Whipvine Cord	guide	ATT,EzWoW,Norgannon
+dm-east	11492	18328	Shadewood Cloak	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+dm-east	11492	272020	Felvine Seed	withheld	Norgannon
+dm-north	14326	18450	Robe of Combustion	guide	EzWoW,Norgannon
+dm-north	14326	18451	Hyena Hide Belt	guide	EzWoW,Norgannon
+dm-north	14326	18458	Modest Armguards	guide	EzWoW,Norgannon
+dm-north	14326	18459	Gallant's Wristguards	guide	EzWoW,Norgannon
+dm-north	14326	18460	Unsophisticated Hand Cannon	guide	EzWoW,Norgannon
+dm-north	14326	18462	Jagged Bone Fist	guide	EzWoW,Norgannon
+dm-north	14326	18463	Ogre Pocket Knife	guide	EzWoW,Norgannon
+dm-north	14326	18464	Gordok Nose Ring	guide	EzWoW,Norgannon
+dm-north	14326	18493	Bulky Iron Spaulders	guide	ATT,EzWoW,Norgannon
+dm-north	14326	18494	Denwatcher's Shoulders	guide	ATT,EzWoW,Norgannon
+dm-north	14326	18496	Heliotrope Cloak	guide	ATT,EzWoW,Norgannon
+dm-north	14326	18497	Sublime Wristguards	guide	ATT,EzWoW,Norgannon
+dm-north	14326	18498	Hedgecutter	guide	ATT,EzWoW,Norgannon
+dm-north	14326	18250	Gordok Shackle Key	guide	ATT-zone,EzWoW
+dm-north	14326	18268	Gordok Inner Door Key	guide	ATT,EzWoW
+dm-north	14322	18425	Kreeg's Mug	guide	ATT,EzWoW,Norgannon
+dm-north	14321	18450	Robe of Combustion	guide	EzWoW,Norgannon
+dm-north	14321	18451	Hyena Hide Belt	guide	EzWoW,Norgannon
+dm-north	14321	18458	Modest Armguards	guide	EzWoW,Norgannon
+dm-north	14321	18459	Gallant's Wristguards	guide	EzWoW,Norgannon
+dm-north	14321	18460	Unsophisticated Hand Cannon	guide	EzWoW,Norgannon
+dm-north	14321	18462	Jagged Bone Fist	guide	EzWoW,Norgannon
+dm-north	14321	18463	Ogre Pocket Knife	guide	EzWoW,Norgannon
+dm-north	14321	18464	Gordok Nose Ring	guide	EzWoW,Norgannon
+dm-north	14321	18494	Denwatcher's Shoulders	withheld	Norgannon
+dm-north	14321	18493	Bulky Iron Spaulders	withheld	Norgannon
+dm-north	14321	18496	Heliotrope Cloak	withheld	Norgannon
+dm-north	14321	18497	Sublime Wristguards	withheld	Norgannon
+dm-north	14321	18498	Hedgecutter	withheld	Norgannon
+dm-north	14321	18250	Gordok Shackle Key	guide	ATT-zone,EzWoW
+dm-north	14323	18450	Robe of Combustion	guide	EzWoW,Norgannon
+dm-north	14323	18451	Hyena Hide Belt	guide	EzWoW,Norgannon
+dm-north	14323	18458	Modest Armguards	guide	EzWoW,Norgannon
+dm-north	14323	18459	Gallant's Wristguards	guide	EzWoW,Norgannon
+dm-north	14323	18460	Unsophisticated Hand Cannon	guide	EzWoW,Norgannon
+dm-north	14323	18462	Jagged Bone Fist	guide	EzWoW,Norgannon
+dm-north	14323	18463	Ogre Pocket Knife	guide	EzWoW,Norgannon
+dm-north	14323	18464	Gordok Nose Ring	guide	EzWoW,Norgannon
+dm-north	14323	18493	Bulky Iron Spaulders	guide	ATT,EzWoW,Norgannon
+dm-north	14323	18494	Denwatcher's Shoulders	guide	ATT,EzWoW,Norgannon
+dm-north	14323	18496	Heliotrope Cloak	guide	ATT,EzWoW,Norgannon
+dm-north	14323	18497	Sublime Wristguards	guide	ATT,EzWoW,Norgannon
+dm-north	14323	18498	Hedgecutter	guide	ATT,EzWoW,Norgannon
+dm-north	14323	18250	Gordok Shackle Key	guide	ATT-zone,EzWoW
+dm-north	14325	18502	Monstrous Glaive	guide	ATT,EzWoW,Norgannon
+dm-north	14325	18503	Kromcrush's Chestplate	guide	ATT,EzWoW,Norgannon
+dm-north	14325	18505	Mugger's Belt	guide	ATT,EzWoW,Norgannon
+dm-north	14325	18507	Boots of the Full Moon	guide	ATT,EzWoW,Norgannon
+dm-north	14324	18483	Mana Channeling Wand	guide	ATT,Norgannon
+dm-north	14324	18484	Cho'Rush's Blade	guide	ATT,Norgannon
+dm-north	14324	18485	Observer's Shield	guide	ATT,Norgannon
+dm-north	14324	18490	Insightful Hood	guide	ATT,Norgannon
+dm-north	11501	18520	Barbarous Blade	guide	ATT,Norgannon
+dm-north	11501	18521	Grimy Metal Boots	guide	ATT,Norgannon
+dm-north	11501	18522	Band of the Ogre King	guide	ATT,Norgannon
+dm-north	11501	18523	Brightly Glowing Stone	guide	ATT,Norgannon
+dm-north	11501	18524	Leggings of Destruction	guide	ATT,Norgannon
+dm-north	11501	18525	Bracers of Prosperity	guide	ATT,Norgannon
+dm-north	11501	18526	Crown of the Ogre King	guide	ATT,Norgannon
+dm-north	11501	18527	Harmonious Gauntlets	guide	ATT,Norgannon
+dm-north	11501	18780	Top Half of Advanced Armorsmithing: Volume I	guide	ATT,Norgannon
+dm-north	11501	19258	Ace of Warlords	guide	ATT,Norgannon
+dm-north	11501	272022	Earthstone Diamond Pinky Ring	withheld	Norgannon
+dm-west	11489	18352	Petrified Bark Shield	guide	ATT,EzWoW,Norgannon
+dm-west	11489	18353	Stoneflower Staff	guide	ATT,EzWoW,Norgannon
+dm-west	11489	18390	Tanglemoss Leggings	guide	ATT,EzWoW,Norgannon
+dm-west	11489	18393	Warpwood Binding	guide	ATT,EzWoW,Norgannon
+dm-west	11489	273120	Blueprint: Seed Hybridizer	guide	ATT,Norgannon
+dm-west	11488	18347	Well Balanced Axe	guide	ATT,EzWoW,Norgannon
+dm-west	11488	18349	Gauntlets of Accuracy	guide	ATT,EzWoW,Norgannon
+dm-west	11488	18383	Force Imbued Gauntlets	guide	ATT,EzWoW,Norgannon
+dm-west	11488	18386	Padre's Trousers	guide	ATT,EzWoW,Norgannon
+dm-west	11487	3970	Smooth Leather Boots	withheld	Norgannon
+dm-west	11487	18350	Amplifying Cloak	guide	ATT,EzWoW,Norgannon
+dm-west	11487	18351	Magically Sealed Bracers	guide	ATT,EzWoW,Norgannon
+dm-west	11487	18371	Mindtap Talisman	guide	ATT,EzWoW,Norgannon
+dm-west	11487	18374	Flamescarred Shoulders	guide	ATT,EzWoW,Norgannon
+dm-west	11487	18397	Elder Magus Pendant	guide	ATT,EzWoW,Norgannon
+dm-west	11487	22309	Pattern: Big Bag of Enchantment	withheld	Norgannon
+dm-west	11487	227912	Applied Divinity	withheld	Norgannon
+dm-west	11467	18345	Murmuring Ring	guide	ATT,EzWoW,Norgannon
+dm-west	11467	18346	Threadbare Trousers	guide	ATT,EzWoW,Norgannon
+dm-west	11467	18387	Brightspark Gloves	guide	ATT,EzWoW,Norgannon
+dm-west	11496	18370	Vigilance Charm	guide	ATT,EzWoW,Norgannon
+dm-west	11496	18372	Blade of the New Moon	guide	ATT,EzWoW,Norgannon
+dm-west	11496	18377	Quickdraw Gloves	guide	ATT,EzWoW,Norgannon
+dm-west	11496	18379	Odious Greaves	guide	ATT,EzWoW,Norgannon
+dm-west	11496	18381	Evil Eye Pendant	guide	ATT,EzWoW,Norgannon
+dm-west	11496	18384	Bile-etched Spaulders	guide	ATT,EzWoW,Norgannon
+dm-west	11496	18385	Robe of Everlasting Night	guide	ATT,EzWoW,Norgannon
+dm-west	11496	18389	Cloak of the Cosmos	guide	ATT,EzWoW,Norgannon
+dm-west	11496	18391	Eyestalk Cord	guide	ATT,EzWoW,Norgannon
+dm-west	11496	18394	Demon Howl Wristguards	guide	ATT,EzWoW,Norgannon
+dm-west	11496	285949	Blood of Immol'thar	guide	ATT,Norgannon
+dm-west	11496	282712	Libram of Binding	guide	ATT
+dm-west	11486	21525	Green Winter Hat	withheld	Norgannon
+dm-west	11486	18373	Chestplate of Tranquility	guide	ATT,EzWoW,Norgannon
+dm-west	11486	18375	Bracers of the Eclipse	guide	ATT,EzWoW,Norgannon
+dm-west	11486	18376	Timeworn Mace	guide	ATT,EzWoW,Norgannon
+dm-west	11486	18378	Silvermoon Leggings	guide	ATT,EzWoW,Norgannon
+dm-west	11486	18380	Eldritch Reinforced Legplates	guide	ATT,EzWoW,Norgannon
+dm-west	11486	18382	Fluctuating Cloak	guide	ATT,EzWoW,Norgannon
+dm-west	11486	18388	Stoneshatter	guide	ATT,EzWoW,Norgannon
+dm-west	11486	18392	Distracting Dagger	guide	ATT,EzWoW,Norgannon
+dm-west	11486	18395	Emerald Flame Ring	guide	ATT,EzWoW,Norgannon
+dm-west	11486	18396	Mind Carver	guide	ATT,EzWoW,Norgannon
+dm-west	11486	272021	Ancient Memento	withheld	Norgannon
+dm-west	14506	18754	Fel Hardened Bracers	guide	ATT,Norgannon
+dm-west	14506	18755	Xorothian Firestick	guide	ATT,Norgannon
+dm-west	14506	18756	Dreadguard's Protector	guide	ATT,Norgannon
+dm-west	14506	18757	Diabolic Mantle	guide	ATT,Norgannon
+dm-west	14690	23127	Cloak of Revanchion	withheld	Norgannon
+dm-west	14690	23128	The Shadow's Grasp	withheld	Norgannon
+dm-west	14690	23129	Bracers of Mending	withheld	Norgannon
+drowned-city	258905	271718	Linken's Boots of Iron	withheld	Norgannon
+drowned-city	258905	274598	Bloodslash Axe	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+drowned-city	258905	274599	Oathbound Bracers	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+drowned-city	258905	274600	Berserker Shackles	featured	ATT,Everloot,EzWoW,Norgannon
+drowned-city	258924	271718	Linken's Boots of Iron	withheld	Norgannon
+drowned-city	258924	274601	Harpoon of Command	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+drowned-city	258924	274602	Brinebelly Leggings	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+drowned-city	258924	274613	Priestess Cloak	featured	ATT,Everloot,EzWoW,Norgannon
+drowned-city	260042	271718	Linken's Boots of Iron	withheld	Norgannon
+drowned-city	260042	274603	Dreadfrost Saber	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+drowned-city	260042	274604	Frosty Blunderbuss	featured	ATT,Everloot,EzWoW,Norgannon
+drowned-city	260042	274605	Briny Sash	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+drowned-city	264177	286646	Gill's Gills	guide	EzWoW,Norgannon
+drowned-city	264177	271718	Linken's Boots of Iron	withheld	Norgannon
+drowned-city	264177	286649	Tidebound Dagger	guide	EzWoW,Norgannon
+excavation-site-wetlands	260322	273024	Glinteye Slippers	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+excavation-site-wetlands	260322	273022	Supple Bellyskin Leggings	featured	ATT,EzWoW,Norgannon,Scout
+excavation-site-wetlands	260322	273023	Saltscale Girdle	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+excavation-site-wetlands	260325	273025	Raptorclaw Greaves	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+excavation-site-wetlands	260325	273026	Garb of Florid Feathers	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+excavation-site-wetlands	260325	273027	Raptor's Gaze	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+excavation-site-wetlands	260325	273106	Blueprint: Greenhouse	featured	ATT,EzWoW,Norgannon,Scout
+excavation-site-wetlands	260325	4714	Silver-thread Sash	withheld	Scout
+excavation-site-wetlands	260326	273028	Reliquary Mantle	featured	ATT,EzWoW,Norgannon,Scout
+excavation-site-wetlands	260326	273029	Golemsight Long Gun	featured	ATT,Everloot,EzWoW,Norgannon
+excavation-site-wetlands	260326	273030	Ring of Power Regulation	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+excavation-site-wetlands	260326	270866	Titan Relic	featured	ATT,EG-corpse,EzWoW,Norgannon
+excavation-site-wetlands	260326	273097	Blueprint: Rock Garden	featured	ATT,EzWoW,Norgannon,Scout
+excavation-site-wetlands	260326	270865	Titan Relic	featured	ATT,Scout
+gnomeregan	7361	9445	Grubbis Paws	featured	ATT,EG-corpse,EzWoW,Norgannon,Scout
+gnomeregan	7361	6400	Glimmering Shield	withheld	Norgannon
+gnomeregan	7361	274042	Skullduggery Belt	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+gnomeregan	7361	274043	Irradiated Shield	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+gnomeregan	7361	4633	Heavy Bronze Lockbox	withheld	Scout
+gnomeregan	7361	6607	Dervish Leggings	withheld	Scout
+gnomeregan	7361	251353	Plans: Acolyte's Chain Helm	other	Everloot
+gnomeregan	7361	253982	Pattern: Filigreed Shadow Circlet	other	EG-corpse
+gnomeregan	7079	9452	Hydrocane	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+gnomeregan	7079	9453	Toxic Revenger	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon,Scout
+gnomeregan	7079	9454	Acidic Walkers	encounter	ATT,EG-roll,EzWoW,Norgannon
+gnomeregan	7079	6388	Glimmering Mail Pauldrons	withheld	Norgannon
+gnomeregan	7079	9451	Bubbling Water	withheld	Everloot,Scout
+gnomeregan	7079	15242	Honed Stiletto	withheld	Everloot
+gnomeregan	7079	251351	Plans: Guard's Chain Helm	other	Everloot
+gnomeregan	7079	252818	Pattern: Stormrider's Leather Helm	other	Everloot
+gnomeregan	7079	253980	Pattern: Filigreed Flame Circlet	encounter	EG-roll
+gnomeregan	6235	9446	Electrocutioner Leg	featured	ATT,EG-corpse,EzWoW,Norgannon,Scout
+gnomeregan	6235	9447	Electrocutioner Lagnut	guide	ATT,EzWoW,Norgannon
+gnomeregan	6235	9448	Spidertank Oilrag	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+gnomeregan	6235	4073	Glimmering Mail Greaves	withheld	Norgannon
+gnomeregan	6235	4306	Silk Cloth	withheld	Everloot
+gnomeregan	6235	4634	Iron Lockbox	withheld	EG-corpse,EG-roll
+gnomeregan	6235	6893	Workshop Key	featured	ATT,EG-corpse,Everloot,EzWoW,Scout
+gnomeregan	6235	253984	Pattern: Filigreed Pearly Circlet	other	Scout
+gnomeregan	6229	9449	Manual Crowd Pummeler	guide	ATT,EzWoW,Norgannon
+gnomeregan	6229	9450	Gnomebot Operating Boots	featured	ATT,EG-roll,Everloot,EzWoW,Norgannon,Scout
+gnomeregan	6229	5007	Band of Thorns	withheld	Norgannon
+gnomeregan	6229	9819	Durable Tunic	withheld	Norgannon
+gnomeregan	6229	11827	Schematic: Lil' Smoky	withheld	Norgannon
+gnomeregan	6229	274049	Schematic: 9-60 Battery Pack	guide	ATT,EzWoW,Norgannon
+gnomeregan	6229	274068	Thermaplugg Medal of Honor	guide	ATT,EzWoW,Norgannon
+gnomeregan	6228	9455	Emissary Cuffs	guide	ATT,EzWoW,Norgannon
+gnomeregan	6228	9456	Glass Shooter	guide	ATT,EzWoW,Norgannon
+gnomeregan	6228	9457	Royal Diplomatic Scepter	guide	ATT,EzWoW,Norgannon
+gnomeregan	6228	5108	Dark Iron Leather	guide	ATT
+gnomeregan	7800	4413	Schematic: Discombobulator Ray	guide	ATT,EzWoW,Norgannon
+gnomeregan	7800	7742	Schematic: Gnomish Cloaking Device	guide	ATT,EzWoW,Norgannon
+gnomeregan	7800	9458	Thermaplugg's Central Core	featured	ATT,EzWoW,Norgannon,Scout
+gnomeregan	7800	9459	Thermaplugg's Left Arm	featured	ATT,Everloot,EzWoW,Norgannon
+gnomeregan	7800	9461	Charged Gear	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon,Scout
+gnomeregan	7800	9492	Electromagnetic Gigaflux Reactivator	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+gnomeregan	7800	4411	Schematic: Flame Deflector	guide	ATT,EzWoW,Norgannon
+gnomeregan	7800	9871	Renegade Leggings	withheld	Norgannon
+gnomeregan	7800	4717	Mail Combat Belt	withheld	Norgannon
+gnomeregan	7800	6672	Schematic: Flash Bomb	guide	ATT,EzWoW,Norgannon
+gnomeregan	7800	7192	Schematic: Goblin Rocket Boots	guide	ATT,EzWoW,Norgannon
+gnomeregan	7800	7560	Schematic: Gnomish Universal Remote	guide	ATT,EzWoW,Norgannon
+gnomeregan	7800	7561	Schematic: Goblin Jumper Cables	guide	ATT,EzWoW,Norgannon
+gnomeregan	7800	11828	Schematic: Pet Bombling	withheld	Norgannon
+gnomeregan	7800	4408	Schematic: Mechanical Squirrel	guide	ATT
+gnomeregan	7800	4409	Schematic: Small Seaforium Charge	guide	ATT
+gnomeregan	7800	4410	Schematic: Shadow Goggles	guide	ATT
+gnomeregan	7800	4412	Schematic: Moonsight Rifle	guide	ATT
+gnomeregan	7800	4414	Schematic: Portable Bronze Mortar	guide	ATT
+gnomeregan	7800	4415	Schematic: Craftsman's Monocle	guide	ATT,EzWoW
+gnomeregan	7800	4416	Schematic: Goblin Land Mine	guide	ATT
+gnomeregan	7800	4417	Schematic: Large Seaforium Charge	guide	ATT
+gnomeregan	7800	6716	Schematic: EZ-Thro Dynamite	guide	ATT
+gnomeregan	7800	7437	Twilight Cuffs	withheld	Everloot
+gnomeregan	7800	9299	Thermaplugg's Safe Combination	withheld	EG-corpse,Everloot
+gnomeregan	7800	9833	Scaled Leather Leggings	withheld	Scout
+gnomeregan	7800	9855	Archer's Belt	other	Everloot,Scout
+gnomeregan	7800	9862	Archer's Trousers	withheld	Everloot
+gnomeregan	7800	9863	Archer's Shoulderpads	withheld	EG-corpse,EG-roll
+hall-of-thanes	261306	270227	Ephemeral Choker	featured	ATT,EG-roll,EzWoW,Norgannon,Scout
+hall-of-thanes	261306	271096	Aetherwisp Bracers	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+hall-of-thanes	261306	271097	Spiritwraith Drape	featured	ATT,EzWoW,Norgannon,Scout
+hall-of-thanes	261316	270230	Kindlegem Girdle	featured	ATT,EzWoW,Norgannon,Scout
+hall-of-thanes	261316	270231	Flamefist Grips	featured	ATT,EzWoW,Norgannon,Scout
+hall-of-thanes	261316	271095	Fang of Magmatus	featured	ATT,EzWoW,Norgannon,Scout
+hall-of-thanes	261311	270228	Golemheart Stave	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+hall-of-thanes	261311	271098	Golemguard Chest	featured	ATT,EzWoW,Norgannon,Scout
+hall-of-thanes	261311	270229	Treads of the Protector Golem	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+hall-of-thanes	261319	270256	Durgen's Crescent Axe	featured	ATT,EzWoW,Norgannon,Scout
+hall-of-thanes	261319	270260	Direhammer Leggings	featured	ATT,EzWoW,Norgannon,Scout
+hall-of-thanes	261319	270261	Robes of the Disgraced Thane	featured	ATT,EG-roll,EzWoW,Norgannon,Scout
+hall-of-thanes	261319	274286	Durgen Dirgehammer's Head	featured	EG-corpse,EzWoW,Norgannon,Scout
+kroldok-stronghold	258966	274996	Resistance Breaker Spaulder	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+kroldok-stronghold	258966	274997	Chain of Binding	featured	ATT,Everloot,EzWoW,Norgannon
+kroldok-stronghold	258966	274995	Slavecrusher Scepter	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+kroldok-stronghold	258966	273101	Blueprint: Expert Campfire	featured	ATT,Norgannon,Scout
+kroldok-stronghold	258972	275000	Zarmok's Plated Signet	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+kroldok-stronghold	258972	274998	Shadowlight Athame	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+kroldok-stronghold	258972	274999	Shadecaster's Leggings	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+kroldok-stronghold	259281	275001	Bloodied Gutslicer	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+kroldok-stronghold	259281	275002	War Handler's Gaze	guide	ATT,EzWoW,Norgannon
+kroldok-stronghold	259281	275003	Worgbinder's Treads	featured	ATT,EG-corpse,EzWoW,Norgannon,Scout
+kroldok-stronghold	258964	275004	Chain of the Corruptor	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+kroldok-stronghold	258964	275005	Krol'dok Warplate Chest	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+kroldok-stronghold	258964	275006	Krol'dok Warplate Helmet	featured	ATT,EzWoW,Norgannon,Scout
+kroldok-stronghold	258964	267104	Tome of Twilight	featured	EG-corpse,EzWoW,Scout
+kroldok-stronghold	264773	286430	Toofbreaker	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon,Scout
+kroldok-stronghold	264773	286429	Big-Belly Belt	guide	ATT,EzWoW,Norgannon
+kroldok-stronghold	264773	286428	Band of Bossman	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon
+kroldok-stronghold	258968	275009	Emblem of Slamming	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+kroldok-stronghold	258968	275007	Mugg's Jabber	featured	ATT,EG-corpse,EzWoW,Norgannon
+kroldok-stronghold	258968	275010	Strongly Scented Hood	featured	ATT,EG-corpse,EzWoW,Norgannon
+kroldok-stronghold	258968	275008	Mugg's Crosser	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+kroldok-stronghold	258968	267086	Eye of Mugg	featured	EG-corpse,EzWoW,Scout
+kroldok-stronghold	258968	271721	Krol'dok Ogre Key	guide	ATT,EzWoW
+lbrs	9196	12534	Omokk's Head	featured	ATT,EzWoW,Norgannon,Scout
+lbrs	9196	13166	Slamshot Shoulders	guide	ATT,EzWoW,Norgannon
+lbrs	9196	13167	Fist of Omokk	guide	ATT,EzWoW,Norgannon
+lbrs	9196	13168	Plate of the Shaman King	featured	ATT,EzWoW,Norgannon,Scout
+lbrs	9196	13169	Tressermane Leggings	guide	ATT,EzWoW,Norgannon
+lbrs	9196	13170	Skyshroud Leggings	guide	ATT,EzWoW,Norgannon
+lbrs	9196	16670	Boots of Elements	guide	ATT,EzWoW,Norgannon
+lbrs	9196	12336	Gemstone of Spirestone	guide	ATT,EzWoW,Norgannon
+lbrs	9236	13352	Vosh'gajin's Snakestone	guide	ATT,Norgannon
+lbrs	9236	16712	Shadowcraft Gloves	guide	ATT,EzWoW,Norgannon
+lbrs	9236	12626	Funeral Cuffs	guide	ATT,EzWoW,Norgannon
+lbrs	9236	12651	Blackcrow	featured	ATT,EzWoW,Norgannon,Scout
+lbrs	9236	12653	Riphook	guide	ATT,EzWoW,Norgannon
+lbrs	9236	13255	Trueaim Gauntlets	guide	ATT,EzWoW,Norgannon
+lbrs	9236	13257	Demonic Runed Spaulders	guide	ATT,EzWoW,Norgannon
+lbrs	9236	12654	Doomshot	featured	ATT,EzWoW,Norgannon,Scout
+lbrs	9237	13173	Flightblade Throwing Axe	guide	ATT,EzWoW,Norgannon
+lbrs	9237	21524	Red Winter Hat	withheld	Norgannon
+lbrs	9237	16676	Beaststalker's Gloves	guide	ATT,EzWoW,Norgannon
+lbrs	9237	12582	Keris of Zul'Serak	featured	ATT,EzWoW,Norgannon,Scout
+lbrs	9237	13175	Voone's Twitchbow	guide	ATT,Norgannon
+lbrs	9237	13177	Talisman of Evasion	guide	ATT,EzWoW,Norgannon
+lbrs	9237	13178	Rosewine Circle	withheld	Norgannon
+lbrs	9237	13179	Brazecore Armguards	guide	ATT,EzWoW,Norgannon
+lbrs	9237	22231	Kayser's Boots of Precision	guide	ATT,EzWoW,Norgannon
+lbrs	9237	12335	Gemstone of Smolderthorn	guide	ATT,EzWoW,Norgannon
+lbrs	9237	1168	Skullflame Shield	withheld	Norgannon
+lbrs	9237	2099	Dwarven Hand Cannon	withheld	Norgannon
+lbrs	9237	2245	Helm of Narv	withheld	Norgannon
+lbrs	10596	13183	Venomspitter	guide	ATT,EzWoW,Norgannon
+lbrs	10596	13213	Smolderweb's Eye	guide	ATT,EzWoW,Norgannon
+lbrs	10596	13244	Gilded Gauntlets	featured	ATT,EzWoW,Norgannon,Scout
+lbrs	10596	16715	Wildheart Boots	guide	ATT,EzWoW,Norgannon
+lbrs	10596	249521	Formula: Dormant Heart of the Mountain	featured	ATT,Norgannon,Scout
+lbrs	10584	13178	Rosewine Circle	featured	ATT,EzWoW,Norgannon,Scout
+lbrs	10584	13258	Slaghide Gauntlets	guide	ATT,EzWoW,Norgannon
+lbrs	10584	13259	Ribsteel Footguards	guide	ATT,EzWoW,Norgannon
+lbrs	10584	16670	Boots of Elements	withheld	Norgannon
+lbrs	10584	22232	Marksman's Girdle	guide	ATT,EzWoW,Norgannon
+lbrs	10584	18784	Top Half of Advanced Armorsmithing: Volume III	featured	ATT,EzWoW,Norgannon,Scout
+lbrs	10584	13053	Doombringer	withheld	Norgannon
+lbrs	10584	12712	Warosh's Mojo	featured	ATT,Scout
+lbrs	9736	13252	Cloudrunner Girdle	guide	ATT,EzWoW,Norgannon
+lbrs	9736	13253	Hands of Power	guide	ATT,EzWoW,Norgannon
+lbrs	9736	12835	Plans: Annihilator	guide	ATT,Norgannon
+lbrs	9736	273115	Blueprint: Iron Oven	guide	ATT,Norgannon
+lbrs	9736	13247	Quartermaster Zigris' Footlocker	guide	ATT,EzWoW
+lbrs	9736	16716	Wildheart Belt	withheld	Scout
+lbrs	10220	13210	Pads of the Dread Wolf	guide	ATT,EzWoW,Norgannon
+lbrs	10220	13211	Slashclaw Bracers	guide	ATT,EzWoW,Norgannon
+lbrs	10220	13212	Halycon's Spiked Collar	guide	ATT,EzWoW,Norgannon
+lbrs	10220	22313	Ironweave Bracers	featured	ATT,EzWoW,Norgannon,Scout
+lbrs	10268	13205	Rhombeard Protector	guide	ATT,EzWoW,Norgannon
+lbrs	10268	13206	Wolfshear Leggings	featured	ATT,EzWoW,Norgannon,Scout
+lbrs	10268	13208	Bleak Howler Armguards	guide	ATT,EzWoW,Norgannon
+lbrs	10268	16718	Wildheart Spaulders	guide	ATT,EzWoW,Norgannon
+lbrs	9568	12780	General Drakkisath's Command	featured	ATT,EzWoW,Norgannon,Scout
+lbrs	9568	16679	Beaststalker's Mantle	featured	ATT,EzWoW,Norgannon,Scout
+lbrs	9568	13148	Chillpike	guide	ATT,EzWoW,Norgannon
+lbrs	9568	13161	Trindlehaven Staff	guide	ATT,EzWoW,Norgannon
+lbrs	9568	13162	Reiver Claws	guide	ATT,EzWoW,Norgannon
+lbrs	9568	13163	Relentless Scythe	guide	ATT,EzWoW,Norgannon
+lbrs	9568	13164	Heart of the Scale	guide	ATT,EzWoW,Norgannon
+lbrs	9568	22321	Heart of Wyrmthalak	guide	ATT,EzWoW,Norgannon
+lbrs	9568	12337	Gemstone of Bloodaxe	featured	ATT,EzWoW,Norgannon,Scout
+lbrs	9568	13143	Mark of the Dragon Lord	guide	ATT,EzWoW,Norgannon
+lbrs	9568	272018	Overseer's License	withheld	Norgannon
+lbrs	9568	10217	Elegant Leggings	withheld	Scout
+lbrs	9568	281018	Scroll: RARE SERVICHI RADAR	withheld	Scout
+lbrs	9219	12608	Butcher's Apron	guide	ATT,Norgannon
+lbrs	9219	13286	Rivenspike	guide	ATT,Norgannon
+lbrs	9218	13285	The Blackrock Slicer	guide	ATT,Norgannon
+lbrs	9218	13284	Swiftdart Battleboots	guide	ATT,Norgannon
+lbrs	9217	13261	Globe of D'sak	guide	ATT,Norgannon
+lbrs	9217	13282	Ogreseer Tower Boots	guide	ATT,Norgannon
+lbrs	9217	13283	Magus Ring	guide	ATT,Norgannon
+lbrs	9596	12621	Demonfork	guide	ATT,EzWoW,Norgannon
+lbrs	9596	12634	Chiselbrand Girdle	guide	ATT,EzWoW,Norgannon
+lbrs	9596	12637	Backusarian Gauntlets	guide	ATT,EzWoW,Norgannon
+lbrs	9596	12838	Plans: Arcanite Reaper	guide	ATT,Norgannon
+lbrs	9718	13198	Hurd Smasher	guide	ATT,EzWoW,Norgannon
+lbrs	9718	13203	Armswake Cloak	guide	ATT,EzWoW,Norgannon
+lbrs	9718	13204	Bashguuder	guide	ATT,EzWoW,Norgannon
+lbrs	10376	13184	Fallbrush Handgrips	guide	ATT,EzWoW,Norgannon
+lbrs	10376	13185	Sunderseer Mantle	guide	ATT,EzWoW,Norgannon
+lbrs	10376	13218	Fang of the Crystal Spider	guide	ATT,EzWoW,Norgannon
+lbrs	10263	13181	Demonskin Gloves	guide	ATT,Norgannon
+lbrs	10263	13182	Phase Blade	guide	ATT,Norgannon
+maraudon	13282	17744	Heart of Noxxion	featured	ATT,EzWoW,Norgannon,Scout
+maraudon	13282	17745	Noxious Shooter	featured	ATT,EG-corpse,EzWoW,Norgannon
+maraudon	13282	17746	Noxxion's Shackles	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+maraudon	13282	17684	Theradric Crystal Carving	withheld	EG-corpse
+maraudon	13282	17702	Celebrian Rod	featured	ATT,EG-corpse,Scout
+maraudon	13282	252870	Pattern: Skycaller's Leather Gauntlets	other	EG-corpse
+maraudon	12258	17748	Vinerot Sandals	guide	ATT,EzWoW,Norgannon
+maraudon	12258	17749	Phytoskin Spaulders	featured	ATT,EG-corpse,EzWoW,Norgannon
+maraudon	12258	17750	Chloromesh Girdle	featured	ATT,Everloot,EzWoW,Norgannon
+maraudon	12258	17751	Brusslehide Leggings	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+maraudon	12258	14446	Venomshroud Belt	withheld	Norgannon
+maraudon	12258	4808	Well Stone	withheld	Norgannon
+maraudon	12258	3820	Stranglekelp	withheld	Everloot
+maraudon	12258	10286	Heart of the Wild	withheld	Scout
+maraudon	12258	251403	Plans: Officer's Gloves	other	EG-corpse
+maraudon	12236	17703	Celebrian Diamond	featured	ATT,EG-corpse,Norgannon,Scout
+maraudon	12236	17752	Satyr's Lash	guide	ATT,EzWoW,Norgannon
+maraudon	12236	17754	Infernal Trickster Leggings	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon
+maraudon	12236	17755	Satyrmane Sash	featured	ATT,EG-roll,Everloot,EzWoW,Norgannon,Scout
+maraudon	12236	275864	Putridus Wall	guide	ATT,Norgannon
+maraudon	12236	252867	Pattern: Prowler's Leather Gauntlets	encounter	EG-roll
+maraudon	12237	17741	Nature's Embrace	guide	ATT,EzWoW,Norgannon
+maraudon	12237	17742	Fungus Shroud Armor	guide	ATT,EzWoW,Norgannon
+maraudon	12237	17767	Bloomsprout Headpiece	featured	ATT,EG-corpse,EzWoW,Norgannon
+maraudon	12237	254098	Pattern: Frothing Gloves	other	EG-corpse
+maraudon	13601	17717	Megashot Rifle	featured	ATT,EG-roll,EzWoW,Norgannon,Scout
+maraudon	13601	17718	Gizlock's Hypertech Buckler	featured	ATT,EG-corpse,EzWoW,Norgannon
+maraudon	13601	17719	Inventor's Focal Sword	guide	ATT,EzWoW,Norgannon
+maraudon	13601	4018	Whetted Claymore	withheld	EG-corpse
+maraudon	12225	17738	Claw of Celebras	featured	ATT,EzWoW,Norgannon,Scout
+maraudon	12225	17739	Grovekeeper's Drape	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+maraudon	12225	17740	Soothsayer's Headdress	featured	ATT,Everloot,EzWoW,Norgannon
+maraudon	12225	14448	Highborne Bracelets	withheld	Norgannon
+maraudon	12225	4338	Mageweave Cloth	withheld	EG-corpse,Everloot
+maraudon	12225	252919	Pattern: Skycaller's Mail Gauntlets	other	Everloot
+maraudon	12203	17733	Fist of Stone	withheld	Norgannon
+maraudon	12203	17734	Helm of the Mountain	featured	ATT,EG-corpse,EzWoW,Norgannon,Scout
+maraudon	12203	17736	Rockgrip Gauntlets	featured	ATT,Everloot,EzWoW,Norgannon
+maraudon	12203	17737	Cloud Stone	featured	ATT,Everloot,EzWoW,Norgannon
+maraudon	12203	17943	Fist of Stone	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+maraudon	12203	15642	Ironhide Greaves	withheld	Norgannon
+maraudon	12203	4552	Smooth Stone Chip	withheld	EG-corpse
+maraudon	12203	4784	Lifeless Stone	withheld	EG-corpse
+maraudon	12203	7912	Solid Stone	withheld	EG-corpse
+maraudon	12203	8150	Deeprock Salt	withheld	EG-corpse
+maraudon	12203	15245	Vorpal Dagger	withheld	Everloot
+maraudon	13596	17728	Albino Crocscale Boots	guide	ATT,EzWoW,Norgannon
+maraudon	13596	17730	Gatorbite Axe	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+maraudon	13596	17732	Rotgrip Mantle	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon
+maraudon	13596	770	Pointy Crocolisk Tooth	withheld	Everloot
+maraudon	12201	17707	Gemshard Heart	featured	ATT,Everloot,EzWoW,Norgannon
+maraudon	12201	17710	Charstone Dirk	guide	ATT,EzWoW,Norgannon
+maraudon	12201	17711	Elemental Rockridge Leggings	featured	ATT,EzWoW,Norgannon,Scout
+maraudon	12201	17713	Blackstone Ring	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+maraudon	12201	17714	Bracers of the Stone Princess	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+maraudon	12201	17715	Eye of Theradras	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+maraudon	12201	17766	Princess Theradras' Scepter	guide	ATT,EzWoW,Norgannon
+maraudon	12201	17780	Blade of Eternal Darkness	guide	ATT,EzWoW,Norgannon
+maraudon	12201	10128	Revenant Chestplate	withheld	Norgannon
+maraudon	12201	10171	Templar Bracers	withheld	Norgannon
+maraudon	12201	14922	Lofty Sabatons	withheld	Norgannon
+ragefire-chasm	11517	272996	Trogg Scepter	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+ragefire-chasm	11517	272998	Bone Knuckles	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+ragefire-chasm	11517	272999	Barbaric Crossbow	featured	ATT,Everloot,EzWoW,Norgannon
+ragefire-chasm	11517	252781	Pattern: Stormrider's Leather Gloves	withheld	Norgannon
+ragefire-chasm	11517	252782	Pattern: Wisdom's Leather Gloves	withheld	Norgannon
+ragefire-chasm	11517	818	Tigerseye	withheld	Everloot
+ragefire-chasm	11517	1812	Short-handled Battle Axe	withheld	Everloot
+ragefire-chasm	11517	2589	Linen Cloth	withheld	EG-corpse,Everloot
+ragefire-chasm	11517	252773	Pattern: Defender's Leather Armor	other	EG-corpse,EG-roll
+ragefire-chasm	11520	14540	Taragaman the Hungerer's Heart	featured	ATT,EG-corpse,Norgannon
+ragefire-chasm	11520	14145	Cursed Felblade	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+ragefire-chasm	11520	14148	Crystalline Cuffs	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+ragefire-chasm	11520	14149	Subterranean Cape	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+ragefire-chasm	11520	251361	Plans: Guard's Gloves	withheld	Norgannon
+ragefire-chasm	11520	251362	Plans: Protector's Gloves	withheld	Norgannon
+ragefire-chasm	11520	251363	Plans: Acolyte's Gloves	withheld	Norgannon
+ragefire-chasm	11520	252782	Pattern: Wisdom's Leather Gloves	withheld	Norgannon
+ragefire-chasm	11520	2589	Linen Cloth	withheld	EG-corpse,Everloot
+ragefire-chasm	11518	14147	Cavedweller Bracers	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+ragefire-chasm	11518	14150	Robe of Evocation	featured	ATT,Everloot,EzWoW,Norgannon
+ragefire-chasm	11518	14151	Chanting Blade	featured	ATT,Everloot,EzWoW,Norgannon
+ragefire-chasm	11518	251360	Plans: Veteran's Gloves	withheld	Norgannon
+ragefire-chasm	11518	253906	Pattern: Filigreed Flame Gown	withheld	Norgannon
+ragefire-chasm	11518	1768	Canvas Pants	withheld	EG-corpse
+ragefire-chasm	11518	2589	Linen Cloth	withheld	EG-corpse
+ragefire-chasm	11518	2780	Light Hunting Bow	withheld	EG-corpse
+ragefire-chasm	11519	273003	Searing Dagger	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+ragefire-chasm	11519	273005	Satyrskin Cloak	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+ragefire-chasm	11519	273007	Chasm Walkers	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+ragefire-chasm	11519	252780	Pattern: Totemic Leather Gloves	withheld	Norgannon
+ragefire-chasm	11519	252782	Pattern: Wisdom's Leather Gloves	withheld	Norgannon
+ragefire-chasm	11519	253908	Pattern: Filigreed Shadow Gown	withheld	Norgannon
+ragefire-chasm	11519	253910	Pattern: Filigreed Pearly Gown	withheld	Norgannon
+ragefire-chasm	11519	2287	Haunch of Meat	withheld	Everloot
+ragefire-chasm	11519	2589	Linen Cloth	withheld	EG-corpse
+razorfen-downs	7355	10775	Carapace of Tuten'kash	featured	ATT,Everloot,EzWoW,Norgannon
+razorfen-downs	7355	10776	Silky Spider Cape	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+razorfen-downs	7355	10777	Arachnid Gloves	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+razorfen-downs	7355	252898	Pattern: Skirmisher's Mail Boots	other	Everloot
+razorfen-downs	7357	10769	Glowing Eye of Mordresh	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+razorfen-downs	7357	10770	Mordresh's Lifeless Skull	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+razorfen-downs	7357	10771	Deathmage Sash	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+razorfen-downs	7357	3801	Hardened Leather Boots	withheld	Everloot
+razorfen-downs	7357	4338	Mageweave Cloth	withheld	Everloot
+razorfen-downs	7357	14228	Embersilk Coronet	withheld	Scout
+razorfen-downs	7357	252843	Pattern: Prowler's Leather Shoes	guide	ATT
+razorfen-downs	7357	254048	Pattern: Radiant Cord	other	Everloot
+razorfen-downs	8567	10772	Glutton's Cleaver	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+razorfen-downs	8567	10774	Fleshhide Shoulders	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+razorfen-downs	8567	274385	Abomination Chain	featured	ATT,Everloot,EzWoW,Norgannon
+razorfen-downs	8567	251402	Plans: Justicar's Boots	withheld	Norgannon
+razorfen-downs	8567	1708	Sweet Nectar	withheld	Scout
+razorfen-downs	8567	4306	Silk Cloth	withheld	Everloot
+razorfen-downs	7354	10758	X'caliboar	featured	ATT,Everloot,EzWoW,Norgannon
+razorfen-downs	7354	10767	Savage Boar's Guard	guide	ATT,EzWoW,Norgannon
+razorfen-downs	7354	10768	Boar Champion's Belt	guide	ATT,EzWoW,Norgannon
+razorfen-downs	7354	252899	Pattern: Mender's Mail Boots	other	Everloot
+razorfen-downs	7356	10760	Swine Fists	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+razorfen-downs	7356	10766	Plaguerot Sprig	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+razorfen-downs	7356	274380	Decaying Flesh Bands	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+razorfen-downs	7356	3805	Hardened Leather Pants	withheld	Everloot
+razorfen-downs	7356	4306	Silk Cloth	withheld	Everloot
+razorfen-downs	7356	14770	Ravager's Armguards	withheld	EG-corpse,EG-roll
+razorfen-downs	7356	252899	Pattern: Mender's Mail Boots	other	Scout
+razorfen-downs	7356	254040	Pattern: Frothing Cord	encounter	EG-roll
+razorfen-downs	7358	10420	Skull of the Coldbringer	featured	ATT,EG-corpse,Norgannon
+razorfen-downs	7358	10761	Coldrage Dagger	featured	ATT,Everloot,EzWoW,Norgannon
+razorfen-downs	7358	10762	Robes of the Lich	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+razorfen-downs	7358	10763	Icemetal Barbute	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+razorfen-downs	7358	10764	Deathchill Armor	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+razorfen-downs	7358	10765	Bonefingers	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+razorfen-downs	7358	274381	Coldbringer Spine	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+razorfen-downs	7358	4306	Silk Cloth	withheld	EG-corpse
+razorfen-downs	7358	251401	Plans: Prefect's Boots	other	EG-corpse,EG-roll
+razorfen-downs	14686	23177	Lady Falther'ess' Finger	withheld	Norgannon
+razorfen-downs	14686	23178	Mantle of Lady Falther'ess	withheld	Norgannon
+razorfen-downs	14686	3783	Light Scimitar	withheld	Norgannon
+razorfen-downs	14686	15978	Geomancer's Rod	withheld	Norgannon
+razorfen-kraul	6168	274149	Thornweaver Drape	featured	ATT,DropTables,Everloot,EzWoW,Norgannon
+razorfen-kraul	6168	274152	Roogug's Severed Head	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+razorfen-kraul	6168	274155	Geomancer Headdress	featured	ATT,Everloot,EzWoW,Norgannon
+razorfen-kraul	6168	1784	Cross-stitched Pants	withheld	EG-corpse
+razorfen-kraul	6168	2785	Stiff Recurve Bow	withheld	DropTables
+razorfen-kraul	6168	4306	Silk Cloth	withheld	DropTables,EG-corpse,Everloot
+razorfen-kraul	6168	6841	Vial of Phlogiston	featured	ATT,EG-corpse,Everloot,EzWoW
+razorfen-kraul	6168	248706	Waylaid Crate: Journeyman Ingots	withheld	DropTables
+razorfen-kraul	4424	6681	Thornspike	featured	ATT,DropTables,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+razorfen-kraul	4424	274158	Death Prophet Spine	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+razorfen-kraul	4424	274159	Thorncursed Grips	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+razorfen-kraul	4424	252820	Pattern: Brawler's Leather Legguards	withheld	Norgannon
+razorfen-kraul	4424	1827	Meat Cleaver	withheld	Everloot
+razorfen-kraul	4424	2786	Oiled Blunderbuss	withheld	DropTables
+razorfen-kraul	4424	15343	Pathfinder Gloves	withheld	EG-corpse,EG-roll
+razorfen-kraul	4424	251353	Plans: Acolyte's Chain Helm	other	DropTables
+razorfen-kraul	4428	2816	Death Speaker Scepter	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+razorfen-kraul	4428	6682	Death Speaker Robes	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+razorfen-kraul	4428	6685	Death Speaker Mantle	featured	ATT,DropTables,Everloot,EzWoW,Norgannon
+razorfen-kraul	4428	1755	Reinforced Chain Boots	withheld	DropTables
+razorfen-kraul	4428	1785	Cross-stitched Shoulderpads	withheld	Scout
+razorfen-kraul	4428	1829	Short Cutlass	withheld	Everloot
+razorfen-kraul	4428	2592	Wool Cloth	withheld	Scout
+razorfen-kraul	4428	4306	Silk Cloth	withheld	DropTables,Everloot
+razorfen-kraul	4428	15136	Cutthroat's Belt	withheld	EG-corpse,EG-roll
+razorfen-kraul	4420	6686	Tusken Helm	featured	ATT,Everloot,EzWoW,Norgannon
+razorfen-kraul	4420	6687	Corpsemaker	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+razorfen-kraul	4420	274161	Quillord Mail Leggings	featured	ATT,DropTables,EG-corpse,EG-roll,EzWoW,Norgannon
+razorfen-kraul	4420	251379	Plans: Crusader's Silvered Chain Leggings	withheld	Norgannon
+razorfen-kraul	4420	252821	Pattern: Trapper's Leather Legguards	withheld	Norgannon
+razorfen-kraul	4420	3385	Lesser Mana Potion	withheld	Everloot
+razorfen-kraul	4420	3803	Hardened Cloak	withheld	EG-corpse
+razorfen-kraul	4420	4306	Silk Cloth	withheld	EG-corpse
+razorfen-kraul	4420	251350	Plans: Veteran's Chain Helm	other	EG-corpse,EG-roll
+razorfen-kraul	4422	6690	Ferine Leggings	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+razorfen-kraul	4422	6691	Swinetusk Shank	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+razorfen-kraul	4422	274160	Quilrager Throwing Axe	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+razorfen-kraul	4422	251378	Plans: Acolyte's Silvered Chain Leggings	withheld	Norgannon
+razorfen-kraul	4422	2295	Large Boar Tusk	withheld	EG-corpse,Everloot
+razorfen-kraul	4422	2677	Boar Ribs	withheld	Everloot
+razorfen-kraul	4422	3172	Boar Intestines	withheld	DropTables,EG-corpse,Everloot
+razorfen-kraul	4422	3403	Ivory Boar Tusk	withheld	DropTables
+razorfen-kraul	4422	251354	Plans: Crusader's Chain Helm	other	Everloot
+razorfen-kraul	4425	6695	Stygian Bone Amulet	guide	ATT,EzWoW,Norgannon
+razorfen-kraul	4425	6696	Nightstalker Bow	featured	ATT,EG-corpse,EzWoW,Norgannon
+razorfen-kraul	4425	6697	Batwing Mantle	featured	ATT,Everloot,EzWoW,Norgannon
+razorfen-kraul	4421	5792	Razorflank's Medallion	featured	ATT,Norgannon,Scout
+razorfen-kraul	4421	5793	Razorflank's Heart	featured	ATT,EG-corpse,Norgannon
+razorfen-kraul	4421	6692	Pronged Reaver	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+razorfen-kraul	4421	6693	Agamaggan's Clutch	featured	ATT,Everloot,EzWoW,Norgannon
+razorfen-kraul	4421	6694	Heart of Agamaggan	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+razorfen-kraul	4421	273103	Blueprint: Arcane Salvager	other	EG-corpse,EG-roll,Norgannon
+razorfen-kraul	4421	274463	Tattered Note	featured	EG-corpse,EzWoW,Norgannon
+razorfen-kraul	4421	17008	Small Scroll	featured	ATT,DropTables,EG-corpse,Everloot,EzWoW,Norgannon
+razorfen-kraul	4421	1705	Lesser Moonstone	withheld	Everloot
+razorfen-kraul	4421	251351	Plans: Guard's Chain Helm	other	Everloot
+razorfen-kraul	4421	251353	Plans: Acolyte's Chain Helm	other	EG-corpse,EG-roll
+razorfen-kraul	4842	6688	Whisperwind Headdress	featured	ATT,Everloot,EzWoW,Norgannon
+razorfen-kraul	4842	6689	Wind Spirit Staff	featured	ATT,Everloot,EzWoW,Norgannon
+razorfen-kraul	4842	3817	Reinforced Buckler	withheld	Everloot
+razorfen-kraul	4438	6679	Armor Piercer	featured	ATT,EG-corpse,Everloot,Norgannon
+razorfen-kraul	4438	4306	Silk Cloth	withheld	Everloot
+ruins-of-lordaeron	250660	271204	Meathook Slicer	featured	ATT,Everloot,EzWoW,Norgannon
+ruins-of-lordaeron	250660	271205	Abomination Bones	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon
+ruins-of-lordaeron	250660	271206	Leftover Abomination Skin	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon
+ruins-of-lordaeron	250660	280438	Abominable Head	featured	ATT,EG-corpse,Everloot
+ruins-of-lordaeron	250483	271201	Atrophic Girdle	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+ruins-of-lordaeron	250483	271202	Witherbite Bracers	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+ruins-of-lordaeron	250483	271203	Segmented Spider Leg	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+ruins-of-lordaeron	250483	275443	Highly Toxic Strain	withheld	EG-corpse
+ruins-of-lordaeron	250631	271207	Rotmender's Leggings	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+ruins-of-lordaeron	250631	271208	Grip of Fear	guide	ATT,EzWoW,Norgannon
+ruins-of-lordaeron	250631	271216	Scepter of the Abandoned	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+ruins-of-lordaeron	256097	271209	Bonerust Leggings	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+ruins-of-lordaeron	256097	271210	Tuskwrap Belt	featured	ATT,Everloot,EzWoW,Norgannon
+ruins-of-lordaeron	256097	271217	Corpse Chopper	encounter	ATT,EG-roll,EzWoW,Norgannon
+ruins-of-lordaeron	250657	271213	Mirror of Rath'mael	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+ruins-of-lordaeron	250657	271214	Rotmender's Treads	featured	ATT,Everloot,EzWoW,Norgannon
+ruins-of-lordaeron	250657	271215	Coldspire Staff	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+ruins-of-lordaeron	250657	273085	Blueprint: Fermenter	featured	Everloot,EzWoW,Norgannon
+ruins-of-lordaeron	250657	273103	Blueprint: Arcane Salvager	guide	EzWoW,Norgannon
+ruins-of-lordaeron	256035	271211	Vilewalkers	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+ruins-of-lordaeron	256035	271212	Bloodied Chestwraps	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+ruins-of-lordaeron	256035	271218	Vileblood Scimitar	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+ruins-of-lordaeron	255699	6641	Haunting Blade	guide	ATT,EzWoW,Norgannon
+ruins-of-lordaeron	255699	6642	Phantom Armor	featured	ATT,Everloot,EzWoW,Norgannon
+ruins-of-lordaeron	255699	251342	Plans: Protector's Chain Shirt	withheld	Norgannon
+ruins-of-lordaeron	255699	251343	Plans: Acolyte's Chain Shirt	withheld	Norgannon
+ruins-of-lordaeron	255699	251344	Plans: Crusader's Chain Shirt	withheld	Norgannon
+ruins-of-lordaeron	255699	252771	Pattern: Brawler's Leather Armor	withheld	Norgannon
+ruins-of-lordaeron	255699	252772	Pattern: Trapper's Leather Armor	withheld	Norgannon
+ruins-of-lordaeron	255699	252773	Pattern: Defender's Leather Armor	withheld	Norgannon
+ruins-of-lordaeron	255699	252776	Pattern: Wisdom's Leather Armor	withheld	Norgannon
+ruins-of-lordaeron	255699	253912	Pattern: Filigreed Shining Gown	withheld	Norgannon
+scholomance	10506	16734	Boots of Valor	guide	ATT,EzWoW,Norgannon
+scholomance	10506	13955	Stoneform Shoulders	guide	ATT,EzWoW,Norgannon
+scholomance	10506	13956	Clutch of Andros	guide	ATT,EzWoW,Norgannon
+scholomance	10506	13957	Gargoyle Slashers	guide	ATT,EzWoW,Norgannon
+scholomance	10506	13960	Heart of the Fiend	featured	ATT,EG-corpse,EzWoW,Norgannon
+scholomance	10506	13967	Windreaver Greaves	guide	ATT,EzWoW,Norgannon
+scholomance	10506	13969	Loomguard Armbraces	guide	ATT,EzWoW,Norgannon
+scholomance	10506	13983	Gravestone War Axe	guide	ATT,EzWoW,Norgannon
+scholomance	10506	14024	Frightalon	featured	ATT,EG-corpse,EzWoW,Norgannon
+scholomance	10506	12843	Corruptor's Scourgestone	withheld	EG-corpse
+scholomance	10503	13725	Krastinov's Bag of Horrors	guide	ATT,Norgannon
+scholomance	10503	16701	Dreadmist Mantle	encounter	ATT,EG-roll,EzWoW,Norgannon
+scholomance	10503	14541	Barovian Family Sword	guide	ATT,EzWoW,Norgannon
+scholomance	10503	14543	Darkshade Gloves	guide	ATT,EzWoW,Norgannon
+scholomance	10503	14545	Ghostloom Leggings	guide	ATT,EzWoW,Norgannon
+scholomance	10503	14548	Royal Cap Spaulders	guide	ATT,EzWoW,Norgannon
+scholomance	10503	18689	Phantasmal Cloak	guide	ATT,EzWoW,Norgannon
+scholomance	10503	18690	Wraithplate Leggings	guide	ATT,EzWoW,Norgannon
+scholomance	10503	22394	Staff of Metanoia	guide	ATT,EzWoW,Norgannon
+scholomance	10503	2243	Hand of Edward the Odd	withheld	Norgannon
+scholomance	10503	10160	Mercurial Circlet	withheld	EG-roll
+scholomance	10503	12843	Corruptor's Scourgestone	withheld	EG-roll
+scholomance	10503	13523	Blood of Innocents	guide	ATT,EzWoW
+scholomance	11622	18782	Top Half of Advanced Armorsmithing: Volume II	guide	ATT,EzWoW,Norgannon
+scholomance	11622	16711	Shadowcraft Boots	guide	ATT,EzWoW,Norgannon
+scholomance	11622	14528	Rattlecage Buckler	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+scholomance	11622	14531	Frightskull Shaft	guide	ATT,EzWoW,Norgannon
+scholomance	11622	14537	Corpselight Greaves	guide	ATT,EzWoW,Norgannon
+scholomance	11622	14538	Deadwalker Mantle	encounter	ATT,EG-roll,EzWoW,Norgannon
+scholomance	11622	14539	Bone Ring Helm	guide	ATT,EzWoW,Norgannon
+scholomance	11622	18686	Bone Golem Shoulders	guide	ATT,EzWoW,Norgannon
+scholomance	11622	13873	Viewing Room Key	guide	ATT,EzWoW
+scholomance	10433	14576	Ebon Hilt of Marduk	guide	ATT,Norgannon
+scholomance	10433	18692	Death Knight Sabatons	guide	ATT,Norgannon
+scholomance	10433	276069	Gravetoll Gavel	guide	ATT
+scholomance	10433	276071	The Black Helm	guide	ATT
+scholomance	10432	14577	Skullsmoke Pants	guide	ATT,Norgannon
+scholomance	10432	18691	Dark Advisor's Pendant	guide	ATT,Norgannon
+scholomance	10432	273121	Blueprint: Sewing Machine	guide	ATT,Norgannon
+scholomance	10432	273130	Undeath Engine	guide	ATT
+scholomance	10432	276072	Soulwoven Drape	guide	ATT
+scholomance	10432	276073		withheld	ATT
+scholomance	10508	13626	Human Head of Ras Frostwhisper	withheld	Norgannon
+scholomance	10508	13952	Iceblade Hacker	guide	ATT,EzWoW,Norgannon
+scholomance	10508	14340	Freezing Lich Robes	guide	ATT,EzWoW,Norgannon
+scholomance	10508	14487	Bonechill Hammer	guide	ATT,EzWoW,Norgannon
+scholomance	10508	14502	Frostbite Girdle	guide	ATT,EzWoW,Norgannon
+scholomance	10508	14503	Death's Clutch	guide	ATT,EzWoW,Norgannon
+scholomance	10508	14522	Maelstrom Leggings	guide	ATT,EzWoW,Norgannon
+scholomance	10508	14525	Boneclenched Gauntlets	guide	ATT,EzWoW,Norgannon
+scholomance	10508	16689	Magister's Mantle	guide	ATT,EzWoW,Norgannon
+scholomance	10508	18693	Shivery Handwraps	guide	ATT,EzWoW,Norgannon
+scholomance	10508	18694	Shadowy Mail Greaves	guide	ATT,EzWoW,Norgannon
+scholomance	10508	18695	Spellbound Tome	guide	ATT,EzWoW,Norgannon
+scholomance	10508	18696	Intricately Runed Shield	guide	ATT,EzWoW,Norgannon
+scholomance	10508	13521	Recipe: Flask of Supreme Power	guide	ATT,Norgannon
+scholomance	10508	13314	Alanna's Embrace	guide	ATT,EzWoW,Norgannon
+scholomance	10508	273112	Blueprint: Alchemy Laboratory	guide	ATT,Norgannon
+scholomance	10508	285960	Everfrost Sample	guide	ATT,Norgannon
+scholomance	10508	273125	Lich's Index Finger	guide	ATT
+scholomance	10901	16705	Dreadmist Wraps	guide	ATT,EzWoW,Norgannon
+scholomance	10901	10305	Scroll of Protection IV	withheld	EG-corpse
+scholomance	10901	12841	Invader's Scourgestone	withheld	EG-corpse
+scholomance	10901	14611	Bloodmail Hauberk	guide	EzWoW
+scholomance	10901	14612	Bloodmail Legguards	guide	EzWoW
+scholomance	10901	14614	Bloodmail Belt	guide	EzWoW
+scholomance	10901	14615	Bloodmail Gauntlets	guide	EzWoW
+scholomance	10901	14616	Bloodmail Boots	guide	EzWoW
+scholomance	10901	14620	Deathbone Girdle	guide	EzWoW
+scholomance	10901	14621	Deathbone Sabatons	guide	EzWoW
+scholomance	10901	14622	Deathbone Gauntlets	guide	EzWoW
+scholomance	10901	14623	Deathbone Legguards	guide	EzWoW
+scholomance	10901	14624	Deathbone Chestplate	guide	EzWoW
+scholomance	10901	14626	Necropile Robe	guide	EzWoW
+scholomance	10901	14629	Necropile Cuffs	guide	EzWoW
+scholomance	10901	14631	Necropile Boots	guide	EzWoW
+scholomance	10901	14632	Necropile Leggings	guide	EzWoW
+scholomance	10901	14633	Necropile Mantle	guide	EzWoW
+scholomance	10901	14636	Cadaverous Belt	guide	EzWoW
+scholomance	10901	14637	Cadaverous Armor	guide	EzWoW
+scholomance	10901	14638	Cadaverous Leggings	guide	EzWoW
+scholomance	10901	14640	Cadaverous Gloves	guide	EzWoW
+scholomance	10901	14641	Cadaverous Walkers	guide	EzWoW
+scholomance	10901	18680	Ancient Bone Bow	guide	EzWoW
+scholomance	10901	18681	Burial Shawl	guide	EzWoW
+scholomance	10901	18682	Ghoul Skin Leggings	guide	EzWoW
+scholomance	10901	18683	Hammer of the Vesper	guide	EzWoW
+scholomance	10901	18684	Dimly Opalescent Ring	guide	EzWoW
+scholomance	10901	20520	Dark Rune	withheld	EG-corpse,EG-roll
+scholomance	10901	23200	Totem of Sustaining	guide	EzWoW
+scholomance	10901	23201	Libram of Divinity	guide	EzWoW
+scholomance	10901	262890	Sealed Artisan's Writ	withheld	EG-corpse,EG-roll
+scholomance	10507	16716	Wildheart Belt	guide	ATT,EzWoW,Norgannon
+scholomance	10507	12753	Skin of Shadow	withheld	EG-corpse,EG-roll
+scholomance	10507	12843	Corruptor's Scourgestone	withheld	EG-corpse,EG-roll
+scholomance	10507	14611	Bloodmail Hauberk	guide	EzWoW
+scholomance	10507	14612	Bloodmail Legguards	guide	EzWoW
+scholomance	10507	14614	Bloodmail Belt	guide	EzWoW
+scholomance	10507	14615	Bloodmail Gauntlets	guide	EzWoW
+scholomance	10507	14616	Bloodmail Boots	guide	EzWoW
+scholomance	10507	14620	Deathbone Girdle	guide	EzWoW
+scholomance	10507	14621	Deathbone Sabatons	guide	EzWoW
+scholomance	10507	14622	Deathbone Gauntlets	guide	EzWoW
+scholomance	10507	14623	Deathbone Legguards	guide	EzWoW
+scholomance	10507	14624	Deathbone Chestplate	guide	EzWoW
+scholomance	10507	14626	Necropile Robe	guide	EzWoW
+scholomance	10507	14629	Necropile Cuffs	guide	EzWoW
+scholomance	10507	14631	Necropile Boots	guide	EzWoW
+scholomance	10507	14632	Necropile Leggings	guide	EzWoW
+scholomance	10507	14633	Necropile Mantle	guide	EzWoW
+scholomance	10507	14636	Cadaverous Belt	guide	EzWoW
+scholomance	10507	14637	Cadaverous Armor	guide	EzWoW
+scholomance	10507	14638	Cadaverous Leggings	guide	EzWoW
+scholomance	10507	14640	Cadaverous Gloves	guide	EzWoW
+scholomance	10507	14641	Cadaverous Walkers	guide	EzWoW
+scholomance	10507	18680	Ancient Bone Bow	guide	EzWoW
+scholomance	10507	18681	Burial Shawl	guide	EzWoW
+scholomance	10507	18682	Ghoul Skin Leggings	guide	EzWoW
+scholomance	10507	18683	Hammer of the Vesper	guide	EzWoW
+scholomance	10507	18684	Dimly Opalescent Ring	guide	EzWoW
+scholomance	10507	23200	Totem of Sustaining	guide	EzWoW
+scholomance	10507	23201	Libram of Divinity	guide	EzWoW
+scholomance	10505	16710	Shadowcraft Bracers	guide	ATT,EzWoW,Norgannon
+scholomance	10505	12843	Corruptor's Scourgestone	withheld	EG-roll
+scholomance	10505	14611	Bloodmail Hauberk	guide	EzWoW
+scholomance	10505	14612	Bloodmail Legguards	guide	EzWoW
+scholomance	10505	14614	Bloodmail Belt	guide	EzWoW
+scholomance	10505	14615	Bloodmail Gauntlets	guide	EzWoW
+scholomance	10505	14616	Bloodmail Boots	guide	EzWoW
+scholomance	10505	14620	Deathbone Girdle	guide	EzWoW
+scholomance	10505	14621	Deathbone Sabatons	guide	EzWoW
+scholomance	10505	14622	Deathbone Gauntlets	guide	EzWoW
+scholomance	10505	14623	Deathbone Legguards	guide	EzWoW
+scholomance	10505	14624	Deathbone Chestplate	guide	EzWoW
+scholomance	10505	14626	Necropile Robe	guide	EzWoW
+scholomance	10505	14629	Necropile Cuffs	guide	EzWoW
+scholomance	10505	14631	Necropile Boots	guide	EzWoW
+scholomance	10505	14632	Necropile Leggings	guide	EzWoW
+scholomance	10505	14633	Necropile Mantle	guide	EzWoW
+scholomance	10505	14636	Cadaverous Belt	guide	EzWoW
+scholomance	10505	14637	Cadaverous Armor	guide	EzWoW
+scholomance	10505	14638	Cadaverous Leggings	guide	EzWoW
+scholomance	10505	14640	Cadaverous Gloves	guide	EzWoW
+scholomance	10505	14641	Cadaverous Walkers	guide	EzWoW
+scholomance	10505	18680	Ancient Bone Bow	guide	EzWoW
+scholomance	10505	18681	Burial Shawl	guide	EzWoW
+scholomance	10505	18682	Ghoul Skin Leggings	guide	EzWoW
+scholomance	10505	18683	Hammer of the Vesper	guide	EzWoW
+scholomance	10505	18684	Dimly Opalescent Ring	guide	EzWoW
+scholomance	10505	20520	Dark Rune	withheld	EG-roll
+scholomance	10505	23200	Totem of Sustaining	guide	EzWoW
+scholomance	10505	23201	Libram of Divinity	guide	EzWoW
+scholomance	11261	16684	Magister's Gloves	guide	ATT,EzWoW,Norgannon
+scholomance	11261	14617	Sawbones Shirt	guide	ATT,EzWoW,Norgannon
+scholomance	11261	273118	Blueprint: Plague Doctor's Laboratory	guide	ATT,Norgannon
+scholomance	11261	12843	Corruptor's Scourgestone	withheld	EG-corpse,EG-roll
+scholomance	11261	13523	Blood of Innocents	guide	ATT
+scholomance	11261	14611	Bloodmail Hauberk	guide	EzWoW
+scholomance	11261	14612	Bloodmail Legguards	guide	EzWoW
+scholomance	11261	14614	Bloodmail Belt	guide	EzWoW
+scholomance	11261	14615	Bloodmail Gauntlets	guide	EzWoW
+scholomance	11261	14616	Bloodmail Boots	guide	EzWoW
+scholomance	11261	14620	Deathbone Girdle	guide	EzWoW
+scholomance	11261	14621	Deathbone Sabatons	guide	EzWoW
+scholomance	11261	14622	Deathbone Gauntlets	guide	EzWoW
+scholomance	11261	14623	Deathbone Legguards	guide	EzWoW
+scholomance	11261	14624	Deathbone Chestplate	guide	EzWoW
+scholomance	11261	14626	Necropile Robe	guide	EzWoW
+scholomance	11261	14629	Necropile Cuffs	featured	EG-corpse,EG-roll,EzWoW
+scholomance	11261	14631	Necropile Boots	guide	EzWoW
+scholomance	11261	14632	Necropile Leggings	guide	EzWoW
+scholomance	11261	14633	Necropile Mantle	guide	EzWoW
+scholomance	11261	14636	Cadaverous Belt	guide	EzWoW
+scholomance	11261	14637	Cadaverous Armor	guide	EzWoW
+scholomance	11261	14638	Cadaverous Leggings	guide	EzWoW
+scholomance	11261	14640	Cadaverous Gloves	guide	EzWoW
+scholomance	11261	14641	Cadaverous Walkers	guide	EzWoW
+scholomance	11261	18680	Ancient Bone Bow	featured	EG-corpse,EG-roll,EzWoW
+scholomance	11261	18681	Burial Shawl	guide	EzWoW
+scholomance	11261	18682	Ghoul Skin Leggings	guide	EzWoW
+scholomance	11261	18683	Hammer of the Vesper	guide	EzWoW
+scholomance	11261	18684	Dimly Opalescent Ring	guide	EzWoW
+scholomance	11261	23200	Totem of Sustaining	guide	EzWoW
+scholomance	11261	23201	Libram of Divinity	guide	EzWoW
+scholomance	11261	274964	Mote of Unstable Magic	withheld	EG-corpse
+scholomance	10502	12843	Corruptor's Scourgestone	withheld	EG-corpse,EG-roll
+scholomance	10502	14611	Bloodmail Hauberk	guide	EzWoW
+scholomance	10502	14612	Bloodmail Legguards	guide	EzWoW
+scholomance	10502	14614	Bloodmail Belt	guide	EzWoW
+scholomance	10502	14615	Bloodmail Gauntlets	guide	EzWoW
+scholomance	10502	14616	Bloodmail Boots	guide	EzWoW
+scholomance	10502	14620	Deathbone Girdle	guide	EzWoW
+scholomance	10502	14621	Deathbone Sabatons	guide	EzWoW
+scholomance	10502	14622	Deathbone Gauntlets	guide	EzWoW
+scholomance	10502	14623	Deathbone Legguards	guide	EzWoW
+scholomance	10502	14624	Deathbone Chestplate	guide	EzWoW
+scholomance	10502	14626	Necropile Robe	guide	EzWoW
+scholomance	10502	14629	Necropile Cuffs	guide	EzWoW
+scholomance	10502	14631	Necropile Boots	guide	EzWoW
+scholomance	10502	14632	Necropile Leggings	guide	EzWoW
+scholomance	10502	14633	Necropile Mantle	guide	EzWoW
+scholomance	10502	14636	Cadaverous Belt	guide	EzWoW
+scholomance	10502	14637	Cadaverous Armor	guide	EzWoW
+scholomance	10502	14638	Cadaverous Leggings	guide	EzWoW
+scholomance	10502	14640	Cadaverous Gloves	guide	EzWoW
+scholomance	10502	14641	Cadaverous Walkers	guide	EzWoW
+scholomance	10502	18680	Ancient Bone Bow	guide	EzWoW
+scholomance	10502	18681	Burial Shawl	guide	EzWoW
+scholomance	10502	18682	Ghoul Skin Leggings	guide	EzWoW
+scholomance	10502	18683	Hammer of the Vesper	guide	EzWoW
+scholomance	10502	18684	Dimly Opalescent Ring	guide	EzWoW
+scholomance	10502	20520	Dark Rune	withheld	EG-corpse,EG-roll
+scholomance	10502	23200	Totem of Sustaining	guide	EzWoW
+scholomance	10502	23201	Libram of Divinity	guide	EzWoW
+scholomance	10504	14626	Necropile Robe	guide	EzWoW,Norgannon
+scholomance	10504	14637	Cadaverous Armor	guide	EzWoW,Norgannon
+scholomance	10504	18680	Ancient Bone Bow	guide	EzWoW,Norgannon
+scholomance	10504	18681	Burial Shawl	guide	EzWoW,Norgannon
+scholomance	10504	18682	Ghoul Skin Leggings	featured	EG-corpse,EG-roll,EzWoW,Norgannon
+scholomance	10504	18683	Hammer of the Vesper	guide	EzWoW,Norgannon
+scholomance	10504	18684	Dimly Opalescent Ring	guide	EzWoW,Norgannon
+scholomance	10504	14611	Bloodmail Hauberk	guide	EzWoW,Norgannon
+scholomance	10504	14624	Deathbone Chestplate	guide	EzWoW,Norgannon
+scholomance	10504	16722	Lightforge Bracers	guide	ATT,EzWoW,Norgannon
+scholomance	10504	12843	Corruptor's Scourgestone	withheld	EG-corpse,EG-roll
+scholomance	10504	14612	Bloodmail Legguards	guide	EzWoW
+scholomance	10504	14614	Bloodmail Belt	guide	EzWoW
+scholomance	10504	14615	Bloodmail Gauntlets	guide	EzWoW
+scholomance	10504	14616	Bloodmail Boots	guide	EzWoW
+scholomance	10504	14620	Deathbone Girdle	guide	EzWoW
+scholomance	10504	14621	Deathbone Sabatons	guide	EzWoW
+scholomance	10504	14622	Deathbone Gauntlets	guide	EzWoW
+scholomance	10504	14623	Deathbone Legguards	guide	EzWoW
+scholomance	10504	14629	Necropile Cuffs	guide	EzWoW
+scholomance	10504	14631	Necropile Boots	guide	EzWoW
+scholomance	10504	14632	Necropile Leggings	guide	EzWoW
+scholomance	10504	14633	Necropile Mantle	guide	EzWoW
+scholomance	10504	14636	Cadaverous Belt	encounter	EG-roll,EzWoW
+scholomance	10504	14638	Cadaverous Leggings	guide	EzWoW
+scholomance	10504	14640	Cadaverous Gloves	guide	EzWoW
+scholomance	10504	14641	Cadaverous Walkers	guide	EzWoW
+scholomance	10504	23200	Totem of Sustaining	guide	EzWoW
+scholomance	10504	23201	Libram of Divinity	guide	EzWoW
+scholomance	1853	21525	Green Winter Hat	withheld	Norgannon
+scholomance	1853	16677	Beaststalker's Cap	guide	ATT,EzWoW,Norgannon
+scholomance	1853	16686	Magister's Crown	guide	ATT,EzWoW,Norgannon
+scholomance	1853	13398	Boots of the Shrieker	guide	ATT,EzWoW,Norgannon
+scholomance	1853	13938	Bonecreeper Stylus	guide	ATT,EzWoW,Norgannon
+scholomance	1853	13944	Tombstone Breastplate	guide	ATT,EzWoW,Norgannon
+scholomance	1853	13950	Detention Strap	guide	ATT,EzWoW,Norgannon
+scholomance	1853	13951	Vigorsteel Vambraces	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+scholomance	1853	13953	Silent Fang	guide	ATT,EzWoW,Norgannon
+scholomance	1853	13964	Witchblade	encounter	ATT,EG-roll,EzWoW,Norgannon
+scholomance	1853	22433	Don Mauricio's Band of Domination	guide	ATT,EzWoW,Norgannon
+scholomance	1853	16731	Helm of Valor	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+scholomance	1853	16698	Dreadmist Mask	guide	ATT,EzWoW,Norgannon
+scholomance	1853	16693	Devout Crown	encounter	ATT,EG-roll,EzWoW,Norgannon
+scholomance	1853	16720	Wildheart Cowl	guide	ATT,EzWoW,Norgannon
+scholomance	1853	16707	Shadowcraft Cap	guide	ATT,EzWoW,Norgannon
+scholomance	1853	13501	Recipe: Major Mana Potion	guide	ATT,Norgannon
+scholomance	1853	14514	Pattern: Robe of the Void	guide	ATT,Norgannon
+scholomance	1853	16727	Lightforge Helm	guide	ATT,EzWoW,Norgannon
+scholomance	1853	16667	Coif of Elements	guide	ATT,EzWoW,Norgannon
+scholomance	1853	19276	Ace of Portals	guide	ATT,EzWoW,Norgannon
+scholomance	1853	13937	Headmaster's Charge	guide	ATT,EzWoW,Norgannon
+scholomance	1853	272023	Headmaster's Records	withheld	Norgannon
+scholomance	1853	285962	Gandling's Signet Ring	guide	ATT,Norgannon
+scholomance	1853	12843	Corruptor's Scourgestone	withheld	EG-corpse,EG-roll
+scholomance	14695	23132	Lord Blackwood's Blade	withheld	Norgannon
+scholomance	14695	23139	Lord Blackwood's Buckler	withheld	Norgannon
+scholomance	14695	23156	Blackwood's Thigh	withheld	Norgannon
+scholomance	14516	18749	Charger's Lost Soul	guide	ATT,Norgannon
+scholomance	14516	18880	Darkreaver's Head	guide	ATT,Norgannon
+scholomance	14516	18758	Specter's Blade	guide	ATT,Norgannon
+scholomance	14516	18759	Malicious Axe	guide	ATT,Norgannon
+scholomance	14516	18760	Necromantic Band	guide	ATT,Norgannon
+scholomance	14516	18761	Oblivion's Touch	guide	ATT,Norgannon
+scholomance	14516	276784	Charger's Lost Soul	withheld	Norgannon
+shadowfang-keep	3914	5254	Rugged Spaulders	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+shadowfang-keep	3914	2985	Inscribed Leather Breastplate	withheld	Norgannon
+shadowfang-keep	3914	273456	Cell Keeper's Claws	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+shadowfang-keep	3914	273457	Sorcerer Collar	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+shadowfang-keep	3914	1738	Laced Mail Belt	withheld	Scout
+shadowfang-keep	3914	1813	Chipped Quarterstaff	withheld	Everloot
+shadowfang-keep	3914	2781	Dirty Blunderbuss	withheld	Scout
+shadowfang-keep	3914	9779	Bandit Cloak	withheld	Scout
+shadowfang-keep	3914	251344	Plans: Crusader's Chain Shirt	encounter	EG-roll
+shadowfang-keep	3914	252774	Pattern: Totemic Leather Armor	other	Everloot
+shadowfang-keep	3886	1292	Butcher's Cleaver	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+shadowfang-keep	3886	3193	Oak Mallet	withheld	Norgannon
+shadowfang-keep	3886	6226	Bloody Apron	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+shadowfang-keep	3886	6633	Butcher's Slicer	featured	ATT,EzWoW,Norgannon,Scout
+shadowfang-keep	3886	273096	Blueprint: Tanning Rack	featured	ATT,EzWoW,Norgannon,Scout
+shadowfang-keep	3886	1746	Linked Chain Belt	withheld	EG-corpse
+shadowfang-keep	3886	5578	Plans: Silvered Bronze Breastplate	other	Scout
+shadowfang-keep	3886	6582	Scouting Boots	withheld	Scout
+shadowfang-keep	3886	253946	Pattern: Filigreed Pearly Leggings	other	Everloot
+shadowfang-keep	3887	6321	Silverlaine's Family Seal	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+shadowfang-keep	3887	6323	Baron's Scepter	featured	ATT,Everloot,EzWoW,Norgannon
+shadowfang-keep	3887	9792	Ivycloth Boots	withheld	Norgannon
+shadowfang-keep	3887	1822	Cedar Walking Stick	withheld	Norgannon
+shadowfang-keep	3887	3212	Lambent Scale Bracers	withheld	Norgannon
+shadowfang-keep	3887	273637	Blade of Silverlaine	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+shadowfang-keep	3887	1775	Brocade Gloves	withheld	Everloot
+shadowfang-keep	3887	2589	Linen Cloth	withheld	Everloot,Scout
+shadowfang-keep	3887	2592	Wool Cloth	withheld	Scout
+shadowfang-keep	3887	3647	Bright Bracers	withheld	Everloot
+shadowfang-keep	3887	7364	Pattern: Heavy Earthen Gloves	other	EG-corpse,EG-roll
+shadowfang-keep	3887	253946	Pattern: Filigreed Pearly Leggings	other	Everloot
+shadowfang-keep	4278	3191	Arced War Axe	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+shadowfang-keep	4278	6320	Commander's Crest	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+shadowfang-keep	4278	9773	Greenweave Robe	withheld	Norgannon
+shadowfang-keep	4278	2220	Box Shield	withheld	Norgannon
+shadowfang-keep	4278	3212	Lambent Scale Bracers	withheld	Norgannon
+shadowfang-keep	4278	4707	Lambent Scale Girdle	withheld	Norgannon
+shadowfang-keep	4278	273105	Blueprint: Toxin Study	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+shadowfang-keep	4278	273643	Worgenbane Talisman	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+shadowfang-keep	4278	6341	Eerie Stable Lantern	guide	ATT,Norgannon
+shadowfang-keep	4278	2592	Wool Cloth	withheld	Scout
+shadowfang-keep	4278	3740	Decapitating Sword	withheld	Everloot
+shadowfang-keep	4279	6318	Odo's Ley Staff	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+shadowfang-keep	4279	6319	Girdle of the Blindwatcher	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+shadowfang-keep	4279	2782	Mishandled Recurve Bow	withheld	Norgannon
+shadowfang-keep	4279	3067	Bright Pants	withheld	Norgannon
+shadowfang-keep	4279	6567	Shimmering Armor	withheld	Norgannon
+shadowfang-keep	4279	273645	Blindwatcher's Sight	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+shadowfang-keep	4279	1206	Moss Agate	withheld	Everloot
+shadowfang-keep	4279	4661	Bright Mantle	withheld	Scout
+shadowfang-keep	4279	252795	Pattern: Totemic Leather Pants	other	Everloot
+shadowfang-keep	4274	3230	Black Wolf Bracers	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+shadowfang-keep	4274	6340	Fenrus' Hide	guide	ATT,EzWoW,Norgannon
+shadowfang-keep	4274	4064	Emblazoned Buckler	withheld	Norgannon
+shadowfang-keep	4274	9804	Superior Buckler	withheld	Norgannon
+shadowfang-keep	4274	273646	Half-Eaten Boots	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+shadowfang-keep	4274	251380	Plans: Veteran's Silvered Chain Helm	withheld	Norgannon
+shadowfang-keep	4274	1015	Lean Wolf Flank	withheld	EG-corpse
+shadowfang-keep	4274	1483	Face Smasher	withheld	Scout
+shadowfang-keep	4274	3301	Sharp Canine	withheld	EG-corpse,Everloot
+shadowfang-keep	4274	3402	Soft Patch of Fur	withheld	EG-corpse
+shadowfang-keep	4274	5635	Sharp Claw	withheld	EG-corpse
+shadowfang-keep	3927	3748	Feline Mantle	featured	ATT,Everloot,EzWoW,Norgannon
+shadowfang-keep	3927	6314	Wolfmaster Cape	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+shadowfang-keep	3927	9816	Fortified Shield	withheld	Norgannon
+shadowfang-keep	3927	3212	Lambent Scale Bracers	withheld	Norgannon
+shadowfang-keep	3927	273647	Worgpelt Leggings	featured	ATT,Everloot,EzWoW,Norgannon
+shadowfang-keep	3927	929	Healing Potion	withheld	EG-corpse
+shadowfang-keep	3927	3045	Lambent Scale Boots	withheld	Scout
+shadowfang-keep	4275	6220	Meteor Shard	featured	ATT,EG-corpse,EzWoW,Norgannon,Scout
+shadowfang-keep	4275	6324	Robes of Arugal	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+shadowfang-keep	4275	6392	Belt of Arugal	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+shadowfang-keep	4275	1826	Rock Maul	withheld	Norgannon
+shadowfang-keep	4275	1758	Reinforced Chain Gloves	withheld	Norgannon
+shadowfang-keep	4275	9794	Ivycloth Cloak	withheld	Norgannon
+shadowfang-keep	4275	6605	Dervish Gloves	withheld	Norgannon
+shadowfang-keep	4275	9809	Superior Tunic	withheld	Norgannon
+shadowfang-keep	4275	9829	Scaled Leather Bracers	withheld	Norgannon
+shadowfang-keep	4275	2592	Wool Cloth	withheld	Everloot
+shadowfang-keep	4275	3066	Bright Gloves	withheld	Everloot
+shadowfang-keep	4275	3385	Lesser Mana Potion	withheld	Everloot
+shadowfang-keep	4275	3656	Lambent Scale Shield	withheld	Scout
+shadowfang-keep	4275	5442	Head of Arugal	featured	ATT,EG-corpse
+shadowfang-keep	3872	6641	Haunting Blade	guide	ATT,Norgannon
+shadowfang-keep	3872	6642	Phantom Armor	featured	ATT,Norgannon,Scout
+shadowfang-keep	3864	6341	Eerie Stable Lantern	featured	ATT,Everloot,Norgannon
+shadowfang-keep	3864	932	Fel Steed Saddlebags	featured	ATT,EG-corpse,Everloot,Norgannon
+shadowfang-keep	3864	251341	Plans: Guard's Chain Shirt	withheld	Norgannon
+shadowfang-keep	3864	251362	Plans: Protector's Gloves	withheld	Norgannon
+shadowfang-keep	3864	251363	Plans: Acolyte's Gloves	withheld	Norgannon
+shadowfang-keep	3864	251364	Plans: Crusader's Gloves	withheld	Norgannon
+shadowfang-keep	3864	252781	Pattern: Stormrider's Leather Gloves	withheld	Norgannon
+shadowfang-keep	3864	252782	Pattern: Wisdom's Leather Gloves	withheld	Norgannon
+shadowfang-keep	3864	253902	Pattern: Filigreed Pristine Gown	withheld	Norgannon
+shadowfang-keep	3864	253904	Pattern: Filigreed Silky Gown	withheld	Norgannon
+shadowfang-keep	3864	253906	Pattern: Filigreed Flame Gown	withheld	Norgannon
+shadowfang-keep	3864	253908	Pattern: Filigreed Shadow Gown	withheld	Norgannon
+shadowfang-keep	3864	253910	Pattern: Filigreed Pearly Gown	withheld	Norgannon
+shadowfang-keep	3864	253912	Pattern: Filigreed Shining Gown	withheld	Norgannon
+shadowfang-keep	3864	251381	Plans: Guard's Silvered Chain Helm	withheld	Norgannon
+shadowfang-keep	3864	251382	Plans: Protector's Silvered Chain Helm	withheld	Norgannon
+shadowfang-keep	3864	252799	Pattern: Trapper's Leather Hood	withheld	Norgannon
+shadowfang-keep	3864	252801	Pattern: Totemic Leather Hood	withheld	Norgannon
+shadowfang-keep	3864	252803	Pattern: Wisdom's Leather Hood	withheld	Norgannon
+shadowfang-keep	3864	253940	Pattern: Filigreed Silky Leggings	withheld	Norgannon
+shadowfang-keep	3864	253946	Pattern: Filigreed Pearly Leggings	withheld	Norgannon
+shadowfang-keep	3864	253948	Pattern: Filigreed Shining Leggings	withheld	Norgannon
+shadowfang-keep	3864	818	Tigerseye	withheld	Everloot
+shadowfang-keep	3864	3211	Burnished Bracers	withheld	Everloot
+shadowfang-keep	3864	5120	Long Tail Hair	withheld	Everloot
+shadowfang-keep	3864	5871	Large Hoof	withheld	EG-corpse
+shadowfang-keep	3864	7608	Seer's Fine Stein	withheld	Everloot
+shadowfang-keep	3864	248684	Waylaid Crate: Apprentice Textiles	withheld	EG-corpse
+shadowfang-keep	3864	252775	Pattern: Stormrider's Leather Armor	other	EG-corpse
+shadowfang-keep	4627	5943	Rift Bracers	guide	ATT,Norgannon
+shadowfang-keep	4627	6438	Dull Elemental Bracer	withheld	Everloot
+shapers-terrace	253201	280009	Titanosaur Scale Pendant	guide	ATT,EzWoW,Norgannon
+shapers-terrace	253201	280011	Deeproar Cord	guide	ATT,EzWoW,Norgannon
+shapers-terrace	253201	280010	Gargantuan Wristguards	guide	ATT,EzWoW,Norgannon
+shapers-terrace	261813	280015	Venomvessel Ring	guide	ATT,EzWoW,Norgannon
+shapers-terrace	261813	280016	Spiderchitin Wrap	guide	ATT,EzWoW,Norgannon
+shapers-terrace	261813	280017	Octoclaw Chain Boots	guide	ATT,EzWoW,Norgannon
+shapers-terrace	261812	280018	Hammer of Thundering Hooves	guide	ATT,EzWoW,Norgannon
+shapers-terrace	261812	280019	Dinofrill Casque	guide	ATT,EzWoW,Norgannon
+shapers-terrace	261812	280020	Deep Jungle Rifle	guide	ATT,EzWoW,Norgannon
+shapers-terrace	262127	280021	Tooth of the Matriarch	guide	ATT,EzWoW,Norgannon
+shapers-terrace	262127	280022	Scaleguard Scimitar	guide	ATT,EzWoW,Norgannon
+shapers-terrace	262127	280045	Regal Direhorn Drape	guide	ATT,EzWoW,Norgannon
+shapers-terrace	262127	285951	Direhorn Matriarch's Heart	guide	ATT
+shapers-terrace	262081	280031	Sparklance Wand	guide	ATT,EzWoW,Norgannon
+shapers-terrace	262081	280032	Bolt's Charged Eyeball	guide	ATT,EzWoW,Norgannon
+shapers-terrace	272561	280026	Albinofur Grips	guide	ATT,EzWoW,Norgannon
+shapers-terrace	272561	280027	Crownroar Chestplate	guide	ATT,EzWoW,Norgannon
+shapers-terrace	272561	280028	Heartflame Gauntlets	guide	ATT,EzWoW,Norgannon
+shapers-terrace	272561	280031	Sparklance Wand	guide	ATT,EzWoW,Norgannon
+shapers-terrace	272561	280032	Bolt's Charged Eyeball	guide	ATT,EzWoW,Norgannon
+shapers-terrace	272561	280029	Cinderedge Crescent	guide	ATT,EzWoW
+shapers-terrace	253218	280014	Raptorscale Bulwark	withheld	Norgannon
+shapers-terrace	253218	280013	Frostfang Mail Vest	withheld	Norgannon
+shapers-terrace	253218	280012	Talon of Tor'Rel	withheld	Norgannon
+shapers-terrace	261809	280023	Nanaya's Control Spire	guide	ATT,EzWoW,Norgannon
+shapers-terrace	261809	280025	Leggings of Curation	guide	ATT,EzWoW,Norgannon
+shapers-terrace	261809	273128	Maker's Spark	guide	ATT,EzWoW,Norgannon
+shapers-terrace	261809	280024	Legplates of Reinforced Crystal	guide	ATT,EzWoW,Norgannon
+shapers-terrace	261809	273116	Blueprint: Arcane Forge	guide	ATT,Norgannon
+shapers-terrace	261809	285952	Stone Heart of the Watcher	guide	ATT
+sm-armory	3975	7717	Ravager	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+sm-armory	3975	7718	Herod's Shoulder	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+sm-armory	3975	7719	Raging Berserker's Helm	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+sm-armory	3975	10330	Scarlet Leggings	guide	ATT,EzWoW,Norgannon
+sm-armory	3975	3811	Double-Stitched Cloak	withheld	Norgannon
+sm-armory	3975	274295	Band of Crimson Light	featured	EG-corpse,EG-roll,EzWoW,Norgannon
+sm-armory	3975	3810	Double Mail Bracers	withheld	EG-corpse
+sm-armory	3975	4338	Mageweave Cloth	withheld	EG-corpse
+sm-armory	3975	248690	Waylaid Crate: Earthly Expert Herbs	withheld	EG-corpse
+sm-armory	3975	262889	Sealed Expert's Writ	withheld	Everloot
+sm-cathedral	4542	19507	Inquisitor's Shawl	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+sm-cathedral	4542	19508	Branded Leather Bracers	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+sm-cathedral	4542	19509	Dusty Mail Boots	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+sm-cathedral	4542	4306	Silk Cloth	withheld	EG-corpse,Everloot
+sm-cathedral	4542	15234	Greater Scythe	withheld	Everloot
+sm-cathedral	4542	252847	Pattern: Mender's Leather Shoes	other	EG-corpse,EG-roll
+sm-cathedral	3976	7723	Mograine's Might	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon
+sm-cathedral	3976	7724	Gauntlets of Divinity	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon
+sm-cathedral	3976	7726	Aegis of the Scarlet Commander	featured	ATT,EG-corpse,EzWoW,Norgannon,Scout
+sm-cathedral	3976	10330	Scarlet Leggings	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon
+sm-cathedral	3976	1708	Sweet Nectar	withheld	EG-corpse
+sm-cathedral	3976	3963	Thick Leather Bracers	withheld	EG-corpse
+sm-cathedral	3976	4338	Mageweave Cloth	withheld	EG-corpse,Everloot
+sm-cathedral	3976	254042	Pattern: Fiery Cord	other	EG-corpse
+sm-cathedral	3977	7720	Whitemane's Chapeau	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon,Scout
+sm-cathedral	3977	7721	Hand of Righteousness	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon
+sm-cathedral	3977	7722	Triune Amulet	featured	ATT,EG-corpse,Everloot,EzWoW,Norgannon
+sm-cathedral	3977	7495	Captain's Buckler	withheld	Norgannon
+sm-cathedral	3977	8157	Jouster's Chestplate	withheld	Norgannon
+sm-cathedral	3977	4338	Mageweave Cloth	withheld	Everloot
+sm-cathedral	3977	6431	Imperial Leather Boots	withheld	Everloot
+sm-cathedral	3977	213546	Scroll: SHOOBEEDOOP	withheld	EG-corpse
+sm-cathedral	3977	252846	Pattern: Skycaller's Leather Shoes	other	EG-corpse
+sm-cathedral	3977	252897	Pattern: Skycaller's Mail Boots	other	Everloot
+sm-graveyard	3983	7682	Torturing Poker	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+sm-graveyard	3983	7683	Bloody Brass Knuckles	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+sm-graveyard	3983	3797	Interlaced Pants	withheld	Norgannon
+sm-graveyard	3983	6389	Glimmering Mail Coif	withheld	Norgannon
+sm-graveyard	3983	274290	Painwalker Buckler	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+sm-graveyard	3983	1710	Greater Healing Potion	withheld	Everloot
+sm-graveyard	3983	3783	Light Scimitar	withheld	Everloot
+sm-graveyard	3983	4306	Silk Cloth	withheld	Everloot
+sm-graveyard	3983	5805	Heart of Zeal	withheld	EG-corpse
+sm-graveyard	3983	15232	Hacking Cleaver	withheld	Everloot
+sm-graveyard	4543	7684	Bloodmage Mantle	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+sm-graveyard	4543	7685	Orb of the Forgotten Seer	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+sm-graveyard	4543	274291	Polished Skullcap	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+sm-graveyard	4543	252822	Pattern: Defender's Leather Kilt	withheld	Norgannon
+sm-graveyard	4543	2080	Hillborne Axe	withheld	Everloot
+sm-graveyard	4543	4306	Silk Cloth	withheld	EG-corpse
+sm-graveyard	4543	252818	Pattern: Stormrider's Leather Helm	other	Everloot
+sm-graveyard	6490	7708	Necrotic Wand	guide	ATT,Norgannon
+sm-graveyard	6490	7709	Blighted Leggings	guide	ATT,Norgannon
+sm-graveyard	6490	7731	Ghostshard Talisman	featured	ATT,Everloot,Norgannon
+sm-graveyard	6488	7689	Morbid Dawn	guide	ATT,Norgannon
+sm-graveyard	6488	7690	Ebon Vise	guide	ATT,Norgannon
+sm-graveyard	6488	7691	Embalmed Shroud	guide	ATT,Norgannon
+sm-graveyard	6489	7686	Ironspine's Eye	featured	ATT,EG-corpse,Norgannon
+sm-graveyard	6489	7687	Ironspine's Fist	guide	ATT,Norgannon
+sm-graveyard	6489	7688	Ironspine's Ribcage	featured	ATT,Everloot,Norgannon
+sm-graveyard	6489	253976	Pattern: Filigreed Pristine Circlet	other	EG-corpse
+sm-library	3974	3456	Dog Whistle	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+sm-library	3974	7710	Loksey's Training Stick	featured	ATT,Everloot,EzWoW,Norgannon
+sm-library	3974	7756	Dog Training Gloves	featured	ATT,Everloot,EzWoW,Norgannon
+sm-library	3974	7417	Phalanx Boots	withheld	Norgannon
+sm-library	3974	273109	Blueprint: Trapper's Workbench	featured	ATT,Everloot,Norgannon
+sm-library	3974	274292	Houndmaster Boomerang	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+sm-library	3974	1707	Stormwind Brie	withheld	Everloot
+sm-library	3974	1710	Greater Healing Potion	withheld	Everloot
+sm-library	3974	4306	Silk Cloth	withheld	Everloot
+sm-library	3974	5805	Heart of Zeal	withheld	EG-corpse
+sm-library	3974	9867	Renegade Cloak	withheld	EG-corpse,EG-roll
+sm-library	3974	248694	Waylaid Crate: Expert Curiosities	withheld	Everloot
+sm-library	3974	251350	Plans: Veteran's Chain Helm	other	Everloot
+sm-library	3974	252814	Pattern: Brawler's Leather Helm	other	Scout
+sm-library	6487	7711	Robe of Doan	featured	ATT,EzWoW,Norgannon,Scout
+sm-library	6487	7712	Mantle of Doan	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+sm-library	6487	7713	Illusionary Rod	featured	ATT,EG-roll,EzWoW,Norgannon,Scout
+sm-library	6487	7714	Hypnotic Blade	featured	ATT,EzWoW,Norgannon,Scout
+sm-library	6487	274293	Spellsever Crossbow	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+sm-library	6487	274294	Library Walkers	featured	ATT,EG-roll,Everloot,EzWoW,Norgannon
+sm-library	6487	7146	The Scarlet Key	withheld	Norgannon
+sm-library	6487	1707	Stormwind Brie	withheld	Everloot
+sm-library	6487	4078	Chief Brigadier Coif	withheld	Everloot
+sm-library	6487	4306	Silk Cloth	withheld	EG-corpse
+sm-library	6487	4338	Mageweave Cloth	withheld	Everloot
+sm-library	6487	213544	Scroll: TOPAZ YORAK	withheld	EG-corpse
+stockade	1696	3630	Head of Targorr	featured	ATT,EG-corpse,Norgannon,Scout
+stockade	1696	273804	Executioner Mantle	featured	ATT,EG-roll,Everloot,EzWoW,Norgannon,Scout
+stockade	1696	273805	Blackrock Harness	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+stockade	1696	273806	Dark Horde Band	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+stockade	1696	251380	Plans: Veteran's Silvered Chain Helm	withheld	Norgannon
+stockade	1696	251382	Plans: Protector's Silvered Chain Helm	withheld	Norgannon
+stockade	1696	253942	Pattern: Filigreed Flame Leggings	withheld	Norgannon
+stockade	1696	1205	Melon Juice	withheld	Everloot
+stockade	1696	1749	Linked Chain Cloak	withheld	Scout
+stockade	1696	2589	Linen Cloth	withheld	Everloot
+stockade	1696	2592	Wool Cloth	withheld	Everloot
+stockade	1696	3039	Short Ash Bow	withheld	EG-corpse,EG-roll
+stockade	1696	4297	Pattern: Barbaric Gloves	other	Scout
+stockade	1696	15927	Bright Sphere	withheld	Scout
+stockade	1696	251348	Plans: Acolyte's Chain Leggings	other	Scout
+stockade	1696	251349	Plans: Crusader's Chain Leggings	other	Scout
+stockade	1696	252795	Pattern: Totemic Leather Pants	other	Everloot
+stockade	1696	252796	Pattern: Stormrider's Leather Pants	other	Scout
+stockade	1666	2280	Kam's Walking Stick	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+stockade	1666	3640	Head of Deepfury	featured	ATT,Norgannon,Scout
+stockade	1666	273807	Demolition Girdle	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+stockade	1666	273808	Bridgebreaker Bindings	featured	ATT,EG-roll,Everloot,EzWoW,Norgannon,Scout
+stockade	1666	251379	Plans: Crusader's Silvered Chain Leggings	withheld	Norgannon
+stockade	1666	252825	Pattern: Wisdom's Leather Leggings	withheld	Norgannon
+stockade	1666	789	Stout Battlehammer	withheld	Scout
+stockade	1666	1205	Melon Juice	withheld	Everloot
+stockade	1666	2072	Dwarven Magestaff	withheld	Scout
+stockade	1666	2592	Wool Cloth	withheld	Scout
+stockade	1666	4306	Silk Cloth	withheld	Everloot,Scout
+stockade	1666	4633	Heavy Bronze Lockbox	withheld	Scout
+stockade	1666	15284	Long Battle Bow	withheld	Scout
+stockade	1717	273809	Hamhock's Cleaver	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+stockade	1717	273810	Ogre Grips	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+stockade	1717	273811	Repurposed Rack	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+stockade	1717	251377	Plans: Protector's Silvered Chain Leggings	withheld	Norgannon
+stockade	1717	2592	Wool Cloth	withheld	Scout
+stockade	1717	4306	Silk Cloth	withheld	Everloot
+stockade	1717	9822	Durable Cape	withheld	Everloot
+stockade	1717	15212	Fighter Broadsword	withheld	Scout
+stockade	1717	251351	Plans: Guard's Chain Helm	other	Scout
+stockade	1717	252816	Pattern: Defender's Leather Helm	other	Scout
+stockade	1717	252817	Pattern: Totemic Leather Helm	other	Everloot
+stockade	1717	253980	Pattern: Filigreed Flame Circlet	other	Scout
+stockade	1717	253986	Pattern: Filigreed Shining Circlet	other	Everloot
+stockade	1716	2926	Head of Bazil Thredd	featured	ATT,EG-corpse,Norgannon,Scout
+stockade	1716	273824	Defias Jailbreakers	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+stockade	1716	273825	Red Wool Cloak	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+stockade	1716	273827	Debt Collector	featured	ATT,EG-roll,EzWoW,Norgannon,Scout
+stockade	1716	273829	Concealed Hand Crossbow	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+stockade	1716	252824	Pattern: Stormrider's Leather Kilt	withheld	Norgannon
+stockade	1716	253976	Pattern: Filigreed Pristine Circlet	withheld	Norgannon
+stockade	1716	253986	Pattern: Filigreed Shining Circlet	withheld	Norgannon
+stockade	1716	2775	Silver Ore	withheld	Scout
+stockade	1716	2909	Red Wool Bandana	withheld	EG-corpse
+stockade	1716	4306	Silk Cloth	withheld	Scout
+stockade	1716	9822	Durable Cape	withheld	Scout
+stockade	1716	13079	Shield of Thorsen	withheld	Scout
+stockade	1716	262888	Sealed Journeyman's Writ	withheld	Scout
+stockade	1663	3628	Hand of Dextren Ward	featured	ATT,EG-corpse,Norgannon,Scout
+stockade	1663	273817	Graverobber's Shovel	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+stockade	1663	273819	Boneslicer	featured	ATT,EG-roll,EzWoW,Norgannon,Scout
+stockade	1663	273820	Nightskulker Ring	featured	ATT,EG-roll,Everloot,EzWoW,Norgannon,Scout
+stockade	1663	251375	Plans: Veteran's Silvered Chain Leggings	withheld	Norgannon
+stockade	1663	251376	Plans: Guard's Silvered Chain Leggings	withheld	Norgannon
+stockade	1663	252820	Pattern: Brawler's Leather Legguards	withheld	Norgannon
+stockade	1663	252821	Pattern: Trapper's Leather Legguards	withheld	Norgannon
+stockade	1663	422	Dwarven Mild	withheld	Scout
+stockade	1663	4306	Silk Cloth	withheld	EG-corpse,Scout
+stockade	1663	4709	Forest Leather Mantle	withheld	Scout
+stockade	1663	253986	Pattern: Filigreed Shining Circlet	encounter	EG-roll
+stockade	1720	2941	Prison Shank	guide	ATT,EzWoW,Norgannon
+stockade	1720	2942	Iron Knuckles	featured	ATT,EG-corpse,EzWoW,Norgannon
+stockade	1720	3228	Jimmied Handcuffs	guide	ATT,EzWoW,Norgannon
+stratholme	10393	13394	Skul's Cold Embrace	guide	ATT,EzWoW,Norgannon
+stratholme	10393	13395	Skul's Fingerbone Claws	guide	ATT,EzWoW,Norgannon
+stratholme	10393	13396	Skul's Ghastly Touch	guide	ATT,EzWoW,Norgannon
+stratholme	10558	13378	Songbird Blouse	guide	ATT,EzWoW,Norgannon
+stratholme	10558	13379	Piccolo of the Flaming Fire	guide	ATT,EzWoW,Norgannon
+stratholme	10558	13383	Woollies of the Prancing Minstrel	guide	ATT,EzWoW,Norgannon
+stratholme	10558	13384	Rainbow Girdle	guide	ATT,EzWoW,Norgannon
+stratholme	10558	16682	Magister's Boots	guide	ATT,EzWoW,Norgannon
+stratholme	10516	3946	Twill Bracers	withheld	Norgannon
+stratholme	10516	13404	Mask of the Unforgiven	guide	ATT,EzWoW,Norgannon
+stratholme	10516	13405	Wailing Nightbane Pauldrons	guide	ATT,EzWoW,Norgannon
+stratholme	10516	13408	Soul Breaker	guide	ATT,EzWoW,Norgannon
+stratholme	10516	13409	Tearfall Bracers	guide	ATT,EzWoW,Norgannon
+stratholme	10516	16717	Wildheart Gloves	guide	ATT,EzWoW,Norgannon
+stratholme	10808	13400	Vambraces of the Sadist	guide	ATT,EzWoW,Norgannon
+stratholme	10808	13401	The Cruel Hand of Timmy	guide	ATT,EzWoW,Norgannon
+stratholme	10808	13402	Timmy's Galoshes	guide	ATT,EzWoW,Norgannon
+stratholme	10808	13403	Grimgore Noose	guide	ATT,EzWoW,Norgannon
+stratholme	10808	16724	Lightforge Gauntlets	guide	ATT,EzWoW,Norgannon
+stratholme	11032	276397	Hand of the Zealous	guide	ATT,EzWoW,Norgannon
+stratholme	11032	276398	Scarlet Malice	guide	ATT,EzWoW,Norgannon
+stratholme	11032	276399	Plate of the Scarlet Bastion	guide	ATT,EzWoW,Norgannon
+stratholme	10997	21524	Red Winter Hat	withheld	Norgannon
+stratholme	10997	16708	Shadowcraft Spaulders	guide	ATT,EzWoW,Norgannon
+stratholme	10997	13380	Willey's Portable Howitzer	guide	ATT,EzWoW,Norgannon
+stratholme	10997	13381	Master Cannoneer Boots	guide	ATT,EzWoW,Norgannon
+stratholme	10997	13382	Cannonball Runner	guide	ATT,EzWoW,Norgannon
+stratholme	10997	18721	Barrage Girdle	guide	ATT,EzWoW,Norgannon
+stratholme	10997	22403	Diana's Pearl Necklace	guide	ATT,EzWoW,Norgannon
+stratholme	10997	22404	Willey's Back Scratcher	guide	ATT,EzWoW,Norgannon
+stratholme	10997	22405	Mantle of the Scarlet Crusade	guide	ATT,EzWoW,Norgannon
+stratholme	10997	22406	Redemption	guide	ATT,EzWoW,Norgannon
+stratholme	10997	22407	Helm of the New Moon	guide	ATT,EzWoW,Norgannon
+stratholme	10997	12839	Plans: Heartseeker	guide	ATT,Norgannon
+stratholme	10997	13377	Miniature Cannon Balls	guide	ATT,EzWoW
+stratholme	10811	13385	Tome of Knowledge	guide	ATT,EzWoW,Norgannon
+stratholme	10811	13386	Archivist Cape	guide	ATT,EzWoW,Norgannon
+stratholme	10811	13387	Foresight Girdle	guide	ATT,EzWoW,Norgannon
+stratholme	10811	18716	Ash Covered Boots	guide	ATT,EzWoW,Norgannon
+stratholme	10811	16692	Devout Gloves	guide	ATT,EzWoW,Norgannon
+stratholme	10811	22897	Tome of Conjure Food VII	guide	ATT,EzWoW,Norgannon
+stratholme	10811	12811	Righteous Orb	guide	EzWoW
+stratholme	10811	14679	Of Love and Family	guide	ATT
+stratholme	10813	12103	Star of Mystaria	withheld	Norgannon
+stratholme	10813	13348	Demonshear	withheld	Norgannon
+stratholme	10813	13358	Wyrmtongue Shoulders	withheld	Norgannon
+stratholme	10813	13359	Crown of Tyranny	withheld	Norgannon
+stratholme	10813	13360	Gift of the Elven Magi	withheld	Norgannon
+stratholme	10813	13369	Fire Striders	withheld	Norgannon
+stratholme	10813	16725	Lightforge Boots	withheld	Norgannon
+stratholme	10813	18717	Hammer of the Grand Crusader	withheld	Norgannon
+stratholme	10813	18718	Grand Crusader's Helm	withheld	Norgannon
+stratholme	10813	18720	Shroud of the Nathrezim	withheld	Norgannon
+stratholme	10813	14512	Pattern: Truefaith Vestments	withheld	Norgannon
+stratholme	10813	13520	Recipe: Flask of Distilled Wisdom	withheld	Norgannon
+stratholme	10813	13353	Book of the Dead	withheld	Norgannon
+stratholme	11120	13351	Crimson Hammersmith's Apron	guide	ATT,Norgannon
+stratholme	11120	18781	Bottom Half of Advanced Armorsmithing: Volume II	guide	ATT,EzWoW,Norgannon
+stratholme	11120	2073	Dwarven Hatchet	withheld	Norgannon
+stratholme	11120	8316	Alabaster Plate Greaves	withheld	Norgannon
+stratholme	11120	10204	Heavy Lamellar Shield	withheld	Norgannon
+stratholme	11120	15936	Duskwoven Branch	withheld	Norgannon
+stratholme	11120	276403	Scarlet Bonebreaker	guide	ATT,Norgannon
+stratholme	11120	276404	Masterwork Crimson Hammer	guide	ATT,Norgannon
+stratholme	11120	276419	Lightcrest Hammer	guide	ATT,Norgannon
+stratholme	11120	12827	Plans: Serenity	guide	ATT
+stratholme	11143	13388	The Postmaster's Tunic	guide	ATT,EzWoW,Norgannon
+stratholme	11143	13389	The Postmaster's Trousers	guide	ATT,EzWoW,Norgannon
+stratholme	11143	13390	The Postmaster's Band	guide	ATT,EzWoW,Norgannon
+stratholme	11143	13391	The Postmaster's Treads	guide	ATT,EzWoW,Norgannon
+stratholme	11143	13392	The Postmaster's Seal	guide	ATT,EzWoW,Norgannon
+stratholme	11143	13393	Malown's Slam	guide	ATT,EzWoW,Norgannon
+stratholme	11143	16682	Magister's Boots	withheld	Norgannon
+stratholme	10809	13397	Stoneskin Gargoyle Cape	guide	ATT,EzWoW,Norgannon
+stratholme	10809	13399	Gargoyle Shredder Talons	guide	ATT,EzWoW,Norgannon
+stratholme	10809	13954	Verdant Footpads	guide	ATT,EzWoW,Norgannon
+stratholme	10436	13534	Banshee Finger	guide	ATT,EzWoW,Norgannon
+stratholme	10436	13535	Coldtouch Phantom Wraps	guide	ATT,EzWoW,Norgannon
+stratholme	10436	13537	Chillhide Bracers	guide	ATT,EzWoW,Norgannon
+stratholme	10436	13538	Windshrieker Pauldrons	encounter	ATT,EG-roll,EzWoW,Norgannon
+stratholme	10436	13539	Banshee's Touch	guide	ATT,EzWoW,Norgannon
+stratholme	10436	18728	Anastari Heirloom	guide	ATT,EzWoW,Norgannon
+stratholme	10436	18729	Screeching Bow	guide	ATT,EzWoW,Norgannon
+stratholme	10436	18730	Shadowy Laced Handwraps	encounter	ATT,EG-roll,EzWoW,Norgannon
+stratholme	10436	16704	Dreadmist Sandals	guide	ATT,EzWoW,Norgannon
+stratholme	10436	273124	Blueprint: Loom	guide	ATT,Norgannon
+stratholme	10436	13514	Wail of the Banshee	guide	ATT,EzWoW
+stratholme	10436	273131	Bottled Screams	encounter	ATT,EG-roll
+stratholme	10436	274964	Mote of Unstable Magic	withheld	EG-corpse
+stratholme	10437	13529	Husk of Nerub'enkan	guide	ATT,EzWoW,Norgannon
+stratholme	10437	13530	Fangdrip Runners	guide	ATT,EzWoW,Norgannon
+stratholme	10437	13531	Crypt Stalker Leggings	guide	ATT,EzWoW,Norgannon
+stratholme	10437	13532	Darkspinner Claws	guide	ATT,EzWoW,Norgannon
+stratholme	10437	13533	Acid-etched Pauldrons	guide	ATT,EzWoW,Norgannon
+stratholme	10437	18738	Carapace Spine Crossbow	guide	ATT,EzWoW,Norgannon
+stratholme	10437	18739	Chitinous Plate Legguards	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+stratholme	10437	18740	Thuzadin Sash	guide	ATT,EzWoW,Norgannon
+stratholme	10437	16675	Beaststalker's Boots	guide	ATT,EzWoW,Norgannon
+stratholme	10437	5759	Thorium Lockbox	withheld	EG-roll
+stratholme	10437	12843	Corruptor's Scourgestone	withheld	EG-corpse
+stratholme	10437	13508	Eye of Arachnida	guide	ATT,EzWoW
+stratholme	10438	13524	Skull of Burning Shadows	encounter	ATT,EG-roll,EzWoW,Norgannon
+stratholme	10438	13525	Darkbind Fingers	encounter	ATT,EG-roll,EzWoW,Norgannon
+stratholme	10438	13526	Flamescarred Girdle	guide	ATT,EzWoW,Norgannon
+stratholme	10438	13527	Lavawalker Greaves	guide	ATT,EzWoW,Norgannon
+stratholme	10438	13528	Twilight Void Bracers	guide	ATT,EzWoW,Norgannon
+stratholme	10438	18734	Pale Moon Cloak	guide	ATT,EzWoW,Norgannon
+stratholme	10438	18735	Maleki's Footwraps	guide	ATT,EzWoW,Norgannon
+stratholme	10438	18737	Bone Slicing Hatchet	guide	ATT,EzWoW,Norgannon
+stratholme	10438	16691	Devout Sandals	guide	ATT,EzWoW,Norgannon
+stratholme	10438	12833	Plans: Hammer of the Titans	guide	ATT,Norgannon
+stratholme	10438	227690	Necrotic Runestone	withheld	Norgannon
+stratholme	10438	13509	Clutch of Foresight	guide	ATT,EzWoW
+stratholme	10435	3997	Laminated Scale Pants	withheld	Norgannon
+stratholme	10435	13376	Royal Tribunal Cloak	guide	ATT,EzWoW,Norgannon
+stratholme	10435	18722	Death Grips	guide	ATT,EzWoW,Norgannon
+stratholme	10435	18725	Peacemaker	guide	ATT,EzWoW,Norgannon
+stratholme	10435	18726	Magistrate's Cuffs	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+stratholme	10435	18727	Crimson Felt Hat	guide	ATT,EzWoW,Norgannon
+stratholme	10435	23198	Idol of Brutality	guide	ATT,EzWoW,Norgannon
+stratholme	10435	12382	Key to the City	featured	ATT,EG-corpse,EG-roll,EzWoW
+stratholme	10435	12843	Corruptor's Scourgestone	withheld	EG-corpse
+stratholme	10439	15880	Head of Ramstein the Gorger	guide	ATT,Norgannon
+stratholme	10439	16737	Gauntlets of Valor	encounter	ATT,EG-roll,EzWoW,Norgannon
+stratholme	10439	13372	Slavedriver's Cane	guide	ATT,EzWoW,Norgannon
+stratholme	10439	13373	Band of Flesh	guide	ATT,EzWoW,Norgannon
+stratholme	10439	13374	Soulstealer Mantle	guide	ATT,EzWoW,Norgannon
+stratholme	10439	13375	Crest of Retribution	guide	ATT,EzWoW,Norgannon
+stratholme	10439	13515	Ramstein's Lightning Bolts	guide	ATT,EzWoW,Norgannon
+stratholme	10439	18723	Animated Chain Necklace	guide	ATT,EzWoW,Norgannon
+stratholme	10439	10260	Adventurer's Gloves	withheld	EG-roll
+stratholme	10439	12735	Frayed Abomination Stitching	withheld	ATT-zone,EG-corpse,EG-roll
+stratholme	10439	274964	Mote of Unstable Magic	withheld	EG-corpse
+stratholme	10440	13251	Head of Baron Rivendare	guide	ATT,Norgannon
+stratholme	10440	22408	Ritssyn's Wand of Bad Mojo	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+stratholme	10440	22409	Tunic of the Crescent Moon	guide	ATT,EzWoW,Norgannon
+stratholme	10440	22410	Gauntlets of Deftness	guide	ATT,EzWoW,Norgannon
+stratholme	10440	22411	Helm of the Executioner	guide	ATT,EzWoW,Norgannon
+stratholme	10440	22412	Thuzadin Mantle	guide	ATT,EzWoW,Norgannon
+stratholme	10440	13340	Cape of the Black Baron	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+stratholme	10440	13344	Dracorian Gauntlets	guide	ATT,EzWoW,Norgannon
+stratholme	10440	13345	Seal of Rivendare	guide	ATT,EzWoW,Norgannon
+stratholme	10440	13346	Robes of the Exalted	guide	ATT,EzWoW,Norgannon
+stratholme	10440	13349	Scepter of the Unholy	guide	ATT,EzWoW,Norgannon
+stratholme	10440	13361	Skullforge Reaver	guide	ATT,EzWoW,Norgannon
+stratholme	10440	13368	Bonescraper	guide	ATT,EzWoW,Norgannon
+stratholme	10440	16687	Magister's Leggings	guide	ATT,EzWoW,Norgannon
+stratholme	10440	16732	Legplates of Valor	guide	ATT,EzWoW,Norgannon
+stratholme	10440	16709	Shadowcraft Pants	guide	ATT,EzWoW,Norgannon
+stratholme	10440	16678	Beaststalker's Pants	guide	ATT,EzWoW,Norgannon
+stratholme	10440	16694	Devout Skirt	guide	ATT,EzWoW,Norgannon
+stratholme	10440	16699	Dreadmist Leggings	guide	ATT,EzWoW,Norgannon
+stratholme	10440	16719	Wildheart Kilt	guide	ATT,EzWoW,Norgannon
+stratholme	10440	16728	Lightforge Legplates	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+stratholme	10440	16668	Kilt of Elements	guide	ATT,EzWoW,Norgannon
+stratholme	10440	13505	Runeblade of Baron Rivendare	guide	ATT,EzWoW,Norgannon
+stratholme	10440	272024	Grain Shipment Records	withheld	Norgannon
+stratholme	10440	285873	Shattered Pauldron of Rivendare	guide	ATT,Norgannon
+stratholme	10440	12843	Corruptor's Scourgestone	withheld	EG-corpse
+stratholme	10440	13335	Deathcharger's Reins	guide	ATT,EzWoW
+stratholme	14684	23124	Staff of Balzaphon	withheld	Norgannon
+stratholme	14684	23125	Chains of the Lich	withheld	Norgannon
+stratholme	14684	23126	Waistband of Balzaphon	withheld	Norgannon
+sunken-temple	5713	10239	Heavy Lamellar Vambraces	withheld	EG-corpse
+sunken-temple	5715	10073	Righteous Helmet	withheld	Norgannon
+sunken-temple	5714	6181	Fetish of Hakkar	withheld	EG-corpse
+sunken-temple	5714	8152	Flask of Big Mojo	withheld	EG-corpse
+sunken-temple	5714	10787	Atal'ai Gloves	withheld	EG-corpse
+sunken-temple	5714	13825	Primed Musket	withheld	EG-corpse
+sunken-temple	5714	281018	Scroll: RARE SERVICHI RADAR	withheld	EG-corpse
+sunken-temple	5717	4338	Mageweave Cloth	withheld	EG-corpse
+sunken-temple	5712	4338	Mageweave Cloth	withheld	EG-corpse
+sunken-temple	5712	10784	Atal'ai Breastplate	withheld	EG-corpse
+sunken-temple	5712	13822	Spiked Dagger	withheld	EG-corpse
+sunken-temple	5716	10785	Atal'ai Leggings	withheld	EG-corpse
+sunken-temple	8580	10798	Atal'alarion's Tusk Ring	guide	ATT,EzWoW,Norgannon
+sunken-temple	8580	10799	Headspike	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+sunken-temple	8580	10800	Darkwater Bracers	guide	ATT,EzWoW,Norgannon
+sunken-temple	8580	6181	Fetish of Hakkar	withheld	EG-corpse
+sunken-temple	8580	22444	Putrid Vine	guide	ATT
+sunken-temple	5721	12465	Nightfall Drape	withheld	Norgannon
+sunken-temple	5721	12466	Dawnspire Cord	withheld	Norgannon
+sunken-temple	5721	12243	Smoldering Claw	withheld	Norgannon
+sunken-temple	5720	12465	Nightfall Drape	withheld	Norgannon
+sunken-temple	5720	12466	Dawnspire Cord	withheld	Norgannon
+sunken-temple	5720	12243	Smoldering Claw	withheld	Norgannon
+sunken-temple	5711	10803	Blade of the Wretched	guide	ATT,Norgannon
+sunken-temple	5711	10804	Fist of the Damned	guide	ATT,Norgannon
+sunken-temple	5711	10805	Eater of the Dead	featured	ATT,EG-corpse,Norgannon
+sunken-temple	5710	6212	Head of Jammal'an	featured	ATT,EG-corpse,Norgannon
+sunken-temple	5710	10806	Vestments of the Atal'ai Prophet	featured	ATT,EG-corpse,EG-roll,Norgannon
+sunken-temple	5710	10807	Kilt of the Atal'ai Prophet	guide	ATT,Norgannon
+sunken-temple	5710	10808	Gloves of the Atal'ai Prophet	guide	ATT,Norgannon
+sunken-temple	5710	10110	Wanderer's Gloves	withheld	Norgannon
+sunken-temple	5710	273119	Blueprint: Fishing Hut	guide	ATT,Norgannon
+sunken-temple	5710	4338	Mageweave Cloth	withheld	EG-corpse
+sunken-temple	5710	4599	Cured Ham Steak	withheld	EG-corpse
+sunken-temple	5710	6181	Fetish of Hakkar	withheld	EG-corpse
+sunken-temple	5710	10805	Eater of the Dead	withheld	EG-roll
+sunken-temple	5719	20025	Blood of Morphaz	withheld	Norgannon
+sunken-temple	5719	12465	Nightfall Drape	withheld	Norgannon
+sunken-temple	5719	12466	Dawnspire Cord	withheld	Norgannon
+sunken-temple	5719	12243	Smoldering Claw	withheld	Norgannon
+sunken-temple	5719	10796	Drakestone	withheld	EG-roll
+sunken-temple	5719	20085	Arcane Shard	withheld	EG-corpse
+sunken-temple	5719	252918	Pattern: Stalker's Mail Gauntlets	encounter	EG-roll
+sunken-temple	5722	12465	Nightfall Drape	withheld	Norgannon
+sunken-temple	5722	12466	Dawnspire Cord	withheld	Norgannon
+sunken-temple	5722	12243	Smoldering Claw	withheld	Norgannon
+sunken-temple	5709	10454	Essence of Eranikus	featured	ATT,EG-corpse,EzWoW,Norgannon
+sunken-temple	5709	10828	Dire Nail	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+sunken-temple	5709	10829	Dragon's Eye	guide	ATT,EzWoW,Norgannon
+sunken-temple	5709	10833	Horns of Eranikus	guide	ATT,EzWoW,Norgannon
+sunken-temple	5709	10835	Crest of Supremacy	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+sunken-temple	5709	10836	Rod of Corrosion	guide	ATT,EzWoW,Norgannon
+sunken-temple	5709	10837	Tooth of Eranikus	guide	ATT,EzWoW,Norgannon
+sunken-temple	5709	10847	Dragon's Call	guide	ATT,EzWoW,Norgannon
+sunken-temple	5709	10110	Wanderer's Gloves	withheld	Norgannon
+sunken-temple	5709	10167	Templar Boots	withheld	Norgannon
+sunken-temple	5708	10801	Slitherscale Boots	featured	ATT,EG-corpse,Norgannon
+sunken-temple	5708	10802	Wingveil Cloak	guide	ATT,Norgannon
+sunken-temple	8443	10838	Might of Hakkar	withheld	EzWoW
+sunken-temple	8443	10842	Windscale Sarong	withheld	EzWoW
+sunken-temple	8443	10843	Featherskin Cape	withheld	EzWoW
+sunken-temple	8443	10844	Spire of Hakkar	withheld	EzWoW
+sunken-temple	8443	10845	Warrior's Embrace	withheld	EzWoW
+sunken-temple	8443	10846	Bloodshot Greaves	withheld	EzWoW
+sunken-temple	8443	12462	Embrace of the Wind Serpent	withheld	EzWoW
+ubrs	9816	17322	Eye of the Emberseer	guide	ATT,Norgannon
+ubrs	9816	21988	Ember of Emberseer	guide	ATT,Norgannon
+ubrs	9816	12905	Wildfire Cape	guide	ATT,EzWoW,Norgannon
+ubrs	9816	12926	Flaming Band	guide	ATT,EzWoW,Norgannon
+ubrs	9816	12927	Truestrike Shoulders	guide	ATT,EzWoW,Norgannon
+ubrs	9816	12929	Emberfury Talisman	guide	ATT,EzWoW,Norgannon
+ubrs	9816	16672	Gauntlets of Elements	guide	ATT,EzWoW,Norgannon
+ubrs	9816	23320	Tablet of Flame Shock VI	guide	ATT,EzWoW,Norgannon
+ubrs	9816	249520	Formula: Molten Heart of the Mountain	guide	ATT,Norgannon
+ubrs	10264	12589	Dustfeather Sash	guide	ATT,EzWoW,Norgannon
+ubrs	10264	12603	Nightbrace Tunic	guide	ATT,EzWoW,Norgannon
+ubrs	10264	12606	Crystallized Girdle	guide	ATT,EzWoW,Norgannon
+ubrs	10264	12609	Polychromatic Visionwrap	guide	ATT,EzWoW,Norgannon
+ubrs	10264	16695	Devout Mantle	guide	ATT,EzWoW,Norgannon
+ubrs	10264	18657	Schematic: Hyper-Radiant Flame Reflector	guide	ATT,Norgannon
+ubrs	10509	12604	Starfire Tiara	guide	ATT,EzWoW,Norgannon
+ubrs	10509	12605	Serpentine Skuller	guide	ATT,EzWoW,Norgannon
+ubrs	10509	12930	Briarwood Reed	guide	ATT,EzWoW,Norgannon
+ubrs	10899	21525	Green Winter Hat	withheld	Norgannon
+ubrs	10899	18779	Bottom Half of Advanced Armorsmithing: Volume I	guide	ATT,EzWoW,Norgannon
+ubrs	10899	12834	Plans: Arcanite Champion	guide	ATT,Norgannon
+ubrs	10899	12837	Plans: Masterwork Stormhammer	guide	ATT,Norgannon
+ubrs	10899	13498	Handcrafted Mastersmith Leggings	guide	ATT,EzWoW,Norgannon
+ubrs	10899	13502	Handcrafted Mastersmith Girdle	guide	ATT,EzWoW,Norgannon
+ubrs	10899	18047	Flame Walkers	guide	ATT,EzWoW,Norgannon
+ubrs	10899	18048	Mastersmith's Hammer	guide	ATT,EzWoW,Norgannon
+ubrs	10899	12847	Soul Stained Pike	withheld	Norgannon
+ubrs	10899	228312	Plans: Invincible Mail	withheld	Norgannon
+ubrs	10899	12728	Plans: Invulnerable Mail	guide	ATT
+ubrs	10429	12630	Head of Rend Blackhand	guide	ATT,Norgannon
+ubrs	10429	12587	Eye of Rend	guide	ATT,Norgannon
+ubrs	10429	12935	Warmaster Legguards	guide	ATT,Norgannon
+ubrs	10429	18102	Dragonrider Boots	guide	ATT,Norgannon
+ubrs	10429	18103	Band of Rumination	guide	ATT,Norgannon
+ubrs	10429	16733	Spaulders of Valor	guide	ATT,Norgannon
+ubrs	10429	12588	Bonespike Shoulder	guide	ATT,Norgannon
+ubrs	10429	12936	Battleborn Armbraces	guide	ATT,Norgannon
+ubrs	10429	18104	Feralsurge Girdle	guide	ATT,Norgannon
+ubrs	10429	22247	Faith Healer's Boots	guide	ATT,Norgannon
+ubrs	10429	12583	Blackhand Doomsaw	guide	ATT,Norgannon
+ubrs	10429	12939	Dal'Rend's Tribal Guardian	guide	ATT,Norgannon
+ubrs	10429	12940	Dal'Rend's Sacred Charge	guide	ATT,Norgannon
+ubrs	10429	1728	Teebu's Blazing Longsword	withheld	Norgannon
+ubrs	10429	2243	Hand of Edward the Odd	withheld	Norgannon
+ubrs	10429	3475	Cloak of Flames	withheld	Norgannon
+ubrs	10429	14555	Alcor's Sunrazor	withheld	Norgannon
+ubrs	10429	12590	Felstriker	guide	ATT,Norgannon
+ubrs	10429	285808	Eye of Blackhand	guide	ATT,Norgannon
+ubrs	10430	16729	Lightforge Spaulders	guide	ATT,EzWoW,Norgannon
+ubrs	10430	24101	Book of Ferocious Bite V	guide	ATT,EzWoW,Norgannon
+ubrs	10430	12709	Pip's Skinner	guide	ATT,EzWoW,Norgannon
+ubrs	10430	12963	Blademaster Leggings	guide	ATT,EzWoW,Norgannon
+ubrs	10430	12964	Tristam Legguards	guide	ATT,EzWoW,Norgannon
+ubrs	10430	12965	Spiritshroud Leggings	guide	ATT,EzWoW,Norgannon
+ubrs	10430	12966	Blackmist Armguards	guide	ATT,EzWoW,Norgannon
+ubrs	10430	12967	Bloodmoon Cloak	guide	ATT,EzWoW,Norgannon
+ubrs	10430	12968	Frostweaver Cape	guide	ATT,EzWoW,Norgannon
+ubrs	10430	12969	Seeping Willow	guide	ATT,EzWoW,Norgannon
+ubrs	10430	22311	Ironweave Boots	guide	ATT,EzWoW,Norgannon
+ubrs	10430	19227	Ace of Beasts	guide	ATT,EzWoW,Norgannon
+ubrs	10430	273109	Blueprint: Trapper's Workbench	withheld	Norgannon
+ubrs	10430	12731	Pristine Hide of the Beast	guide	EzWoW
+ubrs	10363	16663	Blood of the Black Dragon Champion	guide	ATT,Norgannon
+ubrs	10363	22253	Tome of the Lost	guide	ATT,EzWoW,Norgannon
+ubrs	10363	22267	Spellweaver's Turban	guide	ATT,EzWoW,Norgannon
+ubrs	10363	22268	Draconic Infused Emblem	guide	ATT,EzWoW,Norgannon
+ubrs	10363	22269	Shadow Prowler's Cloak	guide	ATT,EzWoW,Norgannon
+ubrs	10363	12602	Draconian Deflector	guide	ATT,EzWoW,Norgannon
+ubrs	10363	13098	Painweaver Band	guide	ATT,EzWoW,Norgannon
+ubrs	10363	13141	Tooth of Gnarr	guide	ATT,EzWoW,Norgannon
+ubrs	10363	13142	Brigam Girdle	guide	ATT,EzWoW,Norgannon
+ubrs	10363	16700	Dreadmist Robe	guide	ATT,EzWoW,Norgannon
+ubrs	10363	16730	Breastplate of Valor	guide	ATT,EzWoW,Norgannon
+ubrs	10363	16706	Wildheart Vest	guide	ATT,EzWoW,Norgannon
+ubrs	10363	16674	Beaststalker's Tunic	guide	ATT,EzWoW,Norgannon
+ubrs	10363	16688	Magister's Robes	guide	ATT,EzWoW,Norgannon
+ubrs	10363	16690	Devout Robe	guide	ATT,EzWoW,Norgannon
+ubrs	10363	16721	Shadowcraft Tunic	guide	ATT,EzWoW,Norgannon
+ubrs	10363	16726	Lightforge Breastplate	guide	ATT,EzWoW,Norgannon
+ubrs	10363	16666	Vest of Elements	guide	ATT,EzWoW,Norgannon
+ubrs	10363	15730	Pattern: Red Dragonscale Breastplate	guide	ATT,Norgannon
+ubrs	10363	13519	Recipe: Flask of the Titans	guide	ATT,Norgannon
+ubrs	10363	12592	Blackblade of Shahram	guide	ATT,EzWoW,Norgannon
+ubrs	10363	272017	Nefarion's Remit	withheld	Norgannon
+ubrs	10363	285868	Eye of Drakkisath	guide	ATT,Norgannon
+ubrs	10339	12952	Gyth's Skull	guide	ATT,Norgannon
+ubrs	10339	12953	Dragoneye Coif	guide	ATT,Norgannon
+ubrs	10339	12960	Tribal War Feathers	guide	ATT,Norgannon
+ubrs	10339	16669	Pauldrons of Elements	guide	ATT,Norgannon
+ubrs	10339	22225	Dragonskin Cowl	guide	ATT,Norgannon
+ubrs	10339	12871	Chromatic Carapace	guide	ATT
+ubrs	10339	13522	Recipe: Flask of Chromatic Resistance	guide	ATT
+ubrs	16042	22335	Lord Valthalak's Staff of Command	guide	ATT,Norgannon
+ubrs	16042	22336	Draconian Aegis of the Legion	guide	ATT,Norgannon
+ubrs	16042	22337	Shroud of Domination	guide	ATT,Norgannon
+ubrs	16042	22339	Rune Band of Wizardry	guide	ATT,Norgannon
+ubrs	16042	22340	Pendant of Celerity	guide	ATT,Norgannon
+ubrs	16042	22342	Leggings of Torment	guide	ATT,Norgannon
+ubrs	16042	22343	Handguards of Savagery	guide	ATT,Norgannon
+ubrs	16042	22302	Ironweave Cowl	guide	ATT,Norgannon
+uldaman	6910	7741	The Shaft of Tsol	guide	ATT,EzWoW,Norgannon
+uldaman	6910	9387	Revelosh's Boots	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+uldaman	6910	9388	Revelosh's Armguards	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+uldaman	6910	9389	Revelosh's Spaulders	featured	ATT,EzWoW,Norgannon,Scout
+uldaman	6910	9390	Revelosh's Gloves	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+uldaman	6910	4041	Aurora Cowl	withheld	Scout
+uldaman	6910	251400	Plans: Warder's Boots	other	Scout
+uldaman	6910	254046	Pattern: Golden Cord	other	EG-corpse,EG-roll
+uldaman	6906	9400	Baelog's Shortbow	featured	ATT,EG-corpse,Norgannon,Scout
+uldaman	6906	9401	Nordic Longshank	featured	ATT,EG-corpse,Norgannon
+uldaman	6906	9398	Worn Running Boots	withheld	Norgannon
+uldaman	6906	9394	Horned Viking Helmet	withheld	Norgannon
+uldaman	6906	9403	Battered Viking Shield	withheld	Norgannon
+uldaman	6906	9404	Olaf's All Purpose Shield	withheld	Norgannon
+uldaman	6906	9399	Precision Arrow	featured	ATT,EG-corpse,Norgannon,Scout
+uldaman	6907	9394	Horned Viking Helmet	featured	ATT,EG-corpse,Everloot,Norgannon
+uldaman	6907	9398	Worn Running Boots	featured	ATT,Norgannon,Scout
+uldaman	6907	2459	Swiftness Potion	guide	ATT
+uldaman	6907	7453	Pattern: Swift Boots	other	EG-corpse
+uldaman	6907	252845	Pattern: Warden's Leather Shoes	other	EG-corpse
+uldaman	6908	9403	Battered Viking Shield	featured	ATT,EG-corpse,Everloot,Norgannon
+uldaman	6908	9404	Olaf's All Purpose Shield	featured	ATT,Norgannon,Scout
+uldaman	6908	1177	Oil of Olaf	featured	ATT,EG-corpse
+uldaman	6908	2313	Medium Armor Kit	withheld	EG-corpse
+uldaman	7228	9407	Stoneweaver Leggings	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+uldaman	7228	9408	Ironshod Bludgeon	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+uldaman	7228	9409	Ironaya's Bracers	guide	ATT,EzWoW,Norgannon
+uldaman	7228	7556	Twilight Orb	withheld	Norgannon
+uldaman	7228	9973	Embossed Plate Boots	withheld	Norgannon
+uldaman	7228	12030	Jet Chain	withheld	Norgannon
+uldaman	7228	274484	Axe of Inevitable Ruin	guide	ATT,EzWoW,Norgannon
+uldaman	7228	4306	Silk Cloth	withheld	EG-corpse
+uldaman	7228	4338	Mageweave Cloth	withheld	EG-corpse
+uldaman	7228	7912	Solid Stone	withheld	EG-corpse
+uldaman	7228	262889	Sealed Expert's Writ	withheld	Scout
+uldaman	7023	8053	Obsidian Power Source	guide	ATT,EzWoW,Norgannon
+uldaman	7023	274425	White Obsidian Wand	guide	ATT,EzWoW,Norgannon
+uldaman	7023	274428	Dark Golem Breastplate	guide	ATT,EzWoW,Norgannon
+uldaman	7023	274430	Rock Sentinel Slicer	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+uldaman	7023	274485	Axe of Lingering Dread	guide	ATT,EzWoW,Norgannon
+uldaman	7023	4554	Shiny Polished Stone	withheld	EG-corpse
+uldaman	7023	7912	Solid Stone	withheld	EG-corpse
+uldaman	7206	9410	Cragfists	featured	ATT,EzWoW,Norgannon,Scout
+uldaman	7206	9411	Rockshard Pauldrons	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+uldaman	7206	274431	Sandstorm Staff	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+uldaman	7206	251399	Plans: Sentinel's Boots	other	Scout
+uldaman	7291	9412	Galgann's Fireblaster	guide	ATT,EzWoW,Norgannon
+uldaman	7291	9419	Galgann's Firehammer	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+uldaman	7291	11310	Flameseer Mantle	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+uldaman	7291	11311	Emberscale Cape	featured	ATT,EzWoW,Norgannon,Scout
+uldaman	7291	4062	Imperial Leather Pants	withheld	Norgannon
+uldaman	7291	4338	Mageweave Cloth	withheld	Everloot
+uldaman	7291	7472	Regal Boots	withheld	Scout
+uldaman	7291	9909	Royal Bands	withheld	Scout
+uldaman	7291	252845	Pattern: Warden's Leather Shoes	other	Scout
+uldaman	4854	7670	Shattered Necklace Sapphire	guide	ATT,EzWoW,Norgannon
+uldaman	4854	9414	Oilskin Leggings	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+uldaman	4854	9415	Grimlok's Tribal Vestments	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+uldaman	4854	9416	Grimlok's Charge	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+uldaman	4854	8144	Chromite Pauldrons	withheld	Norgannon
+uldaman	4854	4306	Silk Cloth	withheld	Everloot
+uldaman	4854	7478	Ranger Leggings	withheld	Scout
+uldaman	4854	251402	Plans: Justicar's Boots	other	EG-corpse,EG-roll
+uldaman	4854	252899	Pattern: Mender's Mail Boots	other	Scout
+uldaman	2748	7672	Shattered Necklace Power Source	guide	ATT,EzWoW,Norgannon
+uldaman	2748	9413	The Rockpounder	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+uldaman	2748	9418	Stoneslayer	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+uldaman	2748	11118	Archaedic Stone	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+uldaman	2748	274432	Stone Keeper Spire	guide	ATT,EzWoW,Norgannon
+uldaman	2748	4087	Trueshot Bow	withheld	Scout
+uldaman	2748	4306	Silk Cloth	withheld	Everloot
+uldaman	2748	4422	Scroll of Stamina III	withheld	Everloot
+uldaman	2748	7909	Aquamarine	withheld	Scout
+uldaman	2748	8196	Ebon Scimitar	withheld	Scout
+uldaman	2748	9903	Jazeraint Leggings	withheld	Scout
+uldaman	2748	9968	Embossed Plate Girdle	withheld	Scout
+uldaman	2748	15244	Razor Blade	withheld	Scout
+uldaman	2748	252920	Pattern: Skirmisher's Mail Gauntlets	other	EG-corpse,EG-roll
+uldaman	4857	7532	Cabalist Spaulders	withheld	Norgannon
+uldaman	4857	7542	Champion's Greaves	withheld	Norgannon
+uldaman	4857	3966	Thick Leather Pants	withheld	EG-corpse
+uldaman	4857	4554	Shiny Polished Stone	withheld	EG-corpse
+uldaman	4857	4638	Reinforced Steel Lockbox	withheld	EG-corpse
+wailing-caverns	3671	9739	Gem of Anacondra	featured	ATT,EG-corpse,Norgannon
+wailing-caverns	3671	5404	Serpent's Shoulders	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+wailing-caverns	3671	10412	Belt of the Fang	featured	ATT,EG-roll,Everloot,EzWoW,Norgannon
+wailing-caverns	3671	1741	Laced Cloak	withheld	Norgannon
+wailing-caverns	3671	12992	Searing Blade	withheld	Norgannon
+wailing-caverns	3671	273088	Snake Eye Kaleidoscope	featured	ATT,Everloot,EzWoW,Norgannon
+wailing-caverns	3671	273098	Blueprint: Field Guide	featured	ATT,Everloot,EzWoW,Norgannon
+wailing-caverns	3671	6446	Snakeskin Bag	featured	ATT,Everloot,EzWoW,Norgannon
+wailing-caverns	3671	1764	Canvas Shoes	withheld	EG-corpse
+wailing-caverns	3671	2217	Rectangular Shield	withheld	Everloot
+wailing-caverns	3671	2592	Wool Cloth	withheld	EG-corpse
+wailing-caverns	3671	4537	Tel'Abim Banana	withheld	Everloot
+wailing-caverns	3671	4568	Grunt Axe	withheld	Everloot
+wailing-caverns	3671	14367	Mystic's Gloves	withheld	EG-roll
+wailing-caverns	3671	15502	Outrunner's Gloves	withheld	Everloot
+wailing-caverns	3671	253904	Pattern: Filigreed Silky Gown	other	Everloot
+wailing-caverns	3653	6447	Worn Turtle Shell Shield	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+wailing-caverns	3653	13245	Kresh's Back	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+wailing-caverns	3653	14367	Mystic's Gloves	withheld	Norgannon
+wailing-caverns	3653	273084	Cloak of Hermitic Bliss	featured	ATT,Everloot,EzWoW,Norgannon
+wailing-caverns	3653	4555	Thick Scaly Tail	withheld	EG-corpse
+wailing-caverns	3653	4556	Speckled Shell Fragment	withheld	EG-corpse
+wailing-caverns	3653	5523	Small Barnacled Clam	withheld	Everloot
+wailing-caverns	3653	6391	Pattern: Stylish Green Shirt	other	Everloot
+wailing-caverns	3653	15893	Prospector's Buckler	withheld	Everloot
+wailing-caverns	3653	251344	Plans: Crusader's Chain Shirt	other	Everloot
+wailing-caverns	3653	252775	Pattern: Stormrider's Leather Armor	other	Everloot
+wailing-caverns	3669	6460	Cobrahn's Grasp	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+wailing-caverns	3669	6465	Robe of the Moccasin	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+wailing-caverns	3669	10410	Leggings of the Fang	featured	ATT,Everloot,EzWoW,Norgannon
+wailing-caverns	3669	818	Tigerseye	withheld	EG-corpse,EG-roll
+wailing-caverns	3669	1816	Unbalanced Axe	withheld	EG-corpse
+wailing-caverns	3669	2589	Linen Cloth	withheld	Everloot
+wailing-caverns	3669	2592	Wool Cloth	withheld	EG-corpse
+wailing-caverns	3669	3377	Canvas Bracers	withheld	Everloot
+wailing-caverns	3669	4537	Tel'Abim Banana	withheld	Everloot
+wailing-caverns	3669	9738	Gem of Cobrahn	featured	ATT,EG-corpse
+wailing-caverns	3669	15893	Prospector's Buckler	withheld	Everloot
+wailing-caverns	3670	9740	Gem of Pythas	featured	ATT,EG-corpse,Norgannon
+wailing-caverns	3670	6472	Stinging Viper	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+wailing-caverns	3670	6473	Armor of the Fang	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+wailing-caverns	3670	15506	Grunt's AnkleWraps	other	Everloot,Norgannon
+wailing-caverns	3670	12978	Stormbringer Belt	withheld	Norgannon
+wailing-caverns	3670	273089	Slither Cord	featured	ATT,Everloot,EzWoW,Norgannon
+wailing-caverns	3670	1801	Rawhide Shoulderpads	withheld	Everloot
+wailing-caverns	3670	2592	Wool Cloth	withheld	Everloot
+wailing-caverns	3670	4537	Tel'Abim Banana	withheld	Everloot
+wailing-caverns	3670	252792	Pattern: Brawler's Leather Pants	other	Everloot
+wailing-caverns	3674	6448	Tail Spike	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+wailing-caverns	3674	6449	Glowing Lizardscale Cloak	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+wailing-caverns	3674	14121	Aboriginal Vest	withheld	Norgannon
+wailing-caverns	3674	15893	Prospector's Buckler	withheld	Norgannon
+wailing-caverns	3674	273137	Skum's Bucket	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+wailing-caverns	3674	1206	Moss Agate	withheld	EG-corpse,EG-roll
+wailing-caverns	3674	5128	Shed Lizard Skin	withheld	Everloot
+wailing-caverns	3674	5470	Thunder Lizard Tail	withheld	Everloot
+wailing-caverns	3674	14565	Prospector's Woolies	withheld	EG-corpse,EG-roll
+wailing-caverns	3674	14728	War Paint Shoulder Pads	withheld	Everloot
+wailing-caverns	3674	251349	Plans: Crusader's Chain Leggings	other	EG-corpse,EG-roll
+wailing-caverns	3673	9741	Gem of Serpentis	featured	ATT,EG-corpse,Norgannon
+wailing-caverns	3673	5970	Serpent Gloves	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+wailing-caverns	3673	6459	Savage Trodders	featured	ATT,Everloot,EzWoW,Norgannon
+wailing-caverns	3673	6469	Venomstrike	guide	ATT,EzWoW,Norgannon
+wailing-caverns	3673	10411	Footpads of the Fang	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+wailing-caverns	3673	14129	Ritual Sandals	withheld	Norgannon
+wailing-caverns	3673	15110	Rigid Belt	withheld	Norgannon
+wailing-caverns	3673	15307	Feral Buckler	withheld	Norgannon
+wailing-caverns	3673	273087	Blueprint: Journeyman Campfire	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+wailing-caverns	3673	2219	Small Round Shield	withheld	Everloot
+wailing-caverns	3673	2589	Linen Cloth	withheld	Everloot
+wailing-caverns	3673	251349	Plans: Crusader's Chain Leggings	other	Everloot
+wailing-caverns	3673	252796	Pattern: Stormrider's Leather Pants	other	Everloot
+wailing-caverns	5775	6629	Sporid Cape	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+wailing-caverns	5775	6630	Seedcloud Buckler	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+wailing-caverns	5775	6631	Living Root	featured	ATT,Everloot,EzWoW,Norgannon
+wailing-caverns	5775	11981	Lead Band	withheld	Norgannon
+wailing-caverns	5775	14374	Sanguine Sandals	withheld	Norgannon
+wailing-caverns	5775	15329	Wrangler's Belt	withheld	Norgannon
+wailing-caverns	5775	1778	Brocade Vest	withheld	EG-corpse
+wailing-caverns	5775	6470	Deviate Scale	withheld	Everloot
+wailing-caverns	5775	15018	Lupine Vest	withheld	Everloot
+wailing-caverns	5775	15505	Outrunner's Pauldrons	withheld	EG-corpse
+wailing-caverns	5775	252797	Pattern: Wisdom's Leather Pants	other	Everloot
+wailing-caverns	3654	10441	Glowing Shard	featured	ATT,EG-corpse,EzWoW,Norgannon
+wailing-caverns	3654	6461	Slime-encrusted Pads	featured	ATT,Everloot,EzWoW,Norgannon
+wailing-caverns	3654	6463	Deep Fathom Ring	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+wailing-caverns	3654	6627	Mutant Scale Breastplate	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+wailing-caverns	3654	1795	Rawhide Belt	withheld	Norgannon
+wailing-caverns	3654	12053	Volcanic Rock Ring	withheld	Norgannon
+wailing-caverns	3654	14565	Prospector's Woolies	withheld	Norgannon
+wailing-caverns	3654	730	Murloc Eye	withheld	Everloot
+wailing-caverns	3654	789	Stout Battlehammer	withheld	Everloot
+wailing-caverns	3654	1468	Murloc Fin	withheld	Everloot
+wailing-caverns	3654	5524	Thick-shelled Clam	withheld	Everloot
+wailing-caverns	3654	5784	Slimy Murloc Scale	withheld	Everloot
+wailing-caverns	3654	6289	Raw Longjaw Mud Snapper	withheld	Everloot
+wailing-caverns	3654	6563	Shimmering Bracers	withheld	Everloot
+wailing-caverns	3654	6564	Shimmering Cloak	withheld	Everloot
+wailing-caverns	3654	6570	Shimmering Sash	withheld	Everloot
+wailing-caverns	3654	6574	Defender Bracers	withheld	Everloot
+wailing-caverns	3654	6576	Defender Girdle	other	EG-corpse,EG-roll,Everloot
+wailing-caverns	3654	6581	Scouting Belt	other	EG-corpse,EG-roll,Everloot
+wailing-caverns	3654	10407	Raider's Shoulderpads	withheld	Everloot
+wailing-caverns	5912	5243	Firebelcher	guide	ATT,EzWoW,Norgannon
+wailing-caverns	5912	6632	Feyscale Cloak	featured	ATT,Everloot,EzWoW,Norgannon
+wailing-caverns	5912	252781	Pattern: Stormrider's Leather Gloves	withheld	Norgannon
+zulfarrak	10082	12470	Sandstalker Ankleguards	featured	ATT,EG-corpse,EzWoW,Norgannon
+zulfarrak	10082	2040	Troll Protector	withheld	Norgannon
+zulfarrak	10082	6440	Brainlash	withheld	Norgannon
+zulfarrak	10082	274658	Dune Hacker	guide	ATT,EzWoW,Norgannon
+zulfarrak	10080	274659	Bloodsand Belt	guide	ATT,Norgannon
+zulfarrak	10080	274660	Sandarr's Shoulders	guide	ATT,Norgannon
+zulfarrak	10080	862	Runed Ring	guide	ATT
+zulfarrak	10080	2040	Troll Protector	guide	ATT
+zulfarrak	10080	5616	Gutwrencher	guide	ATT
+zulfarrak	10080	6440	Brainlash	guide	ATT
+zulfarrak	10080	9480	Eyegouger	guide	ATT
+zulfarrak	10080	9481	The Minotaur	guide	ATT
+zulfarrak	10080	9482	Witch Doctor's Cane	guide	ATT
+zulfarrak	10080	9483	Flaming Incinerator	guide	ATT
+zulfarrak	10080	9484	Spellshock Leggings	guide	ATT
+zulfarrak	10080	9511	Bloodletter Scalpel	guide	ATT
+zulfarrak	10080	9512	Blackmetal Cape	guide	ATT
+zulfarrak	10080	9523	Troll Temper	guide	EzWoW
+zulfarrak	10081	12471	Desertwalker Cane	guide	ATT,EzWoW,Norgannon
+zulfarrak	10081	12469	Mutilator	guide	EzWoW
+zulfarrak	7272	14660	Scorpashi Shoulder Pads	withheld	Norgannon
+zulfarrak	7272	15373	Wolf Rider's Headgear	withheld	Norgannon
+zulfarrak	7272	15166	Imposing Gloves	withheld	Norgannon
+zulfarrak	7272	15964	Silksand Star	withheld	Norgannon
+zulfarrak	7272	2040	Troll Protector	withheld	Norgannon
+zulfarrak	7272	9480	Eyegouger	withheld	Norgannon
+zulfarrak	7272	9483	Flaming Incinerator	withheld	Norgannon
+zulfarrak	7272	274638	Sandfury Pauldrons	featured	ATT,EzWoW,Norgannon,Scout
+zulfarrak	7272	274639	Sacrificial Chain Vest	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon,Scout
+zulfarrak	7272	274641	Theka's Last Breath	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+zulfarrak	7272	10660	First Mosh'aru Tablet	featured	ATT,EG-corpse,EzWoW,Scout
+zulfarrak	7271	18082	Zum'rah's Vexing Cane	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+zulfarrak	7271	18083	Jumanza Grips	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+zulfarrak	7271	10090	Gothic Plate Helmet	withheld	Norgannon
+zulfarrak	7271	9960	Warmonger's Gauntlets	withheld	Norgannon
+zulfarrak	7271	7540	Champion's Helmet	withheld	Norgannon
+zulfarrak	7271	10206	Overlord's Girdle	withheld	Norgannon
+zulfarrak	7271	9913	Royal Gown	withheld	Norgannon
+zulfarrak	7271	274642	Blood Ritual Ring	guide	ATT,EzWoW,Norgannon
+zulfarrak	7271	1520	Troll Sweat	withheld	EG-corpse,Scout
+zulfarrak	7271	8151	Flask of Mojo	withheld	EG-corpse
+zulfarrak	7271	277112	Zum'rah's Head	withheld	EG-corpse,Scout
+zulfarrak	7796	9471	Nekrum's Medallion	guide	ATT,EzWoW,Norgannon
+zulfarrak	7796	14907	Brutish Helmet	withheld	Norgannon
+zulfarrak	7796	9480	Eyegouger	withheld	Norgannon
+zulfarrak	7796	274643	Gutcutter Hatchet	guide	ATT,EzWoW,Norgannon
+zulfarrak	7796	274644	Undying Headdress	featured	ATT,EG-corpse,EzWoW,Norgannon,Scout
+zulfarrak	7796	274645	Desert Ziggurat Drape	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+zulfarrak	7796	1520	Troll Sweat	withheld	EG-corpse
+zulfarrak	7796	4338	Mageweave Cloth	withheld	EG-corpse
+zulfarrak	7796	8151	Flask of Mojo	withheld	EG-corpse
+zulfarrak	7796	254104	Pattern: Golden Gloves	other	EG-corpse,EG-roll
+zulfarrak	7275	9470	Bad Mojo Mask	featured	ATT,Everloot,EzWoW,Norgannon,Scout
+zulfarrak	7275	9473	Jinxed Hoodoo Skin	guide	ATT,EzWoW,Norgannon
+zulfarrak	7275	9474	Jinxed Hoodoo Kilt	featured	ATT,EG-corpse,EzWoW,Norgannon
+zulfarrak	7275	9475	Diabolic Skiver	featured	ATT,EzWoW,Norgannon,Scout
+zulfarrak	7275	1520	Troll Sweat	withheld	EG-corpse
+zulfarrak	7275	6149	Greater Mana Potion	withheld	Scout
+zulfarrak	7275	252921	Pattern: Mender's Mail Gauntlets	other	Scout
+zulfarrak	8127	9379	Sang'thraze the Deflector	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+zulfarrak	8127	9639	The Hand of Antu'sul	featured	ATT,EzWoW,Norgannon,Scout
+zulfarrak	8127	9640	Vice Grips	encounter	ATT,EG-roll,EzWoW,Norgannon
+zulfarrak	8127	9641	Lifeblood Amulet	featured	ATT,Everloot,EzWoW,Norgannon
+zulfarrak	8127	9484	Spellshock Leggings	withheld	Norgannon
+zulfarrak	8127	14840	Tyrant's Legplates	withheld	Norgannon
+zulfarrak	8127	4023	Fine Pointed Dagger	withheld	EG-corpse
+zulfarrak	8127	4338	Mageweave Cloth	withheld	EG-corpse
+zulfarrak	8127	9523	Troll Temper	withheld	EG-corpse
+zulfarrak	8127	14269	Gaea's Slippers	withheld	EG-roll
+zulfarrak	7795	9234	Tiara of the Deep	featured	ATT,EG-corpse,EzWoW,Norgannon,Scout
+zulfarrak	7795	10661	Second Mosh'aru Tablet	featured	ATT,EG-corpse,EzWoW,Norgannon,Scout
+zulfarrak	7795	1447	Ring of Saviors	withheld	Norgannon
+zulfarrak	7795	9481	The Minotaur	withheld	Norgannon
+zulfarrak	7795	9483	Flaming Incinerator	withheld	Norgannon
+zulfarrak	7795	274651	Zealot Plate	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+zulfarrak	7795	274652	Wall of Water	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+zulfarrak	7795	274653	Deep Ritual Girdle	featured	ATT,EzWoW,Norgannon,Scout
+zulfarrak	7795	1520	Troll Sweat	withheld	Scout
+zulfarrak	7795	4024	Heavy War Staff	withheld	Scout
+zulfarrak	7273	8707	Gahz'rilla's Electrified Scale	featured	ATT,EG-corpse,Norgannon,Scout
+zulfarrak	7273	9467	Gahz'rilla Fang	featured	ATT,Everloot,EzWoW,Norgannon
+zulfarrak	7273	9469	Gahz'rilla Scale Armor	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+zulfarrak	7273	14270	Gaea's Cloak	withheld	Norgannon
+zulfarrak	7273	14787	Khan's Mantle	withheld	Norgannon
+zulfarrak	7273	274657	Hydra Leather Legs	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
+zulfarrak	7273	5516	Threshadon Fang	withheld	Scout
+zulfarrak	7273	252921	Pattern: Mender's Mail Gauntlets	other	EG-corpse,EG-roll
+zulfarrak	7273	254104	Pattern: Golden Gloves	other	Scout
+zulfarrak	7267	9476	Big Bad Pauldrons	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon,Scout
+zulfarrak	7267	9477	The Chief's Enforcer	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
+zulfarrak	7267	9478	Ripsaw	guide	ATT,EzWoW,Norgannon
+zulfarrak	7267	9479	Embrace of the Lycan	featured	ATT,EG-roll,EzWoW,Norgannon,Scout
+zulfarrak	7267	11086	Jang'thraze the Protector	guide	ATT,EzWoW,Norgannon
+zulfarrak	7267	9484	Spellshock Leggings	withheld	Norgannon
+zulfarrak	7267	14263	Bloodwoven Mask	withheld	Norgannon
+zulfarrak	7267	1520	Troll Sweat	withheld	EG-corpse
+zulfarrak	7267	9523	Troll Temper	withheld	Scout
+zulfarrak	7267	274654	Sandfury Guillotine	withheld	Scout
+zulfarrak	7267	274655	Peacekeeper Wand	withheld	EG-roll
+zulfarrak	7797	1520	Troll Sweat	withheld	EG-corpse
+zulfarrak	7797	3965	Thick Leather Gloves	withheld	EG-corpse
+zulfarrak	7797	9479	Embrace of the Lycan	withheld	EG-corpse
+zulfarrak	7797	9523	Troll Temper	featured	EG-corpse,EzWoW
+zulfarrak	7797	213547	Scroll: THAW WORDS	withheld	EG-corpse
+zulfarrak	7797	274654	Sandfury Guillotine	guide	ATT
+zulfarrak	7797	274655	Peacekeeper Wand	featured	ATT,EG-corpse
+excavation-site-wetlands	260808	270180	Horrible Rootcore	featured	ATT,EzWoW,Scout
+drowned-city	264172	286658	Umbral Scaled Belt	guide	ATT,EzWoW
+drowned-city	264172	286662	Deep-Dweller's Grips	guide	ATT,EzWoW
+drowned-city	260468	286650	Pyromancer's Baton	guide	EzWoW
+drowned-city	260468	286651	Flamestarter's Signet	guide	EzWoW
+drowned-city	260202	274606	Bloodspine Staff	featured	ATT,EG-corpse,Everloot,EzWoW
+drowned-city	260202	274607	Viscera Spaulders	featured	ATT,EG-corpse,Everloot,EzWoW
+drowned-city	260202	274614	Knucklebone Ring	featured	ATT,EG-corpse,Everloot,EzWoW
+drowned-city	260202	276894	Ancient Gurubashi Idol	withheld	EG-corpse
+drowned-city	263886	271718	Linken's Boots of Iron	guide	EzWoW-group
+drowned-city	263886	274611	Robe of the Drowned	featured	ATT-group,EG-corpse,EG-roll,EzWoW-group,Scout
+drowned-city	263886	274612	Waterlogged Burial Shroud	featured	ATT-group,EG-corpse,EG-roll,Everloot,EzWoW-group
+drowned-city	263886	274615	Heart of the Primeval	featured	EG-corpse,EG-roll,Everloot,EzWoW-group
+drowned-city	260243	271718	Linken's Boots of Iron	withheld	EG-corpse,EG-roll
+drowned-city	260243	274608	Maw of Min'loth	featured	ATT-group,EG-corpse,EG-roll,Everloot,EzWoW-group
+drowned-city	260243	274609	Serpentbane Crown	featured	ATT-group,EzWoW-group,Scout
+drowned-city	260243	274610	Ritual-Binder's Gloves	guide	ATT-group,EzWoW-group
+zulfarrak	7604	8548	Divino-matic Rod	featured	ATT,EG-corpse,Everloot,EzWoW
+zulfarrak	7604	9242	Ancient Tablet	withheld	EG-corpse
+zulfarrak	7604	274646	Arch of the Covenant	featured	ATT,EG-corpse,EzWoW
+zulfarrak	7604	274647	Farraki Kris	featured	ATT,Everloot,EzWoW
+zulfarrak	7604	274648	The Desert Rose	featured	ATT,EG-corpse,EzWoW
+blackmaw-hold	269111	280077	Fist of Revelation	guide	EzWoW
+blackmaw-hold	269111	280078	Apprentice's Protective Treads	guide	EzWoW
+blackmaw-hold	250034	280085	Tunnelweb Pincer	guide	EzWoW
+blackmaw-hold	250034	280086	Octofinger Gauntlets	guide	EzWoW
+scholomance	16118	22303	Ironweave Pants	guide	ATT,EzWoW
+scholomance	16118	22326	Amalgam's Band	guide	ATT,EzWoW
+scholomance	16118	22331	Band of the Steadfast Hero	guide	ATT,EzWoW
+scholomance	16118	22332	Blade of Necromancy	guide	ATT,EzWoW
+scholomance	16118	22333	Hammer of Divine Might	guide	ATT,EzWoW
+shapers-terrace	253214	280012	Talon of Tor'Rel	guide	ATT-group,EzWoW-group
+shapers-terrace	253214	280013	Frostfang Mail Vest	guide	ATT-group,EzWoW-group
+shapers-terrace	253214	280014	Raptorscale Bulwark	guide	ATT-group,EzWoW-group
+shapers-terrace	261974	280028	Heartflame Gauntlets	guide	ATT,EzWoW
+shapers-terrace	261974	280029	Cinderedge Crescent	guide	ATT,EzWoW
+shapers-terrace	261993	280026	Albinofur Grips	guide	ATT,EzWoW
+shapers-terrace	261993	280027	Crownroar Chestplate	guide	ATT,EzWoW
+shapers-terrace	262297	280026	Albinofur Grips	guide	ATT,EzWoW
+shapers-terrace	262297	280027	Crownroar Chestplate	guide	ATT
+stratholme	11121	12830	Plans: Corruption	guide	ATT
+stratholme	11121	13350	Insignia of the Black Guard	guide	ATT
+stratholme	11121	18783	Bottom Half of Advanced Armorsmithing: Volume III	guide	ATT
+stratholme	11121	276434	Black Guard Skullcap	guide	ATT
+stratholme	11121	276455	Swordsmith Mitts	guide	ATT
+stratholme	11121	276456	Plague Defiled Buckler	guide	ATT
+stratholme	11058	13172	Grimm's Premium Tobacco	guide	ATT
+stratholme	11058	273117	Blueprint: Anarchist's Workbench	guide	ATT
+stratholme	11058	273129	Essence of Anarchy	guide	ATT
+stratholme	11058	276394	Luxurious Smoking Jacket	guide	ATT
+stratholme	11058	276395	Grimm's Packing Gloves	guide	ATT
+stratholme	11058	276396	Ezra's Seal of Authenticity	guide	ATT
+sunken-temple	8440	6826	Brilliant Scale	withheld	EG-corpse
+sunken-temple	8440	10663	Essence of Hakkar	featured	ATT-group,EG-corpse
+sunken-temple	8440	10838	Might of Hakkar	featured	ATT-group,EG-corpse,EG-roll
+sunken-temple	8440	10842	Windscale Sarong	guide	ATT-group
+sunken-temple	8440	10843	Featherskin Cape	guide	ATT-group
+sunken-temple	8440	10844	Spire of Hakkar	guide	ATT-group
+sunken-temple	8440	10845	Warrior's Embrace	featured	ATT-group,EG-corpse,EG-roll
+sunken-temple	8440	10846	Bloodshot Greaves	guide	ATT-group
+sunken-temple	8440	12462	Embrace of the Wind Serpent	guide	ATT-group

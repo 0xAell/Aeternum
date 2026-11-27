@@ -1,6 +1,6 @@
 -- Extract floor geometry and boss stops from the pinned MIT Forever Dungeon Routes data.
 -- The addon uses only file IDs of textures already in the WoW client.
-local source, database, output = ...
+local source, database, output, reviewFile = ...
 assert(output, "Usage: lua tools/import_floors.lua ROUTES_DIR Data.lua FloorData.lua")
 local routes, addon = {}, {}
 for _, name in ipairs({"Dungeons", "Floors", "Rooms", "Pictures", "Minimaps", "DefaultRoutes", "Encounters"}) do
@@ -41,7 +41,19 @@ local function transform(floor)
     return {0, -1/(west-east), west/(west-east), -1/(north-south), 0, north/(north-south)}
 end
 
-local function writeStops(file, id, floorID, variants, bosses, encounters)
+local pinReview = {}
+if reviewFile ~= "-" then
+    local review = assert(io.open(reviewFile or "docs/boss-audit/pin-review.tsv"))
+    review:read("*l")
+    for line in review:lines() do
+        local id, npc, floor, action, x, y = line:match("^([^\t]+)\t(%d+)\t(%d+)\t([a-z]+)\t([^\t]*)\t([^\t]*)$")
+        assert(id and (action == "pull" or action == "estimate" or action == "hide"), line)
+        pinReview[id .. "/" .. npc .. "/" .. floor] = {action=action, x=tonumber(x), y=tonumber(y)}
+    end
+    review:close()
+end
+
+local function writeStops(file, id, floorID, index, variants, bosses, encounters)
     local seen, count = {}, 0
     for _, route in ipairs(variants) do
         for _, stop in ipairs(route.stops or {}) do
@@ -52,12 +64,20 @@ local function writeStops(file, id, floorID, variants, bosses, encounters)
                 for _, name in ipairs((sharedStops[id] or {})[stop.name] or {}) do names[#names + 1] = name end
                 for _, name in ipairs(names) do
                     local npc = bosses[key(name)]
-                    if npc and not seen[npc] then
-                        file:write(("{%d,%s,%s"):format(npc, stop.x, stop.y))
+                    local review = npc and pinReview[id .. "/" .. npc .. "/" .. index]
+                    if npc and not seen[npc] and not (review and review.action == "hide") then
+                        local pull = review and review.action == "pull"
+                        file:write(("{%d,%s,%s"):format(npc, pull and review.x or stop.x, pull and review.y or stop.y))
                         if stop.encounters and #stop.encounters > 0 then
                             file:write(",encounters=", array(stop.encounters))
                         end
                         if name ~= stop.name then file:write((",label=%q"):format(stop.name)) end
+                        if pull then
+                            file:write(",pull=true")
+                        elseif (review and review.action == "estimate")
+                            or (route.name or ""):find("Approximate", 1, true) then
+                            file:write(",approximate=true")
+                        end
                         file:write("},")
                         seen[npc], count = true, count + 1
                     end
@@ -104,13 +124,16 @@ for _, dungeon in ipairs(addon.Data.dungeons) do
     local route = routes.DefaultRoutes[original.key] or {}
     local variants = route.id and {route} or route
     local bosses = {}
-    for _, boss in ipairs(dungeon.bosses) do bosses[key(boss.name)] = boss.id end
+    for _, boss in ipairs(dungeon.bosses) do
+        bosses[key(boss.name)] = boss.id
+        if boss.routeAlias then bosses[key(boss.routeAlias)] = boss.id end
+    end
     local encounters = {}
     for _, encounter in ipairs(routes.Encounters[original.instanceID] or {}) do
         for _, id in ipairs(encounter.ids) do encounters[id] = encounter.name end
     end
     file:write(("    [%q] = {instance=%d, floors={\n"):format(dungeon.id, original.instanceID))
-    for _, floorID in ipairs(original.floors) do
+    for index, floorID in ipairs(original.floors) do
         local floor = assert(routes.Floors[floorID])
         local mosaic = routes.MinimapArt[floorID]
         floorCount = floorCount + 1
@@ -151,7 +174,7 @@ for _, dungeon in ipairs(addon.Data.dungeons) do
             file:write("}")
         end
         file:write(", bosses={")
-        pinCount = pinCount + writeStops(file, dungeon.id, floorID, variants, bosses, encounters)
+        pinCount = pinCount + writeStops(file, dungeon.id, floorID, index, variants, bosses, encounters)
         file:write("}},\n")
     end
     file:write("    }},\n")

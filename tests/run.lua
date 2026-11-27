@@ -606,7 +606,7 @@ test("all dungeon floor references and boss stops resolve to their own dungeon",
         end
     end
     equal(floors, 71, "floors")
-    equal(stops, 260, "recorded boss positions")
+    equal(stops, 277, "displayed boss positions")
     equal(sketches, 1, "documented fallback sketch")
 end)
 
@@ -648,10 +648,12 @@ end)
 test("unplaced bosses and dungeon quest starts are reachable from the floor itself", function()
     local addon, env, state = openDeadmines()
     local frame = addon.DungeonMap.frame
-    local menu = frame.dropdown:OpenMenu()
-    menu:Find("Boss loot"):Find("Goblin Woodcarver"):Click()
+    addon.DungeonMap:Open(dungeonNamed(addon, "blackmaw-hold"))
+    frame.dropdown:OpenMenu():Find("Boss loot"):Find("Impaan the Imprisoner"):Click()
     Wow.flushTimers()
-    equal(state.menu.children[1].label, "Goblin Woodcarver", "encounter list opens loot")
+    equal(state.menu.children[1].label, "Impaan the Imprisoner", "unplaced encounter opens loot")
+    addon.DungeonMap:Open(dungeonNamed(addon, "deadmines"))
+    local menu = frame.dropdown:OpenMenu()
     local d = addon.DungeonMap.dungeon
     local id = findEntry(d.quests, function(q) return addon.QuestStart(q) ~= nil end)
     local start = addon.QuestStart(id)
@@ -915,7 +917,7 @@ end)
 
 test("alternate wing routes restore distinct boss positions and group an arena's loot by combatant", function()
     local addon, env, state = load()
-    for key, expected in pairs({maraudon=9, stratholme=17, ["dm-north"]=7}) do
+    for key, expected in pairs({maraudon=9, stratholme=19, ["dm-north"]=7}) do
         local ids, count = {}, 0
         for _, floor in ipairs(addon.floorData[key].floors) do
             equal(#floor.toMap, 6)
@@ -936,7 +938,8 @@ test("alternate wing routes restore distinct boss positions and group an arena's
     state.menu:Find("Gorosh the Dervish"):Click()
     Wow.flushTimers()
     equal(state.menu.children[1].label, "Gorosh the Dervish")
-    check(menuRow(state.menu, "Savage Gladiator Chain"), "selected boss's own loot")
+    check(menuRow(state.menu, "Savage Gladiator Chain")
+        or menuRow(state.menu:Find("Guide-listed drops"), "Savage Gladiator Chain"), "selected boss's own loot")
 end)
 
 test("Forever-specific named drops fill previously empty boss menus", function()
@@ -947,9 +950,29 @@ test("Forever-specific named drops fill previously empty boss menus", function()
     for boss, id in pairs({["Katerina the Cleaner"]=276738, Blazeroar=276744}) do
         addon.DungeonMap.frame.dropdown:OpenMenu():Find("Boss loot"):Find(boss):Click()
         Wow.flushTimers()
-        check(menuRow(state.menu, addon.Data.items[id]), boss)
+        local parent = boss == "Katerina the Cleaner" and state.menu:Find("Encounter rolls") or state.menu
+        check(menuRow(parent, addon.Data.items[id]), boss)
         equal(state.menu.children[1].label, boss)
     end
+end)
+
+test("Rhahk'Zor separates his recorded gear, other corpse drops, and encounter rolls", function()
+    local addon, _, state = openDeadmines()
+    local boss = assert(findEntry(addon.DungeonMap.dungeon.bosses, function(b) return b.id == 644 end))
+    addon.UI:Boss(addon.DungeonMap.frame, boss)
+    local menu = state.menu
+    for _, id in ipairs({5187, 872, 273289}) do check(menuRow(menu, addon.Data.items[id])) end
+    local other = menu:Find("Other recorded drops")
+    for _, id in ipairs({251340, 251341, 253912}) do check(menuRow(other, addon.Data.items[id])) end
+    check(menuRow(menu:Find("Encounter rolls"), addon.Data.items[253902]))
+    for _, id in ipairs({14166, 251362, 251364, 253906}) do
+        check(not findEntry(boss.loot, function(item) return id == item end), "unsupported Rhahk'Zor drop")
+    end
+    check(not findEntry(addon.DungeonMap.dungeon.bosses, function(b) return b.id == 641 end))
+    local point = assert(findEntry(addon.floorData["ragefire-chasm"].floors[1].bosses, function(p)
+        return p[1] == 11517
+    end))
+    check(point.pull and point[2] == .5654 and point[3] == .3816, "Oggleflint's recorded pull area")
 end)
 
 test("the indoor player arrow uses the current floor and hides when the client restricts position", function()
@@ -1270,11 +1293,19 @@ test("all shipped floors open and every boss menu shows that boss's recorded dro
             list:Find(boss.name):Click()
             Wow.flushTimers()
             equal(state.menu.children[1].label, boss.name)
-            equal(#state.menu.children - 1, math.max(1, #boss.loot), boss.name)
+            local ids = {}
+            for _, row in ipairs(state.menu.children) do
+                if row.action and #row.children == 0 then ids[#ids+1] = row end
+                for _, child in ipairs(row.children) do ids[#ids+1] = child end
+            end
+            equal(#ids, #boss.loot, boss.name)
+            for index, id in ipairs(boss.loot) do
+                check(ids[index].label:find(addon.ItemName(id), 1, true), boss.name .. " " .. id)
+            end
             bosses = bosses + 1
         end
     end
-    equal(floors, 71); equal(bosses, 287)
+    equal(floors, 71); equal(bosses, 302)
 end)
 
 test("every trainer location opens its lesson list and every eligible reference pin survives grouping", function()

@@ -1,0 +1,309 @@
+dungeon	npc	boss	decision	roster_sources	encounters	route_alias	notes
+alcaz-prison	255391	Overseer Wrex	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3403		
+alcaz-prison	256236	The Questioner	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3415		
+alcaz-prison	255997	Tidemistress Ca'zass	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3410		
+alcaz-prison	257016	Katerina the Cleaner	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3418		
+alcaz-prison	255702	Blazeroar	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3409		
+blackfathom-deeps	4887	Ghamoo-ra	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2697,2761,2916		
+blackfathom-deeps	4831	Lady Sarevess	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2699,2762,2915		
+blackfathom-deeps	6243	Gelihast	keep	ATT,EzWoW,FDR,Norgannon,Scout	2704,2763,2914		
+blackfathom-deeps	12902	Lorgus Jett	keep	ATT,EzWoW,FDR,Norgannon,Scout	2710,2764,2913		
+blackfathom-deeps	4830	Old Serra'kis	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2765,2912		
+blackfathom-deeps	4832	Twilight Lord Kelris	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2766,2825,2911		
+blackfathom-deeps	4829	Aku'mai	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2767,2891,2910		
+blackmaw-hold	247206	Impaan the Imprisoner	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3316		
+blackmaw-hold	247198	Bonesnout the Unbroken	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3322		
+blackmaw-hold	269104	Moontouched Wanderer	keep	ATT,EzWoW,FDR,Norgannon			
+blackmaw-hold	247195	Withermaw	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3315		
+blackmaw-hold	247209	Elder Shaman Bloodmane	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3327		
+blackmaw-hold	247207	Blackmaw Behemoth	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3323		
+blackmaw-hold	247231	Unbound Spirit	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3336		
+blackmaw-hold	247234	Varrox Bleakhoof	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon	3334		
+blackrock-depths	9025	Lord Roccor	keep	ATT,EzWoW,FDR,Norgannon,Scout	228		
+blackrock-depths	9319	Houndmaster Grebmar	keep	ATT,EzWoW,FDR,Norgannon,Scout	229		
+blackrock-depths	9018	High Interrogator Gerstahn	keep	ATT,EzWoW,FDR,Norgannon,Scout	227		
+blackrock-depths	9024	Pyromancer Loregrain	keep	ATT,EzWoW,FDR,Norgannon,Scout	231		
+blackrock-depths	9033	General Angerforge	keep	ATT,EzWoW,FDR,Norgannon,Scout	236		
+blackrock-depths	9016	Bael'Gar	keep	ATT,EzWoW,FDR,Norgannon,Scout	235		
+blackrock-depths	9017	Lord Incendius	keep	ATT,EzWoW,FDR,Norgannon,Scout	232		
+blackrock-depths	9056	Fineous Darkvire	keep	ATT,EzWoW,FDR,Norgannon,Scout	234		
+blackrock-depths	9041	Warder Stilgiss	keep	ATT,EzWoW,FDR,Norgannon,Scout	233		
+blackrock-depths	9042	Verek	keep	ATT,EzWoW,Norgannon	233		
+blackrock-depths	8983	Golem Lord Argelmach	keep	ATT,EzWoW,FDR,Norgannon,Scout	237		
+blackrock-depths	9543	Ribbly Screwspigot	keep	ATT,EzWoW,FDR,Norgannon,Scout	240		
+blackrock-depths	9537	Hurley Blackbreath	keep	ATT,EzWoW,FDR,Norgannon,Scout	238		
+blackrock-depths	9502	Phalanx	keep	ATT,EzWoW,FDR,Norgannon,Scout	239		
+blackrock-depths	9499	Plugger Spazzring	keep	ATT,EzWoW,FDR,Norgannon,Scout	241		
+blackrock-depths	9156	Ambassador Flamelash	keep	ATT,EzWoW,FDR,Norgannon,Scout	242		
+blackrock-depths	9938	Magmus	keep	ATT,EzWoW,FDR,Norgannon,Scout	244		
+blackrock-depths	8929	Princess Moira Bronzebeard	keep	ATT,EzWoW,FDR,Norgannon,Scout	2789		
+blackrock-depths	9019	Emperor Dagran Thaurissan	keep	ATT,EzWoW,FDR,Norgannon,Scout	2790		
+blackrock-depths	9027	Gorosh the Dervish	keep	ATT,EzWoW,Norgannon,Scout	230		
+blackrock-depths	9028	Grizzle	keep	ATT,EzWoW,Norgannon	230		
+blackrock-depths	9029	Eviscerator	keep	ATT,EzWoW,Norgannon	230		
+blackrock-depths	9030	Ok'thor the Breaker	keep	ATT,EzWoW,Norgannon	230		
+blackrock-depths	9031	Anub'shiah	keep	ATT,EzWoW,Norgannon	230		
+blackrock-depths	9032	Hedrum the Creeper	keep	ATT,EzWoW,Norgannon	230		
+blackrock-depths	8923	Panzor the Invincible	keep	ATT,EzWoW,FDR,Norgannon			
+blackrock-depths	9039	Doom'rel	keep	ATT,EzWoW,Norgannon	243		
+city-of-dalaran	247126	Atrexis the Grave Knight	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3311		
+city-of-dalaran	245999	Arcane Anomaly	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3298		
+city-of-dalaran	246003	Fel Ancient	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3299		
+city-of-dalaran	246017	Unstable Sentinel	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3302		
+city-of-dalaran	246008	Mana Devourer	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3300		
+city-of-dalaran	246016	Arcanic Enigma	keep	ATT,EzWoW,FDR,Norgannon,Scout	3301	Mana Elemental	
+city-of-dalaran	247032	Lyn the Ignored	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3310		
+city-of-dalaran	246020	Shade of the Archmage	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3303		
+deadmines	3586	Miner Johnson	keep	ATT,EzWoW,FDR,Norgannon,Scout	3676		
+deadmines	644	Rhahk'Zor	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2741		
+deadmines	643	Sneed	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2742		
+deadmines	642	Sneed's Shredder	keep	ATT,EzWoW,FDR,Norgannon	2742		
+deadmines	1763	Gilnid	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2743		
+deadmines	646	Mr. Smite	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2745		
+deadmines	647	Captain Greenskin	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2744		
+deadmines	639	Edwin VanCleef	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2747		
+deadmines	645	Cookie	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2746		
+deadmines	641	Goblin Woodcarver	omit	Norgannon			Ordinary Deadmines mob. ATT places its gloves under zone drops. No boss encounter or guide stop.
+dm-east	14354	Pusillin	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2792		
+dm-east	14327	Lethtendris	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	345		
+dm-east	13280	Hydrospawn	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	344		
+dm-east	11490	Zevrim Thornhoof	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	343		
+dm-east	11492	Alzzin the Wildshaper	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	346		
+dm-north	14326	Guard Mol'dar	keep	ATT,EzWoW,FDR,Norgannon,Scout	362		
+dm-north	14322	Stomper Kreeg	keep	ATT,EzWoW,FDR,Norgannon,Scout	363		
+dm-north	14321	Guard Fengus	keep	ATT,EzWoW,FDR,Norgannon,Scout	364		
+dm-north	14323	Guard Slip'kik	keep	ATT,EzWoW,FDR,Norgannon,Scout	365		
+dm-north	14325	Captain Kromcrush	keep	ATT,EzWoW,FDR,Norgannon,Scout	366		
+dm-north	14324	Cho'Rush the Observer	keep	ATT,EzWoW,FDR,Norgannon,Scout	367		
+dm-north	11501	King Gordok	keep	ATT,EzWoW,FDR,Norgannon,Scout	368		
+dm-west	11489	Tendris Warpwood	keep	ATT,EzWoW,FDR,Norgannon,Scout	350		
+dm-west	11488	Illyanna Ravenoak	keep	ATT,EzWoW,FDR,Norgannon,Scout	347		
+dm-west	11487	Magister Kalendris	keep	ATT,EzWoW,FDR,Norgannon,Scout	348		
+dm-west	11467	Tsu'zee	keep	ATT,EzWoW,FDR,Norgannon,Scout	2794		
+dm-west	11496	Immol'thar	keep	ATT,EzWoW,FDR,Norgannon,Scout	349		
+dm-west	11486	Prince Tortheldrin	keep	ATT,EzWoW,FDR,Norgannon,Scout	361		
+dm-west	14506	Lord Hel'nurath	keep	ATT,FDR,Norgannon,Scout	2793		
+dm-west	14690	Revanchion	keep	Norgannon			Scourge Invasion event boss. Availability in live Forever is unverified.
+drowned-city	258905	Zul'Alai	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3474		
+drowned-city	258924	Var'Taka	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3475		
+drowned-city	260042	Captain Dreadrise	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3476		
+drowned-city	264177	Gill	keep	EzWoW,FDR,Norgannon			
+drowned-city	260274	Min'loth the Serpent	alias	ATT,FDR,Norgannon	3479		An alternate Min'loth NPC in ATT. Forever combat logs name NPC 260243 on encounter 3479.
+excavation-site-wetlands	260322	Saltspine	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3480		
+excavation-site-wetlands	260325	Shadetooth	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3481		
+excavation-site-wetlands	260326	Relic Guardian	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3482		
+gnomeregan	7361	Grubbis	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2768,2925		
+gnomeregan	7079	Viscous Fallout	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2769,2928		
+gnomeregan	6235	Electrocutioner 6000	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2770,2927		
+gnomeregan	6229	Crowd Pummeler 9-60	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2771,2899		
+gnomeregan	6228	Dark Iron Ambassador	keep	ATT,EzWoW,FDR,Norgannon			
+gnomeregan	7800	Mekgineer Thermaplugg	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2772,2940		
+hall-of-thanes	261306	Faldrim Anvilmar	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3493		
+hall-of-thanes	261316	Magmatus	keep	ATT,EzWoW,FDR,Norgannon,Scout	3495	Infurnus	
+hall-of-thanes	261311	Plunder	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3494		
+hall-of-thanes	261319	Durgen Dirgehammer	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3496		
+kroldok-stronghold	258966	Slavecrusher Grox	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3450		
+kroldok-stronghold	258972	Twilight Commander Zarmok	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3452		
+kroldok-stronghold	259281	War Handler Ashka	keep	ATT,EzWoW,FDR,Norgannon,Scout	3453	Handler Ashka	
+kroldok-stronghold	258964	Nar'gurk	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3449		
+kroldok-stronghold	264773	Bossman Toof	keep	ATT,EzWoW,FDR,Norgannon,Scout			
+kroldok-stronghold	258968	Overlord Mugg	keep	ATT,EzWoW,FDR,Norgannon,Scout	3451	Overseer Mugg	
+lbrs	9196	Highlord Omokk	keep	ATT,EzWoW,FDR,Norgannon,Scout	267		
+lbrs	9236	Shadow Hunter Vosh'gajin	keep	ATT,EzWoW,FDR,Norgannon,Scout	268		
+lbrs	9237	War Master Voone	keep	ATT,EzWoW,FDR,Norgannon,Scout	269		
+lbrs	10596	Mother Smolderweb	keep	ATT,EzWoW,FDR,Norgannon,Scout	270		
+lbrs	10584	Urok Doomhowl	keep	ATT,EzWoW,FDR,Norgannon,Scout	271		
+lbrs	9736	Quartermaster Zigris	keep	ATT,EzWoW,FDR,Norgannon,Scout	272		
+lbrs	10220	Halycon	keep	ATT,EzWoW,FDR,Norgannon,Scout	274		
+lbrs	10268	Gizrul the Slavener	keep	ATT,EzWoW,FDR,Norgannon,Scout	273		
+lbrs	9568	Overlord Wyrmthalak	keep	ATT,EzWoW,FDR,Norgannon,Scout	275		
+lbrs	9219	Spirestone Butcher	keep	ATT,EzWoW,FDR,Norgannon			
+lbrs	9218	Spirestone Battle Lord	keep	ATT,EzWoW,Norgannon			
+lbrs	9217	Spirestone Lord Magus	keep	ATT,EzWoW,Norgannon			
+lbrs	9596	Bannok Grimaxe	keep	ATT,EzWoW,FDR,Norgannon			
+lbrs	9718	Ghok Bashguud	keep	ATT,EzWoW,FDR,Norgannon			
+lbrs	10376	Crystal Fang	keep	ATT,EzWoW,FDR,Norgannon			
+lbrs	10263	Burning Felguard	keep	ATT,Norgannon			
+maraudon	13282	Noxxion	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	422		
+maraudon	12258	Razorlash	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	423		
+maraudon	12236	Lord Vyletongue	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	424		
+maraudon	12237	Meshlok the Harvester	keep	ATT,EzWoW,FDR,Norgannon			
+maraudon	13601	Tinkerer Gizlock	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	427		
+maraudon	12225	Celebras the Cursed	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	425		
+maraudon	12203	Landslide	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	426		
+maraudon	13596	Rotgrip	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	428		
+maraudon	12201	Princess Theradras	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	429		
+ragefire-chasm	11517	Oggleflint	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2732		
+ragefire-chasm	11520	Taragaman the Hungerer	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2733		
+ragefire-chasm	11518	Jergosh the Invoker	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2734		
+ragefire-chasm	11519	Bazzalan	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2735		
+razorfen-downs	7355	Tuten'kash	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2780		
+razorfen-downs	7357	Mordresh Fire Eye	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2782		
+razorfen-downs	8567	Glutton	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2784		
+razorfen-downs	7354	Ragglesnout	keep	ATT,EzWoW,FDR,Norgannon,Scout	2783		
+razorfen-downs	7356	Plaguemaw the Rotting	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2781		
+razorfen-downs	7358	Amnennar the Coldbringer	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2785		
+razorfen-downs	14686	Lady Falther'ess	keep	Norgannon			Scourge Invasion event boss. Availability in live Forever is unverified.
+razorfen-kraul	6168	Roogug	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2773		
+razorfen-kraul	4424	Aggem Thorncurse	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2774		
+razorfen-kraul	4428	Death Speaker Jargba	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2775		
+razorfen-kraul	4420	Overlord Ramtusk	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2776		
+razorfen-kraul	4422	Agathelos the Raging	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2777		
+razorfen-kraul	4425	Blind Hunter	keep	ATT,EzWoW,FDR,Norgannon			
+razorfen-kraul	4421	Charlga Razorflank	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2778		
+razorfen-kraul	4842	Earthcaller Halmgar	keep	ATT,EzWoW,FDR,Norgannon			
+razorfen-kraul	4438	Razorfen Spearhide	keep	ATT,FDR,Norgannon			
+ruins-of-lordaeron	250660	The Baron	keep	ATT,EzWoW,FDR,Norgannon	3355	The Butcher	
+ruins-of-lordaeron	250483	Witherfang	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3353		
+ruins-of-lordaeron	250631	The Abandoned	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3357		
+ruins-of-lordaeron	256097	Bjork	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3412		
+ruins-of-lordaeron	250657	Rath'mael	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3354		
+ruins-of-lordaeron	256035	Viktor the Vile	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	3411		
+ruins-of-lordaeron	255699	Lordaeron Captain	keep	ATT,EzWoW,FDR,Norgannon,Scout	3408		
+scholomance	10506	Kirtonos the Herald	keep	ATT,EzWoW,FDR,Norgannon,Scout	2805		
+scholomance	10503	Jandice Barov	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2804		
+scholomance	11622	Rattlegore	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2811		
+scholomance	10433	Marduk Blackpool	keep	ATT,EzWoW,FDR,Norgannon,Scout	2809		
+scholomance	10432	Vectus	keep	ATT,EzWoW,FDR,Norgannon,Scout	2813		
+scholomance	10508	Ras Frostwhisper	keep	ATT,EzWoW,FDR,Norgannon,Scout	2810		
+scholomance	10901	Lorekeeper Polkelt	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2808		
+scholomance	10507	The Ravenian	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2812		
+scholomance	10505	Instructor Malicia	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2803		
+scholomance	11261	Doctor Theolen Krastinov	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2802		
+scholomance	10502	Lady Illucia Barov	keep	EG-encounter,EzWoW,FDR,Norgannon,Scout	2806		
+scholomance	10504	Lord Alexei Barov	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2807		
+scholomance	1853	Darkmaster Gandling	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2801		
+scholomance	14695	Lord Blackwood	keep	Norgannon			Scourge Invasion event boss. Availability in live Forever is unverified.
+scholomance	14516	Death Knight Darkreaver	keep	ATT,Norgannon			
+shadowfang-keep	3914	Rethilgore	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2748		
+shadowfang-keep	3886	Razorclaw the Butcher	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2749		
+shadowfang-keep	3887	Baron Silverlaine	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2750		
+shadowfang-keep	4278	Commander Springvale	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2751		
+shadowfang-keep	4279	Odo the Blindwatcher	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2752		
+shadowfang-keep	4274	Fenrus the Devourer	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2753		
+shadowfang-keep	3927	Wolf Master Nandos	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2754		
+shadowfang-keep	4275	Archmage Arugal	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2755		
+shadowfang-keep	3872	Deathsworn Captain	keep	ATT,FDR,Norgannon,Scout			
+shadowfang-keep	3864	Fel Steed	keep	ATT,Norgannon			
+shadowfang-keep	4627	Arugal's Voidwalker	keep	ATT,Norgannon			
+shapers-terrace	253201	Titanosaur	keep	ATT,EzWoW,FDR,Norgannon,Scout	3498		
+shapers-terrace	261813	Venomridge	keep	ATT,EzWoW,FDR,Norgannon,Scout	3501		
+shapers-terrace	261812	Thunderhoof	keep	ATT,EzWoW,FDR,Norgannon,Scout	3500		
+shapers-terrace	262127	Direhorn Matriarch	keep	ATT,EzWoW,FDR,Norgannon,Scout	3507		
+shapers-terrace	262081	Bolt	keep	ATT,EzWoW,FDR,Norgannon,Scout	3505		
+shapers-terrace	272561	Vitrix	keep	ATT,EzWoW,FDR,Norgannon,Scout	3600		
+shapers-terrace	253218	Izha'Rel	superseded	Norgannon			The guide loot matches encounter 3499, Ravasaur Hunters. The documented encounter NPCs differ.
+shapers-terrace	261809	Nanaya	keep	ATT,EzWoW,FDR,Norgannon,Scout	3502		
+sm-armory	3975	Herod	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	448		
+sm-cathedral	4542	High Inquisitor Fairbanks	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	449		
+sm-cathedral	3976	Scarlet Commander Mograine	keep	ATT,EzWoW,FDR,Norgannon,Scout	450		
+sm-cathedral	3977	High Inquisitor Whitemane	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	450		
+sm-graveyard	3983	Interrogator Vishas	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	444		
+sm-graveyard	4543	Bloodmage Thalnos	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2779		
+sm-graveyard	6490	Azshir the Sleepless	keep	ATT,EzWoW,FDR,Norgannon			
+sm-graveyard	6488	Fallen Champion	keep	ATT,EzWoW,FDR,Norgannon			
+sm-graveyard	6489	Ironspine	keep	ATT,EzWoW,FDR,Norgannon			
+sm-library	3974	Houndmaster Loksey	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	446		
+sm-library	6487	Arcanist Doan	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	447		
+stockade	1696	Targorr the Dread	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2756		
+stockade	1666	Kam Deepfury	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2757		
+stockade	1717	Hamhock	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2758		
+stockade	1716	Bazil Thredd	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2760		
+stockade	1663	Dextren Ward	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2759		
+stockade	1720	Bruegal Ironknuckle	keep	ATT,EzWoW,FDR,Norgannon			
+stratholme	10393	Skul	keep	ATT,EzWoW,FDR,Norgannon,Scout	2799		
+stratholme	10558	Hearthsinger Forresten	keep	ATT,EzWoW,FDR,Norgannon,Scout	473		
+stratholme	10516	The Unforgiven	keep	ATT,EzWoW,FDR,Norgannon,Scout	472		
+stratholme	10808	Timmy the Cruel	keep	ATT,EzWoW,FDR,Norgannon,Scout	474		
+stratholme	11032	Malor the Zealous	keep	ATT,EzWoW,FDR,Norgannon,Scout	476		
+stratholme	10997	Cannon Master Willey	keep	ATT,EzWoW,FDR,Norgannon,Scout	475		
+stratholme	10811	Archivist Galford	keep	ATT,EzWoW,FDR,Norgannon,Scout	477		
+stratholme	10813	Balnazzar	keep	ATT,EzWoW,FDR,Norgannon,Scout	478		
+stratholme	11120	Crimson Hammersmith	keep	ATT,EzWoW,FDR,Norgannon,Scout	2796		
+stratholme	11143	Postmaster Malown	keep	ATT,EzWoW,FDR,Norgannon,Scout	2798		
+stratholme	10809	Stonespine	keep	ATT,EzWoW,FDR,Norgannon,Scout	2800		
+stratholme	10436	Baroness Anastari	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	479		
+stratholme	10437	Nerub'enkan	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	480		
+stratholme	10438	Maleki the Pallid	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	481		
+stratholme	10435	Magistrate Barthilas	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	482		
+stratholme	10439	Ramstein the Gorger	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	483		
+stratholme	10440	Baron Rivendare	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	484		
+stratholme	14684	Balzaphon	keep	Norgannon			Scourge Invasion event boss. Availability in live Forever is unverified.
+sunken-temple	5713	Gasher	keep	EzWoW,Norgannon,Scout			
+sunken-temple	5715	Hukku	keep	EzWoW,Norgannon			
+sunken-temple	5714	Loro	keep	EzWoW,Norgannon			
+sunken-temple	5717	Mijan	keep	EzWoW,Norgannon			
+sunken-temple	5712	Zolo	keep	EzWoW,Norgannon			
+sunken-temple	5716	Zul'Lor	keep	EzWoW,Norgannon			
+sunken-temple	8580	Atal'alarion	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2814,2952,3582		
+sunken-temple	5721	Dreamscythe	keep	ATT,EzWoW,FDR,Norgannon,Scout	486,3588		
+sunken-temple	5720	Weaver	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	487,3587		
+sunken-temple	5711	Ogom the Wretched	keep	ATT,EzWoW,Norgannon			
+sunken-temple	5710	Jammal'an the Prophet	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	488,3589		
+sunken-temple	5719	Morphaz	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	490,3586		
+sunken-temple	5722	Hazzas	keep	ATT,EzWoW,FDR,Norgannon,Scout	491,3585		
+sunken-temple	5709	Shade of Eranikus	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	493,2959,3584		
+sunken-temple	5708	Spawn of Hakkar	keep	ATT,Norgannon			
+sunken-temple	8443	Avatar of Hakkar	alias	ATT,EzWoW,FDR,Norgannon,Scout	492,2956,3583		ATT groups both Hakkar variants. Live combat records name NPC 8440 in the Sunken Temple.
+ubrs	9816	Pyroguard Emberseer	keep	ATT,EzWoW,FDR,Norgannon,Scout	3062		
+ubrs	10264	Solakar Flamewreath	keep	ATT,EzWoW,FDR,Norgannon			
+ubrs	10509	Jed Runewatcher	keep	ATT,EzWoW,FDR,Norgannon			
+ubrs	10899	Goraluk Anvilcrack	keep	ATT,EzWoW,FDR,Norgannon			
+ubrs	10429	Warchief Rend Blackhand	keep	ATT,EzWoW,FDR,Norgannon,Scout	3063		
+ubrs	10430	The Beast	keep	ATT,EzWoW,FDR,Norgannon,Scout	3068		
+ubrs	10363	General Drakkisath	keep	ATT,EzWoW,FDR,Norgannon,Scout	3069		
+ubrs	10339	Gyth	keep	ATT,EzWoW,Norgannon	3063		
+ubrs	16042	Lord Valthalak	keep	ATT,FDR,Norgannon,Scout	3070		
+uldaman	6910	Revelosh	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	547		
+uldaman	6906	Baelog	keep	ATT,EzWoW,Norgannon,Scout	548		
+uldaman	6907	Eric "The Swift"	keep	ATT,EzWoW,Norgannon,Scout	548		
+uldaman	6908	Olaf	keep	ATT,EzWoW,Norgannon,Scout	548		
+uldaman	7228	Ironaya	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	549		
+uldaman	7023	Obsidian Sentinel	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	1887		
+uldaman	7206	Ancient Stone Keeper	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	551		
+uldaman	7291	Galgann Firehammer	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	552		
+uldaman	4854	Grimlok	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	553		
+uldaman	2748	Archaedas	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	554		
+uldaman	4857	Stone Keeper	omit	Norgannon			Elite guardians in the halls leading to Archaedas. Ancient Stone Keeper is the separate boss, NPC 7206.
+wailing-caverns	3671	Lady Anacondra	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	585		
+wailing-caverns	3653	Kresh	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	587		
+wailing-caverns	3669	Lord Cobrahn	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	586		
+wailing-caverns	3670	Lord Pythas	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	588		
+wailing-caverns	3674	Skum	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	589		
+wailing-caverns	3673	Lord Serpentis	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	590		
+wailing-caverns	5775	Verdan the Everliving	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	591		
+wailing-caverns	3654	Mutanus the Devourer	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	592		
+wailing-caverns	5912	Deviate Faerie Dragon	keep	ATT,EzWoW,FDR,Norgannon			
+zulfarrak	10082	Zerillis	keep	ATT,EzWoW,FDR,Norgannon			
+zulfarrak	10080	Sandarr Dunereaver	keep	ATT,EzWoW,FDR,Norgannon			
+zulfarrak	10081	Dustwraith	keep	ATT,EzWoW,FDR,Norgannon			
+zulfarrak	7272	Theka the Martyr	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	596		
+zulfarrak	7271	Witch Doctor Zum'rah	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	597		
+zulfarrak	7796	Nekrum Gutchewer	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	598		
+zulfarrak	7275	Shadowpriest Sezz'ziz	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	599		
+zulfarrak	8127	Antu'sul	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	595		
+zulfarrak	7795	Hydromancer Velratha	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	593		
+zulfarrak	7273	Gahz'rilla	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	594		
+zulfarrak	7267	Chief Ukorz Sandscalp	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	600		
+zulfarrak	7797	Ruuzlu	keep	ATT,EzWoW,Norgannon			
+excavation-site-wetlands	260808	Highland Horror	add	ATT,EzWoW,FDR,Scout	3644		
+drowned-city	264172	Umbra	add	ATT,EzWoW			
+drowned-city	260468	"Pyromancer" Braxton	add	EzWoW,FDR			
+drowned-city	260202	Deathless Marrow	add	ATT,EzWoW			
+drowned-city	263886	Primeval Elemental	add	ATT,EG-encounter,EzWoW,FDR,Scout	3511		
+drowned-city	260243	Min'loth the Serpent	add	ATT,EG-encounter,EzWoW,FDR,Scout	3479		
+drowned-city	263742	Zin'aka	candidate	EzWoW			
+zulfarrak	7604	Sergeant Bly	add	ATT,EzWoW,FDR			
+blackmaw-hold	269111	Gortek the Apprentice	add	EzWoW,FDR			
+blackmaw-hold	250034	Tunnelweb Matriarch	add	DungeonJournal,EzWoW			
+scholomance	16118	Kormok	add	ATT,EzWoW,FDR,Scout	3055		
+shapers-terrace	253214	Ravasaur Hunters	add	ATT,EzWoW,FDR	3499		
+shapers-terrace	261974	Cinder	add	ATT,EzWoW,FDR,Scout	3503		
+shapers-terrace	261993	King Op	add	ATT,EzWoW,FDR	3504		
+shapers-terrace	262297	Snowtalon	add	ATT,EzWoW,FDR,Scout	3597		
+city-of-dalaran	246931	Mana Wraith	add	ATT,FDR,Scout	3312		
+drowned-city	260213	Deathless Guardians	add	ATT,FDR	3478		
+stratholme	11121	Black Guard Swordsmith	add	ATT,FDR,Scout	2795		
+stratholme	11058	Ezra Grimm	add	ATT,FDR	2797		
+blackrock-depths	9476	Watchman Doomgrip	add	ATT,FDR,Scout	2791	The Vault	
+sunken-temple	8440	Avatar of Hakkar	add	ATT,EG-encounter,FDR	492,2956,3583		
