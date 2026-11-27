@@ -74,11 +74,7 @@ local function openPanel()
     end
     if not WorldMapFrame:IsShown() then
         -- The map's own toggle keeps its windowed or maximised state.
-        if ToggleWorldMap then
-            ToggleWorldMap()
-        else
-            ShowUIPanel(WorldMapFrame)
-        end
+        ToggleWorldMap()
     end
     addon.UI:Show()
 end

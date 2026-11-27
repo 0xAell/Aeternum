@@ -24,15 +24,20 @@ into `World of Warcraft/_forever_/Interface/AddOns/`. The result must be
 
 ## Use it in game
 
-1. Open the world map with **M** and click **Aeternum**, or type `/aeternum`.
+1. Open the world map with **M** and click **Aeternum** in the map's top-right
+   corner, or type `/aeternum`. The panel opens beside the map when the screen
+   has room, and inside the map's right edge when the map is maximised.
 2. Search, or tick the categories to show. **All quests** shows every recorded
    quest location as a reference; **Low-level quests** hides grey quests.
 3. Click a row or pin to select it, then **Guide** (or right-click it) to point
-   the minimap arrow there. **Stop** or `/aeternum stop` ends guidance.
+   the minimap arrow there. **Stop** or `/aeternum stop` ends guidance. Hovering
+   a row highlights its pin on the map. Right-clicking the map anywhere else
+   still zooms out.
 4. Click a dungeon pin, or find one under **All dungeons**, to open its panel.
    Browse floors, step through bosses to see their loot, and open **Quests** to
    see the dungeon's quests; click one to show where it starts. Hover an item for
-   its tooltip; shift-click links it in chat and ctrl-click previews it.
+   its tooltip; shift-click links it in chat and ctrl-click previews it. Escape
+   closes the dungeon panel and leaves the map open.
 
 | Command | Effect |
 |---|---|
@@ -57,6 +62,12 @@ requirements are not modelled. Seasonal event quests are hidden unless **All
 quests** is ticked. Guidance without approach points uses a direct bearing: it
 can point across terrain and does not account for walls, tunnels, or elevation.
 
+## Footprint
+
+The bundled data loads as compact strings: about 1.6 MB of Lua memory at login,
+decoded a map at a time as you browse. Quest-log updates restyle what is on
+screen in place rather than rebuilding the map.
+
 ## Development
 
 You need LuaJIT (or Lua 5.1) and [luacheck](https://github.com/lunarmodules/luacheck).
@@ -70,7 +81,10 @@ tools/package.sh           # build dist/Aeternum-<version>.zip
 
 The tests load the addon in TOC order inside `tests/wow.lua`, a small stand-in
 for the client API, and drive the panel, pins, quest states, guidance, and
-dungeon panel. CI runs all four steps on every push and pull request.
+dungeon panel. The stand-in follows the WoW Forever 1.60.1 interface source
+(the `forever` branch of [wow-ui-source](https://github.com/Gethe/wow-ui-source)):
+the same API names, the map canvas's click and show order, and the Escape
+handler priorities. CI runs all four steps on every push and pull request.
 
 See [data sources and regeneration](DATA_SOURCES.md) for the pinned database,
 attribution, and import command. Licensed under [GPL-3.0](LICENSE).

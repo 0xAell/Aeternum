@@ -1,11 +1,9 @@
 local _, addon = ...
 
 local data = addon.Data
-local maps = {}
-local dungeonRecords = {}
-local questStarts = {}
 local categoryOrder = { dungeon = 1, class = 2, profession = 3, quest = 4 }
-local questRoles = { start = "Quest start", turnin = "Quest turn-in" }
+local questRoles = { s = "Quest start", t = "Quest turn-in" }
+local factionCodes = { A = "Alliance", H = "Horde" }
 
 addon.categories = {
     { id = "dungeon", label = "Dungeons", letter = "D", color = { 1, .71, .33 } },
@@ -34,6 +32,72 @@ function addon.DungeonLevel(dungeon)
     end
 end
 
+-- Quests ---------------------------------------------------------------------
+
+-- Field order of the packed quest strings written by tools/import_norgannon.lua.
+local QUEST_FIELDS = {
+    "name", "level", "minLevel", "maxLevel", "races", "classes", "requiresAll", "requiresAny",
+    "exclusiveTo", "availableStartingWith", "availableUntilCompleted", "disabledByQuest",
+    "requiredSkill", "repeatable", "event",
+}
+local LIST_FIELDS = { requiresAll = true, requiresAny = true, exclusiveTo = true }
+local FLAG_FIELDS = { repeatable = true, event = true }
+
+local function split(text, separator)
+    local fields, start = {}, 1
+    while true do
+        local stop = text:find(separator, start, true)
+        fields[#fields + 1] = text:sub(start, (stop or 0) - 1)
+        if not stop then
+            return fields
+        end
+        start = stop + 1
+    end
+end
+
+local function decodeQuest(packed)
+    local quest = {}
+    for index, value in ipairs(split(packed, "|")) do
+        local field = QUEST_FIELDS[index]
+        if value ~= "" then
+            if index == 1 then
+                quest.name = value
+            elseif LIST_FIELDS[field] then
+                local ids = {}
+                for id in value:gmatch("%d+") do
+                    ids[#ids + 1] = tonumber(id)
+                end
+                quest[field] = ids
+            elseif FLAG_FIELDS[field] then
+                quest[field] = true
+            elseif field == "requiredSkill" then
+                local skill, rank = value:match("^(%d+):(%d+)$")
+                quest.requiredSkill = { tonumber(skill), tonumber(rank) }
+            else
+                quest[field] = tonumber(value)
+            end
+        end
+    end
+    if quest.requiresAll or quest.requiresAny then
+        quest.prerequisites = { all = quest.requiresAll, any = quest.requiresAny }
+    end
+    quest.requiresAll, quest.requiresAny = nil, nil
+    return quest
+end
+
+local quests = {}
+
+-- The quest's name and rules, decoded on first use; nil for an unknown quest.
+function addon.Quest(questID)
+    local quest = quests[questID]
+    if quest == nil then
+        local packed = data.quests[questID]
+        quest = packed and decodeQuest(packed) or false
+        quests[questID] = quest
+    end
+    return quest or nil
+end
+
 -- Records --------------------------------------------------------------------
 
 local function record(category, title, subtitle, point, source)
@@ -41,52 +105,7 @@ local function record(category, title, subtitle, point, source)
         category = category, title = title, subtitle = subtitle,
         mapID = point and point.mapID, x = point and point.x, y = point and point.y,
         faction = point and point.faction, source = source, point = point,
-        search = (title .. " " .. subtitle):lower(),
     }
-end
-
-local function addToMap(entry)
-    local entries = maps[entry.mapID]
-    if not entries then
-        entries = {}
-        maps[entry.mapID] = entries
-    end
-    entries[#entries + 1] = entry
-end
-
-for _, dungeon in ipairs(data.dungeons) do
-    local levels = addon.DungeonLevel(dungeon)
-    dungeonRecords[#dungeonRecords + 1] = record("dungeon", dungeon.name, levels or "Dungeon", nil, dungeon)
-    for _, entrance in ipairs(dungeon.entrances) do
-        local subtitle = entrance.label or "Dungeon entrance"
-        if levels then
-            subtitle = subtitle .. " · " .. levels
-        end
-        addToMap(record("dungeon", dungeon.name, subtitle, entrance, dungeon))
-    end
-end
-
-for _, trainer in ipairs(data.trainers) do
-    addToMap(record(trainer.kind, trainer.name, trainer.specialty or "Trainer", trainer, trainer))
-end
-
-for _, pin in ipairs(data.questPins) do
-    local quest = data.quests[pin.id]
-    local subtitle = questRoles[pin.role]
-    if quest.level then
-        subtitle = subtitle .. " · Level " .. quest.level
-    end
-    local entry = record("quest", quest.name, subtitle, pin, quest)
-    entry.questID, entry.role = pin.id, pin.role
-    addToMap(entry)
-    if pin.role == "start" then
-        local starts = questStarts[pin.id]
-        if not starts then
-            starts = {}
-            questStarts[pin.id] = starts
-        end
-        starts[#starts + 1] = entry
-    end
 end
 
 local function ordered(a, b)
@@ -99,9 +118,102 @@ local function ordered(a, b)
     return a.subtitle < b.subtitle
 end
 
+-- Dungeons and trainers are few, so they are indexed by map at load. Quest pins
+-- stay packed until their map is first shown.
+local dungeonRecords = {}
+local staticByMap = {}
+
+local function addStatic(entry)
+    local entries = staticByMap[entry.mapID]
+    if not entries then
+        entries = {}
+        staticByMap[entry.mapID] = entries
+    end
+    entries[#entries + 1] = entry
+end
+
+for _, dungeon in ipairs(data.dungeons) do
+    local levels = addon.DungeonLevel(dungeon)
+    dungeonRecords[#dungeonRecords + 1] = record("dungeon", dungeon.name, levels or "Dungeon", nil, dungeon)
+    for _, entrance in ipairs(dungeon.entrances) do
+        local subtitle = entrance.label or "Dungeon entrance"
+        if levels then
+            subtitle = subtitle .. " · " .. levels
+        end
+        addStatic(record("dungeon", dungeon.name, subtitle, entrance, dungeon))
+    end
+end
 table.sort(dungeonRecords, ordered)
-for _, entries in pairs(maps) do
+
+for _, trainer in ipairs(data.trainers) do
+    addStatic(record(trainer.kind, trainer.name, trainer.specialty or "Trainer", trainer, trainer))
+end
+
+local PIN_PATTERN = "(%d+)([st])([AH]?)(%d+),(%d+);"
+
+local function questRecord(questID, role, faction, x, y, mapID)
+    local quest = addon.Quest(questID)
+    local subtitle = questRoles[role]
+    if quest.level then
+        subtitle = subtitle .. " · Level " .. quest.level
+    end
+    local point = { mapID = mapID, x = x / 10000, y = y / 10000, faction = factionCodes[faction] }
+    local entry = record("quest", quest.name, subtitle, point, quest)
+    entry.questID, entry.role = questID, role == "s" and "start" or "turnin"
+    return entry
+end
+
+local mapRecords = {}
+
+-- Every record on a world map, sorted, built the first time the map is shown.
+function addon.MapRecords(mapID)
+    local entries = mapRecords[mapID]
+    if entries then
+        return entries
+    end
+    entries = {}
+    for _, entry in ipairs(staticByMap[mapID] or {}) do
+        entries[#entries + 1] = entry
+    end
+    local packed = data.questPins[mapID]
+    if packed then
+        for questID, role, faction, x, y in packed:gmatch(PIN_PATTERN) do
+            entries[#entries + 1] = questRecord(tonumber(questID), role, faction, tonumber(x), tonumber(y), mapID)
+        end
+    end
     table.sort(entries, ordered)
+    mapRecords[mapID] = entries
+    return entries
+end
+
+local startMaps
+
+-- The first recorded start of a quest that the player's faction can use.
+function addon.QuestStart(questID)
+    if not startMaps then
+        startMaps = {}
+        for mapID, packed in pairs(data.questPins) do
+            for id, role in packed:gmatch(PIN_PATTERN) do
+                id = tonumber(id)
+                local list = startMaps[id]
+                if role == "s" and (not list or list[#list] ~= mapID) then
+                    if not list then
+                        list = {}
+                        startMaps[id] = list
+                    end
+                    list[#list + 1] = mapID
+                end
+            end
+        end
+    end
+    local faction = UnitFactionGroup("player")
+    for _, mapID in ipairs(startMaps[questID] or {}) do
+        for _, entry in ipairs(addon.MapRecords(mapID)) do
+            if entry.questID == questID and entry.role == "start" and addon.FactionAllowed(entry, faction) then
+                return entry
+            end
+        end
+    end
 end
 
 -- Settings -------------------------------------------------------------------
@@ -149,29 +261,29 @@ local function visible(entry, faction)
     return true
 end
 
+local function matches(entry, search)
+    if search == "" then
+        return true
+    end
+    if not entry.search then
+        entry.search = (entry.title .. " " .. entry.subtitle):lower()
+    end
+    return entry.search:find(search, 1, true) ~= nil
+end
+
 -- Returns the records on a world map, or every dungeon when atlas is true.
 function addon.Entries(mapID, atlas, query)
     local result = {}
-    local candidates = atlas and dungeonRecords or maps[mapID] or {}
+    local candidates = atlas and dungeonRecords or (mapID and addon.MapRecords(mapID)) or {}
     local search = strtrim(query or ""):lower()
     local faction = UnitFactionGroup("player")
     for _, entry in ipairs(candidates) do
         if (atlas or addon.CategoryEnabled(entry.category)) and visible(entry, faction)
-            and (search == "" or entry.search:find(search, 1, true)) then
+            and matches(entry, search) then
             result[#result + 1] = entry
         end
     end
     return result
-end
-
--- The first recorded start of a quest that the player's faction can use.
-function addon.QuestStart(questID)
-    local faction = UnitFactionGroup("player")
-    for _, entry in ipairs(questStarts[questID] or {}) do
-        if addon.FactionAllowed(entry, faction) then
-            return entry
-        end
-    end
 end
 
 -- Letter, colour, and subtitle for a record as the player currently sees it.
@@ -180,10 +292,11 @@ function addon.Presentation(entry)
     if entry.category ~= "quest" then
         return category.letter, category.color, entry.subtitle
     end
-    local state = addon.Quests:State(entry.questID)
-    local letter = entry.role == "turnin" and "?" or "!"
-    local style = addon.Quests:Style(state, entry.role)
-    return letter, style.color, entry.subtitle .. " · " .. style.label
+    local style = addon.Quests:Style(addon.Quests:State(entry.questID), entry.role)
+    if entry.style ~= style then
+        entry.style, entry.styledSubtitle = style, entry.subtitle .. " · " .. style.label
+    end
+    return entry.role == "turnin" and "?" or "!", style.color, entry.styledSubtitle
 end
 
 function addon.ZoneName(mapID)
@@ -201,34 +314,29 @@ function addon.ItemName(itemID)
     return data.items[itemID] or ("Item " .. itemID)
 end
 
+local qualityColors = {}
+
 function addon.ItemQualityColor(itemID)
-    local quality
-    if C_Item and C_Item.GetItemQualityByID then
-        quality = C_Item.GetItemQualityByID(itemID)
-    elseif GetItemInfo then
-        quality = select(3, GetItemInfo(itemID))
+    local quality = C_Item and C_Item.GetItemQualityByID and C_Item.GetItemQualityByID(itemID)
+    if not quality or not C_Item.GetItemQualityColor then
+        return nil
     end
-    local color = quality and ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[quality]
-    if color then
-        return { color.r, color.g, color.b }
+    local color = qualityColors[quality]
+    if not color then
+        local red, green, blue = C_Item.GetItemQualityColor(quality)
+        color = red and { red, green, blue } or false
+        qualityColors[quality] = color
     end
+    return color or nil
 end
 
 function addon.ItemIcon(itemID)
-    if C_Item and C_Item.GetItemIconByID then
-        return C_Item.GetItemIconByID(itemID)
-    end
-    return GetItemIcon and GetItemIcon(itemID)
+    return C_Item and C_Item.GetItemIconByID and C_Item.GetItemIconByID(itemID)
 end
 
--- A full hyperlink when the client has the item cached, otherwise a bare item string.
+-- A full hyperlink when the client has the item cached, and a bare item string.
 function addon.ItemLink(itemID)
-    local link
-    if C_Item and C_Item.GetItemInfo then
-        link = select(2, C_Item.GetItemInfo(itemID))
-    elseif GetItemInfo then
-        link = select(2, GetItemInfo(itemID))
-    end
+    local link = C_Item and C_Item.GetItemInfo and select(2, C_Item.GetItemInfo(itemID))
     return link, "item:" .. itemID
 end
 

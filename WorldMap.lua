@@ -12,6 +12,8 @@ AeternumMapPinMixin = {}
 
 function pins:OnLoad()
     self:UseFrameLevelType("PIN_FRAME_LEVEL_AREA_POI")
+    -- Keep a steady on-screen size, growing slightly as the map zooms in.
+    self:SetScalingLimits(1, 1, 1.2)
     local outline = self:CreateTexture(nil, "BACKGROUND")
     outline:SetAllPoints()
     outline:SetColorTexture(.06, .07, .1, .95)
@@ -85,6 +87,11 @@ function pins:OnMouseLeave()
     end
 end
 
+-- The canvas makes pins pass right-clicks through to zoom the map out, using
+-- SetPassThroughButtons, which is protected: from an add-on it fails in combat.
+-- Pins keep their right-clicks instead, to start guidance.
+function pins:SetPassThroughButtons() end
+
 function pins:OnMouseClickAction(button)
     if not self.entry then
         return
@@ -95,9 +102,6 @@ function pins:OnMouseClickAction(button)
         addon.UI:Select(self.entry)
     end
 end
-
--- Older map canvases call OnClick rather than OnMouseClickAction; each calls only one.
-pins.OnClick = pins.OnMouseClickAction
 
 local providerMethods = {}
 
@@ -176,7 +180,7 @@ function providerMethods:RefreshAllData()
     refresh(self, false)
 end
 
-providerMethods.OnShow = providerMethods.RefreshAllData
+-- The map refreshes every provider when it is shown, so OnShow needs nothing.
 providerMethods.OnHide = providerMethods.RemoveAllData
 
 function addon.RefreshMap()

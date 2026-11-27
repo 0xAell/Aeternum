@@ -54,6 +54,8 @@ function Region:IsVisible()
     return true
 end
 function Region:GetParent() return self.parent end
+function Region:GetRight() return self.right end
+function Region:GetEffectiveScale() return 1 end
 function Region:Show()
     if not self.shown then
         self.shown = true
@@ -114,6 +116,15 @@ function Frame:SetFrameLevel(value) self.level = value end
 function Frame:GetFrameLevel() return self.level or 1 end
 function Frame:SetClampedToScreen() end
 function Frame:EnableMouse() end
+function Frame:EnableMouseWheel() end
+function Frame:SetScalingLimits(...) self.scalingLimits = { ... } end
+-- Protected: like the client, it fails for add-on code in combat.
+function Frame:SetPassThroughButtons(...)
+    if Wow.state.inCombat then
+        error("Interface action failed because of an AddOn", 2)
+    end
+    self.passThrough = { ... }
+end
 function Frame:RegisterEvent(event)
     if not Wow.knownEvents[event] then
         error("Attempt to register unknown event \"" .. event .. "\"", 2)
@@ -156,16 +167,31 @@ function EditBox:SetAutoFocus() end
 function EditBox:SetMaxLetters() end
 function EditBox:ClearFocus() end
 
-local ScrollFrame = newClass(Frame)
-function ScrollFrame:SetScrollChild(child) self.child = child end
-function ScrollFrame:GetVerticalScroll() return self.scroll or 0 end
-function ScrollFrame:SetVerticalScroll(value)
-    self.scroll = value
-    self:Fire("OnVerticalScroll", value)
-end
-
 local MessageFrame = newClass(Frame)
 function MessageFrame:AddMessage(text) Wow.state.messages[#Wow.state.messages + 1] = text end
+
+local Slider = newClass(Frame)
+function Slider:SetOrientation() end
+function Slider:SetValueStep() end
+function Slider:SetObeyStepOnDrag() end
+function Slider:SetThumbTexture(texture) self.thumb = texture end
+-- Like the client, narrowing the range clamps the value and fires OnValueChanged.
+function Slider:SetMinMaxValues(low, high)
+    self.low, self.high = low, high
+    if self.value and (self.value < low or self.value > high) then
+        self.value = math.min(math.max(self.value, low), high)
+        self:Fire("OnValueChanged", self.value, false)
+    end
+end
+function Slider:GetMinMaxValues() return self.low, self.high end
+function Slider:GetValue() return self.value or 0 end
+function Slider:SetValue(value)
+    value = math.min(math.max(value, self.low or 0), self.high or 0)
+    if value ~= self.value then
+        self.value = value
+        self:Fire("OnValueChanged", value, true)
+    end
+end
 
 local Tooltip = newClass(Frame)
 function Tooltip:SetOwner(owner) self.owner, self.lines = owner, {} end
@@ -176,8 +202,7 @@ function Tooltip:SetItemByID(itemID) self.lines = { "item:" .. itemID } end
 function Tooltip:SetHyperlink(link) self.lines = { link } end
 
 local classes = {
-    Frame = Frame, Button = Button, CheckButton = CheckButton, EditBox = EditBox,
-    ScrollFrame = ScrollFrame,
+    Frame = Frame, Button = Button, CheckButton = CheckButton, EditBox = EditBox, Slider = Slider,
 }
 
 function Wow.region(class, parent)
@@ -210,6 +235,7 @@ function MapCanvas:AcquirePin(template, ...)
     end
     pool.active[#pool.active + 1] = pin
     pin:OnAcquired(...)
+    pin:CheckMouseButtonPassthrough("RightButton")
     return pin
 end
 function MapCanvas:RemoveAllPinsByTemplate(template)
@@ -228,13 +254,31 @@ function MapCanvas:EnumeratePinsByTemplate(template)
         return active[index]
     end
 end
+-- As in WorldMapMixin: the map's own OnShow and OnHide notify the data providers,
+-- and scripts hooked by add-ons run afterwards.
 function MapCanvas:Show()
-    Region.Show(self)
+    if self.shown then return end
+    self.shown = true
+    for _, provider in ipairs(self.providers) do provider:RefreshAllData(true) end
     for _, provider in ipairs(self.providers) do provider:OnShow() end
+    self:Fire("OnShow")
+end
+
+-- A mouse click as the canvas routes it: passed through to the map, or to the pin.
+function MapCanvas:ClickPin(pin, button)
+    for _, passed in ipairs(pin.passThrough or {}) do
+        if passed == button then
+            if button == "RightButton" then self.zoomedOut = true end
+            return
+        end
+    end
+    pin:OnClick(button)
 end
 function MapCanvas:Hide()
-    Region.Hide(self)
+    if not self.shown then return end
+    self.shown = false
     for _, provider in ipairs(self.providers) do provider:OnHide() end
+    self:Fire("OnHide")
 end
 
 -- World model -----------------------------------------------------------------
@@ -267,7 +311,7 @@ Wow.knownEvents = {
 
 local templates = {
     UIPanelButtonTemplate = true, UIPanelCloseButton = true, UICheckButtonTemplate = true,
-    InputBoxTemplate = true, UIPanelScrollFrameTemplate = true,
+    SearchBoxTemplate = true,
 }
 
 function Wow.CreateFrame(kind, _, parent, template)
@@ -282,6 +326,10 @@ function Wow.CreateFrame(kind, _, parent, template)
         end
         frame:SetSize(18, 18)
         frame:OnLoad()
+    elseif template == "SearchBoxTemplate" then
+        frame.Instructions = frame:CreateFontString()
+        frame.clearButton = Wow.CreateFrame("Button", nil, frame)
+        frame.searchIcon = frame:CreateTexture()
     elseif template and not templates[template] then
         error("unknown template " .. template)
     end
@@ -317,7 +365,24 @@ function Wow.new(state)
     end
     env.CreateFromMixins = function(...) return env.Mixin({}, ...) end
     env.CreateVector2D = function(x, y) return { x = x, y = y } end
-    env.ShowUIPanel = function(frame) frame:Show() end
+    env.ToggleWorldMap = function()
+        local map = env.WorldMapFrame
+        if map:IsShown() then map:Hide() else map:Show() end
+    end
+    env.UISpecialFrames = {}
+    env.GameMenuEscPriority = { AddOn = 8, AddOnPost = 9 }
+    state.escapeHandlers = {}
+    env.RegisterGameMenuEscHandler = function(priority, handler)
+        table.insert(state.escapeHandlers, { priority, handler })
+        table.sort(state.escapeHandlers, function(a, b) return a[1] < b[1] end)
+    end
+    -- Blizzard closes its windows, the map included, after the add-on handlers.
+    env.RegisterGameMenuEscHandler(env.GameMenuEscPriority.AddOnPost, function()
+        if env.WorldMapFrame:IsShown() then
+            env.WorldMapFrame:Hide()
+            return true
+        end
+    end)
     env.InCombatLockdown = function() return false end
     env.IsInInstance = function() return state.inInstance or false end
     env.GetPlayerFacing = function() return state.facing or 0 end
@@ -325,14 +390,13 @@ function Wow.new(state)
     env.UnitLevel = function() return state.level or 1 end
     env.UnitRace = function() return "Human", "Human", state.raceID or 1 end
     env.UnitClass = function() return "Warrior", state.class or "WARRIOR", 1 end
-    env.GetQuestGreenRange = function() return 5 end
+    env.UnitQuestTrivialLevelRange = function() return 5 end
     env.IsModifiedClick = function() return state.modified or false end
     env.HandleModifiedItemClick = function(link)
         state.modifiedClick = link
         return true
     end
     env.SetItemRef = function(link, text) state.itemRef = { link, text } end
-    env.ITEM_QUALITY_COLORS = { [4] = { r = .64, g = .21, b = .93 } }
 
     env.C_Timer = {
         After = function(_, callback) state.timers[#state.timers + 1] = callback end,
@@ -342,11 +406,15 @@ function Wow.new(state)
         end,
     }
     env.C_CVar = { GetCVarBool = function(name) return name == "rotateMinimap" and state.rotate or false end }
-    env.C_Minimap = { GetViewRadius = function() return 200 end }
+    env.C_Minimap = {
+        GetViewRadius = function() return 200 end,
+        IsRotateMinimapIgnored = function() return false end,
+    }
     env.C_AddOns = { LoadAddOn = noop }
     env.C_Item = {
         GetItemNameByID = function(itemID) return state.cached[itemID] and ("Cached " .. itemID) or nil end,
         GetItemQualityByID = function(itemID) return state.cached[itemID] and 4 or nil end,
+        GetItemQualityColor = function(quality) return quality == 4 and .64 or 1, .21, .93, "ffa335ee" end,
         GetItemIconByID = function(itemID) return 1000000 + itemID end,
         GetItemInfo = function(itemID)
             if state.cached[itemID] then
@@ -360,7 +428,7 @@ function Wow.new(state)
     }
     env.C_QuestLog = {
         IsQuestFlaggedCompleted = function(questID) return state.completed[questID] or false end,
-        GetLogIndexForQuestID = function(questID) return state.log[questID] end,
+        IsOnQuest = function(questID) return state.log[questID] ~= nil end,
         IsComplete = function(questID) return state.complete[questID] or false end,
     }
     env.C_Map = {
@@ -382,8 +450,21 @@ function Wow.new(state)
         OnShow = noop, OnHide = noop, RefreshAllData = noop, RemoveAllData = noop,
     }
     env.MapCanvasPinMixin = {
+        -- As in Blizzard_MapCanvas: the canvas calls OnClick, which hands over to OnMouseClickAction.
+        OnClick = function(self, ...)
+            if self.OnMouseClickAction then self:OnMouseClickAction(...) end
+        end,
         OnReleased = noop,
         UseFrameLevelType = noop,
+        ShouldMouseButtonBePassthrough = function(_, button) return button == "RightButton" end,
+        CheckMouseButtonPassthrough = function(self, ...)
+            self:SetPassThroughButtons()
+            local buttons = {}
+            for _, button in ipairs({ ... }) do
+                if self:ShouldMouseButtonBePassthrough(button) then buttons[#buttons + 1] = button end
+            end
+            self:SetPassThroughButtons(unpack(buttons))
+        end,
         SetPosition = function(self, x, y) self.x, self.y = x, y end,
     }
     local map = Wow.region(MapCanvas, env.UIParent)
@@ -396,9 +477,20 @@ function Wow.new(state)
     })
     map.mapID = state.mapID or 1429
     map.shown = false
+    map.right = state.mapRight or 1100
+    map.ScrollContainer = Wow.region(Frame, map)
     map.strata = state.mapStrata or "HIGH"
     env.WorldMapFrame = map
     return env
+end
+
+-- Presses Escape: the first handler that reports it closed something wins.
+function Wow.pressEscape()
+    for _, entry in ipairs(Wow.state.escapeHandlers) do
+        if entry[2]() then
+            return
+        end
+    end
 end
 
 -- Runs queued C_Timer.After callbacks.

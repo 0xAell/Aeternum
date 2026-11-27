@@ -27,8 +27,24 @@ checks in game: quest and minimum level, race and class masks, prerequisites,
 exclusive quests, the quests that open or close it, whether it repeats, and
 whether it is a seasonal event. Profession requirements are kept for tooltips.
 Reputation and specialization requirements are not exported. Dungeons also carry
-their group size, key items, authored notes, and quest lists. Race masks pass
-2^32, so whole numbers are written out in full.
+their group size, key items, authored notes, and quest lists.
+
+### Packed layout
+
+Quest pins and quest rules are stored as strings so that loading the addon builds
+no table per pin or per quest. The addon decodes a map's pins the first time that
+map is shown, and a quest's rules the first time they are needed (`Core.lua`).
+
+- `questPins[uiMapID]` repeats `<questID><s|t><A|H|><x>,<y>;`: `s` marks a start
+  and `t` a turn-in; `A` or `H` limits the pin to the Alliance or the Horde; `x`
+  and `y` are map coordinates in ten-thousandths, rounded from the source.
+- `quests[questID]` holds `|`-separated fields in this order, with trailing empty
+  fields dropped: name, quest level, minimum level, maximum level, race mask,
+  class mask, prerequisites that must all be done, prerequisites of which one must
+  be done, exclusive quests, the quest that opens it, the quest that closes it,
+  the quest that blocks it while active, required profession as
+  `<skillLineID>:<rank>`, `1` if repeatable, and `1` if seasonal. Lists are
+  comma-separated quest IDs. Race masks pass 2^32 and are written in full.
 
 The two authored approaches cover the recorded waypoints. Other entrance guidance
 uses a direct bearing.

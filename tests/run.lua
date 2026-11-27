@@ -90,11 +90,26 @@ test("bundled data is consistent", function()
     local addon = load()
     local data = addon.Data
     equal(#data.dungeons, 34, "dungeons")
-    equal(#data.questPins, 11100, "quest pins")
-    for _, pin in ipairs(data.questPins) do
-        check(data.quests[pin.id], "quest pin without a quest record " .. pin.id)
-        check(pin.x >= 0 and pin.x <= 1 and pin.y >= 0 and pin.y <= 1, "pin outside its map")
-        check(pin.role == "start" or pin.role == "turnin", "unknown role")
+    local packedPins, records = 0, 0
+    for mapID, packed in pairs(data.questPins) do
+        local _, count = packed:gsub(";", "")
+        packedPins = packedPins + count
+        for _, entry in ipairs(addon.MapRecords(mapID)) do
+            if entry.questID then
+                records = records + 1
+                check(addon.Quest(entry.questID), "quest pin without a quest record " .. entry.questID)
+                check(entry.x >= 0 and entry.x <= 1 and entry.y >= 0 and entry.y <= 1, "pin outside its map")
+            end
+        end
+    end
+    equal(packedPins, 11100, "packed quest pins")
+    equal(records, 11100, "decoded quest pins")
+    for id in pairs(data.quests) do
+        local quest = addon.Quest(id)
+        check(quest.name and quest.name ~= "", "quest name " .. id)
+        if quest.requiredSkill then
+            check(data.professions[quest.requiredSkill[1]], "unnamed profession")
+        end
     end
     for _, dungeon in ipairs(data.dungeons) do
         for _, boss in ipairs(dungeon.bosses) do
@@ -106,14 +121,22 @@ test("bundled data is consistent", function()
             check(data.items[itemID], "key without a name " .. itemID)
         end
         for _, questID in ipairs(dungeon.quests) do
-            check(data.quests[questID], "dungeon quest without a record " .. questID)
+            check(addon.Quest(questID), "dungeon quest without a record " .. questID)
         end
     end
-    for _, quest in pairs(data.quests) do
-        if quest.requiredSkill then
-            check(data.professions[quest.requiredSkill[1]], "unnamed profession")
-        end
-    end
+end)
+
+test("packed quest rules decode to the source fields", function()
+    local addon = load()
+    -- Quest 2: level 30, from level 20, Horde races, after quest 6383.
+    local quest = addon.Quest(2)
+    equal(quest.name, "Sharptalon's Claw", "name")
+    equal(quest.level, 30, "level")
+    equal(quest.minLevel, 20, "minimum level")
+    equal(quest.races, 8589934770, "race mask beyond 2^32")
+    equal(quest.prerequisites.any[1], 6383, "prerequisite")
+    check(not quest.prerequisites.all, "no required-all list")
+    check(addon.Quest(999999) == nil, "unknown quest")
 end)
 
 -- Loading and the panel -------------------------------------------------------
@@ -140,8 +163,13 @@ test("unknown slash commands print help", function()
 end)
 
 test("the panel reopens with the map when it was left open", function()
-    local addon = load({ savedVariables = { panelOpen = true, filters = { quest = false } } })
-    check(addon.UI:IsOpen(), "panel restored")
+    local addon, env = load({ savedVariables = { panelOpen = true, filters = { quest = false } } })
+    check(not addon.UI:IsOpen(), "hidden while the map is closed")
+    env.WorldMapFrame:Show()
+    check(addon.UI:IsOpen(), "panel restored with the map")
+    env.WorldMapFrame:Hide()
+    check(not addon.UI:IsOpen(), "hidden with the map")
+    check(env.AeternumDB.panelOpen, "still remembered as open")
     check(not addon.UI.sidebar.checks[4]:GetChecked(), "quest filter restored")
 end)
 
@@ -233,7 +261,8 @@ test("level, class, and race rules apply", function()
     local addon, _, state = load({ level = 1 })
     local data = addon.Data
     local highLevel, mageOnly, raceID95
-    for id, quest in pairs(data.quests) do
+    for id in pairs(data.quests) do
+        local quest = addon.Quest(id)
         if not highLevel and quest.minLevel and quest.minLevel >= 30 and not quest.races and not quest.classes
             and not quest.prerequisites and not quest.event and not quest.exclusiveTo then
             highLevel = id
@@ -253,7 +282,7 @@ test("level, class, and race rules apply", function()
     addon.Quests:Invalidate()
     check(addon.Quests:State(mageOnly) ~= "unavailable", "mage")
     check(addon.Quests:State(highLevel) == "available" or addon.Quests:State(highLevel) == "trivial", "level 60")
-    local quest = data.quests[raceID95]
+    local quest = addon.Quest(raceID95)
     local allowed95 = quest.races % (2 * data.raceMasks[95]) >= data.raceMasks[95]
     state.raceID = 95
     addon.Quests:Invalidate()
@@ -477,7 +506,7 @@ test("dungeons without floor art or entrances still open", function()
     local detail = addon.UI.detail
     check(detail:IsShown(), "shown")
     check(not detail.route:IsEnabled(), "no guidance without an entrance")
-    equal(detail.entranceText:GetText(), "Entrance coordinates unavailable", "explained")
+    equal(detail.entranceText:GetText(), "Entrance location not recorded", "explained")
 end)
 
 test("the busiest map draws every location in reference mode", function()
@@ -499,7 +528,8 @@ end)
 test("a quest in the log stays turn-in-able whatever its offer rules say", function()
     local addon, _, state = load({ level = 60 })
     local seasonal
-    for id, quest in pairs(addon.Data.quests) do
+    for id in pairs(addon.Data.quests) do
+        local quest = addon.Quest(id)
         if quest.event and not quest.races and not quest.classes then
             seasonal = id
             break
@@ -528,7 +558,7 @@ test("quest events restyle in place without moving the list or dropping tooltips
     local addon, env = load({ level = 1 })
     slash(env)
     local list = addon.UI.sidebar.list
-    list:SetVerticalScroll(68)
+    list:SetOffset(5)
     local before = pins(env)
     before[1]:OnMouseEnter()
     Wow.fire("QUEST_LOG_UPDATE")
@@ -536,21 +566,21 @@ test("quest events restyle in place without moving the list or dropping tooltips
     local after = pins(env)
     equal(after[1], before[1], "same pin objects")
     check(env.GameTooltip:IsOwned(before[1]), "tooltip kept")
-    equal(list:GetVerticalScroll(), 68, "scroll kept")
+    equal(list:GetOffset(), 5, "scroll kept")
 end)
 
 test("a quest event that changes the visible quests redraws but keeps the scroll", function()
     local addon, env, state = load({ level = 1 })
     slash(env)
     local list = addon.UI.sidebar.list
-    list:SetVerticalScroll(34)
+    list:SetOffset(2)
     state.log[783] = 1
     Wow.fire("QUEST_ACCEPTED", 783)
     Wow.flushTimers()
     check(findEntry(list:GetEntries(), function(entry)
         return entry.questID == 783 and entry.role == "turnin"
     end), "turn-in listed")
-    equal(list:GetVerticalScroll(), 34, "scroll kept")
+    equal(list:GetOffset(), 2, "scroll kept")
 end)
 
 test("the arrow tip sits at the target's true minimap distance", function()
@@ -568,6 +598,176 @@ test("panels sit above a maximised map", function()
     equal(addon.UI.sidebar:GetFrameStrata(), "FULLSCREEN_DIALOG", "sidebar")
     openDeadmines(addon, env)
     equal(addon.UI.detail:GetFrameStrata(), "TOOLTIP", "detail")
+end)
+
+-- Layout and interaction ------------------------------------------------------
+
+local function anchoredTo(frame, relative)
+    for _, point in ipairs(frame.points) do
+        if point[2] == relative then
+            return point
+        end
+    end
+end
+
+test("the sidebar docks beside a windowed map and inside a maximised one", function()
+    local addon, env = load({ mapRight = 1100 })
+    slash(env)
+    local point = anchoredTo(addon.UI.sidebar, env.WorldMapFrame)
+    check(point and point[1] == "TOPLEFT" and point[3] == "TOPRIGHT", "beside the map")
+
+    addon, env = load({ mapRight = 1900 })
+    slash(env)
+    point = anchoredTo(addon.UI.sidebar, env.WorldMapFrame.ScrollContainer)
+    check(point and point[1] == "TOPRIGHT", "inside the canvas")
+end)
+
+test("the map button sits in the canvas's free top-right corner", function()
+    local addon, env = load()
+    local point = anchoredTo(addon.UI.toggle, env.WorldMapFrame.ScrollContainer)
+    check(point and point[1] == "TOPRIGHT", "top right of the canvas")
+    addon.UI.toggle:Click()
+    check(addon.UI:IsOpen() or not env.WorldMapFrame:IsShown(), "toggles the panel")
+end)
+
+test("closing the map closes the dungeon panel even with the sidebar closed", function()
+    local addon, env = load()
+    slash(env, "pins")
+    env.WorldMapFrame:Show()
+    env.WorldMapFrame:SetMapID(1436)
+    local entrance
+    for _, pin in ipairs(pins(env)) do
+        if pin.entry.category == "dungeon" then entrance = pin end
+    end
+    entrance:OnClick("LeftButton")
+    check(addon.UI.detail:IsShown(), "opened from a pin")
+    Wow.pressEscape()
+    check(not addon.UI.detail:IsShown() and env.WorldMapFrame:IsShown(), "Escape closes the panel first")
+    entrance:OnClick("LeftButton")
+    env.WorldMapFrame:Hide()
+    check(not addon.UI.detail:IsShown(), "closed with the map")
+end)
+
+test("pins keep a steady size and use the canvas's click path", function()
+    local addon, env, state = load()
+    state.playerMap, state.playerX, state.playerY = 1429, .1, .1
+    slash(env)
+    local pin = pins(env)[1]
+    equal(pin.scalingLimits[2], 1, "scaling limits set")
+    check(pin.OnClick == env.MapCanvasPinMixin.OnClick, "base OnClick kept")
+    env.WorldMapFrame:ClickPin(pin, "RightButton")
+    check(not env.WorldMapFrame.zoomedOut, "right-click reaches the pin")
+    check(addon.Navigation:IsActive(), "right-click guides")
+end)
+
+test("lists draw only visible rows and scroll with the wheel", function()
+    local addon, env = load()
+    addon.settings.questMode = "all"
+    slash(env)
+    local list = addon.UI.sidebar.list
+    local total = #list:GetEntries()
+    check(total > #list.rows, "fewer rows than entries")
+    check(list.bar:IsShown(), "scroll bar shown")
+    local first = list.rows[1].entry
+    list:Fire("OnMouseWheel", -1)
+    equal(list:GetOffset(), 3, "three rows per notch")
+    check(list.rows[1].entry ~= first, "rows refilled")
+    list:Fire("OnMouseWheel", 1)
+    list:Fire("OnMouseWheel", 1)
+    equal(list:GetOffset(), 0, "clamped at the top")
+end)
+
+test("hovering a row highlights its pin", function()
+    local addon, env = load()
+    slash(env)
+    local row = addon.UI.sidebar.list.rows[1]
+    row:Fire("OnEnter")
+    local found
+    for _, pin in ipairs(pins(env)) do
+        for _, entry in ipairs(pin.entries) do
+            if entry == row.entry then found = pin end
+        end
+    end
+    equal(found.width, 24, "highlighted")
+    check(env.GameTooltip:IsOwned(row), "row tooltip")
+    row:Fire("OnLeave")
+    equal(found.width, 18, "restored")
+end)
+
+test("rows carry a badge matching their pin", function()
+    local addon, env = load({ level = 1 })
+    slash(env)
+    for _, row in ipairs(addon.UI.sidebar.list.rows) do
+        if row.entry then
+            local letter = addon.Presentation(row.entry)
+            equal(row.badge.letter:GetText(), letter, "badge letter")
+        end
+    end
+end)
+
+test("opening the map with the panel remembered draws pins and the list", function()
+    local addon, env = load({ savedVariables = { panelOpen = true } })
+    env.WorldMapFrame:Show()
+    check(#pins(env) > 0, "pins drawn")
+    check(#addon.UI.sidebar.list:GetEntries() > 0, "list filled")
+    equal(addon.UI.sidebar.heading:GetText(), "Elwynn Forest", "heading for the open map")
+end)
+
+test("pins can be drawn in combat", function()
+    local addon, env, state = load()
+    state.inCombat = true
+    slash(env)
+    check(#pins(env) > 0, "pins drawn")
+    env.WorldMapFrame:SetMapID(1453)
+    check(addon.UI:IsOpen(), "no protected calls")
+end)
+
+test("a narrower list starts at the top", function()
+    local addon, env = load()
+    addon.settings.questMode = "all"
+    slash(env)
+    local list = addon.UI.sidebar.list
+    list:SetOffset(60)
+    equal(list:GetOffset(), 60, "scrolled down")
+    -- 39 results: fewer than the old offset, so the scroll bar's range narrows past it.
+    addon.UI.sidebar.search:SetText("turn-in · level 1")
+    equal(#list:GetEntries(), 39, "narrower list")
+    equal(list:GetOffset(), 0, "back at the top")
+end)
+
+test("modified clicks on uncached items pass a hyperlink", function()
+    local addon, env, state = load()
+    local detail = openDeadmines(addon, env)
+    local itemID = detail.loot:GetEntries()[1]
+    state.modified = true
+    detail.loot.rows[1]:Click()
+    check(state.modifiedClick:find("|Hitem:" .. itemID .. "|h[", 1, true), "hyperlink text")
+end)
+
+test("completed quests read as completed in reference mode", function()
+    local addon, _, state = load({ level = 60 })
+    local seasonal
+    for id in pairs(addon.Data.quests) do
+        local quest = addon.Quest(id)
+        if quest.event and not quest.races and not quest.classes and not quest.repeatable then
+            seasonal = id
+            break
+        end
+    end
+    state.completed[seasonal] = true
+    equal(addon.Quests:State(seasonal), "done", "done, not unavailable")
+end)
+
+test("opening the map refreshes the pins once", function()
+    local addon, env = load({ savedVariables = { pinsWithPanelClosed = true } })
+    local refreshes = 0
+    local original = addon.Entries
+    addon.Entries = function(...)
+        refreshes = refreshes + 1
+        return original(...)
+    end
+    env.WorldMapFrame:Show()
+    equal(refreshes, 1, "one refresh")
 end)
 
 print(("%d passed, %d failed"):format(passed, failed))

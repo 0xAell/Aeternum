@@ -245,7 +245,7 @@ local function importDungeons(quests)
         local name = dungeonName(row)
         if name and not row.raid and #(row.bosses or {}) > 0 then
             local dungeon = {
-                id = id, name = name, floors = {}, entrances = entrances(id, row), bosses = bosses(row),
+                id = id, name = name, entrances = entrances(id, row), bosses = bosses(row),
                 levelMin = row.levels and row.levels.min, levelMax = row.levels and row.levels.max,
                 size = row.size, note = row.note, keys = {}, quests = {},
             }
@@ -351,6 +351,71 @@ local function importTrainers()
     return trainers
 end
 
+-- Packing --------------------------------------------------------------------
+
+-- Quest pins and quest rules are packed into strings that the addon decodes
+-- only for the map or quest it shows. The layouts are documented in DATA_SOURCES.md
+-- and decoded by Core.lua.
+local QUEST_FIELDS = {
+    "name", "level", "minLevel", "maxLevel", "races", "classes", "requiresAll", "requiresAny",
+    "exclusiveTo", "availableStartingWith", "availableUntilCompleted", "disabledByQuest",
+    "requiredSkill", "repeatable", "event",
+}
+local FACTION_CODES = {Alliance = "A", Horde = "H"}
+
+local function number(value)
+    return string.format("%.0f", value)
+end
+
+local function packQuest(quest)
+    local values = {
+        name = quest.name, level = quest.level, minLevel = quest.minLevel, maxLevel = quest.maxLevel,
+        races = quest.races, classes = quest.classes,
+        requiresAll = quest.prerequisites and quest.prerequisites.all,
+        requiresAny = quest.prerequisites and quest.prerequisites.any,
+        exclusiveTo = quest.exclusiveTo, availableStartingWith = quest.availableStartingWith,
+        availableUntilCompleted = quest.availableUntilCompleted, disabledByQuest = quest.disabledByQuest,
+        requiredSkill = quest.requiredSkill and (quest.requiredSkill[1] .. ":" .. quest.requiredSkill[2]),
+        repeatable = quest.repeatable and "1", event = quest.event and "1",
+    }
+    local fields = {}
+    for index, field in ipairs(QUEST_FIELDS) do
+        local value = values[field]
+        if type(value) == "table" then
+            local ids = {}
+            for i, id in ipairs(value) do ids[i] = number(id) end
+            value = table.concat(ids, ",")
+        elseif type(value) == "number" then
+            value = number(value)
+        end
+        assert(value == nil or not value:find("|", 1, true), "Separator in quest field")
+        fields[index] = value or ""
+    end
+    while fields[#fields] == "" do
+        fields[#fields] = nil
+    end
+    return table.concat(fields, "|")
+end
+
+-- One string per map: "<questID><s|t><A|H|><x>,<y>;" with x and y in 1/10000ths.
+local function packPins(pins)
+    local byMap = {}
+    for _, pin in ipairs(pins) do
+        local parts = byMap[pin.mapID]
+        if not parts then
+            parts = {}
+            byMap[pin.mapID] = parts
+        end
+        parts[#parts + 1] = string.format("%d%s%s%d,%d;", pin.id, pin.role == "start" and "s" or "t",
+            FACTION_CODES[pin.faction] or "", math.floor(pin.x * 10000 + .5), math.floor(pin.y * 10000 + .5))
+    end
+    local packed = {}
+    for mapID, parts in pairs(byMap) do
+        packed[mapID] = table.concat(parts)
+    end
+    return packed
+end
+
 -- Output ---------------------------------------------------------------------
 
 local function literal(value)
@@ -412,8 +477,12 @@ file:write("-- SPDX-License-Identifier: GPL-3.0-only\n",
     "local _, addon = ...\n\naddon.Data = {\n")
 section("dungeons", dungeons)
 section("trainers", trainers)
-section("questPins", questPinRows)
-map("quests", quests)
+local packedQuests = {}
+for id, quest in pairs(quests) do
+    packedQuests[id] = packQuest(quest)
+end
+map("questPins", packPins(questPinRows))
+map("quests", packedQuests)
 map("items", items)
 map("professions", usedProfessions)
 map("raceMasks", db.enums.raceMaskById)

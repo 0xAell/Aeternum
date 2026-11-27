@@ -93,11 +93,9 @@ local function firstStep(points, playerX, playerY)
 end
 
 local function facingRotation()
-    local getCVarBool = C_CVar and C_CVar.GetCVarBool or GetCVarBool
-    local rotate = getCVarBool and getCVarBool("rotateMinimap")
-    local ignore = C_Minimap and C_Minimap.IsRotateMinimapIgnored
-    if not readable(rotate) or not rotate or (ignore and ignore()) then return 1, 0 end
-    local facing = GetPlayerFacing and GetPlayerFacing()
+    local rotate = C_CVar.GetCVarBool("rotateMinimap")
+    if not readable(rotate) or not rotate or C_Minimap.IsRotateMinimapIgnored() then return 1, 0 end
+    local facing = GetPlayerFacing()
     if isNumber(facing) then return math.cos(facing), math.sin(facing) end
 end
 

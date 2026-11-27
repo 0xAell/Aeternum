@@ -128,37 +128,15 @@ local referenceMaps = {
 }
 
 local function getFloors(dungeon)
-    if not dungeon then return {} end
-    if dungeon.floors and #dungeon.floors > 0 then return dungeon.floors end
-
-    local reference = referenceMaps[dungeon.id]
+    local reference = dungeon and referenceMaps[dungeon.id]
     local floors = {}
     if reference then
         local tiles, first, last = unpack(reference)
         for number = first, last do
-            floors[#floors + 1] = { tileIDs = tiles[number] }
+            floors[#floors + 1] = tiles[number]
         end
     end
     return floors
-end
-
-local function getNativeArt(mapID)
-    if type(mapID) ~= "number" or not C_Map
-        or not C_Map.GetMapArtLayers or not C_Map.GetMapArtLayerTextures then
-        return
-    end
-
-    local layers = C_Map.GetMapArtLayers(mapID)
-    local layer = layers and layers[1]
-    if layer and layer.layerWidth > 0 and layer.layerHeight > 0
-        and layer.tileWidth > 0 and layer.tileHeight > 0 then
-        local columns = math.ceil(layer.layerWidth / layer.tileWidth)
-        local rows = math.ceil(layer.layerHeight / layer.tileHeight)
-        local textures = C_Map.GetMapArtLayerTextures(mapID, 1)
-        if textures and columns * rows <= 128 and #textures >= columns * rows then
-            return layer.layerWidth, layer.layerHeight, layer.tileWidth, layer.tileHeight, textures
-        end
-    end
 end
 
 local function hideTiles(tiles, first)
@@ -205,21 +183,15 @@ local function drawTiles(view, width, height, tileWidth, tileHeight, textures)
     return count
 end
 
-local function drawArt(view, floor)
-    local width, height, tileWidth, tileHeight, textures = getNativeArt(floor.mapID)
-    if textures then
-        local count = drawTiles(view, width, height, tileWidth, tileHeight, textures)
-        if count then return count end
-    end
-    if floor.tileIDs then
-        return drawTiles(view, 1002, 668, 256, 256, floor.tileIDs), true
-    end
+-- Legacy floor art is a 4x3 grid of 256-pixel tiles covering 1002x668 pixels.
+local function drawArt(view, tileIDs)
+    return drawTiles(view, 1002, 668, 256, 256, tileIDs)
 end
 
 local function tilesLoaded(view, count)
     for index = 1, count do
         local tile = view.tiles[index]
-        if tile.IsObjectLoaded and not tile:IsObjectLoaded() then
+        if not tile:IsObjectLoaded() then
             return false
         end
     end
@@ -263,23 +235,10 @@ function DungeonMap.Create(parent)
     local caption = panel:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
     caption:SetPoint("BOTTOMLEFT", 1, 1)
 
-    local worldMap = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-    worldMap:SetSize(92, 18)
-    worldMap:SetPoint("BOTTOMRIGHT")
-    worldMap:SetText("World Map")
-    worldMap:SetScript("OnClick", function()
-        local floor = panel.floors[panel.floorIndex]
-        if floor and floor.mapID and WorldMapFrame and WorldMapFrame.SetMapID
-            and not (InCombatLockdown and InCombatLockdown()) then
-            ShowUIPanel(WorldMapFrame)
-            WorldMapFrame:SetMapID(floor.mapID)
-        end
-    end)
-
     local function showUnavailable()
         hideTiles(view.tiles, 1)
         caption:SetText("")
-        empty:SetText(panel.dungeon and "Client floor map unavailable." or "Select a dungeon to view its map.")
+        empty:SetText(panel.dungeon and "No floor map for this dungeon in the client." or "Select a dungeon to view its map.")
         empty:Show()
     end
 
@@ -294,17 +253,13 @@ function DungeonMap.Create(parent)
         nextFloor:SetShown(count > 1)
         previous:SetEnabled(panel.floorIndex > 1)
         nextFloor:SetEnabled(panel.floorIndex < count)
-        local hasWorldMap = floor and type(floor.mapID) == "number" and WorldMapFrame
-            and type(WorldMapFrame.SetMapID) == "function" and type(ShowUIPanel) == "function"
-        worldMap:SetShown(hasWorldMap and true or false)
-        title:SetText(floor and (floor.name or (count > 1 and "Floor " .. panel.floorIndex)) or "Dungeon map")
+        title:SetText(count > 1 and ("Floor %d of %d"):format(panel.floorIndex, count) or "Dungeon map")
 
-        local drawn, isReference
-        if floor then drawn, isReference = drawArt(view, floor) end
+        local drawn = floor and drawArt(view, floor)
         if drawn then
             empty:Hide()
-            caption:SetText(isReference and "Legacy client reference" or "")
-            if C_Timer and C_Timer.NewTimer and not tilesLoaded(view, drawn) then
+            caption:SetText("Legacy client reference")
+            if not tilesLoaded(view, drawn) then
                 -- Loading is asynchronous even when SetTexture reports success.
                 view.loadTimer = C_Timer.NewTimer(5, function()
                     view.loadTimer = nil

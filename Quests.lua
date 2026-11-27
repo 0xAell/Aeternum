@@ -29,49 +29,17 @@ local function hasFlag(mask, flag)
     return mask % (2 * flag) >= flag
 end
 
-local function call(namespace, method, ...)
-    local api = namespace and namespace[method]
-    if api then
-        return api(...)
-    end
-end
-
-local function completedAPI()
-    return (C_QuestLog and C_QuestLog.IsQuestFlaggedCompleted) or IsQuestFlaggedCompleted
-end
-
 local function isCompleted(questID)
-    local api = completedAPI()
-    return api and api(questID) and true or false
-end
-
-local function logIndex(questID)
-    local index = call(C_QuestLog, "GetLogIndexForQuestID", questID)
-    if index == nil and GetQuestLogIndexByID then
-        index = GetQuestLogIndexByID(questID)
-    end
-    return index and index > 0 and index or nil
+    return C_QuestLog.IsQuestFlaggedCompleted(questID) and true or false
 end
 
 -- IsOnQuest also sees quests under a collapsed quest log header.
 local function inLog(questID)
-    local onQuest = call(C_QuestLog, "IsOnQuest", questID)
-    if onQuest ~= nil then
-        return onQuest and true or false
-    end
-    return logIndex(questID) ~= nil
+    return C_QuestLog.IsOnQuest(questID) and true or false
 end
 
 local function isComplete(questID)
-    local complete = call(C_QuestLog, "IsComplete", questID)
-    if complete == nil and IsQuestComplete then
-        complete = IsQuestComplete(questID)
-    end
-    if complete == nil and GetQuestLogTitle then
-        local index = logIndex(questID)
-        complete = index and select(6, GetQuestLogTitle(index)) == 1
-    end
-    return complete and true or false
+    return C_QuestLog.IsComplete(questID) and true or false
 end
 
 local function started(questID)
@@ -86,8 +54,8 @@ local function playerInfo()
         local class = select(2, UnitClass("player"))
         player.raceMask = raceID and data.raceMasks[raceID]
         player.classMask = class and data.classMasks[class]
-        local range = (GetQuestGreenRange and GetQuestGreenRange())
-            or (UnitQuestTrivialLevelRange and UnitQuestTrivialLevelRange("player"))
+        -- The same rule the client uses to grey out quests (GetQuestDifficultyColor).
+        local range = UnitQuestTrivialLevelRange("player")
         player.greenRange = type(range) == "number" and range or nil
     end
     return player
@@ -128,7 +96,7 @@ local function exclusiveTaken(list)
 end
 
 local function evaluate(questID)
-    local quest = data.quests[questID]
+    local quest = addon.Quest(questID)
     if not quest then
         return "unknown"
     end
@@ -136,15 +104,15 @@ local function evaluate(questID)
     if inLog(questID) then
         return isComplete(questID) and "ready" or "active"
     end
+    if isCompleted(questID) and not quest.repeatable then
+        return "done"
+    end
     local info = playerInfo()
     if not allows(quest.races, info.raceMask) or not allows(quest.classes, info.classMask)
         or quest.event or (quest.maxLevel and info.level > quest.maxLevel)
         or (quest.availableUntilCompleted and isCompleted(quest.availableUntilCompleted))
         or exclusiveTaken(quest.exclusiveTo) then
         return "unavailable"
-    end
-    if isCompleted(questID) and not quest.repeatable then
-        return "done"
     end
     if (quest.minLevel and info.level < quest.minLevel) or not prerequisitesMet(quest.prerequisites)
         or (quest.availableStartingWith and not started(quest.availableStartingWith))
@@ -157,15 +125,7 @@ local function evaluate(questID)
     return "available"
 end
 
--- True when the client reports quest completion, so states can be trusted.
-function Quests:CanTrackProgress()
-    return completedAPI() ~= nil
-end
-
 function Quests:State(questID)
-    if not self:CanTrackProgress() then
-        return "unknown"
-    end
     local state = states[questID]
     if not state then
         state = evaluate(questID)
@@ -180,7 +140,7 @@ end
 
 function Quests:IsPinVisible(entry)
     local settings = addon.settings
-    if settings.questMode == "all" or not self:CanTrackProgress() then
+    if settings.questMode == "all" then
         return true
     end
     local state = self:State(entry.questID)
@@ -192,7 +152,7 @@ end
 
 -- A short requirement note for a quest that needs something the addon cannot check.
 function Quests:Requirement(questID)
-    local quest = data.quests[questID]
+    local quest = addon.Quest(questID)
     local skill = quest and quest.requiredSkill
     if skill then
         return ("Requires %s %d"):format(data.professions[skill[1]], skill[2])
