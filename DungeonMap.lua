@@ -129,7 +129,7 @@ local function tile(frame, index, file, x, y, w, h, level, ...)
 end
 
 local function mosaicTile(frame, i, part)
-    tile(frame, i, part[1], part[2], part[3], part[4], part[5], part[14], unpack(part, 6, 13))
+    return tile(frame, i, part[1], part[2], part[3], part[4], part[5], part[14], unpack(part, 6, 13))
 end
 
 local function drawFloor(frame, floor)
@@ -139,7 +139,8 @@ local function drawFloor(frame, floor)
             for i, file in ipairs(floor.tiles) do
                 local x, y = (i - 1) % 4 * 256, math.floor((i - 1) / 4) * 256
                 local w, h = math.min(256, WIDTH - x), math.min(256, HEIGHT - y)
-                if not tile(frame, i, file, x, y, w, h, 0, 0, w / 256, 0, h / 256) and floor.fallback then
+                if not tile(frame, i, file, x, y, w, h, 0, 0, w / 256, 0, h / 256) then
+                    if not floor.fallback then return false end
                     useFallback = true
                     break
                 end
@@ -152,11 +153,13 @@ local function drawFloor(frame, floor)
                 local part = {}
                 for value in record:gmatch("[^,]+") do part[#part + 1] = tonumber(value) end
                 index = index + 1
-                mosaicTile(frame, index, part)
+                if not mosaicTile(frame, index, part) then return false end
             end
         end
     elseif floor.pieces then
-        for i, part in ipairs(floor.pieces) do mosaicTile(frame, i, part) end
+        for i, part in ipairs(floor.pieces) do
+            if not mosaicTile(frame, i, part) then return false end
+        end
     else
         local index = 0
         for _, path in ipairs(floor.paths) do
@@ -172,6 +175,7 @@ local function drawFloor(frame, floor)
             end
         end
     end
+    return true
 end
 
 local function bossPin(frame, index)
@@ -207,7 +211,11 @@ function DungeonMap:SetFloor(index)
     self.index = index
     frame.zoom, frame.x, frame.y = 1, 0, 0
     clearFloor(frame)
-    drawFloor(frame, floor)
+    local drawn = drawFloor(frame, floor)
+    if not drawn then
+        for _, texture in ipairs(frame.tiles) do texture:Hide() end
+    end
+    frame.artNotice:SetShown(not drawn)
     local name = dungeon.name
     if floor.name ~= name then name = name .. " · " .. floor.name end
     if floor.paths then name = name .. " (route sketch)" end
@@ -293,6 +301,10 @@ function DungeonMap:EnsureFrame()
     frame.art = CreateFrame("Frame", nil, frame)
     frame.art:SetSize(WIDTH, HEIGHT)
     frame.art:EnableMouse(false)
+    frame.artNotice = frame:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    frame.artNotice:SetPoint("BOTTOM", frame, "BOTTOM", 0, 8)
+    frame.artNotice:SetText("Floor artwork unavailable")
+    frame.artNotice:Hide()
     frame.playerArrow = frame.art:CreateTexture(nil, "OVERLAY")
     frame.playerArrow:SetTexture("Interface\\Minimap\\MinimapArrow")
     frame.playerArrow:Hide()
@@ -348,11 +360,11 @@ function DungeonMap:EnsureFrame()
     return frame
 end
 
-function DungeonMap:Open(dungeon, bossIndex, preferredFloor)
+function DungeonMap:Open(dungeon, bossIndex, preferredFloor, entrance)
     local frame = self:EnsureFrame()
     local strata = addon.UI.map:GetFrameStrata()
     frame:SetFrameStrata((strata == "FULLSCREEN" or strata == "FULLSCREEN_DIALOG") and "FULLSCREEN_DIALOG" or "DIALOG")
-    self.dungeon, self.followInstance = dungeon, nil
+    self.dungeon, self.followInstance, self.entrance = dungeon, nil, entrance
     local boss = bossIndex and dungeon.bosses[bossIndex]
     local index = preferredFloor or (boss and bossFloor(dungeon, boss)) or 1
     frame:Show()
@@ -360,7 +372,7 @@ function DungeonMap:Open(dungeon, bossIndex, preferredFloor)
 end
 
 function DungeonMap:Close()
-    self.dungeon, self.followInstance = nil, nil
+    self.dungeon, self.followInstance, self.entrance = nil, nil, nil
     if self.frame then self.frame:Hide() end
 end
 

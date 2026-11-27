@@ -142,7 +142,7 @@ function Navigation:Draw(playerX, playerY, cosine, sine)
     local overlay = self.overlay
     local radius = C_Minimap and C_Minimap.GetViewRadius and C_Minimap.GetViewRadius()
     local hasRadius = isNumber(radius) and radius > 0
-    local halfWidth, halfHeight = width / 2, height / 2
+    local halfSize = math.min(width, height) / 2
     local east, north = screenDirection(self.points[self.step], playerX, playerY, cosine, sine)
     local distance = magnitude(east, north)
     if distance <= 0 then
@@ -153,10 +153,10 @@ function Navigation:Draw(playerX, playerY, cosine, sine)
     overlay.marker:SetShown(inView)
     overlay.arrow:SetShown(not inView)
     if inView then
-        overlay.marker:SetPoint("CENTER", overlay, "CENTER", east / radius * halfWidth, north / radius * halfHeight)
+        overlay.marker:SetPoint("CENTER", overlay, "CENTER", east / radius * halfSize, north / radius * halfSize)
     else
         overlay.arrow:SetPoint("CENTER", overlay, "CENTER",
-            east / distance * (halfWidth - 12), north / distance * (halfHeight - 12))
+            east / distance * (halfSize - 12), north / distance * (halfSize - 12))
         -- Blizzard's navigation atlas points up at zero radians.
         overlay.arrow:SetRotation(-math.atan2(east, north))
     end
@@ -164,12 +164,17 @@ function Navigation:Draw(playerX, playerY, cosine, sine)
     -- Show only known approach points, never interpolated sections through terrain.
     for index, dot in ipairs(overlay.dots) do
         local nextPoint = self.step + index
-        local point = nextPoint < #self.points and self.points[nextPoint]
+        local point = self.points[nextPoint]
         if hasRadius and point then
             local dotEast, dotNorth = screenDirection(point, playerX, playerY, cosine, sine)
             if magnitude(dotEast, dotNorth) < radius then
+                local final = nextPoint == #self.points
+                if dot.final ~= final then
+                    dot.final = final
+                    dot:SetAtlas(final and "waypoint-mappin-minimap-tracked" or "waypoint-mappin-minimap-untracked")
+                end
                 dot:SetPoint("CENTER", overlay, "CENTER",
-                    dotEast / radius * halfWidth, dotNorth / radius * halfHeight)
+                    dotEast / radius * halfSize, dotNorth / radius * halfSize)
                 dot:Show()
             else
                 dot:Hide()
@@ -199,6 +204,7 @@ end
 
 function Navigation:Stop(message)
     self.points, self.step, self.target, self.destination = nil, nil, nil, nil
+    self.elapsed = 0
     AeternumRouteDB = nil
     if self.worker then self.worker:Hide() end
     if self.overlay then self.overlay:Hide() end
@@ -238,21 +244,22 @@ function Navigation:Update()
         return
     end
 
-    if not self.step then
-        self.step = firstStep(self.points, playerX, playerY)
-    end
-    local point = self.points[self.step]
-    local distance = magnitude(point.x - playerX, point.y - playerY)
-    while self.step < #self.points and distance <= STEP_RADIUS do
-        self.step = self.step + 1
-        point = self.points[self.step]
-        distance = magnitude(point.x - playerX, point.y - playerY)
-    end
-    if self.step == #self.points and distance <= ARRIVAL_RADIUS then
+    if distanceBetween(self.points[#self.points], playerX, playerY) <= ARRIVAL_RADIUS then
         self:Stop(("Arrived near %s."):format(self.target))
         return
     end
+    if not self.step then
+        self.step = firstStep(self.points, playerX, playerY)
+    end
+    for index = #self.points - 1, self.step, -1 do
+        if distanceBetween(self.points[index], playerX, playerY) <= STEP_RADIUS then
+            self.step = index + 1
+            break
+        end
+    end
 
+    local point = self.points[self.step]
+    local distance = distanceBetween(point, playerX, playerY)
     local cosine, sine = facingRotation()
     if not cosine then
         self:Pause("Waiting for minimap orientation.")
@@ -306,14 +313,14 @@ function Navigation:Start(name, destination, dungeon)
     end
     self.target, self.points, self.step, self.destination = name, points, nil, saved
     AeternumRouteDB = saved
+    self.elapsed = 0
 
     if not self.worker then
         self.worker = CreateFrame("Frame")
-        local elapsedSinceUpdate = 0
         self.worker:SetScript("OnUpdate", function(_, elapsed)
-            elapsedSinceUpdate = elapsedSinceUpdate + elapsed
-            if elapsedSinceUpdate >= UPDATE_INTERVAL then
-                elapsedSinceUpdate = 0
+            self.elapsed = self.elapsed + elapsed
+            if self.elapsed >= UPDATE_INTERVAL then
+                self.elapsed = 0
                 self:Update()
             end
         end)

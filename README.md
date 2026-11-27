@@ -33,7 +33,9 @@ Download `Aeternum-<version>.zip` from a release or the **Aeternum** CI artifact
 | Command | Action |
 | --- | --- |
 | `/aeternum` | Open the world map |
+| `/aeternum <search words>` | Search by dungeon, boss or drop. Words can appear in any order, as in `/aeternum Herod Scarlet`. |
 | `/aeternum dungeons [name]` | Find a dungeon, boss or drop on the map. For example, `/aeternum dungeons Cruel Barb` opens a result for Edwin VanCleef. |
+| `/aeternum help` | Show the available map commands |
 | `/aeternum stop` | End minimap directions |
 | `/aeternum reset` | Reset map filters |
 

@@ -3,7 +3,7 @@ local UI = {}
 addon.UI = UI
 
 local function menuAt(owner, title, fill)
-    MenuUtil.CreateContextMenu(owner, function(_, menu)
+    return MenuUtil.CreateContextMenu(owner, function(_, menu)
         menu:SetScrollMode(320)
         menu:CreateTitle(title)
         fill(menu)
@@ -18,25 +18,53 @@ local function showLink(kind, id, name)
     SetItemRef(ref, link, "LeftButton")
 end
 
-local function itemRows(menu, items, bags)
+local function itemLabel(id, bags)
+    local name = addon.ItemName(id)
+    local color = addon.ItemQualityColor(id)
+    local text = color and ("|cff%02x%02x%02x%s|r"):format(color[1]*255, color[2]*255, color[3]*255, name) or name
+    local icon = addon.ItemIcon(id)
+    if icon then text = ("|T%d:16:16|t %s"):format(icon, text) end
+    local count = bags and C_Item and C_Item.GetItemCount and C_Item.GetItemCount(id, false)
+    if addon.IsReadableNumber(count) and count > 0 then text = text .. "  |cff88cc88In bags|r" end
+    return text
+end
+
+local function itemRows(menu, items, bags, pending)
     for _, id in ipairs(items) do
-        if not bags then addon.RequestItem(id) end
-        local name = addon.ItemName(id)
-        local color = addon.ItemQualityColor(id)
-        local text = color and ("|cff%02x%02x%02x%s|r"):format(color[1]*255, color[2]*255, color[3]*255, name) or name
-        local icon = addon.ItemIcon(id)
-        if icon then text = ("|T%d:16:16|t %s"):format(icon, text) end
-        local count = bags and C_Item and C_Item.GetItemCount and C_Item.GetItemCount(id, false)
-        if addon.IsReadableNumber(count) and count > 0 then text = text .. "  |cff88cc88In bags|r" end
-        local row = menu:CreateButton(text, function() showLink("item", id, name) end)
+        local row = menu:CreateButton(itemLabel(id, bags), function() showLink("item", id, addon.ItemName(id)) end)
         row:SetTooltip(function(tooltip) tooltip:SetItemByID(id) end)
+        if pending and not addon.ItemCached(id) then
+            pending[id] = row
+        end
     end
 end
 
 function UI:Boss(owner, boss)
-    menuAt(owner, boss.name, function(menu)
+    local pending = {}
+    local openMenu = menuAt(owner, boss.name, function(menu)
         if #boss.loot == 0 then menu:CreateTitle("No recorded drops") end
-        itemRows(menu, boss.loot)
+        itemRows(menu, boss.loot, false, pending)
+    end)
+    if openMenu and next(pending) then
+        local loot = {menu=openMenu, rows=pending}
+        self.openLoot = loot
+        openMenu:SetClosedCallback(function() if self.openLoot == loot then self.openLoot = nil end end)
+        for id in pairs(pending) do addon.RequestItem(id) end
+    end
+end
+
+function UI:ItemLoaded(id, success)
+    local loot = self.openLoot
+    local row = loot and loot.rows[id]
+    if not row then return end
+    loot.rows[id] = nil
+    if not success then return end
+    MenuUtil.SetElementText(row, itemLabel(id))
+    if loot.refreshPending then return end
+    loot.refreshPending = true
+    C_Timer.After(0, function()
+        loot.refreshPending = nil
+        if self.openLoot == loot then loot.menu:ReinitializeAll() end
     end)
 end
 
@@ -165,7 +193,7 @@ function UI:ShowLocation(entry)
 end
 
 function UI:EntranceMenu(menu, dungeon)
-    local doors = addon.DungeonEntrances(dungeon)
+    local doors = addon.DungeonEntrances(dungeon, addon.DungeonMap.entrance, self.map:GetMapID())
     for _, entry in ipairs(doors) do
         local section = menu
         if #doors > 1 then
@@ -220,7 +248,7 @@ end
 
 function UI:Pick(owner, entry)
     if entry.category == "dungeon" then
-        addon.DungeonMap:Open(entry.source, entry.bossIndex)
+        addon.DungeonMap:Open(entry.source, entry.bossIndex, nil, entry.point)
         if entry.bossIndex then self:Boss(addon.DungeonMap.frame, entry.source.bosses[entry.bossIndex]) end
     elseif entry.category == "quest" then
         menuAt(owner, entry.title, function(menu)
@@ -263,9 +291,9 @@ function UI:PickLocation(owner, entries)
     end)
 end
 
-function UI:Search(query)
+function UI:Search(query, results)
     menuAt(self.map, "Dungeons", function(menu)
-        local entries = addon.Entries(self.map:GetMapID(), true, query)
+        local entries = results or addon.Entries(self.map:GetMapID(), true, query)
         if #entries == 0 then menu:CreateTitle("No matching dungeons, bosses or items") end
         for _, entry in ipairs(entries) do
             local label = entry.bossIndex and (entry.title .. " · " .. entry.subtitle) or entry.title

@@ -1,5 +1,6 @@
 -- Headless tests: luajit tests/run.lua (from the repository root).
-package.path = "tests/?.lua;" .. package.path
+local testDirectory = arg[0]:match("^(.*)/") or "."
+package.path = testDirectory .. "/?.lua;" .. package.path
 local Wow = require("wow")
 
 local ADDON = "Aeternum"
@@ -1062,6 +1063,179 @@ test("crowded maps retain every location and separate nearby pins as the player 
     env.WorldMapFrame.providers[1]:OnCanvasScaleChanged()
     Wow.flushTimers()
     check(count() > grouped, "more detail at higher zoom")
+end)
+
+test("recorded alternate entrances survive the data format migration", function()
+    require("dungeon_entrances")(load())
+end)
+
+test("a clicked door takes precedence over the viewed zone and the primary entrance", function()
+    local addon, env, state = load({mapID=1428, playerMap=1428, playerX=.1, playerY=.1})
+    env.WorldMapFrame:Show()
+    local depths = dungeonNamed(addon, "blackrock-depths")
+    addon.DungeonMap:Open(depths)
+    local function doors() return addon.DungeonMap.frame.dropdown:OpenMenu():Find("Entrances").children end
+    check(doors()[1].label:find("29.4, 38.3", 1, true), "viewing Burning Steppes")
+    doors()[1]:Find("Directions to entrance"):Click()
+    equal(env.AeternumRouteDB.mapID, 1428)
+    env.WorldMapFrame:SetMapID(1418)
+    local pin = locate(env, function(e) return e.source.id == "uldaman" and e.x == .652 end)
+    env.WorldMapFrame:ClickPin(pin, "LeftButton")
+    check(doors()[1].label:find("65.2, 43.5", 1, true), "back door clicked in Badlands")
+    doors()[1]:Find("Show on zone map"):Click()
+    equal(env.WorldMapFrame.panX, .652)
+    local other = addon.DungeonEntrances(depths)[2]
+    other.faction = "Horde"
+    equal(#addon.DungeonEntrances(depths, other.point, 1428), 1, "ineligible door filtered before preference")
+    state.faction = "Neutral"
+    equal(addon.DungeonEntrances(depths, other.point, 1428)[1], other)
+end)
+
+test("mixed boss, item and dungeon names work in the slash shortcut and zone search", function()
+    local addon, env, state = load()
+    equal(#addon.Entries(nil, true, "  herod  SCARLET  "), 1)
+    equal(addon.Entries(1436, false, "Edwin Deadmines")[1].source.id, "deadmines")
+    slash(env, "  barb  vancleef ")
+    assert(menuRow(state.menu, "Cruel Barb")):Click()
+    Wow.flushTimers()
+    equal(addon.DungeonMap.index, 2)
+    equal(state.menu.children[1].label, "Edwin VanCleef")
+    env.WorldMapFrame:Hide()
+    slash(env, "help")
+    check(state.messages[#state.messages]:find("/aeternum", 1, true))
+    state.inCombat = true
+    slash(env, "VanCleef")
+    check(not env.WorldMapFrame:IsShown() and state.messages[#state.messages]:find("combat", 1, true))
+    equal(addon.Trim(nil), ""); equal(addon.Trim(99), "")
+    env.strtrim = nil
+    equal(addon.Trim("  Blackrock "), "Blackrock")
+    addon.settings = nil
+    check(addon.CategoryEnabled("dungeon"), "safe before saved variables load")
+end)
+
+test("a route finishes when the player bypasses an approach and leaves no saved directions", function()
+    local addon, env, state = load({playerMap=1429, playerX=.5, playerY=.1})
+    addon.Navigation:Start("Entrance", {mapID=1429, x=.5, y=.9,
+        waypoints={{mapID=1429, x=.5, y=.3}, {mapID=1429, x=.5, y=.6}}})
+    equal(addon.Navigation.step, 1)
+    state.playerY = .6
+    addon.Navigation:Update()
+    equal(addon.Navigation.step, 3, "reaching a later recorded landmark advances the route")
+    addon.Navigation:Stop()
+    state.playerY = .1
+    addon.Navigation:Start("Entrance", {mapID=1429, x=.5, y=.9, waypoints={{mapID=1429, x=.5, y=.3}}})
+    state.playerY = .9
+    addon.Navigation:Update()
+    check(not addon.Navigation:IsActive() and not env.AeternumRouteDB, "arrival clears route")
+end)
+
+test("rectangular minimaps preserve bearings and distinguish the upcoming entrance", function()
+    local addon, env = load({playerMap=1429, playerX=.5, playerY=.5})
+    env.Minimap:SetSize(220, 140)
+    addon.Navigation:Start("Northeast", {mapID=1429, x=.6, y=.35})
+    local overlay = addon.Navigation.overlay
+    local pos = overlay.arrow.points[1]
+    check(math.abs(pos[4] - pos[5]) < .001, "equal world distances use equal pixel distances")
+    addon.Navigation:Start("Nearby door", {mapID=1429, x=.5, y=.41,
+        waypoints={{mapID=1429, x=.5, y=.46}}})
+    check(overlay.marker:IsShown())
+    check(overlay.dots[1]:IsShown() and overlay.dots[1].atlas == "waypoint-mappin-minimap-tracked")
+end)
+
+test("the open loot menu updates a cached item once and ignores late replies after closing", function()
+    local addon, env, state = openDeadmines()
+    local boss = findEntry(addon.DungeonMap.dungeon.bosses, function(b) return b.id == 639 end)
+    addon.UI:Boss(addon.DungeonMap.frame, boss)
+    local proxy = state.menuProxy
+    local item = assert(menuRow(state.menu, "Cruel Barb"))
+    state.cached[5191] = true
+    Wow.fire("ITEM_DATA_LOAD_RESULT", 5191, true)
+    Wow.fire("ITEM_DATA_LOAD_RESULT", 5191, true)
+    Wow.flushTimers()
+    equal(proxy.refreshes, 1)
+    check(item.label:find("Cached 5191", 1, true) and item.label:find("|cff", 1, true))
+    state.modified = true
+    item:Click()
+    check(state.modifiedClick:find("[Cached 5191]", 1, true))
+    Wow.fire("ITEM_DATA_LOAD_RESULT", boss.loot[1], true)
+    proxy.closed()
+    Wow.flushTimers()
+    equal(proxy.refreshes, 1, "a closed menu is never refreshed")
+    check(not addon.UI.openLoot and not env.GameTooltip:IsVisible())
+end)
+
+test("missing floor textures clear incomplete artwork and keep boss controls available", function()
+    local addon, env = load({mapID=1436, missingTextures={[449604]=true}})
+    env.WorldMapFrame:Show()
+    addon.DungeonMap:Open(dungeonNamed(addon, "deadmines"), nil, 2)
+    local frame = addon.DungeonMap.frame
+    check(frame.artNotice:IsShown())
+    for _, texture in ipairs(frame.tiles) do check(not texture:IsShown()) end
+    check(findEntry(frame.pins, function(pin) return pin:IsShown() and pin.boss.id == 639 end))
+    addon.DungeonMap:SetFloor(1)
+    check(not frame.artNotice:IsShown() and frame.tiles[1]:IsShown(), "normal floor recovers")
+end)
+
+test("generated Lua round-trips sparse tables, mixed keys, reserved names and large race masks", function()
+    local _, literal = dofile(testDirectory .. "/../tools/lua_literal.lua")
+    local sample = {[1]="first", [3]="third", [false]="flag", ["end"]=true, ["dm-east"]=8589934770}
+    local decoded = assert(loadstring("return " .. literal(sample)))()
+    for key, value in pairs(sample) do equal(decoded[key], value, tostring(key)) end
+    for key, value in pairs(decoded) do equal(sample[key], value, tostring(key)) end
+end)
+
+test("all shipped floors open and every boss menu shows that boss's recorded drops", function()
+    local addon, env, state = load()
+    env.WorldMapFrame:Show()
+    local map = addon.DungeonMap
+    local floors, bosses = 0, 0
+    for _, dungeon in ipairs(addon.Data.dungeons) do
+        addon.UI:Pick(env.WorldMapFrame, {category="dungeon", source=dungeon})
+        for i, floor in ipairs(addon.floorData[dungeon.id].floors) do
+            map:SetFloor(i)
+            check(not map.frame.artNotice:IsShown(), dungeon.name .. " / " .. floor.name)
+            local members = 0
+            for _, skull in ipairs(map.frame.pins) do
+                if skull:IsShown() then members = members + #skull.members end
+            end
+            equal(members, #floor.bosses, dungeon.name .. " / " .. floor.name)
+            floors = floors + 1
+        end
+        local list = map.frame.dropdown:OpenMenu():Find("Boss loot")
+        for _, boss in ipairs(dungeon.bosses) do
+            list:Find(boss.name):Click()
+            Wow.flushTimers()
+            equal(state.menu.children[1].label, boss.name)
+            equal(#state.menu.children - 1, math.max(1, #boss.loot), boss.name)
+            bosses = bosses + 1
+        end
+    end
+    equal(floors, 71); equal(bosses, 287)
+end)
+
+test("every trainer location opens its lesson list and every eligible reference pin survives grouping", function()
+    local addon, env, state = load({level=60, faction="Neutral", savedVariables={questMode="all", otherTrainers=true}})
+    env.WorldMapFrame:Show()
+    local maps, trainers = {}, 0
+    for id in pairs(addon.Data.questPins) do maps[id] = true end
+    for _, trainer in ipairs(addon.Data.trainers) do maps[trainer.mapID] = true end
+    for id in pairs(maps) do
+        env.WorldMapFrame:SetMapID(id)
+        local drawn = {}
+        for _, pin in ipairs(pins(env)) do
+            for _, entry in ipairs(pin.entries) do
+                check(not drawn[entry], "duplicate pin on map " .. id)
+                drawn[entry] = true
+                if entry.category == "class" or entry.category == "profession" or entry.category == "weapon" then
+                    addon.UI:Pick(pin, entry)
+                    equal(state.menu.children[1].label, entry.title)
+                    trainers = trainers + 1
+                end
+            end
+        end
+        for _, entry in ipairs(addon.Entries(id, false)) do check(drawn[entry], entry.title) end
+    end
+    equal(trainers, 562)
 end)
 
 print(("%d passed, %d failed"):format(passed, failed))

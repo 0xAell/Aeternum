@@ -10,6 +10,11 @@ function addon.IsReadableNumber(value)
         and value == value and math.abs(value) < math.huge
 end
 
+function addon.Trim(value)
+    if type(value) ~= "string" then return "" end
+    return strtrim and strtrim(value) or value:match("^%s*(.-)%s*$")
+end
+
 addon.categories = {
     { id = "dungeon", label = "Dungeon entrances", icon = "Dungeon" },
     { id = "class", label = "Class trainers", icon = 136455 },
@@ -120,7 +125,9 @@ local function ordered(a, b)
     elseif a.title ~= b.title then
         return a.title < b.title
     end
-    return a.subtitle < b.subtitle
+    if a.subtitle ~= b.subtitle then return a.subtitle < b.subtitle end
+    if a.x ~= b.x then return (a.x or 0) < (b.x or 0) end
+    return (a.y or 0) < (b.y or 0)
 end
 
 -- Dungeons and trainers are few, so they are indexed by map at load. Quest pins
@@ -145,6 +152,9 @@ for _, dungeon in ipairs(data.dungeons) do
     entrancesByDungeon[dungeon.id] = doors
     for _, entrance in ipairs(dungeon.entrances) do
         local subtitle = entrance.label or "Dungeon entrance"
+        if #dungeon.entrances > 1 then
+            subtitle = ("%s · %.1f, %.1f"):format(subtitle, entrance.x * 100, entrance.y * 100)
+        end
         if levels then
             subtitle = subtitle .. " · " .. levels
         end
@@ -155,8 +165,17 @@ for _, dungeon in ipairs(data.dungeons) do
 end
 table.sort(dungeonRecords, ordered)
 
-function addon.DungeonEntrances(dungeon)
-    return entrancesByDungeon[dungeon.id]
+function addon.DungeonEntrances(dungeon, selectedPoint, viewedMap)
+    local doors, preferred = {}, nil
+    local faction = UnitFactionGroup("player")
+    for _, door in ipairs(entrancesByDungeon[dungeon.id]) do
+        if addon.FactionAllowed(door, faction) then
+            doors[#doors + 1] = door
+            if door.point == selectedPoint or (not preferred and door.mapID == viewedMap) then preferred = #doors end
+        end
+    end
+    if preferred and preferred > 1 then table.insert(doors, 1, table.remove(doors, preferred)) end
+    return doors
 end
 
 for _, trainer in ipairs(data.trainers) do
@@ -239,6 +258,7 @@ end
 local locations, indexedFaction
 local function locationMaps(questID, role)
     local faction = UnitFactionGroup("player")
+    if faction ~= "Alliance" and faction ~= "Horde" then faction = nil end
     local key = role == "turnin" and "t" or "s"
     if locations and indexedFaction == faction then return locations[key][questID] end
     indexedFaction = faction
@@ -310,13 +330,14 @@ function addon.ResetSettings()
 end
 
 function addon.CategoryEnabled(id)
-    return addon.settings.filters[id] ~= false
+    local filters = addon.settings and addon.settings.filters
+    return not filters or filters[id] ~= false
 end
 
 -- Queries --------------------------------------------------------------------
 
 function addon.FactionAllowed(entry, faction)
-    return not entry.faction or not faction or entry.faction == faction
+    return not entry.faction or (faction ~= "Alliance" and faction ~= "Horde") or entry.faction == faction
 end
 
 local function visible(entry, faction)
@@ -332,59 +353,81 @@ local function visible(entry, faction)
     return true
 end
 
-local function matches(entry, search)
-    if search == "" then
-        return true
-    end
-    if not entry.search then
-        entry.search = (entry.title .. " " .. entry.subtitle):lower()
-    end
-    return entry.search:find(search, 1, true) ~= nil
+local function searchWords(query)
+    local text = addon.Trim(query):lower()
+    if text == "" then return end
+    local words = {}
+    for word in text:gmatch("%S+") do words[#words + 1] = word end
+    return words
 end
 
--- The loot catalogue is searched on request. Share folded names
--- across bosses that drop the same item, and create rows only for actual hits.
 local foldedNames = {}
-local function nameMatches(name, search)
+local function foldedName(name)
     local folded = foldedNames[name]
     if not folded then
         folded = name:lower()
         foldedNames[name] = folded
     end
-    return folded:find(search, 1, true) ~= nil
+    return folded
 end
 
-local function dungeonResults(search)
-    local result, drops = {}, {}
-    for _, entry in ipairs(dungeonRecords) do
-        if matches(entry, search) then result[#result + 1] = entry end
+local function containsWords(words, name, boss, dungeon)
+    for _, word in ipairs(words) do
+        if not name:find(word, 1, true) and not (boss and boss:find(word, 1, true))
+            and not (dungeon and dungeon:find(word, 1, true)) then return false end
     end
-    if search == "" then return result end
+    return true
+end
+
+local function matches(entry, words)
+    if not words then return true end
+    if not entry.search then
+        local parts = {entry.title, entry.subtitle, entry.contact}
+        if entry.category == "dungeon" then
+            for _, boss in ipairs(entry.source.bosses) do parts[#parts + 1] = boss.name end
+        end
+        entry.search = table.concat(parts, " "):lower()
+    end
+    return containsWords(words, entry.search)
+end
+
+-- Match the most specific result a query asks for. Searching a dungeon's
+-- name alone should not also list every item from that dungeon.
+local function dungeonResults(words)
+    local result, bosses, drops = {}, {}, {}
     for _, entry in ipairs(dungeonRecords) do
         local dungeon = entry.source
-        for index, boss in ipairs(dungeon.bosses) do
-            if nameMatches(boss.name, search) then
-                local hit = record("dungeon", boss.name, dungeon.name, nil, dungeon)
-                hit.bossIndex = index
-                result[#result + 1] = hit
-            end
-            for _, id in ipairs(boss.loot) do
-                local name = data.items[id]
-                if name and nameMatches(name, search) then
-                    local hit = record("dungeon", name, boss.name .. " · " .. dungeon.name, nil, dungeon)
-                    hit.bossIndex, hit.itemID = index, id
-                    drops[#drops + 1] = hit
+        local parent = foldedName(dungeon.name)
+        if not words or containsWords(words, parent, foldedName(entry.subtitle)) then
+            result[#result + 1] = entry
+        else
+            for index, boss in ipairs(dungeon.bosses) do
+                local bossName = foldedName(boss.name)
+                if containsWords(words, bossName, parent) then
+                    local hit = record("dungeon", boss.name, dungeon.name, nil, dungeon)
+                    hit.bossIndex = index
+                    bosses[#bosses + 1] = hit
+                else
+                    for _, id in ipairs(boss.loot) do
+                        local name = data.items[id]
+                        if name and containsWords(words, foldedName(name), bossName, parent) then
+                            local hit = record("dungeon", name, boss.name .. " · " .. dungeon.name, nil, dungeon)
+                            hit.bossIndex, hit.itemID = index, id
+                            drops[#drops + 1] = hit
+                        end
+                    end
                 end
             end
         end
     end
+    for _, boss in ipairs(bosses) do result[#result + 1] = boss end
     for _, drop in ipairs(drops) do result[#result + 1] = drop end
     return result
 end
 
 -- Returns the records on a world map, or every dungeon when atlas is true.
 function addon.Entries(mapID, atlas, query)
-    local search = strtrim(query or ""):lower()
+    local search = searchWords(query)
     if atlas then return dungeonResults(search) end
     local result = {}
     local candidates = mapID and addon.MapRecords(mapID) or {}
@@ -447,6 +490,11 @@ function addon.ItemName(itemID)
     return data.items[itemID] or ("Item " .. itemID)
 end
 
+function addon.ItemCached(itemID)
+    if C_Item and C_Item.IsItemDataCachedByID then return C_Item.IsItemDataCachedByID(itemID) end
+    return C_Item and C_Item.GetItemInfo and select(2, C_Item.GetItemInfo(itemID)) ~= nil
+end
+
 local qualityColors = {}
 
 function addon.ItemQualityColor(itemID)
@@ -467,10 +515,11 @@ function addon.ItemIcon(itemID)
     return C_Item and C_Item.GetItemIconByID and C_Item.GetItemIconByID(itemID)
 end
 
--- A full hyperlink when the client has the item cached, and a bare item string.
+-- Links work before the client has cached the item name or quality.
 function addon.ItemLink(itemID)
     local link = C_Item and C_Item.GetItemInfo and select(2, C_Item.GetItemInfo(itemID))
-    return link, "item:" .. itemID
+    local ref = "item:" .. itemID
+    return link or ("|H%s|h[%s]|h"):format(ref, addon.ItemName(itemID)), ref
 end
 
 function addon.RequestItem(itemID)

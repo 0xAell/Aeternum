@@ -93,7 +93,10 @@ function Region:SetShown(shown)
 end
 
 local Texture = newClass(Region)
-function Texture:SetTexture(texture) self.texture, self.atlas = texture, nil return true end
+function Texture:SetTexture(texture)
+    self.texture, self.atlas = texture, nil
+    return not (Wow.state.missingTextures and Wow.state.missingTextures[texture])
+end
 function Texture:SetAtlas(atlas) self.atlas, self.texture = atlas, nil end
 function Texture:SetDesaturated(dim) self.desaturated = dim end
 function Texture:SetAlpha(alpha) self.alpha = alpha end
@@ -383,6 +386,7 @@ Wow.knownEvents = {
     LEARNED_SPELL_IN_SKILL_LINE = true, ZONE_CHANGED_INDOORS = true, ZONE_CHANGED = true,
     BOSS_KILL = true, ENCOUNTER_END = true, TRAINER_SERVICE_INFO_NAME_UPDATE = true,
     QUEST_WATCH_LIST_CHANGED = true, SUPER_TRACKING_CHANGED = true, QUEST_POI_UPDATE = true, CVAR_UPDATE = true,
+    ITEM_DATA_LOAD_RESULT = true,
 }
 
 local templates = { UIPanelButtonTemplate = true, PanelTopTabButtonTemplate = true, MinimalScrollBar = true,
@@ -434,10 +438,17 @@ function Wow.new(state)
     env.CreateFrame = Wow.CreateFrame
     env.BaseScrollBoxEvents = { OnScroll = "OnScroll" }
     env.Menu = { ModifyMenu = function(tag, callback) state.menuHooks[tag] = callback end }
-    env.MenuUtil = { CreateContextMenu = function(owner, generator)
+    env.MenuUtil = {SetElementText = function(row, label) row.label = label end}
+    env.MenuUtil.CreateContextMenu = function(owner, generator)
+        if state.menuProxy and state.menuProxy.closed then state.menuProxy.closed() end
         state.menu = description()
         generator(owner, state.menu)
-    end }
+        local proxy = {refreshes=0}
+        function proxy:SetClosedCallback(callback) self.closed = callback end
+        function proxy:ReinitializeAll() self.refreshes = self.refreshes + 1 end
+        state.menuProxy = proxy
+        return proxy
+    end
     env.PanelTemplates_SelectTab = function(tab) tab:SetEnabled(false) end
     env.PanelTemplates_DeselectTab = function(tab) tab:SetEnabled(true) end
     env.UIParent = Wow.region(Frame)
@@ -545,6 +556,7 @@ function Wow.new(state)
     }
     env.C_AddOns = { LoadAddOn = noop }
     env.C_Item = {
+        IsItemDataCachedByID = function(id) return state.cached[id] or false end,
         GetItemCount = function(id) return (state.inventory or {})[id] or 0 end,
         GetItemNameByID = function(itemID) return state.cached[itemID] and ("Cached " .. itemID) or nil end,
         GetItemQualityByID = function(itemID) return state.cached[itemID] and 4 or nil end,

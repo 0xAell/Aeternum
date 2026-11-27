@@ -13,14 +13,7 @@ local db = NorgannonDB
 assert(db.info.flavor == "Forever" and db.info.interface == 16001, "Expected WoW Forever data")
 assert(db.info.generated == "2026-11-22", "Expected the pinned NorgannonDB snapshot documented in DATA_SOURCES.md")
 
-local function keys(tableToSort)
-    local result = {}
-    for key in pairs(tableToSort or {}) do
-        result[#result + 1] = key
-    end
-    table.sort(result)
-    return result
-end
+local keys, literal = dofile("tools/lua_literal.lua")
 
 local function hasFlag(mask, flag)
     return type(mask) == "number" and mask % (2 * flag) >= flag
@@ -605,29 +598,6 @@ local function packPins(pins)
 end
 
 -- Output ---------------------------------------------------------------------
-
-local function literal(value)
-    local kind = type(value)
-    if kind == "string" then return string.format("%q", value) end
-    if kind == "number" then
-        -- Race masks pass 2^32, so whole numbers are written out in full.
-        if value == math.floor(value) and math.abs(value) < 2 ^ 53 then
-            return string.format("%.0f", value)
-        end
-        return string.format("%.10g", value)
-    end
-    if kind == "boolean" then return tostring(value) end
-    assert(kind == "table", "Unexpected literal type: " .. kind)
-    local parts = {}
-    for _, key in ipairs(keys(value)) do
-        if type(key) == "string" then
-            parts[#parts + 1] = key .. "=" .. literal(value[key])
-        else
-            parts[#parts + 1] = literal(value[key])
-        end
-    end
-    return "{" .. table.concat(parts, ",") .. "}"
-end
 
 local quests = {}
 local questPinRows = importQuestPins(quests)
