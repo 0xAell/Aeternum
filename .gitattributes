@@ -1,1 +1,2 @@
 docs/boss-audit/*.tsv whitespace=-blank-at-eol
+docs/trainer-data/*.tsv whitespace=-blank-at-eol
