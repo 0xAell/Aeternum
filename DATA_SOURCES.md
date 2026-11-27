@@ -25,10 +25,13 @@ The texture IDs refer to files already in the game. Floors with alternate minima
 
 ## Lessons and prices
 
+- `ForeverTraining.lua` joins 10,657 recorded trainer offers by NPC and learned spell ID. 10,007 are documented on live Forever. Another 227 are from Zephras trainer windows with no build attached to the lesson. The other 423 are labeled beta references. Each beta lesson was also recorded on a live trainer of the same class or profession. [Normalized records and method](https://github.com/0xAell/Aeternum/tree/main/docs/trainer-data)
+- Data from Efficient Games (https://efficient.games), licensed under CC BY 4.0. Aeternum selects mapped NPCs from the EG Link trainer exports, reconciles teaching IDs and keeps the reputation standing for recorded prices. Zephras Collector contributors supply additional NPC-specific trainer window records. [EG Link pinned dataset](https://github.com/JIVESCORP/eg-link-output-wowf/tree/c1bf99bc2835bbe1b2dad82fb99f994c0cfffe33) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) · [Zephras Collector](https://zephras.com/forever/enUS/npc/251913/)
+- What’s Training? contributors supply Forever level, profession, prior-spell, talent, race and faction requirements and listed prices. Aeternum uses its Camelot guide to fill in details for recorded lessons. Blizzard’s build 1.60.1.71139 client tables provide spell names, ranks and teaching effects. [What’s Training? pinned source](https://github.com/fusionpit/WhatsTraining/tree/59763c2105428ccf99926919824c23d850bfbaa4) · [MIT license](licenses/WhatsTraining-MIT.txt) · [Forever spell effects](https://wago.tools/db2/SpellEffect/csv?build=1.60.1.71139)
 - `Data.lessons` describes spells and requirements from the Forever snapshot. `Data.offers` preserves each NPC’s recipe or class lesson and that NPC’s recorded price in copper. A blank cost means the source has no price. [NorgannonDB](https://github.com/zmarotrix/NorgannonDB/tree/d3d144a8b2d32ae7fb6a0390141f35b3aa55d216)
 - `ClassicTraining.lua` supplements those offers from CMaNGOS Classic-DB. The importer joins trainer NPCs to their personal and shared trainer catalogues and resolves trainer spells to the spells learned. Identical catalogues are stored once. The pinned projection includes 1,743 spells and 465 NPCs. Rows taken from this source carry a **Classic** label because Forever can change lessons or prices. [Pinned database](https://github.com/cmangos/classic-db/tree/64adf9f62008df8d530e5d88e3c89aa85e42dc38) · [Source license](https://github.com/cmangos/classic-db/blob/64adf9f62008df8d530e5d88e3c89aa85e42dc38/LICENSE.md) · [Copyright notice](licenses/CMaNGOS-COPYRIGHT.md)
 - Class restrictions for the 14 weapon proficiency spells in `Trainers.lua` come from the Forever client’s `SkillLineAbility.ClassMask`. The character’s class and learned professions come from the game. [Forever 1.60.1.71139 SkillLineAbility export](https://wago.tools/db2/SkillLineAbility/csv?build=1.60.1.71139)
-- A trainer visit stores visible lessons and prices under the trainer’s NPC ID in per-character `AeternumTrainerDB`. An observed price takes priority over the bundled Forever entry and the Classic reference. Visiting with a filtered trainer window preserves other previously recorded lessons. [Forever trainer interface](https://github.com/Gethe/wow-ui-source/blob/d9c22e32cb240afb82bb2ecefbb78ef935333f59/Interface/AddOns/Blizzard_TrainerUI/Mainline/Blizzard_TrainerUI.lua)
+- A trainer visit stores visible lessons and prices under the trainer’s NPC ID in per-character `AeternumTrainerDB`. Your character’s price takes priority. Other prices can be recorded at a particular reputation standing, reported by a visitor of unknown standing, or taken from a guide. An unknown price stays blank in the database and reads **Price unknown** on the map. Visiting with a filtered trainer window preserves earlier lessons. [Forever trainer interface](https://github.com/Gethe/wow-ui-source/blob/d9c22e32cb240afb82bb2ecefbb78ef935333f59/Interface/AddOns/Blizzard_TrainerUI/Mainline/Blizzard_TrainerUI.lua)
 
 ## Character loot requirements
 
@@ -38,7 +41,7 @@ The learning check joins each item to its `LearnSpell` effect. This identifies t
 
 ## Regenerate
 
-From the repository root, run `tools/check_data.sh`. It downloads the pinned inputs, verifies the Classic SQL archive’s SHA-256, rebuilds all four databases and compares their output with the committed files. Git, curl, Python 3 and LuaJIT are required by default. Set `LUA=lua5.1` to use Lua 5.1.
+From the repository root, run `tools/check_data.sh`. It downloads the pinned inputs, verifies the Classic SQL archive’s SHA-256, rebuilds all five databases and compares their output with the committed files. Git, curl, Python 3 and LuaJIT are required by default. Set `LUA=lua5.1` to use Lua 5.1.
 
 To reuse existing inputs, pass a NorgannonDB checkout, a Forever Dungeon Routes checkout and the compressed Classic SQL snapshot in that order. These commands regenerate the committed files with those inputs.
 
@@ -47,6 +50,7 @@ luajit tools/import_norgannon.lua /path/to/NorgannonDB Data.lua /path/to/Forever
 luajit tools/import_floors.lua /path/to/ForeverDungeonRoutes Data.lua FloorData.lua
 python3 tools/import_classic_training.py /path/to/ClassicDB_1_12_1_z2815.sql.gz Data.lua ClassicTraining.lua
 python3 tools/import_loot_requirements.py build LootData.lua
+python3 tools/forever_trainers.py build ForeverTraining.lua
 ```
 
 To refresh the numeric item snapshot, save the four linked build 71139 CSVs in a directory as `Item.csv`, `ItemSparse.csv`, `ItemXItemEffect.csv` and `ItemEffect.csv`. The extractor checks their hashes and reads the same build’s version 9 game-data cache. Review the snapshot diff before rebuilding because available hotfixes vary by client. [DB2 definitions](https://github.com/wowdev/WoWDBDefs/tree/master/definitions) · [Hotfix record format](https://github.com/fitzforge/polestar/blob/c0e768df4df867532f6334c1ed5464a8bc544021/rust/crates/forge-gamedata/src/hotfix.rs)

@@ -695,11 +695,12 @@ test("a profession trainer shows NPC-specific recipe prices and skill requiremen
     check(potion.label:find("100 copper", 1, true), "price at this NPC")
     potion.tooltip(env.GameTooltip)
     check(findEntry(env.GameTooltip.lines, function(line) return line == "Alchemy 25" end), "recipe skill required")
-    local function cost(npcID)
-        return findEntry(addon.Trainers:Lessons(npcID), function(lesson) return lesson.id == 2159 end).cost
+    local function cloak(npcID)
+        return findEntry(addon.Trainers:Lessons(npcID), function(lesson) return lesson.id == 2159 end)
     end
-    equal(cost(4212), 250, "first leatherworker")
-    equal(cost(1385), 550, "same recipe, different teacher")
+    equal(cloak(4212).cost, 225, "Telonis's Honored quote")
+    equal(cloak(4212).priceBasis, 6)
+    equal(cloak(1385).cost, 250, "Brawn's observed and guide-listed price")
 end)
 
 test("weapon masters teach only class-appropriate proficiencies by default", function()
@@ -710,7 +711,7 @@ test("weapon masters teach only class-appropriate proficiencies by default", fun
     local lessons = addon.Trainers:Lessons(11867)
     local swords = findEntry(lessons, function(row) return row.id == 201 end)
     equal(swords.cost, 1000, "Woo Ping sword skill price")
-    equal(swords.source, "Classic reference", "price provenance")
+    equal(swords.source, "EG Link trainer visit", "price provenance")
     check(not findEntry(lessons, function(row) return row.id == 5011 end), "paladin cannot learn crossbows")
     Wow.trackingMenu():Find("Trainers"):Find("Other classes and professions"):Click()
     check(locate(env, function(e) return e.source.id == 13084 end), "reference mode includes Bixi")
@@ -744,6 +745,132 @@ test("class skills have ranks, levels and prices before a first visit", function
     check(spell and spell.rank == "Rank 1" and spell.level > 0 and spell.cost == 100, "mage lesson")
     local druid = findEntry(addon.Trainers:Lessons(5504), function(l) return l.source == "Bundled trainer record" end)
     check(druid and druid.id and druid.cost ~= nil, "observed Forever class data wins over reference")
+end)
+
+test("new Forever trainers open with their own recorded spells and recipes on a first visit to the map", function()
+    local addon, env, state = load({mapID=2521, professionIndices={1}, professionSkills={164},
+        professionRanks={[164]=34}, class="PALADIN", level=20})
+    env.WorldMapFrame:Show()
+    local entry = findEntry(addon.MapRecords(2521), function(e) return e.source and e.source.id == 251913 end)
+    addon.UI:Pick(env.WorldMapFrame, assert(entry))
+    check(menuRow(state.menu, "Sharpening Wheel"))
+    local boots = menuRow(state.menu:Find("Later training"), "Glowing Copper Boots")
+    check(boots and boots.label:find("100 copper", 1, true))
+    boots.tooltip(env.GameTooltip)
+    check(findEntry(env.GameTooltip.lines, function(line) return line == "Blacksmithing 35" end))
+    check(findEntry(env.GameTooltip.lines, function(line) return line:find("Zephras", 1, true) end))
+    check(findEntry(env.GameTooltip.lines, function(line) return line:find("build unreported", 1, true) end))
+    check(next(env.AeternumTrainerDB) == nil, "browsing the map never writes a personal trainer visit")
+    local shari = addon.Trainers:Lessons(246152)
+    local hammer = assert(findEntry(shari, function(l) return l.id == 853 end))
+    equal(hammer.source, "EG Link and Zephras trainer visits")
+    equal(hammer.rank, "Rank 1"); equal(hammer.level, 8); equal(hammer.cost, 100)
+    equal(#addon.Trainers:Lessons(248415), 5, "Tordrin's own five recorded hunter lessons")
+    equal(#addon.Trainers:Lessons(246797), 0, "a class alone does not assign spells to Jessa")
+end)
+
+test("recorded trainer requirements follow racial spells, factions, talents and prior ranks", function()
+    local addon, _, state = load({class="PRIEST", raceID=1, level=60})
+    local function lesson(npc, id)
+        return findEntry(addon.Trainers:Lessons(npc), function(l) return l.id == id end)
+    end
+    check(lesson(377, 19271), "Human priest can see Feedback")
+    state.raceID = 3
+    check(not lesson(377, 19271), "Dwarf priest cannot learn Feedback")
+    check(not lesson(5958, 3567), "Horde-only teleport on an Alliance character")
+    state.faction = "Horde"
+    check(lesson(5958, 3567))
+    local light = assert(lesson(246152, 639))
+    local group, why = addon.Trainers:LessonState(light)
+    equal(group, "later"); equal(why, "Requires Holy Light (Rank 1)")
+    state.knownSpells = {[635]=true}
+    equal(addon.Trainers:LessonState(light), nil, "learning the previous rank unlocks the lesson")
+    local mutilate = assert(lesson(3170, 1241582))
+    equal(addon.Trainers:LessonState(mutilate), "later")
+    state.knownSpells[399956] = true
+    equal(addon.Trainers:LessonState(mutilate), nil, "current Forever Mutilate talent ID")
+end)
+
+test("trainer teaching spells and old saved visits resolve to the same learned spell", function()
+    local saved = {[251913]={["Apprentice Blacksmith|"]={id=2020, name="Apprentice Blacksmith", cost=7}}}
+    local addon, _, state = load({savedTrainerData=saved, npcGUID="Creature-0-1-1-1-251913-00A",
+        services={{name="Apprentice Blacksmith", spell=2020, cost=8}}})
+    local function apprentice()
+        local found = {}
+        for _, row in ipairs(addon.Trainers:Lessons(251913)) do
+            if row.id == 2018 or row.id == 2020 then found[#found+1] = row end
+        end
+        equal(#found, 1, "one learned profession")
+        equal(found[1].id, 2018)
+        equal(found[1].source, "Last visit")
+        equal(found[1].priceBasis, nil)
+        return found[1]
+    end
+    equal(apprentice().cost, 7, "legacy saved wrapper")
+    Wow.fire("TRAINER_SHOW")
+    equal(apprentice().cost, 8, "new personal quote wins over the downloaded record")
+    state.knownSpells = {[2018]=true}
+    equal(addon.Trainers:LessonState(apprentice()), "learned")
+    check(findEntry(addon.Trainers:Lessons(5515), function(l) return l.id == 1853 end),
+        "a hunter's Beast Training ability remains distinct from the attack it teaches a pet")
+end)
+
+test("a beta trainer marks its recipes and quotes a current guide price", function()
+    local addon, env, state = load({mapID=2521, professionIndices={1}, professionSkills={197},
+        professionRanks={[197]=30}})
+    env.WorldMapFrame:Show()
+    local entry = findEntry(addon.MapRecords(2521), function(e) return e.source and e.source.id == 251991 end)
+    addon.UI:Pick(env.WorldMapFrame, assert(entry))
+    local vest = assert(menuRow(state.menu, "Brown Linen Vest"))
+    check(vest.label:find("Beta", 1, true) and vest.label:find("50 copper", 1, true))
+    vest.tooltip(env.GameTooltip)
+    check(findEntry(env.GameTooltip.lines, function(line) return line:find("beta trainer visit", 1, true) end))
+    check(findEntry(env.GameTooltip.lines, function(line) return line:find("What's Training", 1, true) end))
+    state.npcGUID = "Creature-0-1-1-1-251991-00A"
+    state.services = {{name="Brown Linen Vest", spell=2385, status="used", cost=0, level=0}}
+    Wow.fire("TRAINER_SHOW")
+    local seen = assert(findEntry(addon.Trainers:Lessons(251991), function(l) return l.id == 2385 end))
+    equal(seen.beta, nil); equal(seen.source, "Last visit"); equal(seen.cost, 50); equal(seen.priceBasis, 10)
+end)
+
+test("all downloaded assignments resolve at mapped trainers and beta lessons match a live trainer role", function()
+    local addon = load()
+    local src, npcs, spellIDs, pairsCount = addon.foreverTraining, 0, {}, 0
+    local mapped, available = {}, 0
+    local live, beta, betaRows = {}, {}, 0
+    for _, trainer in ipairs(addon.Data.trainers) do
+        mapped[trainer.id] = trainer.kind .. ":" .. (trainer.classToken or trainer.skillID or "")
+    end
+    for id in pairs(mapped) do
+        if addon.Data.offers[id] or addon.classicTraining.trainers[id] or src.offers[id] then
+            available = available + 1
+        end
+    end
+    for npc, list in pairs(src.offers) do
+        check(mapped[npc])
+        npcs = npcs + 1
+        local seen = {}
+        for offer in list:gmatch("[^;]+") do
+            local id = tonumber(offer:match("^(%d+):"))
+            check(src.spells[id] and not seen[id] and not src.serviceSpells[id], "ambiguous trainer offer " .. offer)
+            local basis, source = offer:match(":(%d*):(%d+)$")
+            local roleSpell = mapped[npc] .. ":" .. id
+            if source == "4" or source == "6" or source == "7" then
+                check(not addon.Data.offers[npc] and not addon.classicTraining.trainers[npc])
+                check(basis == "" or basis == "10", "beta prices must come from the live guide")
+                beta[roleSpell], betaRows = true, betaRows + 1
+            elseif source ~= "5" then
+                live[roleSpell] = true
+            end
+            seen[id], spellIDs[id] = true, true
+            pairsCount = pairsCount + 1
+        end
+    end
+    local count = 0
+    for _ in pairs(spellIDs) do count = count + 1 end
+    for roleSpell in pairs(beta) do check(live[roleSpell], "no matching live offer for " .. roleSpell) end
+    equal(betaRows, 423)
+    equal(available, 522); equal(npcs, 248); equal(count, 1743); equal(pairsCount, 10657)
 end)
 
 test("non-dungeon pins pass right-click through even when recycled in combat", function()
