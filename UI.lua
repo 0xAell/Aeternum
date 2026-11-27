@@ -246,11 +246,22 @@ function UI:Directions(owner, entries)
     end)
 end
 
+-- Moving the world map from add-on code would taint its map ID and zoom for the rest of
+-- the session (MapCanvasMixin:SetMapID reads the old ID first), and the game would then
+-- block Blizzard's own pins in combat. A location on the open map is marked at once.
+-- Otherwise the chat says where it is, and it is marked when the player opens that map.
 function UI:ShowLocation(entry)
     addon.DungeonMap:Close()
-    self.map:SetMapID(entry.mapID)
-    if self.map.PanTo and entry.x and entry.y then self.map:PanTo(entry.x, entry.y) end
-    addon.FocusLocation(entry)
+    if self.map:GetMapID() == entry.mapID then
+        self.waitingLocation = nil
+        addon.FocusLocation(entry)
+        return
+    end
+    self.waitingLocation = entry
+    local zone = addon.ZoneName(entry.mapID)
+    local name = entry.contact and ("%s (%s)"):format(entry.contact, entry.title) or entry.title
+    DEFAULT_CHAT_FRAME:AddMessage(("%s is in %s at %.1f, %.1f. Open %s on the map to see it."):format(
+        name, zone, entry.x * 100, entry.y * 100, zone))
 end
 
 function UI:EntranceMenu(menu, dungeon)

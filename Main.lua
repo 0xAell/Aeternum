@@ -7,6 +7,15 @@ local function refreshQuests()
     addon.RefreshQuestStates()
 end
 
+-- Quest, level and skill events come in bursts, often in combat. One delayed refresh
+-- restyles the pins in place and redraws only when the visible locations change.
+local function scheduleRefresh()
+    if addon.UI.map and addon.UI.map:IsShown() and not pending then
+        pending = true
+        C_Timer.After(.25, refreshQuests)
+    end
+end
+
 frame:SetScript("OnEvent", function(_, event, arg, second, _, _, success)
     if event == "ADDON_LOADED" then
         if arg == name then addon.LoadSettings() end
@@ -39,15 +48,12 @@ frame:SetScript("OnEvent", function(_, event, arg, second, _, _, success)
         addon.Trainers:Invalidate()
         addon.UI:LootSkillsChanged()
         addon.Quests:Invalidate()
-        addon.RefreshMap()
+        scheduleRefresh()
     else
         if event == "CVAR_UPDATE" and arg ~= "questPOI" then return end
         if event == "PLAYER_LEVEL_UP" then addon.UI:LootSkillsChanged() end
         addon.Quests:Invalidate(event == "PLAYER_LEVEL_UP" and arg or nil)
-        if addon.UI.map and addon.UI.map:IsShown() and not pending then
-            pending = true
-            C_Timer.After(.25, refreshQuests)
-        end
+        scheduleRefresh()
     end
 end)
 for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "PLAYER_ENTERING_WORLD", "TRAINER_SHOW", "TRAINER_UPDATE",
@@ -92,7 +98,10 @@ SlashCmdList.AETERNUM = function(message)
     if not addon.AttachMap() then return end
     if not WorldMapFrame:IsShown() then
         if InCombatLockdown() then DEFAULT_CHAT_FRAME:AddMessage("Open the map after combat."); return end
-        ToggleWorldMap()
+        -- OpenWorldMap without a map ID only calls ShowUIPanel, which shows the map from
+        -- Blizzard's secure delegate. ToggleWorldMap would go on to rebuild the map's zoom
+        -- state from this add-on code and taint it for the session.
+        OpenWorldMap()
     end
     if command == "dungeons" then addon.UI:Search(query, results) end
 end

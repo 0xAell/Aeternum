@@ -5,6 +5,26 @@ local Wow = {}
 
 local function noop() end
 
+-- True when add-on code is on the call stack. In the client that execution is tainted,
+-- so Blizzard state it writes taints the Blizzard code that reads it later. Add-on
+-- files sit at the repository root; the tests and this mock live in tests/.
+local function addonOnStack()
+    for level = 3, 80 do
+        local info = debug.getinfo(level, "S")
+        if not info then return false end
+        if info.source:match("^@[^/\\]+%.lua$") then return true end
+    end
+    return false
+end
+
+-- Records a write to Blizzard-owned state when add-on code made it.
+local function blizzardWrite(name)
+    if addonOnStack() then
+        Wow.state.blizzardWrites = Wow.state.blizzardWrites or {}
+        Wow.state.blizzardWrites[name] = true
+    end
+end
+
 local function newClass(...)
     local class = {}
     for _, parent in ipairs({ ... }) do
@@ -273,14 +293,18 @@ end
 -- Map canvas ------------------------------------------------------------------
 
 local MapCanvas = newClass(Frame)
--- Blizzard sets the wheel mode once at load; any later write comes from add-on code.
 function MapCanvas:SetMouseWheelZoomMode(mode)
+    blizzardWrite("mouseWheelZoomMode")
     self.ScrollContainer.mouseWheelZoomMode = mode
-    Wow.state.wheelModeWritten = true
 end
 function MapCanvas:GetMapID() return self.mapID end
-function MapCanvas:PanTo(x, y) self.panX, self.panY = x, y end
+function MapCanvas:PanTo(x, y)
+    blizzardWrite("scroll position")
+    self.panX, self.panY = x, y
+end
+-- As in MapCanvasMixin: the old map ID is read before it is replaced, and the zoom is reset.
 function MapCanvas:SetMapID(mapID)
+    blizzardWrite("map ID and zoom")
     self.mapID = mapID
     self.ScrollContainer:CreateZoomLevels()
     for _, provider in ipairs(self.providers) do
@@ -330,7 +354,9 @@ function MapCanvas:EnumeratePinsByTemplate(template)
     end
 end
 function MapCanvas:GetNumActivePinsByTemplate(template) return #self.pools[template].active end
+-- Caches the rectangle on the scroll container, as ScrollContainer:GetViewRect does.
 function MapCanvas:GetViewRect()
+    blizzardWrite("view rectangle cache")
     return {GetWidth=function() return Wow.state.viewWidth or 1 end}
 end
 -- As in WorldMapMixin: the map's own OnShow and OnHide notify the data providers,
@@ -518,10 +544,21 @@ function Wow.new(state)
     end
     env.CreateFromMixins = function(...) return env.Mixin({}, ...) end
     env.CreateVector2D = function(x, y) return { x = x, y = y } end
+    -- ToggleWorldMap continues SetDisplayState in the caller's context after the panel
+    -- shows, and that rebuilds the canvas zoom state (UpdateSpacerFrameAnchoring).
     env.ToggleWorldMap = function()
+        blizzardWrite("display state and zoom")
         local map = env.WorldMapFrame
         if map:IsShown() then map:Hide() else map:Show() end
     end
+    -- OpenWorldMap shows the panel through ShowUIPanel's secure delegate, and only moves
+    -- the map when given a map ID.
+    env.OpenWorldMap = function(mapID)
+        local map = env.WorldMapFrame
+        map:Show()
+        if mapID then map:SetMapID(mapID) end
+    end
+    env.UnitIsDeadOrGhost = function() return state.dead or false end
     env.UISpecialFrames = {}
     -- As in Blizzard_GameMenuEsc: one shared list, re-sorted on every registration. A call
     -- from add-on code rewrites its slots insecurely, so each later Escape press runs
@@ -687,6 +724,18 @@ function Wow.new(state)
     map.left, map.scale = state.mapLeft or 0, state.mapScale or 1
     map.ScrollContainer = Wow.region(Frame, map)
     map.ScrollContainer:SetSize(800, 540)
+    -- Read-only view math, as in MapCanvasScrollControllerMixin. Fully zoomed out the whole
+    -- map fits the window at any window size; state.viewWidth is the share of the map's
+    -- width in view, so zooming in makes it smaller.
+    map.ScrollContainer.Child = Wow.region(Frame, map.ScrollContainer)
+    map.ScrollContainer.Child:SetSize(800, 540)
+    map.ScrollContainer.GetCanvasScale = function(self)
+        return self:GetWidth() / self.Child:GetWidth() / (state.viewWidth or 1)
+    end
+    map.ScrollContainer.CalculateViewRect = function(self, scale)
+        local width = (self:GetWidth() / scale) / self.Child:GetWidth()
+        return {GetWidth=function() return width end}
+    end
     -- Blizzard rebuilds the zoom levels for every map and remembers what it wrote, so a
     -- test can tell whether add-on code changed them afterwards.
     map.ScrollContainer.mouseWheelZoomMode = 2
@@ -712,11 +761,13 @@ function Wow.trackingMenu()
     return root
 end
 
--- Blizzard-owned map canvas state that add-on code has written since Blizzard set it.
+-- Blizzard-owned state that add-on code has written: map canvas fields, the zoom levels
+-- and the shared Escape handler list.
 function Wow.addonMapWrites()
     local writes = {}
     local scroll = Wow.env.WorldMapFrame.ScrollContainer
-    if Wow.state.wheelModeWritten then writes[#writes + 1] = "mouseWheelZoomMode" end
+    for name in pairs(Wow.state.blizzardWrites or {}) do writes[#writes + 1] = name end
+    if Wow.state.escapeTainted then writes[#writes + 1] = "Escape handler list" end
     local levels, made = scroll.zoomLevels, scroll.blizzardZoomLevels
     local changed = #levels ~= #made
     for index, level in ipairs(made) do
@@ -726,6 +777,7 @@ function Wow.addonMapWrites()
         end
     end
     if changed then writes[#writes + 1] = "zoomLevels" end
+    table.sort(writes)
     return writes
 end
 

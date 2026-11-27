@@ -120,9 +120,22 @@ function DungeonMap:RecordKill(encounter)
     end
 end
 
+-- Kills belong to one run of an instance. Dying, releasing and running back passes two
+-- loading screens with the same bosses still dead, so those kills are kept. They are
+-- forgotten on entering a different instance or after leaving it alive, because a living
+-- group can reset the instance before going back in.
 function DungeonMap:NewVisit()
+    if not IsInInstance or not IsInInstance() then
+        local dead = UnitIsDeadOrGhost and UnitIsDeadOrGhost("player")
+        if issecretvalue and issecretvalue(dead) then dead = false end
+        self.leftAlive = not dead
+        return
+    end
+    local id = GetInstanceInfo and select(8, GetInstanceInfo())
+    if not addon.IsReadableNumber(id) then id = nil end
+    if id and id == self.killInstance and not self.leftAlive then return end
     wipe(killed)
-    self.chosenWing = nil
+    self.killInstance, self.leftAlive, self.chosenWing = id, nil, nil
 end
 
 local function tile(frame, index, file, x, y, w, h, level, ...)
