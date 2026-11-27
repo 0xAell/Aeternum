@@ -46,17 +46,22 @@ local function started(questID)
     return inLog(questID) or isCompleted(questID)
 end
 
+local function readable(value)
+    return not issecretvalue or not issecretvalue(value)
+end
+
 local function playerInfo()
     if not player.level then
-        local level = UnitLevel("player") or 1
+        local level = UnitLevel("player")
+        level = addon.IsReadableNumber(level) and level or 1
         player.level = math.max(level, player.newLevel or 0)
         local raceID = select(3, UnitRace("player"))
         local class = select(2, UnitClass("player"))
-        player.raceMask = raceID and data.raceMasks[raceID]
-        player.classMask = class and data.classMasks[class]
+        player.raceMask = readable(raceID) and raceID and data.raceMasks[raceID] or nil
+        player.classMask = readable(class) and class and data.classMasks[class] or nil
         -- The same rule the client uses to grey out quests (GetQuestDifficultyColor).
-        local range = UnitQuestTrivialLevelRange("player")
-        player.greenRange = type(range) == "number" and range or nil
+        local range = UnitQuestTrivialLevelRange and UnitQuestTrivialLevelRange("player")
+        player.greenRange = addon.IsReadableNumber(range) and range or nil
     end
     return player
 end
@@ -161,13 +166,10 @@ end
 function Quests:Requirement(questID)
     local quest = addon.Quest(questID)
     local skill = quest and quest.requiredSkill
-    if skill then
-        return ("Requires %s %d"):format(data.professions[skill[1]], skill[2])
+    local profession = skill and data.professions[skill[1]]
+    if profession then
+        return ("Requires %s %d"):format(profession, skill[2])
     end
-end
-
-local function readable(value)
-    return not issecretvalue or not issecretvalue(value)
 end
 
 function Quests:AddObjectives(tooltip, id, alreadyShown)
@@ -199,9 +201,10 @@ local function sitesFor(id, faction)
     if siteQuest == id and siteFaction == faction then return sitesByMap end
     siteQuest, siteFaction, sitesByMap = id, faction, {}
     local quest = addon.Quest(id)
-    local code = faction == "Alliance" and "A" or (faction == "Horde" and "H")
+    if not quest then return sitesByMap end
+    local code = faction == "Alliance" and "A" or (faction == "Horde" and "H") or nil
     for index, zone, x, y, contact, side in data.objectiveSites[id]:gmatch(SITE_PATTERN) do
-        if side == "" or side == code then
+        if side == "" or not code or side == code then
             local mapID, px, py = tonumber(zone), tonumber(x)/10000, tonumber(y)/10000
             local point = {mapID=mapID, x=px, y=py}
             local list = sitesByMap[mapID] or {}
@@ -238,7 +241,8 @@ function Quests:ObjectiveSites(mapID)
     for _, site in ipairs(sites) do
         local objective = progress[site.index]
         if not objective or (readable(objective.finished) and not objective.finished) then
-            site.detail = objective and readable(objective.text) and objective.text or nil
+            local text = objective and objective.text
+            site.detail = readable(text) and type(text) == "string" and text ~= "" and text or nil
             result[#result + 1] = site
         end
     end

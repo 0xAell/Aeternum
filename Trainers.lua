@@ -8,6 +8,11 @@ local weaponClasses = {
     [196]=79, [197]=71, [198]=1115, [199]=1091, [200]=1031, [201]=399, [202]=7,
     [227]=1493, [264]=13, [266]=13, [1180]=1501, [2567]=13, [5011]=13, [15590]=1101,
 }
+local professionByName = {}
+for id, name in pairs(addon.Data.professions or {}) do
+    professionByName[name] = id
+end
+
 local function fitsClass(id)
     local classes = weaponClasses[id]
     if not classes then return true end
@@ -63,7 +68,7 @@ function Trainers:Relevant(npc)
         for id in list:gmatch("(%d+):%d+:%d+:%d+:%d+") do
             if fitsClass(tonumber(id)) then return true end
         end
-        return next(AeternumTrainerDB[npc.id] or {}) ~= nil
+        return next((AeternumTrainerDB and AeternumTrainerDB[npc.id]) or {}) ~= nil
     end
     if npc.kind == "profession" then
         local rank = self:SkillRank(npc.skillID)
@@ -110,13 +115,17 @@ function Trainers:Observe()
             local previous = known[id] or {}
             known[id] = {name = name, rank = rank, id = spell or previous.id, cost = cost or previous.cost,
                 petPoints = pet or nil, lastKnown = state == "used" or nil,
-                level = level, skill = skill, requirement = requirement}
+                level = (level and level > 0) and level or previous.level,
+                skill = skill or previous.skill,
+                requirement = (requirement and requirement > 0) and requirement or previous.requirement}
         end
     end
 end
 
 local function localized(id, fallback)
-    return C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(id) or fallback
+    local name = C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(id)
+    if readable(name) and type(name) == "string" and name ~= "" then return name end
+    return fallback
 end
 
 local function localizedRank(id, fallback)
@@ -165,13 +174,17 @@ end
 function Trainers:Lessons(npcID)
     local data, classic = addon.Data, addon.classicTraining
     local byID, byName, result, blocked = {}, {}, {}, {}
+    local showOther = addon.settings and addon.settings.otherTrainers
     local faction = UnitFactionGroup("player")
+    local hasFaction = readable(faction) and (faction == "Alliance" or faction == "Horde")
     local race = select(3, UnitRace("player"))
+    local hasRace = addon.IsReadableNumber(race) and race > 0
     local catalogue = classic.catalogues[classic.trainers[npcID]] or ""
     for id, cost, level, skill, need in catalogue:gmatch("(%d+):(%d+):(%d+):(%d+):(%d+)") do
         id = tonumber(id)
-        local name, rank = classic.spells[id]:match("^(.-)|(.*)$")
-        if not C_Spell or not C_Spell.DoesSpellExist or C_Spell.DoesSpellExist(id) then
+        local rawSpell = classic.spells[id]
+        if rawSpell and (not C_Spell or not C_Spell.DoesSpellExist or C_Spell.DoesSpellExist(id)) then
+            local name, rank = rawSpell:match("^(.-)|(.*)$")
             byID[id] = {id=id, name=localized(id, name), rank=rank, cost=tonumber(cost), level=tonumber(level),
                 skillID=tonumber(skill), skill=data.professions[tonumber(skill)], requirement=tonumber(need),
                 source="Classic reference"}
@@ -179,18 +192,22 @@ function Trainers:Lessons(npcID)
     end
     for raw, cost in (data.offers[npcID] or ""):gmatch("(%d+):(%d*)") do
         local id = tonumber(raw)
-        local name, rank, level, skill, need, side = data.lessons[id]:match("^(.-)|(.-)|(.-)|(.-)|(.-)|(.*)$")
-        if side == "" or side == faction then
-            byID[id] = {id=id, name=localized(id, name), rank=rank ~= "" and ("Rank " .. rank) or "",
-                cost=tonumber(cost), level=tonumber(level), skillID=tonumber(skill),
-                skill=data.professions[tonumber(skill)], requirement=tonumber(need), source="Bundled trainer record"}
-        else
-            blocked[id] = true
+        local rawLesson = data.lessons[id]
+        if rawLesson then
+            local name, rank, level, skill, need, side = rawLesson:match("^(.-)|(.-)|(.-)|(.-)|(.-)|(.*)$")
+            if side == "" or not hasFaction or side == faction then
+                byID[id] = {id=id, name=localized(id, name), rank=rank ~= "" and ("Rank " .. rank) or "",
+                    cost=tonumber(cost), level=tonumber(level), skillID=tonumber(skill),
+                    skill=data.professions[tonumber(skill)], requirement=tonumber(need),
+                    source="Bundled trainer record"}
+            else
+                blocked[id] = true
+            end
         end
     end
     addRecorded(npcID, byID)
     for id, row in pairs(byID) do byName[key(row.name, row.rank)] = id end
-    for _, seen in pairs(AeternumTrainerDB[npcID] or {}) do
+    for _, seen in pairs((AeternumTrainerDB and AeternumTrainerDB[npcID]) or {}) do
         local id = addon.foreverTraining.serviceSpells[seen.id] or seen.id
             or byName[key(seen.name, seen.rank)] or key(seen.name, seen.rank)
         local row = byID[id] or {}
@@ -201,15 +218,16 @@ function Trainers:Lessons(npcID)
         if row.level == 0 then row.level = level end
         if row.requirement == 0 then row.requirement = requirement end
         if row.rank == "" then row.rank = rank end
+        if not row.skillID and row.skill then row.skillID = professionByName[row.skill] end
         if seen.cost ~= nil then row.priceBasis = nil end
         row.source, row.beta = "Last visit", nil
         byID[id] = row
     end
     for id, row in pairs(byID) do
         local spell = details(id)
-        if not blocked[id] and (addon.settings.otherTrainers or fitsClass(id))
-            and (not spell or not spell.race or spell.race == race)
-            and (not spell or not spell.faction or spell.faction == faction) then
+        if not blocked[id] and (showOther or fitsClass(id))
+            and (not hasRace or not spell or not spell.race or spell.race == race)
+            and (not hasFaction or not spell or not spell.faction or spell.faction == faction) then
             result[#result + 1] = row
         end
     end
@@ -238,7 +256,7 @@ function Trainers:LessonState(lesson)
         return "later", "Requires level " .. lesson.level
     end
     if lesson.skill and lesson.requirement and lesson.requirement > 0 then
-        local rank = self:SkillRank(lesson.skillID)
+        local rank = self:SkillRank(lesson.skillID or professionByName[lesson.skill])
         if rank and rank < lesson.requirement then
             return "later", ("%s %d / %d"):format(lesson.skill, rank, lesson.requirement)
         end
