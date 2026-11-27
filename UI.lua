@@ -15,13 +15,18 @@ local function showLink(kind, id, name)
     local link = kind == "item" and addon.ItemLink(id) or nil
     link = link or ("|H%s|h[%s]|h"):format(ref, name)
     if IsModifiedClick() and HandleModifiedItemClick(link) then return end
-    SetItemRef(ref, link, "LeftButton")
+    if SetItemRef then SetItemRef(ref, link, "LeftButton") end
+end
+
+local function colorChannel(value)
+    return math.floor(math.max(0, math.min(1, value or 0)) * 255 + .5)
 end
 
 local function itemLabel(id, bags)
     local name = addon.ItemName(id)
     local color = addon.ItemQualityColor(id)
-    local text = color and ("|cff%02x%02x%02x%s|r"):format(color[1]*255, color[2]*255, color[3]*255, name) or name
+    local text = color and ("|cff%02x%02x%02x%s|r"):format(
+        colorChannel(color[1]), colorChannel(color[2]), colorChannel(color[3]), name) or name
     local icon = addon.ItemIcon(id)
     if icon then text = ("|T%d:16:16|t %s"):format(icon, text) end
     local count = bags and C_Item and C_Item.GetItemCount and C_Item.GetItemCount(id, false)
@@ -131,7 +136,10 @@ function UI:BossGroup(owner, members, label)
 end
 
 function UI:Keys(menu, dungeon)
-    for _, id in ipairs(dungeon.keys) do itemRow(menu, id, true) end
+    for _, id in ipairs(dungeon.keys) do
+        if not addon.ItemCached(id) then addon.RequestItem(id) end
+        itemRow(menu, id, true)
+    end
 end
 
 local function price(lesson)
@@ -200,7 +208,11 @@ function UI:Trainer(owner, entry)
             list[#list + 1] = lesson
         end
         menu:CreateDivider()
-        lessonRows(menu, groups.current)
+        if #groups.current == 0 then
+            menu:CreateTitle("No training available right now")
+        else
+            lessonRows(menu, groups.current)
+        end
         for _, section in ipairs({{"later", "Later training"}, {"learned", "Learned"}}) do
             local list = groups[section[1]]
             if #list > 0 then
@@ -237,12 +249,16 @@ end
 function UI:ShowLocation(entry)
     addon.DungeonMap:Close()
     self.map:SetMapID(entry.mapID)
-    self.map:PanTo(entry.x, entry.y)
+    if self.map.PanTo and entry.x and entry.y then self.map:PanTo(entry.x, entry.y) end
     addon.FocusLocation(entry)
 end
 
 function UI:EntranceMenu(menu, dungeon)
     local doors = addon.DungeonEntrances(dungeon, addon.DungeonMap.entrance, self.map:GetMapID())
+    if #doors == 0 then
+        menu:CreateTitle("No entrance for this faction")
+        return
+    end
     for _, entry in ipairs(doors) do
         local section = menu
         if #doors > 1 then
@@ -258,22 +274,31 @@ end
 function UI:QuestMenu(menu, dungeon)
     for _, id in ipairs(dungeon.quests) do
         local quest = addon.Quest(id)
-        local state = addon.Quests:State(id)
-        local role = (state == "active" or state == "ready") and "turnin" or "start"
-        local function location() return addon.QuestLocation(id, role, self.map:GetMapID()) end
-        local row = menu:CreateButton(quest.name, function()
-            local entry = location()
-            if entry then self:ShowLocation(entry) end
-        end)
-        row:SetEnabled(addon.HasQuestLocation(id, role))
-        row:SetTooltip(function(tooltip)
-            local entry = location()
-            tooltip:SetText(quest.name)
-            tooltip:AddLine(addon.Quests:Style(state, role).label)
-            if entry then tooltip:AddLine((entry.contact or entry.subtitle) .. " · " .. addon.ZoneName(entry.mapID))
-            else tooltip:AddLine(role == "turnin" and "Turn-in location unknown" or "Start location unknown") end
-            addon.Quests:AddObjectives(tooltip, id)
-        end)
+        if quest then
+            local state = addon.Quests:State(id)
+            local role = (state == "active" or state == "ready") and "turnin" or "start"
+            local function location() return addon.QuestLocation(id, role, self.map:GetMapID()) end
+            local row = menu:CreateButton(quest.name, function()
+                local entry = location()
+                if entry then self:ShowLocation(entry) end
+            end)
+            row:SetEnabled(addon.HasQuestLocation(id, role))
+            row:SetTooltip(function(tooltip)
+                local entry = location()
+                tooltip:SetText(quest.name)
+                local status = addon.Quests:Style(state, role).label
+                if quest.level then status = ("Level %d · %s"):format(quest.level, status) end
+                tooltip:AddLine(status)
+                local requirement = addon.Quests:Requirement(id)
+                if requirement then tooltip:AddLine(requirement) end
+                if entry then
+                    tooltip:AddLine((entry.contact or entry.subtitle) .. " · " .. addon.ZoneName(entry.mapID))
+                else
+                    tooltip:AddLine(role == "turnin" and "Turn-in location unknown" or "Start location unknown")
+                end
+                addon.Quests:AddObjectives(tooltip, id)
+            end)
+        end
     end
 end
 

@@ -534,7 +534,7 @@ test("a live dungeon map ID identifies the wing before a localized room name is 
 end)
 
 test("clicking an entrance uses only the existing viewport and named floors", function()
-    local addon, env = openDeadmines()
+    local addon, env, state = openDeadmines()
     local floors, frame = addon.DungeonMap, addon.DungeonMap.frame
     equal(floors.dungeon.id, "deadmines", "map opened from pin")
     equal(frame:GetParent(), env.WorldMapFrame, "part of the map")
@@ -542,11 +542,14 @@ test("clicking an entrance uses only the existing viewport and named floors", fu
     equal(frame.tiles[1].texture, 449591, "native first-floor art")
     frame.dropdown:OpenMenu():Find("Ironclad Cove"):Click()
     equal(frame.tiles[1].texture, 449603, "second-floor art")
-    Wow.pressEscape()
-    check(not floors.dungeon and env.WorldMapFrame:IsShown(), "first Escape returns to zone")
+    equal(#state.escapeHandlers, 1, "addon never registers an insecure Escape handler")
+    frame:Fire("OnMouseUp", "RightButton")
+    check(not floors.dungeon and env.WorldMapFrame:IsShown(), "right-click returns to zone")
     check(not frame.tiles[1].texture, "closed floor releases tiles")
+    addon.DungeonMap:Open(dungeonNamed(addon, "deadmines"))
     Wow.pressEscape()
-    check(not env.WorldMapFrame:IsShown(), "native map closes next")
+    check(not env.WorldMapFrame:IsShown() and not floors.dungeon, "Escape closes the map cleanly")
+    check(not frame.tiles[1].texture, "closing via Escape releases tiles")
 end)
 
 test("a boss skull opens the correct drop list with modified clicks and native tooltips", function()
@@ -1450,6 +1453,118 @@ test("every trainer location opens its lesson list and every eligible reference 
         for _, entry in ipairs(addon.Entries(id, false)) do check(drawn[entry], entry.title) end
     end
     equal(trainers, 562)
+end)
+
+test("grouped boss pins keep encounter labels even when only a later member carries the label", function()
+    local addon, env, state = openDeadmines()
+    local frame = addon.DungeonMap.frame
+    local sneed = findEntry(frame.pins, function(p) return p:IsShown() and #p.members > 1 end)
+    check(sneed and sneed.label == "Sneed's Shredder", "Deadmines Sneed group keeps encounter label")
+    sneed:Fire("OnEnter")
+    equal(env.GameTooltip.lines[1], "Sneed's Shredder", "hover title uses encounter label")
+    sneed:Click()
+    equal(state.menu.children[1].label, "Sneed's Shredder", "boss-group menu uses encounter label")
+    addon.DungeonMap:Open(dungeonNamed(addon, "sm-cathedral"))
+    local cathedral = findEntry(frame.pins, function(p) return p:IsShown() and #p.members > 1 end)
+    equal(cathedral.label, "Scarlet Commander Mograine", "SM Cathedral group keeps encounter label")
+    addon.DungeonMap:Open(dungeonNamed(addon, "ubrs"), nil, 3)
+    local rend = findEntry(frame.pins, function(p) return p:IsShown() and #p.members > 1 end)
+    equal(rend.label, "Warchief Rend Blackhand", "UBRS Rend group keeps encounter label")
+end)
+
+test("maximizing the map updates dungeon floor strata and manual boss jump pauses auto-follow", function()
+    local addon, env, state = load({inInstance=true, instanceID=36, subzone="Mastraum"})
+    env.WorldMapFrame:Show()
+    local frame = addon.DungeonMap.frame
+    equal(frame:GetFrameStrata(), "DIALOG", "minimized map strata")
+    env.WorldMapFrame:SetFrameStrata("FULLSCREEN")
+    frame:Fire("OnSizeChanged")
+    equal(frame:GetFrameStrata(), "FULLSCREEN_DIALOG", "maximized map keeps dungeon floor above canvas")
+    frame.dropdown:OpenMenu():Find("Boss loot"):Find("Edwin VanCleef"):Click()
+    Wow.flushTimers()
+    equal(addon.DungeonMap.index, 2, "jumped to VanCleef's floor")
+    state.subzone = "Mastraum"
+    Wow.fire("ZONE_CHANGED_INDOORS")
+    equal(addon.DungeonMap.index, 2, "auto-follow does not snap away from a manual boss jump")
+end)
+
+test("hovered quest and route pins refresh their open tooltip on in-place state updates", function()
+    local addon, env, state = load({mapID=1429, playerMap=1429, playerX=.2, playerY=.2, log={[7]=1}, superQuest=7,
+        objectives={[7]={{text="Kobold Vermin slain: 1/10", finished=false}}}})
+    env.WorldMapFrame:Show()
+    local pin = locate(env, function(e) return e.questID == 7 and e.role == "objective" end)
+    pin:OnMouseEnter()
+    check(findEntry(env.GameTooltip.lines, function(v) return v == "Kobold Vermin slain: 1/10" end))
+    state.objectives[7][1].text = "Kobold Vermin slain: 4/10"
+    Wow.fire("QUEST_LOG_UPDATE"); Wow.flushTimers()
+    check(findEntry(env.GameTooltip.lines, function(v) return v == "Kobold Vermin slain: 4/10" end), "live count")
+    -- Blank objective text falls back to quest title instead of an empty line.
+    state.objectives[7][1].text = ""
+    local sites = addon.Quests:ObjectiveSites(1429)
+    equal(sites[1].detail, nil, "blank objective text ignored")
+    -- Neutral faction retains faction-tagged objective sites.
+    state.faction = "Neutral"
+    check(#addon.Quests:ObjectiveSites(1429) > 0, "neutral faction keeps objective sites")
+end)
+
+test("continent pins show dungeon levels, keys request uncached data, and reset confirms in chat", function()
+    local addon, env, state = load({mapID=1415})
+    env.Enum.UIMapType = {World=0, Continent=1}
+    env.C_Map.GetMapInfo = function(id)
+        if id == 1415 then return {mapType=1, name="Eastern Kingdoms"} end
+        return {mapType=3, parentMapID=id == 1436 and 1415 or 0, name="Westfall"}
+    end
+    env.C_Map.GetMapRectOnMap = function() return .1, .5, .2, .6 end
+    env.WorldMapFrame:Show()
+    local _, door = locate(env, function(e) return e.source.id == "deadmines" end)
+    check(door.subtitle:find("Westfall", 1, true) and door.subtitle:find("Levels", 1, true), "continent level range")
+    addon.DungeonMap:Open(dungeonNamed(addon, "blackrock-depths"))
+    addon.DungeonMap.frame.dropdown:OpenMenu():Find("Dungeon keys")
+    check(state.requested and state.requested[11000], "uncached dungeon keys requested")
+    -- GET_ITEM_INFO_RECEIVED also updates an open boss loot menu. The menu lists only drops
+    -- this character can use, so pick one of those that is not cached yet.
+    local usable, boss, itemID = addon.LootFilter(), nil, nil
+    for _, candidate in ipairs(addon.DungeonMap.dungeon.bosses) do
+        for _, id in ipairs(candidate.loot) do
+            if not boss and usable(id) and not state.cached[id] then boss, itemID = candidate, id end
+        end
+    end
+    check(boss, "a boss with an uncached drop this character can use")
+    addon.UI:Boss(addon.DungeonMap.frame, boss)
+    state.cached[itemID] = true
+    Wow.fire("GET_ITEM_INFO_RECEIVED", itemID, true)
+    Wow.flushTimers()
+    equal(state.menuProxy.refreshes, 1, "fallback item event refreshes loot menu")
+    slash(env, "reset")
+    check(state.messages[#state.messages]:find("reset", 1, true), "reset confirmation")
+end)
+
+test("observed trainer visits preserve prior requirements and resolve profession ranks by name", function()
+    local addon, env, state = load({npcGUID="Creature-0-1-1-1-5499-000A",
+        professionIndices={1}, professionSkills={171}, professionRanks={[171]=15},
+        services={{name="Custom Elixir", cost=200, level=12, skill="Alchemy", need=30}}})
+    Wow.fire("TRAINER_SHOW")
+    -- Subsequent visit reports the service without level/skill metadata (e.g. already learned or partial info).
+    state.services = {{name="Custom Elixir", cost=200}}
+    Wow.fire("TRAINER_UPDATE")
+    local lesson = findEntry(addon.Trainers:Lessons(5499), function(l) return l.name == "Custom Elixir" end)
+    equal(lesson.level, 12, "level preserved across trainer visits")
+    equal(lesson.skillID, 171, "profession skillID resolved from name")
+    equal(lesson.requirement, 30, "skill requirement preserved")
+    state.level = 60
+    local group, status = addon.Trainers:LessonState(lesson)
+    equal(group, "later", "observed-only recipe gated by profession rank")
+    equal(status, "Alchemy 15 / 30")
+    -- Safe nil/non-number item helpers and negative quality-color cache.
+    equal(addon.ItemName(nil), "Item ")
+    equal(addon.ItemLink(nil), nil)
+    equal(addon.ItemQualityColor(nil), nil)
+    local colorCalls = 0
+    env.C_Item.GetItemQualityByID = function() return 99 end
+    env.C_Item.GetItemQualityColor = function() colorCalls = colorCalls + 1; return nil end
+    equal(addon.ItemQualityColor(5191), nil)
+    equal(addon.ItemQualityColor(5191), nil)
+    equal(colorCalls, 1, "missing quality color cached negatively")
 end)
 
 print(("%d passed, %d failed"):format(passed, failed))

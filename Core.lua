@@ -119,14 +119,14 @@ local function record(category, title, subtitle, point, source)
 end
 
 local function ordered(a, b)
-    local groupA, groupB = categoryOrder[a.category], categoryOrder[b.category]
+    local groupA, groupB = categoryOrder[a.category] or 99, categoryOrder[b.category] or 99
     if groupA ~= groupB then
         return groupA < groupB
-    elseif a.title ~= b.title then
-        return a.title < b.title
+    elseif (a.title or "") ~= (b.title or "") then
+        return (a.title or "") < (b.title or "")
     end
-    if a.subtitle ~= b.subtitle then return a.subtitle < b.subtitle end
-    if a.x ~= b.x then return (a.x or 0) < (b.x or 0) end
+    if (a.subtitle or "") ~= (b.subtitle or "") then return (a.subtitle or "") < (b.subtitle or "") end
+    if (a.x or 0) ~= (b.x or 0) then return (a.x or 0) < (b.x or 0) end
     return (a.y or 0) < (b.y or 0)
 end
 
@@ -166,9 +166,11 @@ end
 table.sort(dungeonRecords, ordered)
 
 function addon.DungeonEntrances(dungeon, selectedPoint, viewedMap)
+    local list = dungeon and entrancesByDungeon[dungeon.id]
+    if not list then return {} end
     local doors, preferred = {}, nil
     local faction = UnitFactionGroup("player")
-    for _, door in ipairs(entrancesByDungeon[dungeon.id]) do
+    for _, door in ipairs(list) do
         if addon.FactionAllowed(door, faction) then
             doors[#doors + 1] = door
             if door.point == selectedPoint or (not preferred and door.mapID == viewedMap) then preferred = #doors end
@@ -186,6 +188,7 @@ local PIN_PATTERN = "(%d+)([st])([AH]?)(%d+),(%d+)([no]%d+);"
 
 local function questRecord(questID, role, faction, x, y, contact, mapID)
     local quest = addon.Quest(questID)
+    if not quest then return end
     local subtitle = questRoles[role]
     if quest.level then
         subtitle = subtitle .. " · Level " .. quest.level
@@ -216,11 +219,16 @@ local function continentEntrances(entries, mapID)
         return
     end
     for _, dungeon in ipairs(data.dungeons) do
+        local levels = addon.DungeonLevel(dungeon)
         for _, door in ipairs(dungeon.entrances) do
             if isAncestor(door.mapID, mapID) then
                 local left, right, top, bottom = C_Map.GetMapRectOnMap(door.mapID, mapID)
-                if left and right and top and bottom and right > left and bottom > top then
-                    local entry = record("dungeon", dungeon.name, addon.ZoneName(door.mapID), door, dungeon)
+                if addon.IsReadableNumber(left) and addon.IsReadableNumber(right)
+                    and addon.IsReadableNumber(top) and addon.IsReadableNumber(bottom)
+                    and right > left and bottom > top then
+                    local subtitle = addon.ZoneName(door.mapID)
+                    if levels then subtitle = subtitle .. " · " .. levels end
+                    local entry = record("dungeon", dungeon.name, subtitle, door, dungeon)
                     entry.mapID = mapID
                     entry.x, entry.y = left + door.x * (right - left), top + door.y * (bottom - top)
                     if entry.x >= 0 and entry.x <= 1 and entry.y >= 0 and entry.y <= 1 then
@@ -246,8 +254,8 @@ function addon.MapRecords(mapID)
     local packed = data.questPins[mapID]
     if packed then
         for questID, role, faction, x, y, contact in packed:gmatch(PIN_PATTERN) do
-            entries[#entries + 1] =
-                questRecord(tonumber(questID), role, faction, tonumber(x), tonumber(y), contact, mapID)
+            local entry = questRecord(tonumber(questID), role, faction, tonumber(x), tonumber(y), contact, mapID)
+            if entry then entries[#entries + 1] = entry end
         end
     end
     table.sort(entries, ordered)
@@ -347,7 +355,7 @@ local function visible(entry, faction)
     if entry.category == "quest" then
         return addon.Quests:IsPinVisible(entry)
     end
-    if entry.category ~= "dungeon" and not addon.settings.otherTrainers then
+    if entry.category ~= "dungeon" and not (addon.settings and addon.settings.otherTrainers) then
         return addon.Trainers:Relevant(entry.source)
     end
     return true
@@ -484,14 +492,17 @@ end
 -- Items ----------------------------------------------------------------------
 
 function addon.ItemName(itemID)
-    local name = C_Item and C_Item.GetItemNameByID and C_Item.GetItemNameByID(itemID)
-    if name and name ~= "" then
-        return name
+    if type(itemID) == "number" then
+        local name = C_Item and C_Item.GetItemNameByID and C_Item.GetItemNameByID(itemID)
+        if name and name ~= "" then
+            return name
+        end
     end
-    return data.items[itemID] or ("Item " .. itemID)
+    return data.items[itemID] or ("Item " .. tostring(itemID or ""))
 end
 
 function addon.ItemCached(itemID)
+    if type(itemID) ~= "number" then return true end
     if C_Item and C_Item.IsItemDataCachedByID then return C_Item.IsItemDataCachedByID(itemID) end
     return C_Item and C_Item.GetItemInfo and select(2, C_Item.GetItemInfo(itemID)) ~= nil
 end
@@ -499,12 +510,13 @@ end
 local qualityColors = {}
 
 function addon.ItemQualityColor(itemID)
+    if type(itemID) ~= "number" then return nil end
     local quality = C_Item and C_Item.GetItemQualityByID and C_Item.GetItemQualityByID(itemID)
-    if not quality or not C_Item.GetItemQualityColor then
+    if quality == nil or not C_Item.GetItemQualityColor then
         return nil
     end
     local color = qualityColors[quality]
-    if not color then
+    if color == nil then
         local red, green, blue = C_Item.GetItemQualityColor(quality)
         color = red and { red, green, blue } or false
         qualityColors[quality] = color
@@ -513,11 +525,12 @@ function addon.ItemQualityColor(itemID)
 end
 
 function addon.ItemIcon(itemID)
-    return C_Item and C_Item.GetItemIconByID and C_Item.GetItemIconByID(itemID)
+    return type(itemID) == "number" and C_Item and C_Item.GetItemIconByID and C_Item.GetItemIconByID(itemID) or nil
 end
 
 -- Links work before the client has cached the item name or quality.
 function addon.ItemLink(itemID)
+    if type(itemID) ~= "number" then return nil end
     local link = C_Item and C_Item.GetItemInfo and select(2, C_Item.GetItemInfo(itemID))
     local ref = "item:" .. itemID
     return link or ("|H%s|h[%s]|h"):format(ref, addon.ItemName(itemID)), ref
