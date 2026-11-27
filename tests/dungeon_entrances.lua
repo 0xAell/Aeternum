@@ -48,6 +48,7 @@ assert(found[uldaman.entrances[1]]:find("44.6, 12.1", 1, true))
 assert(found[uldaman.entrances[2]]:find("65.2, 43.5", 1, true))
 
 -- Exercise the detail panel through the same selection call as pin and atlas clicks.
+assert(loadfile("Navigation.lua"))("Aeternum", addon)
 assert(loadfile("UI.lua"))("Aeternum", addon)
 local function noop() end
 local label = {SetText = noop}
@@ -57,7 +58,6 @@ local mapID
 local zoneNames = {[badlands] = "Badlands", [searingGorge] = "Searing Gorge", [burningSteppes] = "Burning Steppes"}
 UIParent = {GetWidth = function() return 1024 end, GetHeight = function() return 768 end}
 C_Map = {GetMapInfo = function(id) return {name = zoneNames[id]} end}
-addon.Navigation = {GetStatus = noop}
 local ui = addon.UI
 ui.map = {GetMapID = function() return mapID end}
 ui.ChangeBoss = noop
@@ -65,7 +65,7 @@ ui.detail = {
     SetSize = noop, GetWidth = UIParent.GetWidth, Show = noop,
     floorMap = {SetWidth = noop, SetDungeon = noop},
     title = label, levels = label, routeStatus = label,
-    route = button, nextEntrance = button, entranceText = caption,
+    route = button, nextEntrance = button, stop = button, showZone = button, entranceText = caption,
 }
 local function chosen(dungeon, viewedMapID, clicked)
     mapID = viewedMapID
