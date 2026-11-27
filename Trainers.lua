@@ -14,6 +14,7 @@ local function fitsClass(id)
     return not classes or not player or classes % (2 * player) >= player
 end
 
+local function readable(value) return not issecretvalue or not issecretvalue(value) end
 local professions
 local function readProfessions()
     if not GetProfessions or not GetProfessionInfo then return end
@@ -46,7 +47,8 @@ function Trainers:SkillRank(id)
     end
     if C_SkillInfo and C_SkillInfo.GetSkillLineInfoByID then
         local skill = C_SkillInfo.GetSkillLineInfoByID(id)
-        if skill and addon.IsReadableNumber(skill.rank) then return skill.rank end
+        if readable(skill) and skill and (not canaccesstable or canaccesstable(skill))
+            and addon.IsReadableNumber(skill.rank) then return skill.rank end
     end
     if professions then return 0 end
 end
@@ -69,7 +71,6 @@ function Trainers:Relevant(npc)
     return true
 end
 
-local function readable(value) return not issecretvalue or not issecretvalue(value) end
 local function key(name, rank)
     return name .. "|" .. (rank or "")
 end

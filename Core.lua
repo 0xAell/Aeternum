@@ -395,6 +395,7 @@ end
 -- name alone should not also list every item from that dungeon.
 local function dungeonResults(words)
     local result, bosses, drops = {}, {}, {}
+    local usable = words and addon.LootFilter()
     for _, entry in ipairs(dungeonRecords) do
         local dungeon = entry.source
         local parent = foldedName(dungeon.name)
@@ -410,7 +411,7 @@ local function dungeonResults(words)
                 else
                     for _, id in ipairs(boss.loot) do
                         local name = data.items[id]
-                        if name and containsWords(words, foldedName(name), bossName, parent) then
+                        if name and containsWords(words, foldedName(name), bossName, parent) and usable(id) then
                             local hit = record("dungeon", name, boss.name .. " · " .. dungeon.name, nil, dungeon)
                             hit.bossIndex, hit.itemID = index, id
                             drops[#drops + 1] = hit

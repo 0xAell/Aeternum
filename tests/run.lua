@@ -373,8 +373,10 @@ local function menuRow(menu, name)
     return findEntry(menu.children, function(row) return row.label:find(name, 1, true) end)
 end
 
-local function openDeadmines()
-    local addon, env, state = load({mapID=1436})
+local function openDeadmines(character)
+    character = character or {}
+    character.mapID = 1436
+    local addon, env, state = load(character)
     env.WorldMapFrame:Show()
     local pin = locate(env, function(entry) return entry.title == "The Deadmines" end)
     env.WorldMapFrame:ClickPin(pin, "LeftButton")
@@ -957,7 +959,8 @@ test("Forever-specific named drops fill previously empty boss menus", function()
 end)
 
 test("Rhahk'Zor separates his recorded gear, other corpse drops, and encounter rolls", function()
-    local addon, _, state = openDeadmines()
+    local addon, _, state = openDeadmines({professionIndices={1, 2}, professionSkills={164, 197},
+        professionRanks={[164]=80, [197]=75}})
     local boss = assert(findEntry(addon.DungeonMap.dungeon.bosses, function(b) return b.id == 644 end))
     addon.UI:Boss(addon.DungeonMap.frame, boss)
     local menu = state.menu
@@ -973,6 +976,106 @@ test("Rhahk'Zor separates his recorded gear, other corpse drops, and encounter r
         return p[1] == 11517
     end))
     check(point.pull and point[2] == .5654 and point[3] == .3816, "Oggleflint's recorded pull area")
+end)
+
+test("Rhahk'Zor shows trained weapons and learnable plans from a cold item cache", function()
+    local addon, _, state = openDeadmines({class="HUNTER", level=18, skillRanks={[172]=1, [414]=1}})
+    local boss = findEntry(addon.DungeonMap.dungeon.bosses, function(b) return b.id == 644 end)
+    addon.UI:Boss(addon.DungeonMap.frame, boss)
+    check(menuRow(state.menu, "Rockslicer") and menuRow(state.menu, "Ogre Loincloth"))
+    check(not menuRow(state.menu, "Rhahk'Zor's Hammer"))
+    check(not menuRow(state.menu, "Other recorded drops") and not menuRow(state.menu, "Encounter rolls"))
+    check(not state.requested[251341] and not state.requested[5187], "ineligible items never requested")
+
+    local original = state.menuProxy
+    state.professionIndices = {[4]=17}
+    state.professionSkills = {[17]=164}
+    state.professionRanks = {[164]=79}
+    Wow.fire("SKILL_LINES_CHANGED")
+    Wow.flushTimers()
+    equal(original, state.menuProxy, "rank below the threshold leaves the menu in place")
+    state.professionRanks[164] = 80
+    Wow.fire("SKILL_LINES_CHANGED")
+    Wow.flushTimers()
+    local other = state.menu:Find("Other recorded drops")
+    check(menuRow(other, "Guard's Chain Shirt") and state.requested[251341])
+    check(not menuRow(other, "Gown") and not menuRow(state.menu, "Encounter rolls"))
+    check(not addon.LootFilter()(14147), "hunter can learn mail plans before learning to wear mail")
+    state.knownSpells = {[1252238]=true, [1252237]=true}
+    Wow.fire("SPELLS_CHANGED")
+    Wow.flushTimers()
+    check(not menuRow(state.menu, "Other recorded drops"), "both plans learned")
+end)
+
+test("professions, specializations and class books use the character's actual requirements", function()
+    local addon, _, state = load({class="MAGE", professionIndices={1}, professionSkills={164},
+        professionRanks={[164]=300}})
+    local usable = addon.LootFilter()
+    check(usable(251341) and not usable(274049), "blacksmith plans and engineering schematic")
+    check(not usable(11612), "Dark Iron Plate needs Armorsmithing")
+    check(usable(18600), "mage can learn Arcane Brilliance")
+    check(usable(282712) and not usable(22400), "quest libram and paladin relic")
+    state.knownSpells = {[9788]=true, [23028]=true}
+    usable = addon.LootFilter()
+    check(usable(11612) and not usable(18600), "specialization and learned class spell")
+
+    local paladin = load({class="PALADIN"}).LootFilter()
+    check(paladin(22400) and not paladin(22395) and not paladin(18600))
+    local druid = load({class="DRUID"}).LootFilter()
+    check(druid(22397) and not druid(22400))
+    local shaman = load({class="SHAMAN"}).LootFilter()
+    check(shaman(22395) and not shaman(22397))
+end)
+
+test("armor, off-hand weapons and ammunition follow learned proficiencies", function()
+    local addon, _, state = load({class="WARRIOR", skillRanks={[173]=45, [226]=30}})
+    local usable = addon.LootFilter()
+    check(usable(5193) and usable(273289), "cloak and cloth")
+    check(not usable(14147) and not usable(280075), "unlearned mail and plate")
+    check(not usable(18392), "off-hand-only dagger needs dual wield")
+    check(usable(2662) and usable(9399) and not usable(2663) and not usable(13377), "crossbow ammunition")
+    state.knownSpells = {[674]=true, [750]=true, [8737]=true, [266]=true}
+    usable = addon.LootFilter()
+    check(usable(18392) and usable(14147) and usable(280075), "trained passive skills")
+    check(usable(2663) and usable(13377), "gun proficiency")
+    check(not usable(13175) and not usable(99999999), "unknown requirements stay hidden")
+end)
+
+test("unavailable skill details never admit restricted loot or hide ordinary shared gear", function()
+    local addon, env = load({class="MAGE", skillRanks={[202]=125}})
+    env.GetProfessions = nil
+    addon.Trainers:Invalidate()
+    check(addon.LootFilter()(274049), "profession rank available through the native Skills tab")
+    local unreadable = {}
+    env.C_SkillInfo.GetSkillLineInfoByID = function() return unreadable end
+    env.issecretvalue = function(value) return value == unreadable end
+    env.C_SpellBook = nil
+    local usable = addon.LootFilter()
+    check(not usable(274049) and not usable(5187) and not usable(18600))
+    check(usable(5193) and usable(273289), "shared gear remains available")
+end)
+
+test("loot search follows the same profession changes as an open boss menu", function()
+    local addon, _, state = load({class="PRIEST", professionIndices={1}, professionSkills={202},
+        professionRanks={[202]=124}})
+    local query = "9-60 Battery Pack"
+    equal(#addon.Entries(nil, true, query), 0)
+    addon.UI:Search(query)
+    check(menuRow(state.menu, "No matching"))
+    state.professionRanks[202] = 125
+    Wow.fire("SKILL_LINES_CHANGED")
+    Wow.flushTimers()
+    check(menuRow(state.menu, query), "newly eligible schematic appears in the open search")
+    state.professionIndices = {}
+    Wow.fire("SKILL_LINES_CHANGED")
+    Wow.flushTimers()
+    check(menuRow(state.menu, "No matching") and not menuRow(state.menu, query))
+    check(#addon.Entries(nil, true, "Rhahk'Zor") > 0, "bosses stay searchable")
+    local owner = addon.UI.map
+    addon.UI:Boss(owner, {name="Boss", loot={251341, 253902}, lootSections={other=1, encounter=2}})
+    check(menuRow(state.menu, "No usable drops") and #state.menu.children == 2, "no empty sections")
+    addon.UI:Boss(owner, {name="Boss", loot={}})
+    check(menuRow(state.menu, "No documented drops"), "undocumented boss remains distinct")
 end)
 
 test("the indoor player arrow uses the current floor and hides when the client restricts position", function()
@@ -1271,11 +1374,13 @@ test("generated Lua round-trips sparse tables, mixed keys, reserved names and la
     for key, value in pairs(decoded) do equal(sample[key], value, tostring(key)) end
 end)
 
-test("all shipped floors open and every boss menu shows that boss's recorded drops", function()
+test("all shipped floors open and every boss menu shows its eligible recorded drops in order", function()
     local addon, env, state = load()
     env.WorldMapFrame:Show()
     local map = addon.DungeonMap
     local floors, bosses = 0, 0
+    local usable = addon.LootFilter()
+    local allItems = {}
     for _, dungeon in ipairs(addon.Data.dungeons) do
         addon.UI:Pick(env.WorldMapFrame, {category="dungeon", source=dungeon})
         for i, floor in ipairs(addon.floorData[dungeon.id].floors) do
@@ -1298,14 +1403,28 @@ test("all shipped floors open and every boss menu shows that boss's recorded dro
                 if row.action and #row.children == 0 then ids[#ids+1] = row end
                 for _, child in ipairs(row.children) do ids[#ids+1] = child end
             end
-            equal(#ids, #boss.loot, boss.name)
-            for index, id in ipairs(boss.loot) do
-                check(ids[index].label:find(addon.ItemName(id), 1, true), boss.name .. " " .. id)
+            local count = 0
+            for _, id in ipairs(boss.loot) do
+                allItems[id] = true
+                check(addon.lootRules[id] ~= nil, "missing requirement record for " .. id)
+                if usable(id) then
+                    count = count + 1
+                    check(ids[count].label:find(addon.ItemName(id), 1, true), boss.name .. " " .. id)
+                end
             end
+            equal(#ids, count, boss.name)
             bosses = bosses + 1
         end
     end
     equal(floors, 71); equal(bosses, 302)
+    local total, unverified, learnable = 0, 0, 0
+    for id, rule in pairs(addon.lootRules) do
+        check(allItems[id], "stale requirement record " .. id)
+        total = total + 1
+        if not rule then unverified = unverified + 1
+        elseif rule.teaches then learnable = learnable + 1 end
+    end
+    equal(total, 1404); equal(unverified, 8); equal(learnable, 139)
 end)
 
 test("every trainer location opens its lesson list and every eligible reference pin survives grouping", function()

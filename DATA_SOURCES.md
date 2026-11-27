@@ -30,9 +30,15 @@ The texture IDs refer to files already in the game. Floors with alternate minima
 - Class restrictions for the 14 weapon proficiency spells in `Trainers.lua` come from the Forever client’s `SkillLineAbility.ClassMask`. The character’s class and learned professions come from the game. [Forever 1.60.1.71139 SkillLineAbility export](https://wago.tools/db2/SkillLineAbility/csv?build=1.60.1.71139)
 - A trainer visit stores visible lessons and prices under the trainer’s NPC ID in per-character `AeternumTrainerDB`. An observed price takes priority over the bundled Forever entry and the Classic reference. Visiting with a filtered trainer window preserves other previously recorded lessons. [Forever trainer interface](https://github.com/Gethe/wow-ui-source/blob/d9c22e32cb240afb82bb2ecefbb78ef935333f59/Interface/AddOns/Blizzard_TrainerUI/Mainline/Blizzard_TrainerUI.lua)
 
+## Character loot requirements
+
+The item snapshot covers every item in the boss audit. It records the item class, subclass, equip slot, allowed character classes, required skill and rank, required spell, quest starter and spell taught. Values come from Forever build 1.60.1.71139 with Blizzard’s server-published hotfixes applied. Eight guide-listed items have an equipment type but lack confirmed item requirements. Their rows have blank requirement fields and the menus omit them. [Item snapshot](docs/boss-audit/item-requirements.tsv) · [Forever Item](https://wago.tools/db2/Item/csv?build=1.60.1.71139) · [Forever ItemSparse](https://wago.tools/db2/ItemSparse/csv?build=1.60.1.71139)
+
+The learning check joins each item to its `LearnSpell` effect. This identifies the exact rank of a class book or recipe to compare with the character’s spellbook. The game supplies trained weapon and armor proficiencies, professions and ranks when the map opens. [Forever ItemXItemEffect](https://wago.tools/db2/ItemXItemEffect/csv?build=1.60.1.71139) · [Forever ItemEffect](https://wago.tools/db2/ItemEffect/csv?build=1.60.1.71139) · [Forever skill-line and spell data](https://wago.tools/db2/SkillLineAbility/csv?build=1.60.1.71139) · [Forever character sheet](https://github.com/Gethe/wow-ui-source/blob/d9c22e32cb240afb82bb2ecefbb78ef935333f59/Interface/AddOns/Blizzard_UIPanels_Game/Camelot/PaperDollFrameStats.lua)
+
 ## Regenerate
 
-From the repository root, run `tools/check_data.sh`. It downloads the pinned inputs, verifies the Classic SQL archive’s SHA-256, runs all three importers and compares their output with the committed databases. Git, curl, Python 3 and LuaJIT are required by default. Set `LUA=lua5.1` to use Lua 5.1.
+From the repository root, run `tools/check_data.sh`. It downloads the pinned inputs, verifies the Classic SQL archive’s SHA-256, rebuilds all four databases and compares their output with the committed files. Git, curl, Python 3 and LuaJIT are required by default. Set `LUA=lua5.1` to use Lua 5.1.
 
 To reuse existing inputs, pass a NorgannonDB checkout, a Forever Dungeon Routes checkout and the compressed Classic SQL snapshot in that order. These commands regenerate the committed files with those inputs.
 
@@ -40,4 +46,11 @@ To reuse existing inputs, pass a NorgannonDB checkout, a Forever Dungeon Routes 
 luajit tools/import_norgannon.lua /path/to/NorgannonDB Data.lua /path/to/ForeverDungeonRoutes/ForeverDungeonRoutes/Data/Entrances.lua
 luajit tools/import_floors.lua /path/to/ForeverDungeonRoutes Data.lua FloorData.lua
 python3 tools/import_classic_training.py /path/to/ClassicDB_1_12_1_z2815.sql.gz Data.lua ClassicTraining.lua
+python3 tools/import_loot_requirements.py build LootData.lua
+```
+
+To refresh the numeric item snapshot, save the four linked build 71139 CSVs in a directory as `Item.csv`, `ItemSparse.csv`, `ItemXItemEffect.csv` and `ItemEffect.csv`. The extractor checks their hashes and reads the same build’s version 9 game-data cache. Review the snapshot diff before rebuilding because available hotfixes vary by client. [DB2 definitions](https://github.com/wowdev/WoWDBDefs/tree/master/definitions) · [Hotfix record format](https://github.com/fitzforge/polestar/blob/c0e768df4df867532f6334c1ed5464a8bc544021/rust/crates/forge-gamedata/src/hotfix.rs)
+
+```sh
+python3 tools/import_loot_requirements.py snapshot /path/to/csv /path/to/DBCache.bin docs/boss-audit/item-requirements.tsv
 ```

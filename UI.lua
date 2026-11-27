@@ -29,15 +29,10 @@ local function itemLabel(id, bags)
     return text
 end
 
-local function itemRows(menu, items, bags, pending, first, last)
-    for index = first or 1, last or #items do
-        local id = items[index]
-        local row = menu:CreateButton(itemLabel(id, bags), function() showLink("item", id, addon.ItemName(id)) end)
-        row:SetTooltip(function(tooltip) tooltip:SetItemByID(id) end)
-        if pending and not addon.ItemCached(id) then
-            pending[id] = row
-        end
-    end
+local function itemRow(menu, id, bags)
+    local row = menu:CreateButton(itemLabel(id, bags), function() showLink("item", id, addon.ItemName(id)) end)
+    row:SetTooltip(function(tooltip) tooltip:SetItemByID(id) end)
+    return row
 end
 
 local lootSections = {
@@ -46,34 +41,70 @@ local lootSections = {
     {"guide", "Guide-listed drops", "Forever dungeon guides list these items. A matching player drop is unverified."},
 }
 
+local function sectionMenu(menu, section)
+    local parent = menu:CreateButton(section[2])
+    parent:SetScrollMode(320)
+    parent:SetTooltip(function(tooltip) tooltip:SetText(section[3], nil, nil, nil, nil, true) end)
+    return parent
+end
+
+local function trackLootMenu(menu, rows, onSkillsChanged)
+    if not menu then return end
+    local loot = {menu=menu, rows=rows, onSkillsChanged=onSkillsChanged}
+    UI.openLoot = loot
+    menu:SetClosedCallback(function() if UI.openLoot == loot then UI.openLoot = nil end end)
+end
+
 function UI:Boss(owner, boss)
-    local pending = {}
+    local pending, visible = {}, {}
+    local usable = addon.LootFilter()
     local openMenu = menuAt(owner, boss.name, function(menu)
         if boss.event then menu:CreateTitle(boss.event .. " event") end
-        if #boss.loot == 0 then menu:CreateTitle("No documented drops") end
-        local parent, first = menu, 1
+        local starts = {}
         for _, section in ipairs(lootSections) do
             local start = boss.lootSections and boss.lootSections[section[1]]
-            if start then
-                itemRows(parent, boss.loot, false, pending, first, start-1)
-                parent, first = menu:CreateButton(section[2]), start
-                parent:SetScrollMode(320)
-                parent:SetTooltip(function(tooltip) tooltip:SetText(section[3], nil, nil, nil, nil, true) end)
+            if start then starts[start] = section end
+        end
+        local parent, section = menu, nil
+        for index, id in ipairs(boss.loot) do
+            if starts[index] then parent, section = nil, starts[index] end
+            if usable(id) then
+                visible[id] = true
+                parent = parent or sectionMenu(menu, section)
+                local row = itemRow(parent, id)
+                if not addon.ItemCached(id) then pending[id] = row end
             end
         end
-        itemRows(parent, boss.loot, false, pending, first)
+        if not next(visible) then
+            menu:CreateTitle(#boss.loot == 0 and "No documented drops" or "No usable drops found for your character")
+        end
     end)
-    if openMenu and next(pending) then
-        local loot = {menu=openMenu, rows=pending}
-        self.openLoot = loot
-        openMenu:SetClosedCallback(function() if self.openLoot == loot then self.openLoot = nil end end)
-        for id in pairs(pending) do addon.RequestItem(id) end
-    end
+    if not openMenu then return end
+    trackLootMenu(openMenu, pending, function()
+        local now = addon.LootFilter()
+        for _, id in ipairs(boss.loot) do
+            if now(id) ~= (visible[id] == true) then
+                self:Boss(owner, boss)
+                return
+            end
+        end
+    end)
+    for id in pairs(pending) do addon.RequestItem(id) end
+end
+
+function UI:LootSkillsChanged()
+    local loot = self.openLoot
+    if not loot or loot.skillsPending then return end
+    loot.skillsPending = true
+    C_Timer.After(0, function()
+        loot.skillsPending = nil
+        if self.openLoot == loot then loot.onSkillsChanged() end
+    end)
 end
 
 function UI:ItemLoaded(id, success)
     local loot = self.openLoot
-    local row = loot and loot.rows[id]
+    local row = loot and loot.rows and loot.rows[id]
     if not row then return end
     loot.rows[id] = nil
     if not success then return end
@@ -100,7 +131,7 @@ function UI:BossGroup(owner, members, label)
 end
 
 function UI:Keys(menu, dungeon)
-    itemRows(menu, dungeon.keys, true)
+    for _, id in ipairs(dungeon.keys) do itemRow(menu, id, true) end
 end
 
 local function price(lesson)
@@ -310,8 +341,8 @@ function UI:PickLocation(owner, entries)
 end
 
 function UI:Search(query, results)
-    menuAt(self.map, "Dungeons", function(menu)
-        local entries = results or addon.Entries(self.map:GetMapID(), true, query)
+    local entries = results or addon.Entries(self.map:GetMapID(), true, query)
+    local openMenu = menuAt(self.map, "Dungeons", function(menu)
         if #entries == 0 then menu:CreateTitle("No matching dungeons, bosses or items") end
         for _, entry in ipairs(entries) do
             local label = entry.bossIndex and (entry.title .. " · " .. entry.subtitle) or entry.title
@@ -320,6 +351,21 @@ function UI:Search(query, results)
             end)
         end
     end)
+    if query and query ~= "" then
+        trackLootMenu(openMenu, nil, function()
+            local now = addon.Entries(self.map:GetMapID(), true, query)
+            if #entries ~= #now then
+                self:Search(query, now)
+                return
+            end
+            for i, entry in ipairs(now) do
+                if entry.itemID ~= entries[i].itemID then
+                    self:Search(query, now)
+                    return
+                end
+            end
+        end)
+    end
 end
 
 function UI:Attach(map)
