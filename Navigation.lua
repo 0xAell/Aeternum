@@ -1,11 +1,12 @@
 local _, addon = ...
 
-local Navigation = { status = "Choose a dungeon entrance to start guidance." }
+local IDLE = "Choose a location and click Guide to start guidance."
+local Navigation = { status = IDLE, listeners = {} }
 addon.Navigation = Navigation
 
 local UPDATE_INTERVAL = 0.12
 local STEP_RADIUS = 28
-local ENTRANCE_RADIUS = 18
+local ARRIVAL_RADIUS = 18
 local BREADCRUMB_COUNT = 4
 
 local function readable(value)
@@ -74,6 +75,23 @@ local function coordinatesFor(point, axesCache)
     return { continent = continent, x = x, y = y, axes = axes, label = point.label }
 end
 
+local function distanceBetween(a, x, y)
+    return magnitude(a.x - x, a.y - y)
+end
+
+-- Start at the first approach point the player has not passed yet. A point counts
+-- as passed when the player is already closer to the next point than it is.
+local function firstStep(points, playerX, playerY)
+    for index = 1, #points - 1 do
+        local nextPoint = points[index + 1]
+        local fromPoint = distanceBetween(nextPoint, points[index].x, points[index].y)
+        if distanceBetween(nextPoint, playerX, playerY) >= fromPoint then
+            return index
+        end
+    end
+    return #points
+end
+
 local function facingRotation()
     local getCVarBool = C_CVar and C_CVar.GetCVarBool or GetCVarBool
     local rotate = getCVarBool and getCVarBool("rotateMinimap")
@@ -134,7 +152,9 @@ function Navigation:Draw(playerX, playerY, cosine, sine)
     local overlay = self.overlay
     local radius = C_Minimap and C_Minimap.GetViewRadius and C_Minimap.GetViewRadius()
     local hasRadius = isNumber(radius) and radius > 0
-    local halfWidth, halfHeight = width / 2 - 12, height / 2 - 12
+    -- Yards map to pixels across the full minimap; the inset only keeps the arrow inside its edge.
+    local halfWidth, halfHeight = width / 2, height / 2
+    local edgeWidth, edgeHeight = halfWidth - 12, halfHeight - 12
     local east, north = screenDirection(self.points[self.step], playerX, playerY, cosine, sine)
     local distance = magnitude(east, north)
     if distance <= 0 then
@@ -142,8 +162,9 @@ function Navigation:Draw(playerX, playerY, cosine, sine)
         return
     end
     local dirX, dirY = east / distance, north / distance
-    local fraction = hasRadius and math.min(distance / radius, 1) or 1
-    local x, y = dirX * halfWidth * fraction, dirY * halfHeight * fraction
+    local scaleX = hasRadius and halfWidth * distance / radius or edgeWidth
+    local scaleY = hasRadius and halfHeight * distance / radius or edgeHeight
+    local x, y = dirX * math.min(scaleX, edgeWidth), dirY * math.min(scaleY, edgeHeight)
     local wingX, wingY = x - dirX * 7, y - dirY * 7
     local tailX, tailY = x - dirX * 14, y - dirY * 14
     for _, lines in ipairs(overlay.arrowLayers) do
@@ -173,8 +194,26 @@ function Navigation:Draw(playerX, playerY, cosine, sine)
     overlay:Show()
 end
 
+function Navigation:SetStatus(message)
+    if message ~= self.status then
+        self.status = message
+        for _, listener in ipairs(self.listeners) do
+            listener(message)
+        end
+    end
+end
+
+-- listener(status) runs whenever the guidance status text changes.
+function Navigation:AddListener(listener)
+    self.listeners[#self.listeners + 1] = listener
+end
+
 function Navigation:GetStatus()
     return self.status
+end
+
+function Navigation:GetTarget()
+    return self.target
 end
 
 function Navigation:IsActive()
@@ -183,21 +222,21 @@ end
 
 function Navigation:Stop(message)
     self.points, self.step, self.target = nil, nil, nil
-    self.status = message or "Choose a dungeon entrance to start guidance."
     if self.worker then self.worker:Hide() end
     if self.overlay then self.overlay:Hide() end
+    self:SetStatus(message or IDLE)
 end
 
 function Navigation:Pause(message)
-    self.status = message
     if self.overlay then self.overlay:Hide() end
+    self:SetStatus(message)
 end
 
 function Navigation:Update()
     if not self.points then return end
     local insideInstance = IsInInstance and IsInInstance()
     if insideInstance then
-        self:Pause("Entrance guidance is paused inside an instance.")
+        self:Pause("Guidance is paused inside an instance.")
         return
     end
     local continent, playerX, playerY = playerPoint()
@@ -206,26 +245,12 @@ function Navigation:Update()
         return
     end
     if continent ~= self.points[#self.points].continent then
-        self:Pause("Travel to the entrance’s continent to resume guidance.")
+        self:Pause(("Travel to %s’s continent to resume guidance."):format(self.target))
         return
     end
 
     if not self.step then
-        -- A player already near the portal can skip outdoor approach points.
-        local last = self.points[#self.points]
-        if magnitude(last.x - playerX, last.y - playerY) <= STEP_RADIUS then
-            self.step = #self.points
-        else
-            self.step = 1
-            local closest
-            for index = 1, #self.points - 1 do
-                local point = self.points[index]
-                local distance = magnitude(point.x - playerX, point.y - playerY)
-                if not closest or distance < closest then
-                    self.step, closest = index, distance
-                end
-            end
-        end
+        self.step = firstStep(self.points, playerX, playerY)
     end
     local point = self.points[self.step]
     local distance = magnitude(point.x - playerX, point.y - playerY)
@@ -234,8 +259,8 @@ function Navigation:Update()
         point = self.points[self.step]
         distance = magnitude(point.x - playerX, point.y - playerY)
     end
-    if self.step == #self.points and distance <= ENTRANCE_RADIUS then
-        self:Stop("Near " .. self.target .. " entrance.")
+    if self.step == #self.points and distance <= ARRIVAL_RADIUS then
+        self:Stop(("Arrived near %s."):format(self.target))
         return
     end
 
@@ -245,17 +270,18 @@ function Navigation:Update()
         return
     end
     if self.step == #self.points then
-        self.status = ("Entrance bearing  •  %.0f yd"):format(distance)
+        self:SetStatus(("%s  •  %.0f yd"):format(self.target, distance))
     else
-        self.status = ("%s  •  %.0f yd"):format(point.label or ("Approach point " .. self.step), distance)
+        self:SetStatus(("%s  •  %.0f yd"):format(point.label or ("Approach point " .. self.step), distance))
     end
     self:Draw(playerX, playerY, cosine, sine)
 end
 
-function Navigation:Start(dungeon, entrance)
-    entrance = entrance or dungeon and dungeon.entrances and dungeon.entrances[1]
-    if not isMapPoint(entrance) then
-        self:Stop("This dungeon has no entrance coordinates.")
+-- Guides the minimap arrow to destination, a map point { mapID, x, y } that may
+-- list recorded approach waypoints. name labels the destination in the status.
+function Navigation:Start(name, destination)
+    if not isMapPoint(destination) then
+        self:Stop("This location has no map coordinates.")
         return false
     end
     if not (C_Map and C_Map.GetWorldPosFromMapPos and C_Map.GetBestMapForUnit
@@ -265,12 +291,12 @@ function Navigation:Start(dungeon, entrance)
     end
 
     local axesCache, points = {}, {}
-    local goal = coordinatesFor(entrance, axesCache)
+    local goal = coordinatesFor(destination, axesCache)
     if not goal then
-        self:Stop("A minimap position is unavailable for this entrance.")
+        self:Stop("A minimap position is unavailable for this location.")
         return false
     end
-    for _, waypoint in ipairs(entrance.waypoints or {}) do
+    for _, waypoint in ipairs(destination.waypoints or {}) do
         local point = isMapPoint(waypoint) and coordinatesFor(waypoint, axesCache)
         if point and point.continent == goal.continent then
             points[#points + 1] = point
@@ -278,7 +304,7 @@ function Navigation:Start(dungeon, entrance)
     end
     points[#points + 1] = goal
     self.points, self.step = points, nil
-    self.target = dungeon and dungeon.name or "the dungeon"
+    self.target = name or "the destination"
 
     if not self.worker then
         self.worker = CreateFrame("Frame")

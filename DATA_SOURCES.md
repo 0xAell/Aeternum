@@ -20,8 +20,16 @@ The import keeps non-raid dungeon entries with identified bosses and preserves
 the upstream loot order. Unknown entrance locations are omitted. Trainer pins
 use reported NPC coordinates, trainer titles, and recorded class or profession
 lessons. Quest pins show representative starts and turn-ins with map
-coordinates, including known faction variants. They provide reference locations.
-Availability can depend on level, class, race, prerequisites, or game state.
+coordinates, including known faction variants.
+
+Each quest with a pin or a dungeon listing also carries the rules the addon
+checks in game: quest and minimum level, race and class masks, prerequisites,
+exclusive quests, the quests that open or close it, whether it repeats, and
+whether it is a seasonal event. Profession requirements are kept for tooltips.
+Reputation and specialization requirements are not exported. Dungeons also carry
+their group size, key items, authored notes, and quest lists. Race masks pass
+2^32, so whole numbers are written out in full.
+
 The two authored approaches cover the recorded waypoints. Other entrance guidance
 uses a direct bearing.
 
@@ -30,10 +38,13 @@ build 1.60.1.71139. [UiMap export](https://wago.tools/db2/UiMap/csv?build=1.60.1
 
 ## Regenerate
 
-Run these commands from the repository root with Git and Lua 5.1 installed.
+Run these commands from the repository root with Git and LuaJIT (or Lua 5.1).
 
 ```sh
 git clone https://github.com/zmarotrix/NorgannonDB.git ../aeternum-source-norgannondb
 git -C ../aeternum-source-norgannondb checkout d3d144a8b2d32ae7fb6a0390141f35b3aa55d216
-lua tools/import_norgannon.lua ../aeternum-source-norgannondb Data.lua
+luajit tools/import_norgannon.lua ../aeternum-source-norgannondb Data.lua
 ```
+
+`tools/check_data.sh` does the same into a temporary file and fails if the
+result differs from the committed `Data.lua`. CI runs it on every change.
