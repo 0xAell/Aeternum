@@ -17,9 +17,13 @@ The addon reads the bundled file directly and has no runtime data dependency.
   the portal. [Deadmines guide](https://mmonster.co/wow-forever/guides/dungeons/the-deadmines#where-is-the-deadmines-entrance-and-how-to-get-there) · [Ragefire Chasm guide](https://wow.gg/guides/ragefire-chasm#where-to-find-the-ragefire-chasm-entrance)
 
 The import keeps non-raid dungeon entries with identified bosses and preserves
-the upstream loot order. Unknown entrance locations are omitted. Trainer pins
-use reported NPC coordinates, trainer titles, and recorded class or profession
-lessons. Quest pins show representative starts and turn-ins with map
+the upstream loot order. Each dungeon's or wing's primary entrance appears
+first. When its map and coordinates match an entry in the upstream area's
+entrance list, the import includes the other distinct entrances in that list.
+When a dungeon has no valid primary, it uses the area's recorded entrances.
+
+Trainer pins use reported NPC coordinates, trainer titles, and recorded class
+or profession lessons. Quest pins show representative starts and turn-ins with map
 coordinates, including known faction variants. They provide reference locations.
 Availability can depend on level, class, race, prerequisites, or game state.
 The two authored approaches cover the recorded waypoints. Other entrance guidance
