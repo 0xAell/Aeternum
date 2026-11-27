@@ -192,6 +192,11 @@ local function bossPin(frame, index)
             for _, member in ipairs(self.members) do GameTooltip:AddLine(member.name) end
         end
         if self.complete then GameTooltip:AddLine("Encounter complete", .55, .8, .55) end
+        if self.stop.pull then
+            GameTooltip:AddLine("Recorded pull location", .8, .8, .8)
+        elseif self.stop.approximate then
+            GameTooltip:AddLine("Approximate location", .8, .8, .8)
+        end
         GameTooltip:AddLine("Click for loot", 1, .82, 0)
         GameTooltip:Show()
     end)
