@@ -7,6 +7,8 @@ local UPDATE_INTERVAL = 0.12
 local STEP_RADIUS = 28
 local ENTRANCE_RADIUS = 18
 local BREADCRUMB_COUNT = 4
+local MIN_ARROW_OFFSET = 16
+local axesCache = {}
 
 local function readable(value)
     return not issecretvalue or not issecretvalue(value)
@@ -32,13 +34,17 @@ local function pointXY(vector)
 end
 
 local function worldPoint(mapID, x, y)
-    local continent, vector = C_Map.GetWorldPosFromMapPos(mapID, CreateVector2D(x, y))
+    if not (C_Map and C_Map.GetWorldPosFromMapPos and CreateVector2D) then return end
+    local position = CreateVector2D(x, y)
+    if not position then return end
+    local continent, vector = C_Map.GetWorldPosFromMapPos(mapID, position)
     if not isNumber(continent) then return end
     local worldX, worldY = pointXY(vector)
     if worldX then return continent, worldX, worldY end
 end
 
 local function playerPoint()
+    if not (C_Map and C_Map.GetBestMapForUnit and C_Map.GetPlayerMapPosition) then return end
     local mapID = C_Map.GetBestMapForUnit("player")
     if not isNumber(mapID) or mapID <= 0 then return end
     local x, y = pointXY(C_Map.GetPlayerMapPosition(mapID, "player"))
@@ -50,7 +56,7 @@ local function magnitude(x, y)
     return math.sqrt(x * x + y * y)
 end
 
-local function coordinatesFor(point, axesCache)
+local function coordinatesFor(point)
     local continent, x, y = worldPoint(point.mapID, point.x, point.y)
     if not continent then return end
     local axes = axesCache[point.mapID]
@@ -123,6 +129,12 @@ local function makeOverlay()
     return overlay
 end
 
+local function notify(self)
+    if type(self.onChange) == "function" then
+        self.onChange(self.status, self:IsActive())
+    end
+end
+
 function Navigation:Draw(playerX, playerY, cosine, sine)
     if not Minimap or not Minimap.CreateLine or not Minimap:IsVisible() then return end
     local width, height = Minimap:GetSize()
@@ -134,7 +146,8 @@ function Navigation:Draw(playerX, playerY, cosine, sine)
     local overlay = self.overlay
     local radius = C_Minimap and C_Minimap.GetViewRadius and C_Minimap.GetViewRadius()
     local hasRadius = isNumber(radius) and radius > 0
-    local halfWidth, halfHeight = width / 2 - 12, height / 2 - 12
+    -- Use a uniform radius so arrow bearings stay accurate on non-square minimaps.
+    local edgeRadius = math.min(width, height) / 2 - 12
     local east, north = screenDirection(self.points[self.step], playerX, playerY, cosine, sine)
     local distance = magnitude(east, north)
     if distance <= 0 then
@@ -143,7 +156,8 @@ function Navigation:Draw(playerX, playerY, cosine, sine)
     end
     local dirX, dirY = east / distance, north / distance
     local fraction = hasRadius and math.min(distance / radius, 1) or 1
-    local x, y = dirX * halfWidth * fraction, dirY * halfHeight * fraction
+    local tipOffset = math.min(edgeRadius, math.max(MIN_ARROW_OFFSET, edgeRadius * fraction))
+    local x, y = dirX * tipOffset, dirY * tipOffset
     local wingX, wingY = x - dirX * 7, y - dirY * 7
     local tailX, tailY = x - dirX * 14, y - dirY * 14
     for _, lines in ipairs(overlay.arrowLayers) do
@@ -152,16 +166,21 @@ function Navigation:Draw(playerX, playerY, cosine, sine)
         setLine(lines[3], overlay, wingX + dirY * 4, wingY - dirX * 4, x, y)
     end
 
-    -- Show only known approach points, never interpolated sections through terrain.
+    -- Show only known approach points and the entrance itself, never interpolated segments.
     for index, dot in ipairs(overlay.dots) do
         local nextPoint = self.step + index
-        local point = nextPoint < #self.points and self.points[nextPoint]
+        local point = nextPoint <= #self.points and self.points[nextPoint]
         if hasRadius and point then
             local dotEast, dotNorth = screenDirection(point, playerX, playerY, cosine, sine)
             if magnitude(dotEast, dotNorth) < radius then
                 dot:ClearAllPoints()
                 dot:SetPoint("CENTER", overlay, "CENTER",
-                    dotEast / radius * halfWidth, dotNorth / radius * halfHeight)
+                    dotEast / radius * edgeRadius, dotNorth / radius * edgeRadius)
+                if nextPoint == #self.points then
+                    dot:SetColorTexture(1, 0.82, 0.38, 0.92)
+                else
+                    dot:SetColorTexture(0.35, 0.91, 0.91, 0.68)
+                end
                 dot:Show()
             else
                 dot:Hide()
@@ -182,15 +201,17 @@ function Navigation:IsActive()
 end
 
 function Navigation:Stop(message)
-    self.points, self.step, self.target = nil, nil, nil
+    self.points, self.step, self.target, self.elapsed = nil, nil, nil, 0
     self.status = message or "Choose a dungeon entrance to start guidance."
     if self.worker then self.worker:Hide() end
     if self.overlay then self.overlay:Hide() end
+    notify(self)
 end
 
 function Navigation:Pause(message)
     self.status = message
     if self.overlay then self.overlay:Hide() end
+    notify(self)
 end
 
 function Navigation:Update()
@@ -205,51 +226,62 @@ function Navigation:Update()
         self:Pause("Waiting for a readable player map position.")
         return
     end
-    if continent ~= self.points[#self.points].continent then
+    local total = #self.points
+    local last = self.points[total]
+    if continent ~= last.continent then
         self:Pause("Travel to the entrance’s continent to resume guidance.")
         return
     end
 
+    -- Always recognize arrival at the portal even if an earlier approach point was bypassed.
+    local lastDistance = magnitude(last.x - playerX, last.y - playerY)
+    if lastDistance <= ENTRANCE_RADIUS then
+        local arrived = "Near " .. self.target .. " entrance."
+        self:Stop(arrived)
+        if type(print) == "function" then
+            print("Aeternum: " .. arrived)
+        end
+        return
+    end
+
     if not self.step then
-        -- A player already near the portal can skip outdoor approach points.
-        local last = self.points[#self.points]
-        if magnitude(last.x - playerX, last.y - playerY) <= STEP_RADIUS then
-            self.step = #self.points
-        else
-            self.step = 1
-            local closest
-            for index = 1, #self.points - 1 do
-                local point = self.points[index]
-                local distance = magnitude(point.x - playerX, point.y - playerY)
-                if not closest or distance < closest then
-                    self.step, closest = index, distance
-                end
+        -- Pick the nearest point along the route (including the entrance itself) so players
+        -- past an outdoor approach waypoint are never sent backwards.
+        self.step = total
+        local closest = lastDistance
+        for index = 1, total - 1 do
+            local point = self.points[index]
+            local distance = magnitude(point.x - playerX, point.y - playerY)
+            if distance < closest then
+                self.step, closest = index, distance
             end
         end
     end
+
+    -- Advance past any approach point along or ahead of the current step once within reach.
+    for index = total - 1, self.step, -1 do
+        local candidate = self.points[index]
+        if magnitude(candidate.x - playerX, candidate.y - playerY) <= STEP_RADIUS then
+            self.step = index + 1
+            break
+        end
+    end
+
     local point = self.points[self.step]
-    local distance = magnitude(point.x - playerX, point.y - playerY)
-    while self.step < #self.points and distance <= STEP_RADIUS do
-        self.step = self.step + 1
-        point = self.points[self.step]
-        distance = magnitude(point.x - playerX, point.y - playerY)
-    end
-    if self.step == #self.points and distance <= ENTRANCE_RADIUS then
-        self:Stop("Near " .. self.target .. " entrance.")
-        return
-    end
+    local distance = self.step == total and lastDistance or magnitude(point.x - playerX, point.y - playerY)
 
     local cosine, sine = facingRotation()
     if not cosine then
         self:Pause("Waiting for minimap orientation.")
         return
     end
-    if self.step == #self.points then
+    if self.step == total then
         self.status = ("Entrance bearing  •  %.0f yd"):format(distance)
     else
         self.status = ("%s  •  %.0f yd"):format(point.label or ("Approach point " .. self.step), distance)
     end
     self:Draw(playerX, playerY, cosine, sine)
+    notify(self)
 end
 
 function Navigation:Start(dungeon, entrance)
@@ -264,29 +296,28 @@ function Navigation:Start(dungeon, entrance)
         return false
     end
 
-    local axesCache, points = {}, {}
-    local goal = coordinatesFor(entrance, axesCache)
+    local points = {}
+    local goal = coordinatesFor(entrance)
     if not goal then
         self:Stop("A minimap position is unavailable for this entrance.")
         return false
     end
     for _, waypoint in ipairs(entrance.waypoints or {}) do
-        local point = isMapPoint(waypoint) and coordinatesFor(waypoint, axesCache)
+        local point = isMapPoint(waypoint) and coordinatesFor(waypoint)
         if point and point.continent == goal.continent then
             points[#points + 1] = point
         end
     end
     points[#points + 1] = goal
-    self.points, self.step = points, nil
+    self.points, self.step, self.elapsed = points, nil, 0
     self.target = dungeon and dungeon.name or "the dungeon"
 
     if not self.worker then
         self.worker = CreateFrame("Frame")
-        local elapsedSinceUpdate = 0
         self.worker:SetScript("OnUpdate", function(_, elapsed)
-            elapsedSinceUpdate = elapsedSinceUpdate + elapsed
-            if elapsedSinceUpdate >= UPDATE_INTERVAL then
-                elapsedSinceUpdate = 0
+            self.elapsed = (self.elapsed or 0) + elapsed
+            if self.elapsed >= UPDATE_INTERVAL then
+                self.elapsed = 0
                 self:Update()
             end
         end)

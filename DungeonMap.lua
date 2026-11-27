@@ -170,7 +170,10 @@ end
 
 local function drawTiles(view, width, height, tileWidth, tileHeight, textures)
     local availableWidth, availableHeight = view:GetSize()
-    if availableWidth <= 0 or availableHeight <= 0 then return false end
+    if not availableWidth or not availableHeight or availableWidth <= 0 or availableHeight <= 0 then
+        hideTiles(view.tiles, 1)
+        return false
+    end
 
     local scale = math.min(availableWidth / width, availableHeight / height)
     local offsetX = (availableWidth - width * scale) / 2
@@ -192,7 +195,8 @@ local function drawTiles(view, width, height, tileWidth, tileHeight, textures)
         end
         local fileID = textures[index]
         if type(fileID) ~= "number" or fileID <= 0 or tile:SetTexture(fileID) == false then
-            return
+            hideTiles(view.tiles, 1)
+            return nil
         end
 
         tile:ClearAllPoints()
@@ -209,7 +213,7 @@ local function drawArt(view, floor)
     local width, height, tileWidth, tileHeight, textures = getNativeArt(floor.mapID)
     if textures then
         local count = drawTiles(view, width, height, tileWidth, tileHeight, textures)
-        if count then return count end
+        if count ~= nil then return count, false end
     end
     if floor.tileIDs then
         return drawTiles(view, 1002, 668, 256, 256, floor.tileIDs), true
@@ -224,6 +228,22 @@ local function tilesLoaded(view, count)
         end
     end
     return true
+end
+
+local function floorTitle(floor, index, count)
+    if not floor then
+        return "Dungeon map"
+    end
+    if floor.name then
+        if count > 1 then
+            return ("%s (%d/%d)"):format(floor.name, index, count)
+        end
+        return floor.name
+    end
+    if count > 1 then
+        return ("Floor %d / %d"):format(index, count)
+    end
+    return "Dungeon map"
 end
 
 function DungeonMap.Create(parent)
@@ -269,12 +289,25 @@ function DungeonMap.Create(parent)
     worldMap:SetText("World Map")
     worldMap:SetScript("OnClick", function()
         local floor = panel.floors[panel.floorIndex]
-        if floor and floor.mapID and WorldMapFrame and WorldMapFrame.SetMapID
-            and not (InCombatLockdown and InCombatLockdown()) then
-            ShowUIPanel(WorldMapFrame)
-            WorldMapFrame:SetMapID(floor.mapID)
+        if not (floor and floor.mapID and WorldMapFrame and WorldMapFrame.SetMapID) then
+            return
         end
+        if InCombatLockdown and InCombatLockdown() then
+            if type(print) == "function" then
+                print("Aeternum: cannot open the world map during combat.")
+            end
+            return
+        end
+        ShowUIPanel(WorldMapFrame)
+        WorldMapFrame:SetMapID(floor.mapID)
     end)
+
+    local function cancelLoadTimer()
+        if view.loadTimer then
+            view.loadTimer:Cancel()
+            view.loadTimer = nil
+        end
+    end
 
     local function showUnavailable()
         hideTiles(view.tiles, 1)
@@ -284,10 +317,7 @@ function DungeonMap.Create(parent)
     end
 
     local function render()
-        if view.loadTimer then
-            view.loadTimer:Cancel()
-            view.loadTimer = nil
-        end
+        cancelLoadTimer()
         local count = #panel.floors
         local floor = panel.floors[panel.floorIndex]
         previous:SetShown(count > 1)
@@ -297,11 +327,11 @@ function DungeonMap.Create(parent)
         local hasWorldMap = floor and type(floor.mapID) == "number" and WorldMapFrame
             and type(WorldMapFrame.SetMapID) == "function" and type(ShowUIPanel) == "function"
         worldMap:SetShown(hasWorldMap and true or false)
-        title:SetText(floor and (floor.name or (count > 1 and "Floor " .. panel.floorIndex)) or "Dungeon map")
+        title:SetText(floorTitle(floor, panel.floorIndex, count))
 
         local drawn, isReference
         if floor then drawn, isReference = drawArt(view, floor) end
-        if drawn then
+        if type(drawn) == "number" and drawn > 0 then
             empty:Hide()
             caption:SetText(isReference and "Legacy client reference" or "")
             if C_Timer and C_Timer.NewTimer and not tilesLoaded(view, drawn) then
@@ -313,6 +343,10 @@ function DungeonMap.Create(parent)
                     end
                 end)
             end
+        elseif drawn == false then
+            -- Frame has not received layout bounds yet; wait for OnSizeChanged without flashing an error.
+            caption:SetText("")
+            empty:Hide()
         else
             showUnavailable()
         end
@@ -331,11 +365,12 @@ function DungeonMap.Create(parent)
         render()
     end)
     nextFloor:SetScript("OnClick", function()
-        panel.floorIndex = math.min(#panel.floors, panel.floorIndex + 1)
+        panel.floorIndex = math.min(math.max(1, #panel.floors), panel.floorIndex + 1)
         render()
     end)
     view:SetScript("OnSizeChanged", render)
     panel:SetScript("OnShow", render)
+    panel:SetScript("OnHide", cancelLoadTimer)
     render()
     return panel
 end

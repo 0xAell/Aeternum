@@ -8,16 +8,18 @@ It runs with the bundled database and the game’s own interface and artwork.
 1. Put the `Aeternum` folder in `World of Warcraft/_forever_/Interface/AddOns/`.
    `Aeternum.toc` should be directly inside that folder.
 2. Restart WoW, open the world map with **M**, and click **Aeternum**. You can
-   also open the panel with `/aeternum`.
-3. Search or filter the current map for dungeon entrances, class trainers,
-   profession trainers, and quest starts and turn-ins. Select a row to highlight
-   its location. Map pins at the same location share a tooltip.
+   also open the panel with `/aeternum` (or `/aeternum <search>`).
+3. Search (including multi-word queries and boss names) or filter the current
+   map for dungeon entrances, class trainers, profession trainers, and quest
+   starts and turn-ins. Select a row to highlight its location. Map pins at the
+   same location share a tooltip; right-click a stacked pin to cycle entries.
 4. Choose a dungeon pin or find a dungeon under **All dungeons**. Browse its
-   reference floors, switch bosses to view their loot, and click an item to
-   inspect it in game.
-5. Choose an entrance and click **Guide me**. The minimap arrow points to the
-   next recorded approach point or the entrance. Stop guidance with the **Stop**
-   button or `/aeternum stop`.
+   reference floors, switch bosses to view their loot, hover items for tooltips,
+   and click (or Shift/Ctrl-click) an item to inspect or link it in game.
+5. Choose an entrance and click **Guide me** (or **Show zone** to jump the world
+   map to its entrance). The minimap arrow points to the next recorded approach
+   point or the entrance. Stop guidance with the **Stop** button or
+   `/aeternum stop`.
 
 ## Seed coverage
 

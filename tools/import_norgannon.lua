@@ -16,7 +16,13 @@ local function keys(tableToSort)
     for key in pairs(tableToSort or {}) do
         result[#result + 1] = key
     end
-    table.sort(result)
+    table.sort(result, function(a, b)
+        local typeA, typeB = type(a), type(b)
+        if typeA == typeB then
+            return a < b
+        end
+        return typeA < typeB
+    end)
     return result
 end
 
@@ -265,17 +271,46 @@ local function importQuests()
     return quests
 end
 
+local reservedKeywords = {
+    ["and"] = true, ["break"] = true, ["do"] = true, ["else"] = true, ["elseif"] = true,
+    ["end"] = true, ["false"] = true, ["for"] = true, ["function"] = true, ["if"] = true,
+    ["in"] = true, ["local"] = true, ["nil"] = true, ["not"] = true, ["or"] = true,
+    ["repeat"] = true, ["return"] = true, ["then"] = true, ["true"] = true, ["until"] = true,
+    ["while"] = true,
+}
+
+local function isSequence(tbl)
+    local count, max = 0, 0
+    for key in pairs(tbl) do
+        if type(key) ~= "number" or key < 1 or key % 1 ~= 0 then
+            return false
+        end
+        count = count + 1
+        if key > max then
+            max = key
+        end
+    end
+    return count == max
+end
+
 local function literal(value)
     local kind = type(value)
     if kind == "string" then return string.format("%q", value) end
     if kind == "number" then return string.format("%.10g", value) end
+    if kind == "boolean" then return value and "true" or "false" end
     assert(kind == "table", "Unexpected literal type: " .. kind)
     local parts = {}
-    for _, key in ipairs(keys(value)) do
-        if type(key) == "string" then
-            parts[#parts + 1] = key .. "=" .. literal(value[key])
-        else
-            parts[#parts + 1] = literal(value[key])
+    if isSequence(value) then
+        for index = 1, #value do
+            parts[#parts + 1] = literal(value[index])
+        end
+    else
+        for _, key in ipairs(keys(value)) do
+            if type(key) == "string" and key:match("^[%a_][%w_]*$") and not reservedKeywords[key] then
+                parts[#parts + 1] = key .. "=" .. literal(value[key])
+            else
+                parts[#parts + 1] = "[" .. literal(key) .. "]=" .. literal(value[key])
+            end
         end
     end
     return "{" .. table.concat(parts, ",") .. "}"
