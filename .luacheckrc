@@ -16,10 +16,10 @@ read_globals = {
     "GetCursorPosition", "GetInstanceInfo", "GetSubZoneText", "GetLocale", "GetMoneyString", "hooksecurefunc",
     "MAP_CANVAS_MOUSE_WHEEL_ZOOM_BEHAVIOR_FULL",
     "C_AddOns", "C_CVar", "C_Item", "C_Map", "C_Minimap", "C_QuestLog", "C_Timer",
-    "CreateFrame", "CreateFromMixins", "CreateVector2D", "DEFAULT_CHAT_FRAME", "GameMenuEscPriority", "GameTooltip",
+    "CreateFrame", "CreateFromMixins", "CreateVector2D", "DEFAULT_CHAT_FRAME", "GameTooltip",
     "GetPlayerFacing", "HandleModifiedItemClick", "InCombatLockdown", "IsInInstance", "IsModifiedClick",
-    "MapCanvasDataProviderMixin", "MapCanvasPinMixin", "Minimap", "Mixin", "RegisterGameMenuEscHandler", "SetItemRef",
-    "ToggleWorldMap", "UIParent", "UISpecialFrames", "UnitClass", "UnitFactionGroup", "UnitLevel",
+    "MapCanvasDataProviderMixin", "MapCanvasPinMixin", "Minimap", "Mixin", "SetItemRef",
+    "ToggleWorldMap", "UIParent", "UnitClass", "UnitFactionGroup", "UnitLevel",
     "UnitQuestTrivialLevelRange", "UnitRace", "WorldMapFrame", "canaccesstable", "issecretvalue",
     "strtrim", "wipe",
 }

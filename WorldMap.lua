@@ -123,9 +123,11 @@ end
 
 local function gridSize(map)
     local width, height = map.ScrollContainer:GetSize()
+    width = addon.IsReadableNumber(width) and width or 0
+    height = addon.IsReadableNumber(height) and height or 0
     local rect = map:GetMapID() and map.ScrollContainer.zoomLevels and map:GetViewRect()
-    local range = rect and rect:GetWidth() or 1
-    local scale = range > 0 and math.max(1, math.floor(2 / range + .5) / 2) or 1
+    local range = rect and rect:GetWidth()
+    local scale = addon.IsReadableNumber(range) and range > 0 and math.max(1, math.floor(2 / range + .5) / 2) or 1
     return math.max(1, math.floor(width * scale / CELL_SIZE)), math.max(1, math.floor(height * scale / CELL_SIZE))
 end
 
@@ -207,10 +209,15 @@ function addon.RefreshMap()
     if provider then provider:RefreshAllData() end
 end
 
+local function refreshPin(pin)
+    pin:UpdateStyle()
+    if GameTooltip and GameTooltip:IsOwned(pin) then pin:OnMouseEnter() end
+end
+
 function addon.UpdateRoutePins()
     if not provider or not provider:GetMap():IsShown() then return end
     for _, template in ipairs({POINT, ENTRANCE}) do
-        for pin in provider:GetMap():EnumeratePinsByTemplate(template) do pin:UpdateStyle() end
+        for pin in provider:GetMap():EnumeratePinsByTemplate(template) do refreshPin(pin) end
     end
 end
 
@@ -227,10 +234,11 @@ function addon.RefreshQuestStates()
     for i, entry in ipairs(entries) do
         if before[i] ~= entry then provider:Layout(entries) return end
     end
-    for pin in map:EnumeratePinsByTemplate(POINT) do pin:UpdateStyle() end
+    for pin in map:EnumeratePinsByTemplate(POINT) do refreshPin(pin) end
 end
 
 function addon.FocusLocation(entry)
+    if not provider then return end
     local map = provider:GetMap()
     if focus then map:RemovePin(focus) end
     if marked then

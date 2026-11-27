@@ -8,6 +8,7 @@ local UPDATE_INTERVAL = 0.12
 local STEP_RADIUS = 28
 local ARRIVAL_RADIUS = 18
 local BREADCRUMB_COUNT = 4
+local sharedAxesCache = {}
 
 local function readable(value)
     return not issecretvalue or not issecretvalue(value)
@@ -97,7 +98,7 @@ local function facingRotation()
     local ignored = C_Minimap and C_Minimap.IsRotateMinimapIgnored and C_Minimap.IsRotateMinimapIgnored()
     if not readable(ignored) then return end
     if ignored then return 1, 0 end
-    local facing = GetPlayerFacing()
+    local facing = GetPlayerFacing and GetPlayerFacing()
     if isNumber(facing) then return math.cos(facing), math.sin(facing) end
 end
 
@@ -284,15 +285,15 @@ local function makeRoute(name, destination, dungeon)
         return nil, "This client does not provide the map APIs for guidance."
     end
 
-    local axesCache, points = {}, {}
-    local goal = coordinatesFor(destination, axesCache)
+    local points = {}
+    local goal = coordinatesFor(destination, sharedAxesCache)
     if not goal then
         return nil, "A minimap position is unavailable for this location."
     end
     local saved = {name=name, mapID=destination.mapID, x=destination.x, y=destination.y,
         dungeon=type(dungeon) == "string" and addon.floorData[dungeon] and dungeon or nil}
     for _, waypoint in ipairs(type(destination.waypoints) == "table" and destination.waypoints or {}) do
-        local point = isMapPoint(waypoint) and coordinatesFor(waypoint, axesCache)
+        local point = isMapPoint(waypoint) and coordinatesFor(waypoint, sharedAxesCache)
         if point and point.continent == goal.continent then
             points[#points + 1] = point
             saved.waypoints = saved.waypoints or {}

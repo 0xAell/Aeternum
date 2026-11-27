@@ -13,6 +13,7 @@ frame:SetScript("OnEvent", function(_, event, arg, second, _, _, success)
         if arg == name or arg == "Blizzard_WorldMap" then addon.AttachMap() end
     elseif event == "PLAYER_LOGIN" or event == "PLAYER_ENTERING_WORLD" then
         addon.Trainers:Invalidate()
+        addon.Quests:Invalidate()
         if event == "PLAYER_ENTERING_WORLD" then addon.DungeonMap:NewVisit() end
         if addon.AttachMap() then
             addon.DungeonMap:Close()
@@ -25,7 +26,7 @@ frame:SetScript("OnEvent", function(_, event, arg, second, _, _, success)
         if event == "BOSS_KILL" or (addon.IsReadableNumber(success) and success == 1) then
             addon.DungeonMap:RecordKill(arg)
         end
-    elseif event == "ITEM_DATA_LOAD_RESULT" then
+    elseif event == "ITEM_DATA_LOAD_RESULT" or event == "GET_ITEM_INFO_RECEIVED" then
         addon.UI:ItemLoaded(arg, second)
     elseif event == "TRAINER_SHOW" or event == "TRAINER_UPDATE" or event == "TRAINER_SERVICE_INFO_NAME_UPDATE" then
         addon.Trainers:Observe()
@@ -53,7 +54,8 @@ for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "PLAYER_ENTERING_WORLD",
     "SKILL_LINES_CHANGED", "LEARNED_SPELL_IN_SKILL_LINE", "SPELLS_CHANGED", "QUEST_LOG_UPDATE", "QUEST_ACCEPTED",
     "QUEST_TURNED_IN", "QUEST_REMOVED", "PLAYER_LEVEL_UP", "ZONE_CHANGED_INDOORS", "ZONE_CHANGED",
     "BOSS_KILL", "ENCOUNTER_END", "TRAINER_SERVICE_INFO_NAME_UPDATE", "QUEST_WATCH_LIST_CHANGED",
-    "SUPER_TRACKING_CHANGED", "QUEST_POI_UPDATE", "CVAR_UPDATE", "ITEM_DATA_LOAD_RESULT"}) do
+    "SUPER_TRACKING_CHANGED", "QUEST_POI_UPDATE", "CVAR_UPDATE", "ITEM_DATA_LOAD_RESULT",
+    "GET_ITEM_INFO_RECEIVED"}) do
     pcall(frame.RegisterEvent, frame, event)
 end
 
@@ -68,7 +70,12 @@ SlashCmdList.AETERNUM = function(message)
         DEFAULT_CHAT_FRAME:AddMessage(active and "Directions stopped." or "Directions are not active.")
         return
     end
-    if command == "reset" then addon.ResetSettings(); addon.RefreshMap(); return end
+    if command == "reset" then
+        addon.ResetSettings()
+        addon.RefreshMap()
+        DEFAULT_CHAT_FRAME:AddMessage("Aeternum map filters reset.")
+        return
+    end
     local help = "Use /aeternum to open the map, /aeternum <name> to search, or /aeternum stop to end directions."
     if command == "help" or command == "?" then
         DEFAULT_CHAT_FRAME:AddMessage(help)
@@ -80,7 +87,8 @@ SlashCmdList.AETERNUM = function(message)
         if #results == 0 then DEFAULT_CHAT_FRAME:AddMessage(help); return end
         command, query = "dungeons", text
     end
-    if not addon.AttachMap() and C_AddOns then C_AddOns.LoadAddOn("Blizzard_WorldMap") end
+    if not addon.settings then addon.LoadSettings() end
+    if not addon.AttachMap() and C_AddOns and C_AddOns.LoadAddOn then C_AddOns.LoadAddOn("Blizzard_WorldMap") end
     if not addon.AttachMap() then return end
     if not WorldMapFrame:IsShown() then
         if InCombatLockdown() then DEFAULT_CHAT_FRAME:AddMessage("Open the map after combat."); return end
