@@ -1,7 +1,7 @@
 -- SPDX-License-Identifier: GPL-3.0-only
 -- Run from the repository root with Lua 5.1 (or LuaJIT) and the pinned source checkout.
-local source, output = ...
-assert(source and output, "Usage: lua tools/import_norgannon.lua SOURCE_DIR Data.lua")
+local source, output, entranceFile = ...
+assert(source and output and entranceFile, "Usage: lua tools/import_norgannon.lua SOURCE_DIR Data.lua ENTRANCES_LUA")
 
 local SOURCE_COMMIT = "d3d144a8b2d32ae7fb6a0390141f35b3aa55d216"
 
@@ -113,6 +113,7 @@ local function usableQuest(id)
 end
 
 local hordeVariants = db.variants and db.variants.faction and db.variants.faction.Horde or {}
+local questContacts = {}
 
 local function questPins(id, quest, role, field)
     local rows = {}
@@ -132,11 +133,13 @@ local function questPins(id, quest, role, field)
                         for _, point in ipairs(positions(spawns)) do
                             if not used[point.mapID] then
                                 used[point.mapID] = true
-                                local key = string.format("%d:%.6f:%.6f", point.mapID, point.x, point.y)
+                                local contact = (kind == "npcs" and "n" or "o") .. sourceID
+                                questContacts[contact] = sourceRecord.name or ""
+                                local key = string.format("%d:%.6f:%.6f:%s", point.mapID, point.x, point.y, contact)
                                 if rows[key] then
                                     rows[key].faction = nil
                                 else
-                                    point.id, point.role, point.faction = id, role, faction
+                                    point.id, point.role, point.faction, point.contact = id, role, faction, contact
                                     rows[key] = point
                                 end
                             end
@@ -173,6 +176,82 @@ local function importQuestPins(quests)
     return pins
 end
 
+-- Representative outdoor sites for the one quest the player is tracking.
+-- Objective indexes are the client's ordering, so completed steps can disappear.
+local function objectiveOrder(obj)
+    if obj.order then return obj.order end
+    local order = {}
+    for _, kind in ipairs({"npcs", "objects", "items", "killCredit", "spells"}) do
+        for index in ipairs(obj[kind] or {}) do order[#order + 1] = {kind, index} end
+    end
+    if obj.explore or obj.areaTriggers then order[#order + 1] = {"explore", 1} end
+    if #order == 1 then return order end
+    return {}
+end
+
+local function objectiveSources(obj, kind, i, horde, add)
+    local target = obj[kind] and obj[kind][i]
+    local function creatureOrObject(typeName, id)
+        if not id then return end
+        local row = entity(typeName, id)
+        if not row or not row.name then return end
+        local variant = horde and (hordeVariants[typeName] or {})[id]
+        local contact = (typeName == "npcs" and "n" or "o") .. id
+        for _, point in ipairs(positions(variant and variant.spawns or row.spawns)) do
+            add(point, contact, row.name)
+        end
+    end
+    if (kind == "npcs" or kind == "objects") and target then
+        creatureOrObject(kind, target.id)
+    elseif kind == "killCredit" and target then
+        for _, id in ipairs(target.npcs or {}) do creatureOrObject("npcs", id) end
+    elseif kind == "items" and target then
+        local item = db:Peek("items", target.id)
+        local drops = item and item.drops
+        if not drops then return end
+        local npcs, objects = keys(drops.npcs), keys(drops.objects)
+        -- A world-drop material has no useful single quest location.
+        if #npcs + #objects > 12 then return end
+        for _, id in ipairs(npcs) do creatureOrObject("npcs", id) end
+        for _, id in ipairs(objects) do creatureOrObject("objects", id) end
+    elseif kind == "explore" or kind == "areaTriggers" then
+        for _, point in ipairs(positions(obj.explore and obj.explore.spawns)) do add(point, "z0") end
+        for _, id in ipairs(obj.areaTriggers or {}) do
+            local trigger = db:Peek("areaTriggers", id)
+            for _, point in ipairs(positions(trigger and trigger.spawns)) do add(point, "z0") end
+        end
+    end
+end
+
+local function importObjectives(quests)
+    local packed = {}
+    for id in pairs(quests) do
+        local quest = usableQuest(id)
+        local variant = (hordeVariants.quests or {})[id]
+        local sites = {}
+        for _, faction in ipairs({"A", "H"}) do
+            local horde = faction == "H"
+            local obj = horde and variant and variant.objectives or quest.objectives or {}
+            for index, step in ipairs(objectiveOrder(obj)) do
+                local counts, seen = {}, {}
+                objectiveSources(obj, step[1], step[2], horde, function(point, contact, name)
+                    local x, y = math.floor(point.x * 10000 + .5), math.floor(point.y * 10000 + .5)
+                    local site = ("%d:%d:%d,%d%s"):format(index, point.mapID, x, y, contact)
+                    if seen[site] or (counts[point.mapID] or 0) >= 3 then return end
+                    seen[site] = true
+                    counts[point.mapID] = (counts[point.mapID] or 0) + 1
+                    if sites[site] then sites[site] = "" else sites[site] = faction end
+                    if name then questContacts[contact] = name end
+                end)
+            end
+        end
+        local entries = {}
+        for _, site in ipairs(keys(sites)) do entries[#entries + 1] = site .. sites[site] .. ";" end
+        if #entries > 0 then packed[id] = table.concat(entries) end
+    end
+    return packed
+end
+
 -- Dungeons -------------------------------------------------------------------
 
 local function dungeonName(row)
@@ -194,29 +273,97 @@ local approaches = {
     },
 }
 
-local function entrances(id, row)
-    local result = {}
-    if row.entrance then
-        local entrance = coord(row.entrance.area, row.entrance.x, row.entrance.y)
-        if entrance then
-            local approach = approaches[id]
-            if approach and approach.waypoint.mapID == entrance.mapID then
-                entrance.label = approach.label
-                entrance.waypoints = {approach.waypoint}
-            end
-            result[1] = entrance
+-- Exterior landmarks and portals recorded on the Forever zone maps. These
+-- supply only entrances missing from the pinned database. See DATA_SOURCES.md.
+local foreverDoors = {
+    ["alcaz-prison"] = {mapID=1445, x=.755, y=.137, label="Prison cellar",
+        waypoints={{mapID=1445, x=.746, y=.146, label="Prison building"}},
+        hint="Enter the prison building and take the stairs down to the cellar."},
+    ["blackmaw-hold"] = {mapID=1447, x=.349, y=.238, label="Blackmaw tunnel portal",
+        waypoints={{mapID=1447, x=.387, y=.332, label="Tunnel mouth"}},
+        hint="Enter the furbolg tunnel and follow it northwest to the portal."},
+    ["kroldok-stronghold"] = {mapID=2548, x=.375, y=.379, label="Stronghold cave",
+        waypoints={{mapID=2548, x=.391, y=.388, label="Meeting stone"}},
+        hint="From the meeting stone, take the cave west of the fortress gates."},
+    ["shapers-terrace"] = {mapID=1449, x=.482, y=.057, label="Titan doorway",
+        waypoints={{mapID=1449, x=.484, y=.086, label="Stone staircase"}},
+        hint="Climb the stone staircase above Marshal's Refuge to the titan doorway."},
+}
+
+-- Wing portals from the pinned Forever Dungeon Routes Entrances.lua, derived
+-- from named Classic AreaTriggers on these same outdoor zone maps.
+local reference, wingPortals = {}, {}
+assert(loadfile(entranceFile))("", reference)
+for _, family in pairs(reference.WingPortals) do
+    for _, portal in ipairs(family) do
+        local id = portal.key:gsub("^diremaul_", "dm-"):gsub("_", "-")
+        local doors = wingPortals[id] or {}
+        wingPortals[id] = doors
+        doors[#doors + 1] = {mapID=family.map, x=portal.x, y=portal.y}
+    end
+end
+
+local function findEntrance(entrances, point)
+    for index, entrance in ipairs(entrances) do
+        if entrance.mapID == point.mapID and entrance.x == point.x and entrance.y == point.y then
+            return index
         end
     end
-    if #result == 0 then
-        local fallback = db.dungeons[row.area]
-        for _, rowEntrance in ipairs((fallback and fallback.entrances) or {}) do
-            local entrance = coord(rowEntrance[1], rowEntrance[2], rowEntrance[3])
-            if entrance then
-                result[#result + 1] = entrance
-            end
+end
+
+local function dungeonEntrances(id, row)
+    local entrances = {}
+    local area = db.dungeons[row.area]
+    for _, entry in ipairs(area and area.entrances or {}) do
+        local point = coord(entry[1], entry[2], entry[3])
+        if point and not findEntrance(entrances, point) then
+            entrances[#entrances + 1] = point
         end
     end
-    return result
+
+    local entry = row.entrance
+    local primary = entry and coord(entry.area, entry.x, entry.y)
+    local portals = wingPortals[id]
+    if portals then
+        for _, door in ipairs(portals) do
+            if door.mapID == 1420 and primary and primary.mapID == door.mapID then
+                door.waypoints = {{mapID=primary.mapID, x=primary.x, y=primary.y, label="Monastery entrance"}}
+                door.hint = "Enter the monastery grounds and follow the marker to the wing portal."
+            end
+        end
+        return portals
+    end
+    if not primary then
+        if #entrances == 0 and foreverDoors[id] then return {foreverDoors[id]} end
+        return entrances
+    end
+
+    local approach = approaches[id]
+    if approach and approach.waypoint.mapID == primary.mapID then
+        primary.label = approach.label
+        primary.waypoints = {approach.waypoint}
+    end
+
+    -- An area can describe several wings. Only add its other entrances when
+    -- the list also identifies this dungeon's primary on the same map.
+    local match = findEntrance(entrances, primary)
+    if not match then return {primary} end
+    table.remove(entrances, match)
+    table.insert(entrances, 1, primary)
+    return entrances
+end
+
+-- Forever's new encounters also have named equipment in NPC drop records.
+-- Keep a direct drop only when the item independently names the same NPC.
+local function extraDrops(npc, npcID, seen, loot)
+    for _, id in ipairs(keys(npc.drops)) do
+        local item = not seen[id] and db:Peek("items", id)
+        if item and (item.class == 2 or item.class == 4 or item.class == 9)
+            and item.drops and item.drops.npcs and item.drops.npcs[npcID] ~= nil and itemName(id) then
+            loot[#loot + 1] = id
+            seen[id] = true
+        end
+    end
 end
 
 local function bosses(row)
@@ -232,6 +379,7 @@ local function bosses(row)
                     boss.loot[#boss.loot + 1] = itemID
                 end
             end
+            if row.forever then extraDrops(sourceNPC, sourceBoss.id, seen, boss.loot) end
             result[#result + 1] = boss
         end
     end
@@ -245,7 +393,7 @@ local function importDungeons(quests)
         local name = dungeonName(row)
         if name and not row.raid and #(row.bosses or {}) > 0 then
             local dungeon = {
-                id = id, name = name, entrances = entrances(id, row), bosses = bosses(row),
+                id = id, name = name, entrances = dungeonEntrances(id, row), bosses = bosses(row),
                 levelMin = row.levels and row.levels.min, levelMax = row.levels and row.levels.max,
                 size = row.size, note = row.note, keys = {}, quests = {},
             }
@@ -290,6 +438,7 @@ local professionTokens = {
 
 local function classifyTrainer(title)
     local lower = title:lower()
+    if lower == "weapon master" then return "weapon", "Weapon Master" end
     for _, key in ipairs(keys(classes)) do
         if lower:find(classes[key]:lower(), 1, true) then
             return "class", classes[key]
@@ -330,6 +479,9 @@ local function importTrainers()
     for id in pairs(db.categories.trainer.npcs) do candidates[id] = true end
     for id in pairs(inferredClass) do candidates[id] = true end
     for id in pairs(inferredProfession) do candidates[id] = true end
+    local classTokens, skillIDs = {}, {}
+    for token, name in pairs(classes) do classTokens[name] = token end
+    for skillID, name in pairs(professions) do skillIDs[name] = skillID end
     for _, id in ipairs(keys(candidates)) do
         local npc = entity("npcs", id)
         if npc and npc.name then
@@ -343,12 +495,47 @@ local function importTrainers()
                 for _, point in ipairs(positions(npc.spawns)) do
                     point.id, point.name, point.kind = id, npc.name, kind
                     point.specialty, point.faction = specialty, factions[npc.reaction]
+                    point.classToken, point.skillID = classTokens[specialty], skillIDs[specialty]
                     trainers[#trainers + 1] = point
                 end
             end
         end
     end
     return trainers
+end
+
+-- A lesson can cost different amounts at different NPCs. Keep the price on
+-- the NPC assignment and store common spell details only once.
+local function importLessons(trainers)
+    local spells, offers, packed = {}, {}, {}
+    local function offer(npcID, id, price, name, rank, level, skill, need, faction)
+        if not offers[npcID] then return end
+        spells[id] = table.concat({name, rank or "", level or "", skill or "", need or "", faction or ""}, "|")
+        offers[npcID][id] = price or ""
+    end
+    for _, npc in ipairs(trainers) do offers[npc.id] = {} end
+    for _, class in ipairs(keys(db.training)) do
+        for id, spell in pairs(db.training[class]) do
+            if not spell.pet and not spell.how then
+                for _, npcID in ipairs(spell.trainers or {}) do
+                    offer(npcID, id, spell.cost, spell.name, spell.rank, spell.level, nil, nil, spell.faction)
+                end
+            end
+        end
+    end
+    for id, recipe in pairs(db.recipes) do
+        for npcID, cost in pairs(recipe.trainers or {}) do
+            offer(npcID, id, cost, recipe.name, nil, nil, recipe.skill, recipe.learn)
+        end
+    end
+    for npcID, assignments in pairs(offers) do
+        local parts = {}
+        for _, id in ipairs(keys(assignments)) do
+            parts[#parts + 1] = id .. ":" .. assignments[id]
+        end
+        if #parts > 0 then packed[npcID] = table.concat(parts, ";") end
+    end
+    return spells, packed
 end
 
 -- Packing --------------------------------------------------------------------
@@ -397,7 +584,7 @@ local function packQuest(quest)
     return table.concat(fields, "|")
 end
 
--- One string per map: "<questID><s|t><A|H|><x>,<y>;" with x and y in 1/10000ths.
+-- Coordinates are in ten-thousandths. Contacts use n<NPC ID> or o<object ID>.
 local function packPins(pins)
     local byMap = {}
     for _, pin in ipairs(pins) do
@@ -406,8 +593,9 @@ local function packPins(pins)
             parts = {}
             byMap[pin.mapID] = parts
         end
-        parts[#parts + 1] = string.format("%d%s%s%d,%d;", pin.id, pin.role == "start" and "s" or "t",
-            FACTION_CODES[pin.faction] or "", math.floor(pin.x * 10000 + .5), math.floor(pin.y * 10000 + .5))
+        parts[#parts + 1] = string.format("%d%s%s%d,%d%s;", pin.id, pin.role == "start" and "s" or "t",
+            FACTION_CODES[pin.faction] or "", math.floor(pin.x * 10000 + .5), math.floor(pin.y * 10000 + .5),
+            pin.contact)
     end
     local packed = {}
     for mapID, parts in pairs(byMap) do
@@ -445,6 +633,7 @@ local quests = {}
 local questPinRows = importQuestPins(quests)
 local dungeons = importDungeons(quests)
 local trainers = importTrainers()
+local objectiveRows = importObjectives(quests)
 
 local usedProfessions = {}
 for _, quest in pairs(quests) do
@@ -477,13 +666,19 @@ file:write("-- SPDX-License-Identifier: GPL-3.0-only\n",
     "local _, addon = ...\n\naddon.Data = {\n")
 section("dungeons", dungeons)
 section("trainers", trainers)
+local lessons, offers = importLessons(trainers)
+map("lessons", lessons)
+map("offers", offers)
 local packedQuests = {}
 for id, quest in pairs(quests) do
     packedQuests[id] = packQuest(quest)
 end
 map("questPins", packPins(questPinRows))
+map("objectiveSites", objectiveRows)
+map("questContacts", questContacts)
 map("quests", packedQuests)
 map("items", items)
+for id, name in pairs(professions) do usedProfessions[id] = name end
 map("professions", usedProfessions)
 map("raceMasks", db.enums.raceMaskById)
 local classMasks = {}

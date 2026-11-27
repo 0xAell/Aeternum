@@ -1,7 +1,7 @@
 local _, addon = ...
 
-local IDLE = "Choose a location and click Guide to start guidance."
-local Navigation = { status = IDLE, listeners = {} }
+local IDLE = "No active directions."
+local Navigation = { status = IDLE }
 addon.Navigation = Navigation
 
 local UPDATE_INTERVAL = 0.12
@@ -13,13 +13,10 @@ local function readable(value)
     return not issecretvalue or not issecretvalue(value)
 end
 
-local function isNumber(value)
-    return readable(value) and type(value) == "number"
-        and value == value and math.abs(value) < math.huge
-end
+local isNumber = addon.IsReadableNumber
 
 local function isMapPoint(point)
-    return type(point) == "table" and isNumber(point.mapID) and point.mapID > 0
+    return type(point) == "table" and isNumber(point.mapID) and point.mapID > 0 and point.mapID % 1 == 0
         and isNumber(point.x) and point.x >= 0 and point.x <= 1
         and isNumber(point.y) and point.y >= 0 and point.y <= 1
 end
@@ -72,7 +69,8 @@ local function coordinatesFor(point, axesCache)
         }
         axesCache[point.mapID] = axes
     end
-    return { continent = continent, x = x, y = y, axes = axes, label = point.label }
+    local label = type(point.label) == "string" and point.label or nil
+    return { continent = continent, x = x, y = y, axes = axes, label = label }
 end
 
 local function distanceBetween(a, x, y)
@@ -93,8 +91,12 @@ local function firstStep(points, playerX, playerY)
 end
 
 local function facingRotation()
-    local rotate = C_CVar.GetCVarBool("rotateMinimap")
-    if not readable(rotate) or not rotate or C_Minimap.IsRotateMinimapIgnored() then return 1, 0 end
+    local rotate = C_CVar and C_CVar.GetCVarBool and C_CVar.GetCVarBool("rotateMinimap")
+    if not readable(rotate) then return end
+    if not rotate then return 1, 0 end
+    local ignored = C_Minimap and C_Minimap.IsRotateMinimapIgnored and C_Minimap.IsRotateMinimapIgnored()
+    if not readable(ignored) then return end
+    if ignored then return 1, 0 end
     local facing = GetPlayerFacing()
     if isNumber(facing) then return math.cos(facing), math.sin(facing) end
 end
@@ -107,40 +109,30 @@ local function screenDirection(point, playerX, playerY, cosine, sine)
     return east * cosine + north * sine, north * cosine - east * sine
 end
 
-local function setLine(line, overlay, x1, y1, x2, y2)
-    line:SetStartPoint("CENTER", overlay, x1, y1)
-    line:SetEndPoint("CENTER", overlay, x2, y2)
-end
-
 local function makeOverlay()
     local overlay = CreateFrame("Frame", nil, Minimap)
     overlay:SetAllPoints(Minimap)
     overlay:SetFrameLevel(Minimap:GetFrameLevel() + 8)
     overlay:EnableMouse(false)
-    overlay.arrow, overlay.outline, overlay.dots = {}, {}, {}
-    for index = 1, 3 do
-        local outline = overlay:CreateLine(nil, "OVERLAY", nil, 1)
-        outline:SetThickness(5)
-        outline:SetColorTexture(0.04, 0.09, 0.12, 0.96)
-        overlay.outline[index] = outline
-
-        local arrow = overlay:CreateLine(nil, "OVERLAY", nil, 2)
-        arrow:SetThickness(2.5)
-        arrow:SetColorTexture(0.35, 0.91, 0.91, 1)
-        overlay.arrow[index] = arrow
-    end
+    overlay.arrow = overlay:CreateTexture(nil, "OVERLAY", nil, 2)
+    overlay.arrow:SetAtlas("Navigation-Tracked-Arrow")
+    overlay.arrow:SetSize(18, 18)
+    overlay.marker = overlay:CreateTexture(nil, "OVERLAY", nil, 2)
+    overlay.marker:SetAtlas("waypoint-mappin-minimap-tracked")
+    overlay.marker:SetSize(18, 18)
+    overlay.dots = {}
     for index = 1, BREADCRUMB_COUNT do
-        local dot = overlay:CreateTexture(nil, "OVERLAY")
-        dot:SetColorTexture(0.35, 0.91, 0.91, 0.68)
-        dot:SetSize(4, 4)
+        local dot = overlay:CreateTexture(nil, "OVERLAY", nil, 1)
+        dot:SetAtlas("waypoint-mappin-minimap-untracked")
+        dot:SetSize(10, 10)
+        dot:SetAlpha(.75)
         overlay.dots[index] = dot
     end
-    overlay.arrowLayers = { overlay.outline, overlay.arrow }
     return overlay
 end
 
 function Navigation:Draw(playerX, playerY, cosine, sine)
-    if not Minimap or not Minimap.CreateLine or not Minimap:IsVisible() then return end
+    if not Minimap or not Minimap:IsVisible() then return end
     local width, height = Minimap:GetSize()
     if not isNumber(width) or not isNumber(height) or width <= 30 or height <= 30 then
         if self.overlay then self.overlay:Hide() end
@@ -150,25 +142,23 @@ function Navigation:Draw(playerX, playerY, cosine, sine)
     local overlay = self.overlay
     local radius = C_Minimap and C_Minimap.GetViewRadius and C_Minimap.GetViewRadius()
     local hasRadius = isNumber(radius) and radius > 0
-    -- Yards map to pixels across the full minimap; the inset only keeps the arrow inside its edge.
     local halfWidth, halfHeight = width / 2, height / 2
-    local edgeWidth, edgeHeight = halfWidth - 12, halfHeight - 12
     local east, north = screenDirection(self.points[self.step], playerX, playerY, cosine, sine)
     local distance = magnitude(east, north)
     if distance <= 0 then
         overlay:Hide()
         return
     end
-    local dirX, dirY = east / distance, north / distance
-    local scaleX = hasRadius and halfWidth * distance / radius or edgeWidth
-    local scaleY = hasRadius and halfHeight * distance / radius or edgeHeight
-    local x, y = dirX * math.min(scaleX, edgeWidth), dirY * math.min(scaleY, edgeHeight)
-    local wingX, wingY = x - dirX * 7, y - dirY * 7
-    local tailX, tailY = x - dirX * 14, y - dirY * 14
-    for _, lines in ipairs(overlay.arrowLayers) do
-        setLine(lines[1], overlay, tailX, tailY, x, y)
-        setLine(lines[2], overlay, wingX - dirY * 4, wingY + dirX * 4, x, y)
-        setLine(lines[3], overlay, wingX + dirY * 4, wingY - dirX * 4, x, y)
+    local inView = hasRadius and distance <= radius
+    overlay.marker:SetShown(inView)
+    overlay.arrow:SetShown(not inView)
+    if inView then
+        overlay.marker:SetPoint("CENTER", overlay, "CENTER", east / radius * halfWidth, north / radius * halfHeight)
+    else
+        overlay.arrow:SetPoint("CENTER", overlay, "CENTER",
+            east / distance * (halfWidth - 12), north / distance * (halfHeight - 12))
+        -- Blizzard's navigation atlas points up at zero radians.
+        overlay.arrow:SetRotation(-math.atan2(east, north))
     end
 
     -- Show only known approach points, never interpolated sections through terrain.
@@ -178,7 +168,6 @@ function Navigation:Draw(playerX, playerY, cosine, sine)
         if hasRadius and point then
             local dotEast, dotNorth = screenDirection(point, playerX, playerY, cosine, sine)
             if magnitude(dotEast, dotNorth) < radius then
-                dot:ClearAllPoints()
                 dot:SetPoint("CENTER", overlay, "CENTER",
                     dotEast / radius * halfWidth, dotNorth / radius * halfHeight)
                 dot:Show()
@@ -193,17 +182,7 @@ function Navigation:Draw(playerX, playerY, cosine, sine)
 end
 
 function Navigation:SetStatus(message)
-    if message ~= self.status then
-        self.status = message
-        for _, listener in ipairs(self.listeners) do
-            listener(message)
-        end
-    end
-end
-
--- listener(status) runs whenever the guidance status text changes.
-function Navigation:AddListener(listener)
-    self.listeners[#self.listeners + 1] = listener
+    self.status = message
 end
 
 function Navigation:GetStatus()
@@ -219,10 +198,18 @@ function Navigation:IsActive()
 end
 
 function Navigation:Stop(message)
-    self.points, self.step, self.target = nil, nil, nil
+    self.points, self.step, self.target, self.destination = nil, nil, nil, nil
+    AeternumRouteDB = nil
     if self.worker then self.worker:Hide() end
     if self.overlay then self.overlay:Hide() end
     self:SetStatus(message or IDLE)
+    if addon.UpdateRoutePins then addon.UpdateRoutePins() end
+end
+
+function Navigation:IsDestination(point, dungeon)
+    local dest = self.destination
+    return dest and point and dest.dungeon == dungeon and dest.mapID == point.mapID
+        and dest.x == point.x and dest.y == point.y
 end
 
 function Navigation:Pause(message)
@@ -234,7 +221,11 @@ function Navigation:Update()
     if not self.points then return end
     local insideInstance = IsInInstance and IsInInstance()
     if insideInstance then
-        self:Pause("Guidance is paused inside an instance.")
+        if self.destination and self.destination.dungeon and addon.DungeonMap:IsInside(self.destination.dungeon) then
+            self:Stop(("Arrived at %s."):format(self.target))
+        else
+            self:Pause("Guidance is paused inside an instance.")
+        end
         return
     end
     local continent, playerX, playerY = playerPoint()
@@ -277,32 +268,44 @@ end
 
 -- Guides the minimap arrow to destination, a map point { mapID, x, y } that may
 -- list recorded approach waypoints. name labels the destination in the status.
-function Navigation:Start(name, destination)
+local function makeRoute(name, destination, dungeon)
     if not isMapPoint(destination) then
-        self:Stop("This location has no map coordinates.")
-        return false
+        return nil, "This location has no map coordinates."
     end
     if not (C_Map and C_Map.GetWorldPosFromMapPos and C_Map.GetBestMapForUnit
         and C_Map.GetPlayerMapPosition and CreateVector2D) then
-        self:Stop("This client does not provide the map APIs for guidance.")
-        return false
+        return nil, "This client does not provide the map APIs for guidance."
     end
 
     local axesCache, points = {}, {}
     local goal = coordinatesFor(destination, axesCache)
     if not goal then
-        self:Stop("A minimap position is unavailable for this location.")
-        return false
+        return nil, "A minimap position is unavailable for this location."
     end
-    for _, waypoint in ipairs(destination.waypoints or {}) do
+    local saved = {name=name, mapID=destination.mapID, x=destination.x, y=destination.y,
+        dungeon=type(dungeon) == "string" and addon.floorData[dungeon] and dungeon or nil}
+    for _, waypoint in ipairs(type(destination.waypoints) == "table" and destination.waypoints or {}) do
         local point = isMapPoint(waypoint) and coordinatesFor(waypoint, axesCache)
         if point and point.continent == goal.continent then
             points[#points + 1] = point
+            saved.waypoints = saved.waypoints or {}
+            saved.waypoints[#saved.waypoints + 1] = {mapID=waypoint.mapID, x=waypoint.x, y=waypoint.y,
+                label=point.label}
         end
     end
     points[#points + 1] = goal
-    self.points, self.step = points, nil
-    self.target = name or "the destination"
+    return points, saved
+end
+
+function Navigation:Start(name, destination, dungeon)
+    name = name or "the destination"
+    local points, saved = makeRoute(name, destination, dungeon)
+    if not points then
+        if not self.points then self:SetStatus(saved) end
+        return false, saved
+    end
+    self.target, self.points, self.step, self.destination = name, points, nil, saved
+    AeternumRouteDB = saved
 
     if not self.worker then
         self.worker = CreateFrame("Frame")
@@ -317,5 +320,17 @@ function Navigation:Start(name, destination)
     end
     self.worker:Show()
     self:Update()
+    if addon.UpdateRoutePins then addon.UpdateRoutePins() end
     return true
+end
+
+function Navigation:Restore()
+    local saved = AeternumRouteDB
+    if self.points or saved == nil then return end
+    if not isMapPoint(saved) or type(saved.name) ~= "string"
+        or (saved.waypoints ~= nil and type(saved.waypoints) ~= "table") then
+        AeternumRouteDB = nil
+        return
+    end
+    self:Start(saved.name, saved, saved.dungeon)
 end

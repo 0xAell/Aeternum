@@ -2,13 +2,17 @@
 ## Title: Aeternum
 ## Notes: Dungeon maps, boss loot, trainers, quests, and minimap guidance for WoW Forever.
 ## Author: Ael
-## Version: 0.2.0
+## Version: 0.5.0
 ## X-WoW-Flavor: Forever
 ## SavedVariables: AeternumDB
+## SavedVariablesPerCharacter: AeternumTrainerDB, AeternumRouteDB
 
 Data.lua
+FloorData.lua
+ClassicTraining.lua
 Core.lua
 Quests.lua
+Trainers.lua
 Navigation.lua
 DungeonMap.lua
 UI.lua
