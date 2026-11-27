@@ -127,6 +127,10 @@ local referenceMaps = {
     ["zulfarrak"] = { referenceTiles.ZulFarrak, 1, 1 },
 }
 
+function DungeonMap.HasFloors(dungeon)
+    return referenceMaps[dungeon.id] ~= nil
+end
+
 local function getFloors(dungeon)
     local reference = dungeon and referenceMaps[dungeon.id]
     local floors = {}
@@ -203,15 +207,20 @@ function DungeonMap.Create(parent)
     panel.floors = {}
     panel.floorIndex = 1
 
-    local previous = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-    previous:SetSize(26, 20)
+    local function pageButton(direction)
+        local control = CreateFrame("Button", nil, panel)
+        local art = "Interface\\Buttons\\UI-SpellbookIcon-" .. direction .. "Page-"
+        control:SetSize(26, 26)
+        control:SetNormalTexture(art .. "Up")
+        control:SetPushedTexture(art .. "Down")
+        control:SetDisabledTexture(art .. "Disabled")
+        return control
+    end
+    local previous = pageButton("Prev")
     previous:SetPoint("TOPLEFT")
-    previous:SetText("<")
 
-    local nextFloor = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-    nextFloor:SetSize(26, 20)
+    local nextFloor = pageButton("Next")
     nextFloor:SetPoint("TOPRIGHT")
-    nextFloor:SetText(">")
 
     local title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     title:SetPoint("TOPLEFT", panel, "TOPLEFT", 30, -3)
@@ -242,18 +251,23 @@ function DungeonMap.Create(parent)
         empty:Show()
     end
 
-    local function render()
+    local function cancelLoad()
         if view.loadTimer then
             view.loadTimer:Cancel()
             view.loadTimer = nil
         end
+    end
+
+    local function render()
+        cancelLoad()
+        if not panel:IsVisible() then return end
         local count = #panel.floors
         local floor = panel.floors[panel.floorIndex]
         previous:SetShown(count > 1)
         nextFloor:SetShown(count > 1)
         previous:SetEnabled(panel.floorIndex > 1)
         nextFloor:SetEnabled(panel.floorIndex < count)
-        title:SetText(count > 1 and ("Floor %d of %d"):format(panel.floorIndex, count) or "Dungeon map")
+        title:SetText(count > 1 and ("Floor %d of %d"):format(panel.floorIndex, count) or "")
 
         local drawn = floor and drawArt(view, floor)
         if drawn then
@@ -278,6 +292,7 @@ function DungeonMap.Create(parent)
         self.dungeon = dungeon
         self.floors = getFloors(dungeon)
         self.floorIndex = 1
+        view:SetPoint("TOPLEFT", panel, "TOPLEFT", 0, #self.floors > 1 and -26 or 0)
         render()
     end
 
@@ -291,6 +306,10 @@ function DungeonMap.Create(parent)
     end)
     view:SetScript("OnSizeChanged", render)
     panel:SetScript("OnShow", render)
+    panel:SetScript("OnHide", function()
+        cancelLoad()
+        hideTiles(view.tiles, 1)
+    end)
     render()
     return panel
 end

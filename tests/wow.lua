@@ -34,6 +34,12 @@ end
 local Region = {}
 
 function Region:SetPoint(point, ...)
+    for index, existing in ipairs(self.points) do
+        if existing[1] == point then
+            self.points[index] = { point, ... }
+            return
+        end
+    end
     self.points[#self.points + 1] = { point, ... }
 end
 function Region:ClearAllPoints() self.points = {} end
@@ -55,17 +61,25 @@ function Region:IsVisible()
 end
 function Region:GetParent() return self.parent end
 function Region:GetRight() return self.right end
-function Region:GetEffectiveScale() return 1 end
+function Region:GetLeft() return self.left end
+function Region:GetEffectiveScale() return self.scale or 1 end
+local function visibilityChanged(region, event)
+    if region.isFrame then region:Fire(event) end
+    for _, child in ipairs(region.children) do
+        if child.shown then visibilityChanged(child, event) end
+    end
+end
 function Region:Show()
     if not self.shown then
         self.shown = true
-        if self.isFrame then self:Fire("OnShow") end
+        if self:IsVisible() then visibilityChanged(self, "OnShow") end
     end
 end
 function Region:Hide()
     if self.shown then
+        local wasVisible = self:IsVisible()
         self.shown = false
-        if self.isFrame then self:Fire("OnHide") end
+        if wasVisible then visibilityChanged(self, "OnHide") end
     end
 end
 function Region:SetShown(shown)
@@ -73,15 +87,15 @@ function Region:SetShown(shown)
 end
 
 local Texture = newClass(Region)
-function Texture:SetTexture(texture) self.texture = texture return true end
+function Texture:SetTexture(texture) self.texture, self.atlas = texture, nil return true end
+function Texture:SetAtlas(atlas) self.atlas, self.texture = atlas, nil end
+function Texture:SetDesaturated(dim) self.desaturated = dim end
+function Texture:SetAlpha(alpha) self.alpha = alpha end
+function Texture:SetRotation(angle) self.rotation = angle end
+function Texture:SetBlendMode(mode) self.blend = mode end
 function Texture:SetColorTexture(...) self.color = { ... } end
 function Texture:SetTexCoord(...) self.texCoord = { ... } end
 function Texture:IsObjectLoaded() return true end
-
-local Line = newClass(Texture)
-function Line:SetThickness(value) self.thickness = value end
-function Line:SetStartPoint(...) self.startPoint = { ... } end
-function Line:SetEndPoint(...) self.endPoint = { ... } end
 
 local FontString = newClass(Region)
 function FontString:SetText(text) self.text = text end
@@ -115,6 +129,11 @@ function Frame:GetFrameStrata() return self.strata or "MEDIUM" end
 function Frame:SetFrameLevel(value) self.level = value end
 function Frame:GetFrameLevel() return self.level or 1 end
 function Frame:SetClampedToScreen() end
+function Frame:SetMovable(movable) self.movable = movable end
+function Frame:SetDontSavePosition(value) self.dontSavePosition = value end
+function Frame:RegisterForDrag(...) self.dragButtons = { ... } end
+function Frame:StartMoving() self.moving = true end
+function Frame:StopMovingOrSizing() self.moving = false end
 function Frame:EnableMouse() end
 function Frame:EnableMouseWheel() end
 function Frame:SetScalingLimits(...) self.scalingLimits = { ... } end
@@ -133,7 +152,6 @@ function Frame:RegisterEvent(event)
 end
 function Frame:CreateTexture() return Wow.region(Texture, self) end
 function Frame:CreateFontString() return Wow.region(FontString, self) end
-function Frame:CreateLine() return Wow.region(Line, self) end
 
 local Button = newClass(Frame)
 function Button:SetText(text) self.text = text end
@@ -141,20 +159,51 @@ function Button:GetText() return self.text end
 function Button:SetEnabled(enabled) self.enabled = not not enabled end
 function Button:IsEnabled() return self.enabled ~= false end
 function Button:RegisterForClicks(...) self.clicks = { ... } end
+function Button:LockHighlight() self.highlighted = true end
+function Button:UnlockHighlight() self.highlighted = false end
+function Button:SetNormalTexture(texture) self.normal = texture end
+function Button:SetHighlightTexture(texture, blend) self.highlight, self.highlightBlend = texture, blend end
+function Button:SetPushedTexture(texture) self.pushed = texture end
+function Button:SetDisabledTexture(texture) self.disabled = texture end
 function Button:Click(button)
     if self:IsEnabled() then
         self:Fire("OnClick", button or "LeftButton")
     end
 end
 
-local CheckButton = newClass(Button)
-function CheckButton:SetChecked(checked) self.checked = not not checked end
-function CheckButton:GetChecked() return self.checked end
-function CheckButton:Click(button)
-    if self:IsEnabled() then
-        self.checked = not self.checked
-        self:Fire("OnClick", button or "LeftButton")
+local Description = {}
+Description.__index = Description
+local function description(label, checked, action)
+    return setmetatable({label = label, checked = checked, action = action, children = {}}, Description)
+end
+function Description:CreateCheckbox(label, checked, action)
+    local child = description(label, checked, action)
+    self.children[#self.children + 1] = child
+    return child
+end
+Description.CreateRadio = Description.CreateCheckbox
+function Description:CreateButton(label, action) return self:CreateCheckbox(label, nil, action) end
+function Description:CreateTitle(label) return self:CreateButton(label) end
+function Description:CreateDivider() return self:CreateButton("") end
+function Description:SetEnabled(value) self.enabled = value end
+function Description:SetScrollMode(value) self.scrollHeight = value end
+function Description:Find(text)
+    for _, child in ipairs(self.children) do
+        if child.label == text then return child end
     end
+    error("Missing menu entry " .. text)
+end
+function Description:Click()
+    if self.enabled ~= false then self.action() end
+end
+
+local Dropdown = newClass(Button)
+function Dropdown:SetupMenu(generator) self.generator = generator end
+function Dropdown:OverrideText(text) self:SetText(text) end
+function Dropdown:OpenMenu()
+    local menu = description()
+    self.generator(self, menu)
+    return menu
 end
 
 local EditBox = newClass(Frame)
@@ -170,28 +219,16 @@ function EditBox:ClearFocus() end
 local MessageFrame = newClass(Frame)
 function MessageFrame:AddMessage(text) Wow.state.messages[#Wow.state.messages + 1] = text end
 
-local Slider = newClass(Frame)
-function Slider:SetOrientation() end
-function Slider:SetValueStep() end
-function Slider:SetObeyStepOnDrag() end
-function Slider:SetThumbTexture(texture) self.thumb = texture end
--- Like the client, narrowing the range clamps the value and fires OnValueChanged.
-function Slider:SetMinMaxValues(low, high)
-    self.low, self.high = low, high
-    if self.value and (self.value < low or self.value > high) then
-        self.value = math.min(math.max(self.value, low), high)
-        self:Fire("OnValueChanged", self.value, false)
-    end
+local ScrollBar = newClass(Frame)
+function ScrollBar:RegisterCallback(event, func, owner)
+    self.scripts[event] = function(value) func(owner, value) end
 end
-function Slider:GetMinMaxValues() return self.low, self.high end
-function Slider:GetValue() return self.value or 0 end
-function Slider:SetValue(value)
-    value = math.min(math.max(value, self.low or 0), self.high or 0)
-    if value ~= self.value then
-        self.value = value
-        self:Fire("OnValueChanged", value, true)
-    end
+function ScrollBar:SetScrollPercentage(value)
+    self.value = value
+    if self.scripts.OnScroll then self.scripts.OnScroll(value) end
 end
+function ScrollBar:SetVisibleExtentPercentage(value) self.visibleExtent = value end
+function ScrollBar:SetPanExtentPercentage(value) self.panExtent = value end
 
 local Tooltip = newClass(Frame)
 function Tooltip:SetOwner(owner) self.owner, self.lines = owner, {} end
@@ -202,14 +239,15 @@ function Tooltip:SetItemByID(itemID) self.lines = { "item:" .. itemID } end
 function Tooltip:SetHyperlink(link) self.lines = { link } end
 
 local classes = {
-    Frame = Frame, Button = Button, CheckButton = CheckButton, EditBox = EditBox, Slider = Slider,
+    Frame = Frame, Button = Button, DropdownButton = Dropdown, EditBox = EditBox, EventFrame = ScrollBar,
 }
 
 function Wow.region(class, parent)
     local region = setmetatable({
-        points = {}, scripts = {}, events = {}, shown = true, parent = parent,
+        points = {}, scripts = {}, events = {}, children = {}, shown = true, parent = parent,
         width = 300, height = 400, isFrame = class.Fire ~= nil,
     }, strict(class, "widget"))
+    if parent then parent.children[#parent.children + 1] = region end
     return region
 end
 
@@ -246,6 +284,17 @@ function MapCanvas:RemoveAllPinsByTemplate(template)
     end
     pool.active = {}
 end
+function MapCanvas:RemovePin(pin)
+    local pool = self.pools[pin.template]
+    for i, active in ipairs(pool.active) do
+        if active == pin then
+            table.remove(pool.active, i)
+            pin:OnReleased()
+            pool.free[#pool.free + 1] = pin
+            return
+        end
+    end
+end
 function MapCanvas:EnumeratePinsByTemplate(template)
     local index = 0
     local active = self.pools[template].active
@@ -254,6 +303,7 @@ function MapCanvas:EnumeratePinsByTemplate(template)
         return active[index]
     end
 end
+function MapCanvas:GetNumActivePinsByTemplate(template) return #self.pools[template].active end
 -- As in WorldMapMixin: the map's own OnShow and OnHide notify the data providers,
 -- and scripts hooked by add-ons run afterwards.
 function MapCanvas:Show()
@@ -307,25 +357,33 @@ end
 Wow.knownEvents = {
     ADDON_LOADED = true, PLAYER_LOGIN = true, GET_ITEM_INFO_RECEIVED = true, QUEST_LOG_UPDATE = true,
     QUEST_ACCEPTED = true, QUEST_TURNED_IN = true, QUEST_REMOVED = true, PLAYER_LEVEL_UP = true,
+    UI_SCALE_CHANGED = true, DISPLAY_SIZE_CHANGED = true,
 }
 
-local templates = {
-    UIPanelButtonTemplate = true, UIPanelCloseButton = true, UICheckButtonTemplate = true,
-    SearchBoxTemplate = true,
-}
+local templates = { UIPanelButtonTemplate = true, PanelTopTabButtonTemplate = true, MinimalScrollBar = true,
+    WowStyle1DropdownTemplate = true, WowStyle1FilterDropdownTemplate = true }
+
+local pinXML = assert(io.open("WorldMap.xml", "r"))
+local passThrough = pinXML:read("*a"):match('passThroughButtons="([^"]+)"')
+pinXML:close()
 
 function Wow.CreateFrame(kind, _, parent, template)
     local class = classes[kind] or error("unsupported frame type " .. tostring(kind))
     local frame = Wow.region(class, parent)
+    frame.template = template
     Wow.state.frames[#Wow.state.frames + 1] = frame
     if template == "AeternumMapPinTemplate" then
-        -- Mirrors WorldMap.xml: an 18x18 mouse-enabled frame with the pin mixin.
+        -- The XML applies passthrough at construction, before the pool acquires the frame.
         local env = Wow.env
         for key, value in pairs(env.AeternumMapPinMixin) do
             frame[key] = value
         end
-        frame:SetSize(18, 18)
+        frame.passThrough = { passThrough }
+        frame:SetSize(16, 16)
         frame:OnLoad()
+    elseif template == "BasicFrameTemplateWithInset" then
+        frame.TitleText = frame:CreateFontString()
+        frame.CloseButton = Wow.CreateFrame("Button", nil, frame)
     elseif template == "SearchBoxTemplate" then
         frame.Instructions = frame:CreateFontString()
         frame.clearButton = Wow.CreateFrame("Button", nil, frame)
@@ -341,10 +399,19 @@ function Wow.new(state)
     Wow.env = env
     Wow.state = state
     state.frames, state.messages, state.timers = {}, {}, {}
+    state.menuHooks = {}
     state.completed, state.log, state.complete = state.completed or {}, state.log or {}, state.complete or {}
     state.cached = state.cached or {}
 
     env.CreateFrame = Wow.CreateFrame
+    env.BaseScrollBoxEvents = { OnScroll = "OnScroll" }
+    env.Menu = { ModifyMenu = function(tag, callback) state.menuHooks[tag] = callback end }
+    env.MenuUtil = { CreateContextMenu = function(owner, generator)
+        state.menu = description()
+        generator(owner, state.menu)
+    end }
+    env.PanelTemplates_SelectTab = function(tab) tab:SetEnabled(false) end
+    env.PanelTemplates_DeselectTab = function(tab) tab:SetEnabled(true) end
     env.UIParent = Wow.region(Frame)
     env.UIParent:SetSize(1920, 1080)
     env.Minimap = Wow.region(Frame)
@@ -383,7 +450,7 @@ function Wow.new(state)
             return true
         end
     end)
-    env.InCombatLockdown = function() return false end
+    env.InCombatLockdown = function() return state.inCombat or false end
     env.IsInInstance = function() return state.inInstance or false end
     env.GetPlayerFacing = function() return state.facing or 0 end
     env.UnitFactionGroup = function() return state.faction or "Alliance" end
@@ -478,10 +545,18 @@ function Wow.new(state)
     map.mapID = state.mapID or 1429
     map.shown = false
     map.right = state.mapRight or 1100
+    map.left, map.scale = state.mapLeft or 0, state.mapScale or 1
     map.ScrollContainer = Wow.region(Frame, map)
     map.strata = state.mapStrata or "HIGH"
     env.WorldMapFrame = map
     return env
+end
+
+function Wow.trackingMenu()
+    local root = description()
+    root:CreateButton("Blizzard map filter")
+    Wow.state.menuHooks.MENU_WORLD_MAP_TRACKING(Wow.env.WorldMapFrame, root)
+    return root
 end
 
 -- Presses Escape: the first handler that reports it closed something wins.

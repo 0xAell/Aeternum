@@ -107,40 +107,30 @@ local function screenDirection(point, playerX, playerY, cosine, sine)
     return east * cosine + north * sine, north * cosine - east * sine
 end
 
-local function setLine(line, overlay, x1, y1, x2, y2)
-    line:SetStartPoint("CENTER", overlay, x1, y1)
-    line:SetEndPoint("CENTER", overlay, x2, y2)
-end
-
 local function makeOverlay()
     local overlay = CreateFrame("Frame", nil, Minimap)
     overlay:SetAllPoints(Minimap)
     overlay:SetFrameLevel(Minimap:GetFrameLevel() + 8)
     overlay:EnableMouse(false)
-    overlay.arrow, overlay.outline, overlay.dots = {}, {}, {}
-    for index = 1, 3 do
-        local outline = overlay:CreateLine(nil, "OVERLAY", nil, 1)
-        outline:SetThickness(5)
-        outline:SetColorTexture(0.04, 0.09, 0.12, 0.96)
-        overlay.outline[index] = outline
-
-        local arrow = overlay:CreateLine(nil, "OVERLAY", nil, 2)
-        arrow:SetThickness(2.5)
-        arrow:SetColorTexture(0.35, 0.91, 0.91, 1)
-        overlay.arrow[index] = arrow
-    end
+    overlay.arrow = overlay:CreateTexture(nil, "OVERLAY", nil, 2)
+    overlay.arrow:SetAtlas("Navigation-Tracked-Arrow")
+    overlay.arrow:SetSize(18, 18)
+    overlay.marker = overlay:CreateTexture(nil, "OVERLAY", nil, 2)
+    overlay.marker:SetAtlas("waypoint-mappin-minimap-tracked")
+    overlay.marker:SetSize(18, 18)
+    overlay.dots = {}
     for index = 1, BREADCRUMB_COUNT do
-        local dot = overlay:CreateTexture(nil, "OVERLAY")
-        dot:SetColorTexture(0.35, 0.91, 0.91, 0.68)
-        dot:SetSize(4, 4)
+        local dot = overlay:CreateTexture(nil, "OVERLAY", nil, 1)
+        dot:SetAtlas("waypoint-mappin-minimap-untracked")
+        dot:SetSize(10, 10)
+        dot:SetAlpha(.75)
         overlay.dots[index] = dot
     end
-    overlay.arrowLayers = { overlay.outline, overlay.arrow }
     return overlay
 end
 
 function Navigation:Draw(playerX, playerY, cosine, sine)
-    if not Minimap or not Minimap.CreateLine or not Minimap:IsVisible() then return end
+    if not Minimap or not Minimap:IsVisible() then return end
     local width, height = Minimap:GetSize()
     if not isNumber(width) or not isNumber(height) or width <= 30 or height <= 30 then
         if self.overlay then self.overlay:Hide() end
@@ -150,25 +140,23 @@ function Navigation:Draw(playerX, playerY, cosine, sine)
     local overlay = self.overlay
     local radius = C_Minimap and C_Minimap.GetViewRadius and C_Minimap.GetViewRadius()
     local hasRadius = isNumber(radius) and radius > 0
-    -- Yards map to pixels across the full minimap; the inset only keeps the arrow inside its edge.
     local halfWidth, halfHeight = width / 2, height / 2
-    local edgeWidth, edgeHeight = halfWidth - 12, halfHeight - 12
     local east, north = screenDirection(self.points[self.step], playerX, playerY, cosine, sine)
     local distance = magnitude(east, north)
     if distance <= 0 then
         overlay:Hide()
         return
     end
-    local dirX, dirY = east / distance, north / distance
-    local scaleX = hasRadius and halfWidth * distance / radius or edgeWidth
-    local scaleY = hasRadius and halfHeight * distance / radius or edgeHeight
-    local x, y = dirX * math.min(scaleX, edgeWidth), dirY * math.min(scaleY, edgeHeight)
-    local wingX, wingY = x - dirX * 7, y - dirY * 7
-    local tailX, tailY = x - dirX * 14, y - dirY * 14
-    for _, lines in ipairs(overlay.arrowLayers) do
-        setLine(lines[1], overlay, tailX, tailY, x, y)
-        setLine(lines[2], overlay, wingX - dirY * 4, wingY + dirX * 4, x, y)
-        setLine(lines[3], overlay, wingX + dirY * 4, wingY - dirX * 4, x, y)
+    local inView = hasRadius and distance <= radius
+    overlay.marker:SetShown(inView)
+    overlay.arrow:SetShown(not inView)
+    if inView then
+        overlay.marker:SetPoint("CENTER", overlay, "CENTER", east / radius * halfWidth, north / radius * halfHeight)
+    else
+        overlay.arrow:SetPoint("CENTER", overlay, "CENTER",
+            east / distance * (halfWidth - 12), north / distance * (halfHeight - 12))
+        -- Blizzard's navigation atlas points up at zero radians.
+        overlay.arrow:SetRotation(-math.atan2(east, north))
     end
 
     -- Show only known approach points, never interpolated sections through terrain.
@@ -178,7 +166,6 @@ function Navigation:Draw(playerX, playerY, cosine, sine)
         if hasRadius and point then
             local dotEast, dotNorth = screenDirection(point, playerX, playerY, cosine, sine)
             if magnitude(dotEast, dotNorth) < radius then
-                dot:ClearAllPoints()
                 dot:SetPoint("CENTER", overlay, "CENTER",
                     dotEast / radius * halfWidth, dotNorth / radius * halfHeight)
                 dot:Show()

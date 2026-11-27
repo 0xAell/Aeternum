@@ -37,6 +37,8 @@ end
 register("ADDON_LOADED")
 register("PLAYER_LOGIN")
 register("GET_ITEM_INFO_RECEIVED")
+register("UI_SCALE_CHANGED")
+register("DISPLAY_SIZE_CHANGED")
 for _, event in ipairs(questEvents) do
     register(event)
 end
@@ -53,18 +55,18 @@ events:SetScript("OnEvent", function(_, event, ...)
     elseif event == "PLAYER_LOGIN" then
         addon.AttachMap()
     elseif event == "GET_ITEM_INFO_RECEIVED" then
-        if addon.UI.detail then
-            addon.UI:OnItemInfo((...))
-        end
+        if addon.UI:IsOpen() then addon.UI:OnItemInfo((...)) end
+    elseif event == "UI_SCALE_CHANGED" or event == "DISPLAY_SIZE_CHANGED" then
+        if addon.UI:IsOpen() then addon.UI:Layer() end
     else
         addon.Quests:Invalidate(event == "PLAYER_LEVEL_UP" and (...) or nil)
-        if addon.UI.sidebar then
+        if addon.UI.map and addon.UI.map:IsShown() and (addon.UI:IsOpen() or addon.settings.showMapPins) then
             scheduleRefresh()
         end
     end
 end)
 
-local function openPanel()
+local function openPanel(atlas)
     if not addon.AttachMap() and C_AddOns and C_AddOns.LoadAddOn then
         C_AddOns.LoadAddOn("Blizzard_WorldMap")
     end
@@ -73,36 +75,37 @@ local function openPanel()
         return
     end
     if not WorldMapFrame:IsShown() then
+        if InCombatLockdown() then
+            say("open the map after combat to browse the guide.")
+            return
+        end
         -- The map's own toggle keeps its windowed or maximised state.
         ToggleWorldMap()
     end
-    addon.UI:Show()
+    addon.UI:Show(atlas == true)
 end
 
 local commands = {
     [""] = openPanel,
     show = openPanel,
+    dungeons = function() openPanel(true) end,
     stop = function()
         addon.Navigation:Stop()
     end,
     pins = function()
-        addon.settings.pinsWithPanelClosed = not addon.settings.pinsWithPanelClosed
-        say(addon.settings.pinsWithPanelClosed and "map pins stay visible when the panel is closed."
-            or "map pins show only while the panel is open.")
+        addon.settings.showMapPins = not addon.settings.showMapPins
+        say(addon.settings.showMapPins and "map pins enabled." or "map pins disabled.")
         addon.RefreshMap()
     end,
     reset = function()
         addon.ResetSettings()
-        if addon.UI.sidebar then
-            addon.UI:SyncSettings()
-            addon.UI:Hide()
-        end
+        if addon.UI:IsOpen() then addon.UI:Hide() else addon.RefreshMap() end
         say("settings reset.")
     end,
     help = function()
-        say("/aeternum opens the panel on the world map.")
+        say("/aeternum browses this map. /aeternum dungeons opens the dungeon guide.")
         say("/aeternum stop ends minimap guidance.")
-        say("/aeternum pins keeps map pins visible with the panel closed.")
+        say("/aeternum pins toggles map pins.")
         say("/aeternum reset restores the default filters and options.")
     end,
 }

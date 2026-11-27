@@ -6,10 +6,10 @@ local questRoles = { s = "Quest start", t = "Quest turn-in" }
 local factionCodes = { A = "Alliance", H = "Horde" }
 
 addon.categories = {
-    { id = "dungeon", label = "Dungeons", letter = "D", color = { 1, .71, .33 } },
-    { id = "class", label = "Class trainers", letter = "C", color = { .63, .81, 1 } },
-    { id = "profession", label = "Profession trainers", letter = "P", color = { .53, .89, .68 } },
-    { id = "quest", label = "Quests", letter = "Q", color = { 1, .89, .54 } },
+    { id = "dungeon", label = "Dungeon entrances", icon = "Dungeon" },
+    { id = "class", label = "Class trainers", icon = 136455 },
+    { id = "profession", label = "Profession trainers", icon = 136463 },
+    { id = "quest", label = "Quests" },
 }
 addon.categoryByID = {}
 for _, category in ipairs(addon.categories) do
@@ -19,8 +19,7 @@ end
 local defaults = {
     questMode = "available",
     lowLevelQuests = true,
-    pinsWithPanelClosed = false,
-    panelOpen = false,
+    showMapPins = false,
 }
 
 function addon.DungeonLevel(dungeon)
@@ -225,6 +224,10 @@ function addon.LoadSettings()
     if type(AeternumDB.filters) ~= "table" then
         AeternumDB.filters = {}
     end
+    if AeternumDB.showMapPins == nil then
+        AeternumDB.showMapPins = AeternumDB.pinsWithPanelClosed == true
+    end
+    AeternumDB.pinsWithPanelClosed, AeternumDB.panelOpen = nil, nil
     for key, value in pairs(defaults) do
         if type(AeternumDB[key]) ~= type(value) then
             AeternumDB[key] = value
@@ -271,14 +274,55 @@ local function matches(entry, search)
     return entry.search:find(search, 1, true) ~= nil
 end
 
+-- The loot catalogue is only searched on the dungeon page. Share folded names
+-- across bosses that drop the same item, and create rows only for actual hits.
+local foldedNames = {}
+local function nameMatches(name, search)
+    local folded = foldedNames[name]
+    if not folded then
+        folded = name:lower()
+        foldedNames[name] = folded
+    end
+    return folded:find(search, 1, true) ~= nil
+end
+
+local function dungeonResults(search)
+    local result, drops = {}, {}
+    for _, entry in ipairs(dungeonRecords) do
+        if matches(entry, search) then result[#result + 1] = entry end
+    end
+    if search == "" then return result end
+    for _, entry in ipairs(dungeonRecords) do
+        local dungeon = entry.source
+        for index, boss in ipairs(dungeon.bosses) do
+            if nameMatches(boss.name, search) then
+                local hit = record("dungeon", boss.name, dungeon.name, nil, dungeon)
+                hit.bossIndex = index
+                result[#result + 1] = hit
+            end
+            for _, id in ipairs(boss.loot) do
+                local name = data.items[id]
+                if name and nameMatches(name, search) then
+                    local hit = record("dungeon", name, boss.name .. " · " .. dungeon.name, nil, dungeon)
+                    hit.bossIndex, hit.itemID = index, id
+                    drops[#drops + 1] = hit
+                end
+            end
+        end
+    end
+    for _, drop in ipairs(drops) do result[#result + 1] = drop end
+    return result
+end
+
 -- Returns the records on a world map, or every dungeon when atlas is true.
 function addon.Entries(mapID, atlas, query)
-    local result = {}
-    local candidates = atlas and dungeonRecords or (mapID and addon.MapRecords(mapID)) or {}
     local search = strtrim(query or ""):lower()
+    if atlas then return dungeonResults(search) end
+    local result = {}
+    local candidates = mapID and addon.MapRecords(mapID) or {}
     local faction = UnitFactionGroup("player")
     for _, entry in ipairs(candidates) do
-        if (atlas or addon.CategoryEnabled(entry.category)) and visible(entry, faction)
+        if addon.CategoryEnabled(entry.category) and visible(entry, faction)
             and matches(entry, search) then
             result[#result + 1] = entry
         end
@@ -286,17 +330,30 @@ function addon.Entries(mapID, atlas, query)
     return result
 end
 
--- Letter, colour, and subtitle for a record as the player currently sees it.
+-- The same Blizzard artwork appears in the guide and on its map pins.
 function addon.Presentation(entry)
     local category = addon.categoryByID[entry.category]
     if entry.category ~= "quest" then
-        return category.letter, category.color, entry.subtitle
+        return category.icon, nil, entry.subtitle
     end
-    local style = addon.Quests:Style(addon.Quests:State(entry.questID), entry.role)
+    local state = addon.Quests:State(entry.questID)
+    local style = addon.Quests:Style(state, entry.role)
     if entry.style ~= style then
         entry.style, entry.styledSubtitle = style, entry.subtitle .. " · " .. style.label
     end
-    return entry.role == "turnin" and "?" or "!", style.color, entry.styledSubtitle
+    local icon, dim = addon.Quests:Icon(state, entry.role)
+    return icon, style.color, entry.styledSubtitle, dim
+end
+
+function addon.SetIcon(texture, icon, dim)
+    if icon == "Dungeon" then
+        texture:SetAtlas(icon)
+    else
+        texture:SetTexture(icon)
+        texture:SetTexCoord(0, 1, 0, 1)
+    end
+    texture:SetDesaturated(not not dim)
+    texture:SetAlpha(dim and .72 or 1)
 end
 
 function addon.ZoneName(mapID)

@@ -138,6 +138,11 @@ function Quests:Style(state, role)
     return role == "turnin" and turnInStyles[state] or styles[state] or styles.unknown
 end
 
+function Quests:Icon(state, role)
+    if role == "turnin" then return 132048, state ~= "ready" end
+    return 132049, state ~= "available"
+end
+
 function Quests:IsPinVisible(entry)
     local settings = addon.settings
     if settings.questMode == "all" then

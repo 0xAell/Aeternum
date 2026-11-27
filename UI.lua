@@ -2,25 +2,9 @@ local _, addon = ...
 local UI = {}
 addon.UI = UI
 
-local PANEL_WIDTH = 268
-local TEXT = { .94, .88, .75 }
-local MUTED = { .72, .76, .83 }
-local HINT = { 1, .82, .45 }
-local DISABLED = { .45, .45, .45 }
-local STRATA = { "BACKGROUND", "LOW", "MEDIUM", "HIGH", "DIALOG", "FULLSCREEN", "FULLSCREEN_DIALOG", "TOOLTIP" }
-
--- Widgets --------------------------------------------------------------------
-
-local function surface(frame)
-    local edge = frame:CreateTexture(nil, "BACKGROUND")
-    edge:SetAllPoints()
-    edge:SetColorTexture(.42, .33, .21, .98)
-    local fill = frame:CreateTexture(nil, "BORDER")
-    fill:SetPoint("TOPLEFT", 1, -1)
-    fill:SetPoint("BOTTOMRIGHT", -1, 1)
-    fill:SetColorTexture(.055, .067, .09, .97)
-    frame:EnableMouse(true)
-end
+local MUTED = { .8, .8, .8 }
+local HINT = { 1, .82, 0 }
+local newList = addon.CreateGuideList
 
 local function label(parent, template)
     local line = parent:CreateFontString(nil, "OVERLAY", template or "GameFontHighlightSmall")
@@ -42,236 +26,27 @@ local function button(parent, title, width, callback)
     return control
 end
 
-local function checkbox(parent, text, color, callback)
-    local check = CreateFrame("CheckButton", nil, parent, "UICheckButtonTemplate")
-    check:SetSize(22, 22)
-    local description = label(check)
-    description:SetPoint("LEFT", check, "RIGHT", 2, 1)
-    description:SetText(text)
-    description:SetTextColor(unpack(color))
-    check.label, check.color = description, color
-    check:SetScript("OnClick", callback)
-    return check
-end
-
-local function setCheckEnabled(check, enabled)
-    check:SetEnabled(enabled)
-    check.label:SetTextColor(unpack(enabled and check.color or DISABLED))
-end
-
 local function hideOwnedTooltip(owner)
     if GameTooltip:IsOwned(owner) then
         GameTooltip:Hide()
     end
 end
 
--- The strata the given number of steps above a frame's own.
-local function strataAbove(frame, steps)
-    local current = frame:GetFrameStrata()
-    for index, name in ipairs(STRATA) do
-        if name == current then
-            return STRATA[math.min(index + steps, #STRATA)]
-        end
+local function startGuidance(name, point)
+    addon.Navigation:Start(name, point)
+    if not addon.Navigation:IsActive() then
+        DEFAULT_CHAT_FRAME:AddMessage(addon.Navigation:GetStatus())
     end
-    return STRATA[4 + steps]
-end
-
--- A square letter badge in a category colour, matching the map pins.
-local function badge(parent, size)
-    local frame = CreateFrame("Frame", nil, parent)
-    frame:SetSize(size, size)
-    local outline = frame:CreateTexture(nil, "BACKGROUND")
-    outline:SetAllPoints()
-    outline:SetColorTexture(.06, .07, .1, .95)
-    frame.field = frame:CreateTexture(nil, "ARTWORK")
-    frame.field:SetPoint("TOPLEFT", 1, -1)
-    frame.field:SetPoint("BOTTOMRIGHT", -1, 1)
-    frame.letter = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    frame.letter:SetPoint("CENTER", 0, 1)
-    frame.letter:SetTextColor(.08, .09, .12)
-    return frame
-end
-
-local function setBadge(frame, letter, color)
-    frame.field:SetColorTexture(color[1], color[2], color[3], .96)
-    frame.letter:SetText(letter)
-end
-
--- A virtual list: only the visible rows exist, scrolled with the mouse wheel or
--- a slim scroll bar. describe(entry) returns title, subtitle, title colour, icon,
--- badge letter, and badge colour; handlers may hold click(entry, mouseButton),
--- enter(row, entry) and leave(row, entry).
-local function newList(parent, rowHeight, describe, handlers)
-    local list = CreateFrame("Frame", nil, parent)
-    list:EnableMouseWheel(true)
-    list.rows = {}
-    local entries, offset = {}, 0
-
-    local bar = CreateFrame("Slider", nil, list)
-    bar:SetOrientation("VERTICAL")
-    bar:SetWidth(6)
-    bar:SetPoint("TOPRIGHT", 0, -2)
-    bar:SetPoint("BOTTOMRIGHT", 0, 2)
-    bar:SetValueStep(1)
-    bar:SetObeyStepOnDrag(true)
-    local track = bar:CreateTexture(nil, "BACKGROUND")
-    track:SetAllPoints()
-    track:SetColorTexture(1, 1, 1, .05)
-    local thumb = bar:CreateTexture(nil, "OVERLAY")
-    thumb:SetColorTexture(.84, .66, .37, .55)
-    thumb:SetSize(6, 28)
-    bar:SetThumbTexture(thumb)
-    list.bar = bar
-
-    local function visibleRows()
-        return math.max(1, math.floor(list:GetHeight() / rowHeight))
-    end
-
-    local function maxOffset()
-        return math.max(0, #entries - visibleRows())
-    end
-
-    local function createRow(index)
-        local row = CreateFrame("Button", nil, list)
-        row:SetHeight(rowHeight)
-        row:SetPoint("TOPLEFT", 0, -(index - 1) * rowHeight)
-        row:SetPoint("RIGHT", bar, "LEFT", -4, 0)
-        row:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-        local highlight = row:CreateTexture(nil, "HIGHLIGHT")
-        highlight:SetAllPoints()
-        highlight:SetColorTexture(.84, .66, .37, .14)
-        row.icon = row:CreateTexture(nil, "ARTWORK")
-        row.icon:SetSize(rowHeight - 6, rowHeight - 6)
-        row.icon:SetPoint("LEFT", 3, 0)
-        row.badge = badge(row, 16)
-        row.badge:SetPoint("LEFT", 4, 0)
-        row.title = singleLine(label(row, "GameFontNormal"))
-        row.subtitle = singleLine(label(row))
-        row.subtitle:SetPoint("TOPLEFT", row.title, "BOTTOMLEFT", 0, -1)
-        row.subtitle:SetPoint("RIGHT", -4, 0)
-        row:SetScript("OnClick", function(self, mouseButton)
-            if handlers.click and self.entry ~= nil then
-                handlers.click(self.entry, mouseButton)
-            end
-        end)
-        row:SetScript("OnEnter", function(self)
-            if handlers.enter and self.entry ~= nil then
-                handlers.enter(self, self.entry)
-            end
-        end)
-        row:SetScript("OnLeave", function(self)
-            hideOwnedTooltip(self)
-            if handlers.leave and self.entry ~= nil then
-                handlers.leave(self, self.entry)
-            end
-        end)
-        return row
-    end
-
-    local function fill(row, entry)
-        local title, subtitle, color, icon, letter, letterColor = describe(entry)
-        row.entry = entry
-        row.icon:SetTexture(icon)
-        row.icon:SetShown(icon ~= nil)
-        row.badge:SetShown(letter ~= nil)
-        if letter then
-            setBadge(row.badge, letter, letterColor)
-        end
-        local indent = (icon or letter) and (rowHeight > 26 and 26 or rowHeight) or 5
-        row.title:ClearAllPoints()
-        if subtitle then
-            row.title:SetPoint("TOPLEFT", indent, -3)
-        else
-            row.title:SetPoint("LEFT", indent, 0)
-        end
-        row.title:SetPoint("RIGHT", -4, 0)
-        row.title:SetText(title)
-        row.title:SetTextColor(unpack(color or TEXT))
-        row.subtitle:SetText(subtitle or "")
-        row.subtitle:SetShown(subtitle ~= nil)
-    end
-
-    local function draw()
-        local count = visibleRows()
-        for index = 1, math.max(count, #list.rows) do
-            local row = list.rows[index]
-            local entry = index <= count and entries[offset + index]
-            if entry ~= nil and entry ~= false then
-                if not row then
-                    row = createRow(index)
-                    list.rows[index] = row
-                end
-                fill(row, entry)
-                row:Show()
-            elseif row then
-                row.entry = nil
-                row:Hide()
-            end
-        end
-        bar:SetShown(maxOffset() > 0)
-    end
-
-    -- Narrowing the range clamps the slider's value and fires OnValueChanged,
-    -- which must not move the list.
-    local updating = false
-    local function updateBar()
-        updating = true
-        bar:SetMinMaxValues(0, maxOffset())
-        bar:SetValue(offset)
-        updating = false
-    end
-
-    bar:SetScript("OnValueChanged", function(_, value)
-        if updating then
-            return
-        end
-        local target = math.min(math.max(0, math.floor(value + .5)), maxOffset())
-        if target ~= offset then
-            offset = target
-            draw()
-        end
-    end)
-    list:SetScript("OnMouseWheel", function(_, delta)
-        bar:SetValue(offset - delta * 3)
-    end)
-    list:SetScript("OnSizeChanged", function()
-        offset = math.min(offset, maxOffset())
-        updateBar()
-        draw()
-    end)
-
-    -- keepScroll holds the position, as far as the new entries allow.
-    function list:SetEntries(values, keepScroll)
-        entries = values
-        offset = keepScroll and math.min(offset, maxOffset()) or 0
-        updateBar()
-        draw()
-    end
-
-    function list:GetEntries()
-        return entries
-    end
-
-    function list:GetOffset()
-        return offset
-    end
-
-    function list:SetOffset(value)
-        bar:SetValue(value)
-    end
-
-    -- Redraws the visible rows in place.
-    list.Refresh = draw
-
-    return list
 end
 
 -- Presentation ---------------------------------------------------------------
 
 local function describeRecord(entry)
-    local letter, color, subtitle = addon.Presentation(entry)
-    local titleColor = entry.category == "quest" and color or nil
-    return entry.title, subtitle, titleColor, nil, letter, color
+    if entry.itemID then
+        return entry.title, entry.subtitle, addon.ItemQualityColor(entry.itemID), addon.ItemIcon(entry.itemID)
+    end
+    local icon, color, subtitle, dim = addon.Presentation(entry)
+    return entry.title, subtitle, color, icon, dim
 end
 
 local function describeItem(itemID)
@@ -282,7 +57,9 @@ local questSubtitles = {}
 
 local function describeQuest(questID)
     local quest = addon.Quest(questID)
-    local style = addon.Quests:Style(addon.Quests:State(questID), "start")
+    local state = addon.Quests:State(questID)
+    local role = (state == "active" or state == "ready") and "turnin" or "start"
+    local style = addon.Quests:Style(state, role)
     local cached = questSubtitles[questID]
     if not cached or cached.style ~= style then
         local parts = {}
@@ -295,14 +72,20 @@ local function describeQuest(questID)
         cached = { style = style, text = table.concat(parts, " · ") }
         questSubtitles[questID] = cached
     end
-    return quest.name, cached.text, style.color
+    local icon, dim = addon.Quests:Icon(state, role)
+    return quest.name, cached.text, style.color, icon, dim
 end
 
 local function recordTooltip(row, entry)
-    local _, _, subtitle = addon.Presentation(entry)
     GameTooltip:SetOwner(row, "ANCHOR_RIGHT")
-    GameTooltip:SetText(entry.title)
-    GameTooltip:AddLine(subtitle, MUTED[1], MUTED[2], MUTED[3])
+    if entry.itemID then
+        GameTooltip:SetItemByID(entry.itemID)
+        GameTooltip:AddLine(entry.subtitle, MUTED[1], MUTED[2], MUTED[3], true)
+    else
+        local _, _, subtitle = addon.Presentation(entry)
+        GameTooltip:SetText(entry.title)
+        GameTooltip:AddLine(subtitle, MUTED[1], MUTED[2], MUTED[3])
+    end
     if entry.questID then
         local requirement = addon.Quests:Requirement(entry.questID)
         if requirement then
@@ -310,7 +93,9 @@ local function recordTooltip(row, entry)
         end
     end
     if entry.x then
-        GameTooltip:AddLine("Right-click to guide the minimap arrow here", HINT[1], HINT[2], HINT[3])
+        GameTooltip:AddLine("Right-click for directions", HINT[1], HINT[2], HINT[3])
+    elseif entry.bossIndex then
+        GameTooltip:AddLine("View boss loot", HINT[1], HINT[2], HINT[3])
     end
     GameTooltip:Show()
 end
@@ -318,7 +103,6 @@ end
 local function itemTooltip(row, itemID)
     GameTooltip:SetOwner(row, "ANCHOR_RIGHT")
     GameTooltip:SetItemByID(itemID)
-    GameTooltip:AddLine("Shift-click to link · Ctrl-click to preview", .6, .64, .71)
     GameTooltip:Show()
 end
 
@@ -363,372 +147,275 @@ local function dungeonFacts(dungeon)
     return table.concat(facts, " · ")
 end
 
-local function createDetail(map)
-    local frame = CreateFrame("Frame", "AeternumDungeonFrame", UIParent)
-    frame:SetPoint("CENTER", map.ScrollContainer or map, "CENTER", 0, 0)
-    frame:SetClampedToScreen(true)
-    surface(frame)
-    frame:Hide()
-    -- Escape closes this panel first and leaves the map open. Blizzard closes
-    -- its windows at a later priority (CloseAllWindows at AddOnPost).
-    if RegisterGameMenuEscHandler then
-        RegisterGameMenuEscHandler(GameMenuEscPriority.AddOn, function()
-            if frame:IsShown() then
-                frame:Hide()
-                return true
-            end
-            return false
-        end)
-    else
-        table.insert(UISpecialFrames, "AeternumDungeonFrame")
-    end
+local function entranceName(point)
+    return ("%s · %.1f, %.1f"):format(addon.ZoneName(point.mapID), point.x * 100, point.y * 100)
+end
 
-    frame.title = singleLine(label(frame, "GameFontNormalLarge"))
-    frame.title:SetPoint("TOPLEFT", 17, -14)
-    frame.title:SetPoint("RIGHT", -36, 0)
-    frame.facts = singleLine(label(frame))
-    frame.facts:SetPoint("TOPLEFT", frame.title, "BOTTOMLEFT", 0, -6)
-    frame.facts:SetPoint("RIGHT", -17, 0)
-    frame.note = singleLine(label(frame, "GameFontDisableSmall"))
-    frame.note:SetPoint("TOPLEFT", frame.facts, "BOTTOMLEFT", 0, -3)
-    frame.note:SetPoint("RIGHT", -17, 0)
-    local close = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
-    close:SetPoint("TOPRIGHT", -2, -2)
-    close:SetScript("OnClick", function() frame:Hide() end)
-    frame:HookScript("OnHide", hideOwnedTooltip)
+local function createDetail(parent)
+    local frame = CreateFrame("Frame", nil, parent)
+    frame:SetAllPoints()
+    frame:Hide()
+
+    frame.minTabWidth = 54
+    frame.tabs = {}
+    local previous
+    for _, spec in ipairs({ {"map", "Map"}, {"loot", "Loot"}, {"quests", "Quests"} }) do
+        local key = spec[1]
+        local tab = CreateFrame("Button", nil, frame, "PanelTopTabButtonTemplate")
+        tab:SetText(spec[2])
+        if previous then
+            tab:SetPoint("LEFT", previous, "RIGHT", 5, 0)
+        else
+            tab:SetPoint("TOPLEFT", 3, 0)
+        end
+        tab:SetScript("OnClick", function() UI:ShowTab(key) end)
+        frame.tabs[key], previous = tab, tab
+    end
+    frame.back = button(frame, "Back", 60, function() UI:Show(nil, true) end)
+    frame.back:SetPoint("TOPRIGHT", -1, -2)
+
+    local info = CreateFrame("Frame", nil, frame)
+    info:SetPoint("TOPLEFT", 4, -32)
+    info:SetPoint("TOPRIGHT", -4, -32)
+    info:SetHeight(19)
+    info:EnableMouse(true)
+    frame.facts = singleLine(label(info))
+    frame.facts:SetAllPoints()
+    info:SetScript("OnEnter", function(self)
+        local dungeon = frame.dungeon
+        if not dungeon then return end
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText(dungeon.name)
+        GameTooltip:AddLine(dungeonFacts(dungeon), 1, 1, 1, true)
+        if dungeon.note then GameTooltip:AddLine(dungeon.note, 1, .82, 0, true) end
+        GameTooltip:Show()
+    end)
+    info:SetScript("OnLeave", hideOwnedTooltip)
 
     frame.floorMap = addon.DungeonMap.Create(frame)
-    frame.floorMap:SetPoint("TOPLEFT", 14, -72)
-    frame.floorMap:SetPoint("BOTTOMLEFT", 14, 70)
+    frame.floorMap:Hide()
+    frame.floorMap:SetPoint("TOPLEFT", 2, -54)
+    frame.floorMap:SetPoint("BOTTOMRIGHT", -2, 30)
 
-    frame.lootTab = button(frame, "Loot", 70, function() UI:ShowTab("loot") end)
-    frame.lootTab:SetPoint("TOPLEFT", frame.floorMap, "TOPRIGHT", 18, 0)
-    frame.questTab = button(frame, "Quests", 70, function() UI:ShowTab("quests") end)
-    frame.questTab:SetPoint("LEFT", frame.lootTab, "RIGHT", 4, 0)
-
-    frame.bossBack = button(frame, "<", 27, function() UI:ChangeBoss(-1) end)
-    frame.bossBack:SetPoint("TOPLEFT", frame.lootTab, "BOTTOMLEFT", 0, -8)
-    frame.bossNext = button(frame, ">", 27, function() UI:ChangeBoss(1) end)
-    frame.bossNext:SetPoint("TOP", frame.bossBack, "TOP")
-    frame.bossNext:SetPoint("RIGHT", -17, 0)
-    frame.bossTitle = singleLine(label(frame))
-    frame.bossTitle:SetPoint("LEFT", frame.bossBack, "RIGHT", 6, 0)
-    frame.bossTitle:SetPoint("RIGHT", frame.bossNext, "LEFT", -4, 0)
-
-    frame.loot = newList(frame, 24, describeItem, { click = openItem, enter = itemTooltip })
-    frame.loot:SetPoint("TOPLEFT", frame.bossBack, "BOTTOMLEFT", 0, -8)
-    frame.loot:SetPoint("BOTTOMRIGHT", -17, 72)
-
+    frame.boss = CreateFrame("DropdownButton", nil, frame, "WowStyle1DropdownTemplate")
+    frame.boss:SetPoint("TOPLEFT", 1, -54)
+    frame.boss:SetPoint("TOPRIGHT", -1, -54)
+    frame.boss:SetupMenu(function(_, menu)
+        menu:SetScrollMode(240)
+        for i, boss in ipairs(frame.dungeon and frame.dungeon.bosses or {}) do
+            menu:CreateRadio(boss.name, function() return frame.bossIndex == i end, function() UI:SetBoss(i) end)
+        end
+    end)
+    frame.loot = newList(frame, 25, describeItem, { click = openItem, enter = itemTooltip })
+    frame.loot:SetPoint("TOPLEFT", frame.boss, "BOTTOMLEFT", 0, -5)
+    frame.loot:SetPoint("BOTTOMRIGHT", -1, 31)
     frame.quests = newList(frame, 34, describeQuest, {
         click = function(questID) UI:ShowQuestStart(questID) end,
         enter = questTooltip,
     })
-    frame.quests:SetPoint("TOPLEFT", frame.lootTab, "BOTTOMLEFT", 0, -8)
-    frame.quests:SetPoint("BOTTOMRIGHT", -17, 72)
+    frame.quests:SetPoint("TOPLEFT", 1, -54)
+    frame.quests:SetPoint("BOTTOMRIGHT", -1, 31)
+    frame.empty = label(frame, "GameFontDisableSmall")
 
-    frame.empty = label(frame)
-
-    frame.route = button(frame, "Guide me", 96, function()
+    frame.route = button(frame, "Guide me", 78, function()
         local entrance = frame.entrances[frame.entranceIndex]
-        if entrance then
-            addon.Navigation:Start(frame.dungeon.name .. " entrance", entrance)
+        if entrance then startGuidance(frame.dungeon.name .. " entrance", entrance) end
+    end)
+    frame.route:SetPoint("BOTTOMRIGHT")
+    frame.entranceText = singleLine(label(frame))
+    frame.entranceText:SetPoint("LEFT", frame, "BOTTOMLEFT", 3, 12)
+    frame.entranceText:SetPoint("RIGHT", frame.route, "LEFT", -5, 0)
+    frame.entranceMenu = CreateFrame("DropdownButton", nil, frame, "WowStyle1DropdownTemplate")
+    frame.entranceMenu:SetPoint("BOTTOMLEFT")
+    frame.entranceMenu:SetPoint("BOTTOMRIGHT", frame.route, "BOTTOMLEFT", -4, 0)
+    frame.entranceMenu:SetupMenu(function(_, menu)
+        for i, entrance in ipairs(frame.entrances or {}) do
+            menu:CreateRadio(entranceName(entrance), function() return frame.entranceIndex == i end,
+                function() UI:SetEntrance(i) end)
         end
     end)
-    frame.route:SetPoint("BOTTOMLEFT", 15, 27)
-    frame.stop = button(frame, "Stop", 52, function() addon.Navigation:Stop() end)
-    frame.stop:SetPoint("LEFT", frame.route, "RIGHT", 6, 0)
-    frame.nextEntrance = button(frame, "Next entrance", 111, function()
-        UI:SetEntrance(frame.entranceIndex % #frame.entrances + 1)
-    end)
-    frame.nextEntrance:SetPoint("LEFT", frame.stop, "RIGHT", 6, 0)
-    frame.entranceText = singleLine(label(frame))
-    frame.entranceText:SetPoint("LEFT", frame.nextEntrance, "RIGHT", 8, 0)
-    frame.entranceText:SetPoint("RIGHT", -14, 0)
-    frame.routeStatus = singleLine(label(frame))
-    frame.routeStatus:SetPoint("BOTTOMLEFT", 16, 10)
-    frame.routeStatus:SetPoint("RIGHT", -14, 0)
-    frame.routeStatus:SetTextColor(unpack(MUTED))
     return frame
-end
-
-local function sizeDetail(frame)
-    frame:SetSize(math.min(750, UIParent:GetWidth() - 38), math.min(510, UIParent:GetHeight() - 34))
-    frame.floorMap:SetWidth(math.floor((frame:GetWidth() - 52) * .58))
 end
 
 function UI:SetEntrance(index)
     local frame = self.detail
-    frame.entranceIndex = index
     local entrance = frame.entrances[index]
+    frame.entranceIndex = index
     frame.route:SetEnabled(entrance ~= nil)
-    frame.nextEntrance:SetShown(#frame.entrances > 1)
-    if entrance then
-        local zone = addon.ZoneName(entrance.mapID)
-        frame.entranceText:SetText(entrance.label and (entrance.label .. " · " .. zone) or zone)
+    local multiple = #frame.entrances > 1
+    frame.entranceMenu:SetShown(multiple)
+    frame.entranceText:SetShown(not multiple)
+    if multiple then
+        frame.entranceMenu:OverrideText(entranceName(entrance))
     else
-        frame.entranceText:SetText("Entrance location not recorded")
+        frame.entranceText:SetText(entrance and (entrance.label or entranceName(entrance)) or "Entrance not recorded")
     end
 end
 
-function UI:ChangeBoss(delta)
+function UI:SetBoss(index)
     local frame = self.detail
-    local bosses = frame.dungeon.bosses
-    frame.bossIndex = (frame.bossIndex - 1 + delta) % #bosses + 1
-    local boss = bosses[frame.bossIndex]
-    hideOwnedTooltip(frame)
-    frame.bossTitle:SetText(("%s (%d/%d)"):format(boss.name, frame.bossIndex, #bosses))
-    frame.bossBack:SetEnabled(#bosses > 1)
-    frame.bossNext:SetEnabled(#bosses > 1)
-    for _, itemID in ipairs(boss.loot) do
-        addon.RequestItem(itemID)
-    end
-    frame.loot:SetEntries(boss.loot)
-    self:UpdateEmpty()
-end
-
-function UI:UpdateEmpty()
-    local frame = self.detail
-    local loot = frame.tab == "loot"
-    local list = loot and frame.loot or frame.quests
-    frame.empty:ClearAllPoints()
-    frame.empty:SetPoint("TOPLEFT", list, "TOPLEFT", 5, -5)
-    frame.empty:SetText(loot and "No loot recorded for this boss." or "No quests recorded for this dungeon.")
-    frame.empty:SetShown(#list:GetEntries() == 0)
+    local boss = frame.dungeon.bosses[index]
+    frame.bossIndex = index
+    frame.boss:OverrideText(boss and boss.name or "No bosses recorded")
+    frame.boss:SetEnabled(#frame.dungeon.bosses > 1)
+    local loot = boss and boss.loot or {}
+    for _, itemID in ipairs(loot) do addon.RequestItem(itemID) end
+    frame.loot:SetEntries(loot)
+    frame.empty:SetShown(#loot == 0)
 end
 
 function UI:ShowTab(tab)
     local frame = self.detail
-    local loot = tab == "loot"
     frame.tab = tab
-    frame.lootTab:SetEnabled(not loot)
-    frame.questTab:SetEnabled(loot)
-    for _, widget in ipairs({ frame.bossBack, frame.bossNext, frame.bossTitle, frame.loot }) do
-        widget:SetShown(loot)
+    for key, control in pairs(frame.tabs) do
+        if key == tab then PanelTemplates_SelectTab(control) else PanelTemplates_DeselectTab(control) end
     end
-    frame.quests:SetShown(not loot)
-    hideOwnedTooltip(frame)
-    if loot then
-        frame.loot:Refresh()
-    else
-        frame.quests:SetEntries(frame.dungeon.quests)
+    if tab == "map" then frame.floorMap:SetDungeon(frame.dungeon) end
+    frame.floorMap:SetShown(tab == "map")
+    frame.boss:SetShown(tab == "loot")
+    frame.loot:SetShown(tab == "loot")
+    frame.quests:SetShown(tab == "quests")
+    frame.empty:Hide()
+    if tab ~= "map" then
+        local loot = tab == "loot"
+        local list = loot and frame.loot or frame.quests
+        frame.empty:ClearAllPoints()
+        frame.empty:SetPoint("TOPLEFT", list, "TOPLEFT", 4, -5)
+        frame.empty:SetText(loot and "No loot recorded for this boss." or "No quests recorded for this dungeon.")
+        if loot then
+            self:SetBoss(frame.bossIndex)
+        else
+            frame.quests:SetEntries(frame.dungeon.quests)
+            frame.empty:SetShown(#frame.dungeon.quests == 0)
+        end
     end
-    self:UpdateEmpty()
 end
 
 function UI:OpenDungeon(entry)
-    if not self.detail then
-        self.detail = createDetail(self.map)
-        self:OnNavigation(addon.Navigation:GetStatus())
-    end
-    local frame = self.detail
-    local dungeon = entry.source
-    frame.dungeon = dungeon
-    frame.entrances = {}
-    local faction = UnitFactionGroup("player")
-    local selectedIndex = 1
+    self:EnsureWindow()
+    if not self.detail then self.detail = createDetail(self.content) end
+    local frame, dungeon = self.detail, entry.source
+    if not frame:IsShown() then self.fromBrowse = self:IsBrowsing() end
+    self.sidebar:Hide()
+    frame.floorMap:Hide()
+    frame.dungeon, frame.bossIndex, frame.entrances = dungeon, entry.bossIndex or 1, {}
+    local faction, mapID = UnitFactionGroup("player"), self.map:GetMapID()
+    local preferred, index = entry.point, 1
     for _, entrance in ipairs(dungeon.entrances) do
         if addon.FactionAllowed(entrance, faction) then
             frame.entrances[#frame.entrances + 1] = entrance
-            if entrance == entry.point then
-                selectedIndex = #frame.entrances
-            end
+            if not preferred and entrance.mapID == mapID then preferred = entrance end
+            if entrance == preferred then index = #frame.entrances end
         end
     end
-    frame.title:SetText(dungeon.name)
+    self.window.TitleText:SetText(dungeon.name)
+    frame.back:SetText(self.fromBrowse and "Back" or "Browse")
     frame.facts:SetText(dungeonFacts(dungeon))
-    frame.note:SetText(dungeon.note or "")
-    frame.bossIndex = 1
-    sizeDetail(frame)
-    self:Layer()
     frame:Show()
-    frame.floorMap:SetDungeon(dungeon)
-    self:ChangeBoss(0)
-    self:ShowTab("loot")
-    self:SetEntrance(selectedIndex)
+    if not self:IsOpen() then self:Layer() end
+    self.window:Show()
+    self:SetEntrance(index)
+    self:ShowTab(not entry.bossIndex and addon.DungeonMap.HasFloors(dungeon) and "map" or "loot")
+    if entry.itemID then frame.loot:Reveal(entry.itemID) end
+    addon.RefreshMap()
 end
 
 function UI:ShowQuestStart(questID)
     local start = addon.QuestStart(questID)
-    if not start then
-        return
-    end
-    self.detail:Hide()
-    if self.map:GetMapID() ~= start.mapID then
-        self.map:SetMapID(start.mapID)
-    end
+    if not start then return end
+    self:Show(false)
+    self.sidebar.search:SetText("")
+    if self.map:GetMapID() ~= start.mapID then self.map:SetMapID(start.mapID) end
     self:Select(start)
 end
 
--- Called when the client finishes loading an item's data.
 function UI:OnItemInfo(itemID)
-    local frame = self.detail
-    if not frame or not frame:IsShown() then
+    if self:IsBrowsing() and self:IsAtlas() then
+        local list = self.sidebar.list
+        for _, row in ipairs(list.rows) do
+            if row.entry and row.entry.itemID == itemID then list:Refresh() break end
+        end
         return
     end
-    local function contains(list)
-        for _, candidate in ipairs(list) do
-            if candidate == itemID then
-                return true
-            end
+    local frame = self.detail
+    if not frame or not frame:IsVisible() then return end
+    if frame.tab == "loot" then
+        for _, id in ipairs(frame.loot:GetEntries()) do
+            if id == itemID then frame.loot:Refresh() break end
         end
     end
-    if contains(frame.loot:GetEntries()) then
-        frame.loot:Refresh()
+    for _, id in ipairs(frame.dungeon.keys) do
+        if id == itemID then frame.facts:SetText(dungeonFacts(frame.dungeon)) break end
     end
-    if contains(frame.dungeon.keys) then
-        frame.facts:SetText(dungeonFacts(frame.dungeon))
-    end
-end
-
--- Sidebar --------------------------------------------------------------------
-
-local function guideName(entry)
-    if entry.category == "dungeon" then
-        return entry.title .. " entrance"
-    end
-    return entry.title
 end
 
 function UI:Select(entry)
-    if entry.category == "dungeon" then
-        self:OpenDungeon(entry)
-    end
+    if entry.category == "dungeon" then self:OpenDungeon(entry) end
     self.selected = entry.x and entry or nil
     self:UpdateSelection()
     addon.HighlightPin(self.selected)
 end
 
-function UI:UpdateSelection()
-    local panel = self.sidebar
-    local entry = self.selected
-    if entry then
-        panel.selection:SetText(("%s · %.1f, %.1f"):format(entry.title, 100 * entry.x, 100 * entry.y))
-    else
-        panel.selection:SetText(panel.summary or "")
-    end
-    panel.guide:SetEnabled(entry ~= nil)
-end
-
 function UI:Guide(entry)
     entry = entry or self.selected
     if entry and entry.point then
-        addon.Navigation:Start(guideName(entry), entry.point)
+        local name = entry.category == "dungeon" and (entry.title .. " entrance") or entry.title
+        startGuidance(name, entry.point)
     end
 end
 
-function UI:SyncSettings()
-    local panel = self.sidebar
-    local settings = addon.settings
-    for _, check in ipairs(panel.checks) do
-        check:SetChecked(addon.CategoryEnabled(check.category))
-    end
-    panel.allQuests:SetChecked(settings.questMode == "all")
-    panel.lowLevel:SetChecked(settings.lowLevelQuests)
-    setCheckEnabled(panel.lowLevel, settings.questMode ~= "all")
-end
-
-local function setAtlas(panel, atlas)
-    panel.atlas = atlas
-    panel.mode:SetText(atlas and "Current map" or "All dungeons")
-    for _, check in ipairs(panel.options) do
-        check:SetShown(not atlas)
-    end
-    panel.heading:ClearAllPoints()
-    panel.heading:SetPoint("TOPLEFT", 11, atlas and -68 or -132)
-    panel.heading:SetPoint("RIGHT", -10, 0)
-end
-
--- Places the sidebar beside the map when the screen has room, otherwise inside
--- the right edge of the map canvas, and keeps both panels above the map, whose
--- strata changes when it is maximised.
-function UI:Layer()
-    local map, panel = self.map, self.sidebar
-    local canvas = map.ScrollContainer or map
-    local scale = map:GetEffectiveScale() / UIParent:GetEffectiveScale()
-    local right = map:GetRight()
-    local room = right and UIParent:GetWidth() - right * scale or 0
-    local outside = room >= PANEL_WIDTH + 8
-    if self.docked ~= outside then
-        self.docked = outside
-        panel:ClearAllPoints()
-        if outside then
-            panel:SetPoint("TOPLEFT", map, "TOPRIGHT", 4, 0)
-            panel:SetPoint("BOTTOMLEFT", map, "BOTTOMRIGHT", 4, 0)
-        else
-            panel:SetPoint("TOPRIGHT", canvas, "TOPRIGHT", -6, -34)
-            panel:SetPoint("BOTTOMRIGHT", canvas, "BOTTOMRIGHT", -6, 34)
-        end
-    end
-    panel:SetFrameStrata(strataAbove(map, 1))
-    self.toggle:SetFrameStrata(strataAbove(map, 1))
-    if self.detail then
-        self.detail:SetFrameStrata(strataAbove(map, 2))
-    end
-end
-
-function UI:Attach(map)
-    self.map = map
-    local panel = CreateFrame("Frame", nil, UIParent)
-    self.sidebar = panel
-    panel:SetWidth(PANEL_WIDTH)
-    panel:SetClampedToScreen(true)
-    surface(panel)
-    panel:Hide()
-    panel:HookScript("OnHide", function()
-        if self.detail then
-            self.detail:Hide()
-        end
+-- Both dropdowns edit the same preferences. The client owns their lifetime and focus.
+local function addFilters(menu)
+    menu:CreateCheckbox("Show pins on map", function() return addon.settings.showMapPins end, function()
+        addon.settings.showMapPins = not addon.settings.showMapPins
+        addon.RefreshMap(true)
     end)
-
-    local title = label(panel, "GameFontNormalLarge")
-    title:SetPoint("TOPLEFT", 10, -11)
-    title:SetText("Aeternum")
-    panel.mode = button(panel, "All dungeons", 105, function()
-        setAtlas(panel, not panel.atlas)
-        addon.RefreshMap()
-    end)
-    panel.mode:SetPoint("TOPRIGHT", -9, -8)
-
-    panel.search = CreateFrame("EditBox", nil, panel, "SearchBoxTemplate")
-    panel.search:SetPoint("TOPLEFT", 16, -38)
-    panel.search:SetPoint("TOPRIGHT", -11, -38)
-    panel.search:SetHeight(20)
-    panel.search:SetMaxLetters(70)
-    panel.search.Instructions:SetText("Search names and places")
-    panel.search:HookScript("OnTextChanged", function() addon.RefreshMap() end)
-
-    panel.checks, panel.options = {}, {}
-    for index, category in ipairs(addon.categories) do
-        local check = checkbox(panel, category.label, category.color, function(control)
-            addon.settings.filters[category.id] = not not control:GetChecked()
+    menu:CreateDivider()
+    for _, category in ipairs(addon.categories) do
+        local id = category.id
+        menu:CreateCheckbox(category.label, function() return addon.CategoryEnabled(id) end, function()
+            addon.settings.filters[id] = not addon.CategoryEnabled(id)
             addon.RefreshMap()
         end)
-        check.category = category.id
-        local column = (index - 1) % 2
-        local row = math.floor((index - 1) / 2)
-        check:SetPoint("TOPLEFT", 8 + column * 121, -63 - row * 20)
-        panel.checks[#panel.checks + 1] = check
-        panel.options[#panel.options + 1] = check
     end
-    panel.allQuests = checkbox(panel, "All quests", MUTED, function(control)
-        addon.settings.questMode = control:GetChecked() and "all" or "available"
-        UI:SyncSettings()
+    menu:CreateDivider()
+    menu:CreateCheckbox("All quest locations", function() return addon.settings.questMode == "all" end, function()
+        addon.settings.questMode = addon.settings.questMode == "all" and "available" or "all"
         addon.RefreshMap()
     end)
-    panel.allQuests:SetPoint("TOPLEFT", 8, -105)
-    panel.lowLevel = checkbox(panel, "Low-level quests", MUTED, function(control)
-        addon.settings.lowLevelQuests = not not control:GetChecked()
+    local low = menu:CreateCheckbox("Low-level quests", function() return addon.settings.lowLevelQuests end, function()
+        addon.settings.lowLevelQuests = not addon.settings.lowLevelQuests
         addon.RefreshMap()
     end)
-    panel.lowLevel:SetPoint("TOPLEFT", 129, -105)
-    panel.options[#panel.options + 1] = panel.allQuests
-    panel.options[#panel.options + 1] = panel.lowLevel
+    low:SetEnabled(addon.settings.questMode ~= "all")
+end
 
-    panel.heading = singleLine(label(panel, "GameFontNormal"))
-    panel.list = newList(panel, 34, describeRecord, {
+local function createBrowser(content)
+    local panel = CreateFrame("Frame", nil, content)
+    panel:SetAllPoints()
+    panel.atlas = false
+    panel.search = CreateFrame("EditBox", nil, panel, "SearchBoxTemplate")
+    panel.search:SetHeight(22)
+    panel.search:SetMaxLetters(70)
+    panel.search.Instructions:SetText("Search this map")
+    panel.search:HookScript("OnTextChanged", function()
+        if not UI:IsBrowsing() or panel.changingScope then return end
+        if panel.atlas then
+            local mapID = UI.map:GetMapID()
+            UI:UpdateEntries(addon.Entries(mapID, true, panel.search:GetText()), mapID, 0)
+        else
+            addon.RefreshMap()
+        end
+    end)
+    panel.filter = CreateFrame("DropdownButton", nil, panel, "WowStyle1FilterDropdownTemplate")
+    panel.filter:SetPoint("TOPRIGHT", -4, -4)
+    panel.filter:SetupMenu(function(_, menu) addFilters(menu) end)
+    panel.list = newList(panel, 32, describeRecord, {
         click = function(entry, mouseButton)
             if mouseButton == "RightButton" then
                 UI:Guide(entry)
+            elseif entry.itemID and IsModifiedClick() then
+                openItem(entry.itemID)
             else
                 UI:Select(entry)
             end
@@ -737,124 +424,211 @@ function UI:Attach(map)
             recordTooltip(row, entry)
             addon.HighlightPin(entry)
         end,
-        leave = function()
-            addon.HighlightPin(UI.selected)
-        end,
+        leave = function() addon.HighlightPin(UI.selected) end,
     })
-    panel.list:SetPoint("TOPLEFT", panel.heading, "BOTTOMLEFT", -3, -6)
-    panel.list:SetPoint("BOTTOMRIGHT", -6, 62)
+    panel.list:SetPoint("TOPLEFT", 0, -33)
+    panel.list:SetPoint("BOTTOMRIGHT", 0, 49)
+    panel.selection = singleLine(label(panel, "GameFontDisableSmall"))
+    panel.selection:SetPoint("BOTTOMLEFT", 3, 28)
+    panel.selection:SetPoint("BOTTOMRIGHT", -3, 28)
+    panel.mode = button(panel, "All dungeons", 105, function() UI:Show(not panel.atlas) end)
+    panel.mode:SetPoint("BOTTOMLEFT")
+    panel.guide = button(panel, "Guide", 72, function() UI:Guide() end)
+    panel.guide:SetPoint("BOTTOMRIGHT")
+    return panel
+end
 
-    panel.guide = button(panel, "Guide", 58, function() UI:Guide() end)
-    panel.guide:SetPoint("BOTTOMRIGHT", -9, 34)
-    panel.selection = singleLine(label(panel))
-    panel.selection:SetPoint("LEFT", panel, "BOTTOMLEFT", 11, 45)
-    panel.selection:SetPoint("RIGHT", panel.guide, "LEFT", -6, 0)
-    panel.selection:SetTextColor(unpack(TEXT))
+function UI:UpdateSelection()
+    local panel, entry = self.sidebar, self.selected
+    if not panel then return end
+    panel.selection:SetText(entry and ("%s · %.1f, %.1f"):format(entry.title, entry.x * 100, entry.y * 100)
+        or panel.summary or "")
+    panel.guide:SetShown(entry ~= nil)
+    panel.list:SetSelection(entry)
+end
 
-    panel.stop = button(panel, "Stop", 58, function() addon.Navigation:Stop() end)
-    panel.stop:SetPoint("BOTTOMRIGHT", -9, 8)
-    panel.status = singleLine(label(panel))
-    panel.status:SetPoint("LEFT", panel, "BOTTOMLEFT", 11, 19)
-    panel.status:SetPoint("RIGHT", panel.stop, "LEFT", -6, 0)
-    panel.status:SetTextColor(unpack(MUTED))
+function UI:EnsureWindow()
+    if self.window then return end
+    local window = CreateFrame("Frame", "AeternumGuideFrame", UIParent, "BasicFrameTemplateWithInset")
+    self.window = window
+    window:Hide()
+    window:SetClampedToScreen(true)
+    window:SetMovable(true)
+    window:SetDontSavePosition(true)
+    window:EnableMouse(true)
+    window.TitleText:ClearAllPoints()
+    window.TitleText:SetPoint("TOPLEFT", 12, -5)
+    window.TitleText:SetPoint("TOPRIGHT", -30, -5)
+    window.TitleText:SetWordWrap(false)
+    window.CloseButton:SetScript("OnClick", function() self:Hide() end)
+    local title = CreateFrame("Frame", nil, window)
+    title:SetPoint("TOPLEFT", 3, -1)
+    title:SetPoint("TOPRIGHT", -27, -1)
+    title:SetHeight(19)
+    title:EnableMouse(true)
+    title:RegisterForDrag("LeftButton")
+    title:SetScript("OnDragStart", function() window:StartMoving() end)
+    title:SetScript("OnDragStop", function() window:StopMovingOrSizing() end)
 
-    self.toggle = button(map, "Aeternum", 91, function() UI:Toggle() end)
-    self.toggle:SetPoint("TOPRIGHT", map.ScrollContainer or map, "TOPRIGHT", -6, -6)
-
-    -- The sidebar sits outside the map's frame, so it follows the map's visibility.
-    -- The map refreshes its data providers in its own OnShow, before this hook,
-    -- so the pins are drawn again once the panel is back.
-    map:HookScript("OnShow", function()
-        if addon.settings.panelOpen then
-            UI:Layer()
-            panel:Show()
-            addon.RefreshMap()
-        end
-    end)
-    map:HookScript("OnHide", function()
-        panel:Hide()
-        if self.detail then
-            self.detail:Hide()
-        end
-    end)
-    map:HookScript("OnSizeChanged", function() UI:Layer() end)
-
-    addon.Navigation:AddListener(function(status) UI:OnNavigation(status) end)
+    self.content = CreateFrame("Frame", nil, window)
+    self.tracking = CreateFrame("Frame", nil, window)
+    self.tracking:SetPoint("BOTTOMLEFT", 10, 8)
+    self.tracking:SetPoint("BOTTOMRIGHT", -10, 8)
+    self.tracking:SetHeight(23)
+    self.stop = button(self.tracking, "Stop", 52, function() addon.Navigation:Stop() end)
+    self.stop:SetPoint("RIGHT")
+    self.status = singleLine(label(self.tracking))
+    self.status:SetPoint("LEFT", 2, 0)
+    self.status:SetPoint("RIGHT", self.stop, "LEFT", -6, 0)
+    self.sidebar = createBrowser(self.content)
+    self.sidebar:Hide()
     self:OnNavigation(addon.Navigation:GetStatus())
-    setAtlas(panel, false)
-    self:SyncSettings()
-    self:UpdateSelection()
-    self:Layer()
-    if addon.settings.panelOpen and map:IsShown() then
-        panel:Show()
+    if RegisterGameMenuEscHandler then
+        RegisterGameMenuEscHandler(GameMenuEscPriority.AddOn, function()
+            if not self:IsOpen() then return false end
+            if self.detail and self.detail:IsShown() and self.fromBrowse then self:Show(nil, true) else self:Hide() end
+            return true
+        end)
+    else
+        table.insert(UISpecialFrames, "AeternumGuideFrame")
     end
+    -- The fallback Escape handler and external Hide calls take the same path as Close.
+    window:HookScript("OnHide", function()
+        window:StopMovingOrSizing()
+        self.selected, self.fromBrowse = nil, nil
+        self.sidebar:Hide()
+        if self.detail then self.detail:Hide() end
+        addon.RefreshMap()
+    end)
 end
 
 function UI:OnNavigation(status)
+    if not self.window then return end
     local active = addon.Navigation:IsActive()
-    self.sidebar.status:SetText(status)
-    self.sidebar.stop:SetEnabled(active)
-    if self.detail then
-        self.detail.routeStatus:SetText(status)
-        self.detail.stop:SetEnabled(active)
+    self.status:SetText(active and status or "")
+    if active ~= self.trackingActive then
+        self.trackingActive = active
+        self.tracking:SetShown(active)
+        self.content:ClearAllPoints()
+        self.content:SetPoint("TOPLEFT", self.window, "TOPLEFT", 10, -27)
+        self.content:SetPoint("BOTTOMRIGHT", self.window, "BOTTOMRIGHT", -10, active and 36 or 8)
     end
 end
 
-function UI:Show()
-    addon.settings.panelOpen = true
-    self:Layer()
-    self.sidebar:Show()
-    addon.RefreshMap()
+-- Only our own window is anchored. All measurements below are in UIParent units.
+function UI:Layer()
+    if not self.window then return end
+    local map, window = self.map, self.window
+    local canvas = map.ScrollContainer or map
+    local scale = map:GetEffectiveScale() / UIParent:GetEffectiveScale()
+    local screenWidth, screenHeight = UIParent:GetSize()
+    local width = math.min(328, screenWidth - 20)
+    local left, right = map:GetLeft(), map:GetRight()
+    local outsideRight = right and screenWidth - right * scale >= width + 8
+    local outsideLeft = left and left * scale >= width + 8
+    local height = (outsideRight or outsideLeft) and 382 or 334
+    window:SetSize(math.max(1, width), math.max(1, math.min(height, screenHeight - 40)))
+    window:ClearAllPoints()
+    if outsideRight then
+        window:SetPoint("TOPLEFT", map, "TOPRIGHT", 5, -2)
+    elseif outsideLeft then
+        window:SetPoint("TOPRIGHT", map, "TOPLEFT", -5, -2)
+    else
+        window:SetPoint("TOPRIGHT", canvas, "TOPRIGHT", -8, -40)
+    end
+    local strata = map:GetFrameStrata()
+    window:SetFrameStrata((strata == "FULLSCREEN" or strata == "FULLSCREEN_DIALOG") and "FULLSCREEN_DIALOG" or "DIALOG")
+    window:SetFrameLevel(map:GetFrameLevel() + 10)
+end
+
+function UI:Attach(map)
+    self.map = map
+    if Menu and Menu.ModifyMenu then
+        Menu.ModifyMenu("MENU_WORLD_MAP_TRACKING", function(_, root)
+            local menu = root:CreateButton("Aeternum")
+            menu:CreateButton("Browse this map", function() self:Show(false) end)
+            menu:CreateButton("Dungeon guide", function() self:Show(true) end)
+            menu:CreateDivider()
+            addFilters(menu)
+            if addon.Navigation:IsActive() then
+                menu:CreateDivider()
+                menu:CreateButton("Stop guidance", function() addon.Navigation:Stop() end)
+            end
+        end)
+    end
+    map:HookScript("OnHide", function() self:Hide() end)
+    map:HookScript("OnSizeChanged", function() if self:IsOpen() then self:Layer() end end)
+    addon.Navigation:AddListener(function(status) self:OnNavigation(status) end)
+end
+
+function UI:Show(atlas, keepScroll)
+    self:EnsureWindow()
+    local panel = self.sidebar
+    if self.detail then self.detail:Hide() end
+    if atlas ~= nil and atlas ~= panel.atlas then
+        panel.changingScope = true
+        local old = panel.search:GetText()
+        panel.atlas = atlas
+        panel.search:SetText(panel.otherSearch or "")
+        panel.otherSearch = old
+        panel.changingScope = false
+        self.selected = nil
+    end
+    panel.filter:SetShown(not panel.atlas)
+    panel.search:ClearAllPoints()
+    panel.search:SetPoint("TOPLEFT", 5, -3)
+    if panel.atlas then
+        panel.search:SetPoint("TOPRIGHT", -5, -3)
+    else
+        panel.search:SetPoint("TOPRIGHT", panel.filter, "TOPLEFT", -9, 1)
+    end
+    panel.search.Instructions:SetText(panel.atlas and "Dungeon, boss or item" or "Search this map")
+    panel.mode:SetText(panel.atlas and "Current map" or "All dungeons")
+    self.fromBrowse = nil
+    if not self:IsOpen() then self:Layer() end
+    self.window:Show()
+    panel:Show()
+    addon.RefreshMap(keepScroll)
 end
 
 function UI:Hide()
-    addon.settings.panelOpen = false
-    self.sidebar:Hide()
-    addon.RefreshMap()
-end
-
-function UI:Toggle()
-    if self.sidebar:IsShown() then
-        self:Hide()
-    else
-        self:Show()
-    end
+    if self.window then self.window:Hide() end
 end
 
 function UI:IsOpen()
-    return self.sidebar ~= nil and self.sidebar:IsShown()
+    return self.window ~= nil and self.window:IsShown()
 end
 
-function UI:IsAtlas()
-    return self.sidebar.atlas
+function UI:IsBrowsing()
+    return self:IsOpen() and self.sidebar:IsShown()
 end
 
-function UI:GetSearch()
-    return self.sidebar.search:GetText()
-end
+function UI:IsAtlas() return self.sidebar and self.sidebar.atlas end
+function UI:GetSearch() return self.sidebar.search:GetText() end
 
--- hidden counts the map locations left off past the pin limit.
 function UI:UpdateEntries(entries, mapID, hidden, keepScroll)
     local panel = self.sidebar
-    panel.heading:SetText(panel.atlas and "Dungeon atlas" or addon.ZoneName(mapID))
-    local summary = #entries == 0 and "Nothing matches here" or ("%d results"):format(#entries)
-    if hidden and hidden > 0 then
-        summary = ("%s · %d locations not drawn"):format(summary, hidden)
-    end
-    panel.summary = summary
-    if self.selected and self.selected.mapID ~= mapID then
+    self.window.TitleText:SetText(panel.atlas and "Dungeon guide" or addon.ZoneName(mapID))
+    local count = #entries
+    panel.summary = count == 0 and "No results" or ("%d %s"):format(count, count == 1 and "result" or "results")
+    if hidden > 0 and not panel.atlas then panel.summary = ("%s · %d off map"):format(panel.summary, hidden) end
+    if self.selected then
+        local selected = self.selected
         self.selected = nil
+        for _, entry in ipairs(entries) do
+            if entry == selected then
+                self.selected = entry
+                break
+            end
+        end
     end
-    self:UpdateSelection()
     panel.list:SetEntries(entries, keepScroll)
+    self:UpdateSelection()
 end
 
--- Redraws list rows whose quest states may have changed.
 function UI:RefreshStates()
-    if self.sidebar and self.sidebar:IsVisible() then
-        self.sidebar.list:Refresh()
-    end
-    if self.detail and self.detail:IsVisible() and self.detail.tab == "quests" then
+    if self:IsBrowsing() then self.sidebar.list:Refresh() end
+    if self:IsOpen() and self.detail and self.detail:IsShown() and self.detail.tab == "quests" then
         self.detail.quests:Refresh()
     end
 end

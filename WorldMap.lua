@@ -1,232 +1,211 @@
 local _, addon = ...
 
 local TEMPLATE = "AeternumMapPinTemplate"
-local PIN_LIMIT = 150
-local PIN_SIZE, SELECTED_PIN_SIZE = 18, 24
-local TOOLTIP_ROWS = 4
-local provider
+local PIN_LIMIT, PIN_SIZE, FOCUS_SIZE = 150, 16, 22
+local provider, highlightedPin, previewPin
 local pins = {}
-
--- XML resolves this mixin when MapCanvas creates the first pin.
 AeternumMapPinMixin = {}
 
 function pins:OnLoad()
     self:UseFrameLevelType("PIN_FRAME_LEVEL_AREA_POI")
-    -- Keep a steady on-screen size, growing slightly as the map zooms in.
     self:SetScalingLimits(1, 1, 1.2)
-    local outline = self:CreateTexture(nil, "BACKGROUND")
-    outline:SetAllPoints()
-    outline:SetColorTexture(.06, .07, .1, .95)
-    local field = self:CreateTexture(nil, "ARTWORK")
-    field:SetPoint("TOPLEFT", 1, -1)
-    field:SetPoint("BOTTOMRIGHT", -1, 1)
-    self.field = field
-    self.letter = self:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    self.letter:SetPoint("CENTER", 0, 1)
-    self.letter:SetTextColor(.08, .09, .12)
+    self.icon = self:CreateTexture(nil, "ARTWORK")
+    self.icon:SetAllPoints()
 end
 
 function pins:UpdateStyle()
-    local letter, color = addon.Presentation(self.entry)
-    local red, green, blue = unpack(color)
-    self.field:SetColorTexture(red, green, blue, .96)
-    self.letter:SetText(letter)
+    local icon, _, _, dim = addon.Presentation(self.entry)
+    addon.SetIcon(self.icon, icon, dim)
 end
 
 function pins:OnAcquired(entries)
-    local entry = entries[1]
-    self.entry = entry
-    self.entries = entries
+    self.entries, self.entry = entries, entries[1]
     self:SetSize(PIN_SIZE, PIN_SIZE)
     self:UpdateStyle()
-    self:SetPosition(entry.x, entry.y)
+    self:SetPosition(self.entry.x, self.entry.y)
 end
 
 function pins:OnReleased()
-    if GameTooltip:IsOwned(self) then
-        GameTooltip:Hide()
-    end
-    self.entry = nil
-    self.entries = nil
+    if GameTooltip:IsOwned(self) then GameTooltip:Hide() end
+    if self == highlightedPin then highlightedPin = nil end
+    if self == previewPin then previewPin = nil end
+    self.entry, self.entries = nil, nil
     MapCanvasPinMixin.OnReleased(self)
 end
 
 function pins:OnMouseEnter()
     local entry = self.entry
-    if not entry then
-        return
-    end
+    if not entry then return end
     local _, _, subtitle = addon.Presentation(entry)
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
     GameTooltip:SetText(entry.title)
-    GameTooltip:AddLine(subtitle, .84, .85, .9)
+    GameTooltip:AddLine(subtitle, 1, 1, 1)
     if entry.questID then
         local requirement = addon.Quests:Requirement(entry.questID)
-        if requirement then
-            GameTooltip:AddLine(requirement, .75, .78, .83)
-        end
+        if requirement then GameTooltip:AddLine(requirement, .8, .8, .8, true) end
     end
-    for index = 2, math.min(TOOLTIP_ROWS, #self.entries) do
-        local other = self.entries[index]
-        local _, color = addon.Presentation(other)
-        GameTooltip:AddLine(other.title, color[1], color[2], color[3])
+    local action
+    if #self.entries > 1 then
+        action = ("Choose from %d at this location"):format(#self.entries)
+    elseif entry.category == "dungeon" then
+        action = "Open dungeon guide"
+    else
+        action = "Guide to this location"
     end
-    if #self.entries > TOOLTIP_ROWS then
-        GameTooltip:AddLine(("+%d more at this location"):format(#self.entries - TOOLTIP_ROWS), .75, .78, .83)
-    end
-    if entry.category == "dungeon" then
-        GameTooltip:AddLine("Click for floors, bosses, loot, and quests", 1, .82, .45)
-    end
-    GameTooltip:AddLine("Right-click to guide the minimap arrow here", 1, .82, .45)
+    GameTooltip:AddLine(action, 1, .82, 0)
     GameTooltip:Show()
 end
 
 function pins:OnMouseLeave()
-    if GameTooltip:IsOwned(self) then
-        GameTooltip:Hide()
+    if GameTooltip:IsOwned(self) then GameTooltip:Hide() end
+end
+
+-- The template sets right-button passthrough once. Our pins never need the
+-- canvas to change that protected frame setting when a pin is recycled in combat.
+function pins:CheckMouseButtonPassthrough() end
+
+local function pick(entry)
+    if entry.category == "dungeon" then
+        addon.UI:Select(entry)
+    else
+        addon.UI:Guide(entry)
     end
 end
 
--- The canvas makes pins pass right-clicks through to zoom the map out, using
--- SetPassThroughButtons, which is protected: from an add-on it fails in combat.
--- Pins keep their right-clicks instead, to start guidance.
-function pins:SetPassThroughButtons() end
-
 function pins:OnMouseClickAction(button)
-    if not self.entry then
+    if button ~= "LeftButton" or not self.entry then return end
+    if #self.entries == 1 then
+        pick(self.entry)
         return
     end
-    if button == "RightButton" then
-        addon.UI:Guide(self.entry)
-    elseif button == "LeftButton" then
-        addon.UI:Select(self.entry)
-    end
+    local entries = self.entries
+    MenuUtil.CreateContextMenu(self, function(_, menu)
+        menu:CreateTitle("At this location")
+        menu:SetScrollMode(260)
+        for _, entry in ipairs(entries) do
+            local title = entry.title
+            if entry.questID then
+                title = title .. (entry.role == "turnin" and " (turn-in)" or " (start)")
+            end
+            menu:CreateButton(title, function() pick(entry) end)
+        end
+    end)
 end
 
 local providerMethods = {}
 
 function providerMethods:RemoveAllData()
-    self:GetMap():RemoveAllPinsByTemplate(TEMPLATE)
+    local map = self:GetMap()
+    if map:GetNumActivePinsByTemplate(TEMPLATE) > 0 then map:RemoveAllPinsByTemplate(TEMPLATE) end
+    self.drawn = nil
 end
 
-local function showPins()
-    return addon.UI:IsOpen() or addon.settings.pinsWithPanelClosed
-end
-
--- Groups records that share a location so each spot gets one pin, and counts
--- the locations left off past the pin limit.
-local function locations(entries)
-    local byPosition, result, hidden = {}, {}, 0
+local function drawLocations(map, entries)
+    local groups, positions, hidden = {}, {}, 0
     for _, entry in ipairs(entries) do
-        local position = ("%0.3f:%0.3f"):format(entry.x, entry.y)
-        local group = byPosition[position]
+        local position = ("%.3f:%.3f"):format(entry.x, entry.y)
+        local group = positions[position]
         if group then
             group[#group + 1] = entry
-        elseif #result < PIN_LIMIT then
-            group = { entry }
-            result[#result + 1] = group
-            byPosition[position] = group
-        else
-            byPosition[position] = {}
-            hidden = hidden + 1
+        elseif group == nil then
+            if #groups < PIN_LIMIT then
+                group = { entry }
+                groups[#groups + 1] = group
+                positions[position] = group
+            else
+                positions[position] = false
+                hidden = hidden + 1
+            end
         end
     end
-    return result, hidden
+    for _, group in ipairs(groups) do map:AcquirePin(TEMPLATE, group) end
+    return hidden
 end
 
-local function pinEntries(map)
-    local query = addon.UI:IsOpen() and not addon.UI:IsAtlas() and addon.UI:GetSearch() or ""
+local function mapEntries(map)
+    local ui = addon.UI
+    local query = ui:IsBrowsing() and not ui:IsAtlas() and ui:GetSearch() or ""
     return addon.Entries(map:GetMapID(), false, query)
-end
-
-local function sameEntries(a, b)
-    if not a or not b or #a ~= #b then
-        return false
-    end
-    for index = 1, #a do
-        if a[index] ~= b[index] then
-            return false
-        end
-    end
-    return true
 end
 
 local function refresh(self, keepScroll)
     self:RemoveAllData()
-    self.drawn = nil
-    local map = self:GetMap()
-    if not map:IsShown() or not showPins() then
-        return
+    local map, ui = self:GetMap(), addon.UI
+    if not map:IsShown() then return end
+    local browsing = ui:IsBrowsing()
+    local showPins = addon.settings.showMapPins
+    if showPins or (browsing and not ui:IsAtlas()) then self.drawn = mapEntries(map) end
+    local hidden = showPins and drawLocations(map, self.drawn) or 0
+    if browsing then
+        local listed = ui:IsAtlas() and addon.Entries(map:GetMapID(), true, ui:GetSearch()) or self.drawn
+        ui:UpdateEntries(listed, map:GetMapID(), hidden, keepScroll)
     end
-    addon.UI:Layer()
-    local mapID = map:GetMapID()
-    local entries = pinEntries(map)
-    local groups, hidden = locations(entries)
-    for _, group in ipairs(groups) do
-        map:AcquirePin(TEMPLATE, group)
-    end
-    self.drawn = entries
-    if addon.UI:IsOpen() then
-        local listed = entries
-        if addon.UI:IsAtlas() then
-            listed = addon.Entries(mapID, true, addon.UI:GetSearch())
-        end
-        addon.UI:UpdateEntries(listed, mapID, hidden, keepScroll)
-    end
-    addon.HighlightPin(addon.UI.selected)
+    addon.HighlightPin(ui.selected)
 end
 
 function providerMethods:RefreshAllData()
     refresh(self, false)
 end
-
--- The map refreshes every provider when it is shown, so OnShow needs nothing.
 providerMethods.OnHide = providerMethods.RemoveAllData
 
-function addon.RefreshMap()
-    if provider then
-        provider:RefreshAllData()
-    end
+function addon.RefreshMap(keepScroll)
+    if provider then refresh(provider, keepScroll) end
 end
 
--- After quest progress. Quest log events are frequent, so pins and rows are
--- restyled in place while the same records stay visible; otherwise the map is
--- redrawn without moving the list.
+local function sameEntries(a, b)
+    if #a ~= #b then return false end
+    for index, entry in ipairs(a) do
+        if entry ~= b[index] then return false end
+    end
+    return true
+end
+
 function addon.RefreshQuestStates()
     local map = provider and provider:GetMap()
-    if map and map:IsShown() and showPins() then
-        if not sameEntries(pinEntries(map), provider.drawn) then
-            refresh(provider, true)
-            return
-        end
-        for pin in map:EnumeratePinsByTemplate(TEMPLATE) do
-            pin:UpdateStyle()
-        end
+    if not map or not map:IsShown() then return end
+    if provider.drawn and not sameEntries(mapEntries(map), provider.drawn) then
+        refresh(provider, true)
+    else
+        for pin in map:EnumeratePinsByTemplate(TEMPLATE) do pin:UpdateStyle() end
     end
     addon.UI:RefreshStates()
 end
 
 function addon.HighlightPin(entry)
-    if not provider then
-        return
+    if not provider then return end
+    local map = provider:GetMap()
+    if not map:IsShown() then return end
+    if entry and entry.mapID ~= map:GetMapID() then entry = nil end
+    if highlightedPin then
+        if highlightedPin.entry == entry then return end
+        if previewPin then
+            map:RemovePin(previewPin)
+        else
+            highlightedPin.entry = highlightedPin.entries[1]
+            highlightedPin:UpdateStyle()
+            highlightedPin:SetSize(PIN_SIZE, PIN_SIZE)
+            highlightedPin = nil
+        end
     end
-    for pin in provider:GetMap():EnumeratePinsByTemplate(TEMPLATE) do
-        local size = PIN_SIZE
-        for _, candidate in ipairs(pin.entries or {}) do
+    if not entry or not entry.x or not entry.y then return end
+    for pin in map:EnumeratePinsByTemplate(TEMPLATE) do
+        for _, candidate in ipairs(pin.entries) do
             if candidate == entry then
-                size = SELECTED_PIN_SIZE
-                break
+                pin.entry = entry
+                pin:UpdateStyle()
+                pin:SetSize(FOCUS_SIZE, FOCUS_SIZE)
+                highlightedPin = pin
+                return
             end
         end
-        pin:SetSize(size, size)
     end
+    previewPin = map:AcquirePin(TEMPLATE, {entry})
+    previewPin:SetSize(FOCUS_SIZE, FOCUS_SIZE)
+    highlightedPin = previewPin
 end
 
--- Adds the sidebar and pins once both the saved settings and the world map exist.
 function addon.AttachMap()
-    if provider then
-        return true
-    end
+    if provider then return true end
     if not WorldMapFrame or not MapCanvasDataProviderMixin or not MapCanvasPinMixin or not addon.settings then
         return false
     end
