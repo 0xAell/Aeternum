@@ -6,6 +6,10 @@ local dungeonRecords = {}
 local categoryOrder = { dungeon = 1, class = 2, profession = 3, quest = 4 }
 local questRoles = { start = "Quest start", turnin = "Quest turn-in", objective = "Quest objective" }
 
+function addon.FormatCoordinates(point)
+    return ("%.1f, %.1f"):format(100 * point.x, 100 * point.y)
+end
+
 addon.categories = {
     { id = "dungeon", label = "Dungeons", letter = "D", color = { 1, .71, .33 } },
     { id = "class", label = "Class trainers", letter = "C", color = { .63, .81, 1 } },
@@ -49,6 +53,9 @@ for _, dungeon in ipairs(data.dungeons) do
     dungeonRecords[#dungeonRecords + 1] = record("dungeon", dungeon.name, levels or "Dungeon", nil, dungeon)
     for _, entrance in ipairs(dungeon.entrances or {}) do
         local subtitle = entrance.label or "Dungeon entrance"
+        if #dungeon.entrances > 1 then
+            subtitle = subtitle .. " · " .. addon.FormatCoordinates(entrance)
+        end
         if levels then
             subtitle = subtitle .. " · " .. levels
         end

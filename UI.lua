@@ -209,7 +209,11 @@ function UI:SetEntrance(index)
     frame.nextEntrance:SetEnabled(#frame.entrances > 1)
     if entrance then
         local zone = addon.ZoneName(entrance.mapID)
-        frame.entranceText:SetText(entrance.label and (entrance.label .. " · " .. zone) or zone)
+        local text = entrance.label and (entrance.label .. " · " .. zone) or zone
+        if #frame.entrances > 1 then
+            text = text .. " · " .. addon.FormatCoordinates(entrance)
+        end
+        frame.entranceText:SetText(text)
     else
         frame.entranceText:SetText("Entrance coordinates unavailable")
     end
@@ -255,10 +259,15 @@ function UI:Select(entry)
     frame.entrances = {}
     local faction = UnitFactionGroup("player")
     local selectedIndex = 1
+    local preferred = entry.point
+    local mapID = self.map:GetMapID()
     for _, entrance in ipairs(dungeon.entrances or {}) do
         if addon.FactionAllowed(entrance, faction) then
             frame.entrances[#frame.entrances + 1] = entrance
-            if entrance == entry.point then
+            if not preferred and entrance.mapID == mapID then
+                preferred = entrance
+            end
+            if entrance == preferred then
                 selectedIndex = #frame.entrances
             end
         end

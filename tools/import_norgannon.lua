@@ -72,6 +72,43 @@ local approaches = {
     },
 }
 
+local function findEntrance(entrances, point)
+    for index, entrance in ipairs(entrances) do
+        if entrance.mapID == point.mapID and entrance.x == point.x and entrance.y == point.y then
+            return index
+        end
+    end
+end
+
+local function dungeonEntrances(id, row)
+    local entrances = {}
+    local area = db.dungeons[row.area]
+    for _, entry in ipairs(area and area.entrances or {}) do
+        local point = coord(entry[1], entry[2], entry[3])
+        if point and not findEntrance(entrances, point) then
+            entrances[#entrances + 1] = point
+        end
+    end
+
+    local entry = row.entrance
+    local primary = entry and coord(entry.area, entry.x, entry.y)
+    if not primary then return entrances end
+
+    local approach = approaches[id]
+    if approach and approach.waypoint.mapID == primary.mapID then
+        primary.label = approach.label
+        primary.waypoints = {approach.waypoint}
+    end
+
+    -- An area can describe several wings. Only add its other entrances when
+    -- the list also identifies this dungeon's primary on the same map.
+    local match = findEntrance(entrances, primary)
+    if not match then return {primary} end
+    table.remove(entrances, match)
+    table.insert(entrances, 1, primary)
+    return entrances
+end
+
 local function importDungeons()
     local dungeons, items = {}, {}
     for _, id in ipairs(keys(db.instances)) do
@@ -79,29 +116,9 @@ local function importDungeons()
         local name = dungeonName(row)
         if name and not row.raid and #(row.bosses or {}) > 0 then
             local dungeon = {
-                id = id, name = name, floors = {}, entrances = {}, bosses = {},
+                id = id, name = name, floors = {}, entrances = dungeonEntrances(id, row), bosses = {},
                 levelMin = row.levels and row.levels.min, levelMax = row.levels and row.levels.max,
             }
-            if row.entrance then
-                local entrance = coord(row.entrance.area, row.entrance.x, row.entrance.y)
-                if entrance then
-                    local approach = approaches[id]
-                    if approach and approach.waypoint.mapID == entrance.mapID then
-                        entrance.label = approach.label
-                        entrance.waypoints = {approach.waypoint}
-                    end
-                    dungeon.entrances[1] = entrance
-                end
-            end
-            if #dungeon.entrances == 0 then
-                local fallback = db.dungeons[row.area]
-                for _, rowEntrance in ipairs((fallback and fallback.entrances) or {}) do
-                    local entrance = coord(rowEntrance[1], rowEntrance[2], rowEntrance[3])
-                    if entrance then
-                        dungeon.entrances[#dungeon.entrances + 1] = entrance
-                    end
-                end
-            end
             for _, sourceBoss in ipairs(row.bosses) do
                 local sourceNPC = sourceBoss.id and entity("npcs", sourceBoss.id)
                 if sourceNPC and sourceNPC.name then

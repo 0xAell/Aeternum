@@ -22,8 +22,12 @@ It runs with the bundled database and the game’s own interface and artwork.
 ## Seed coverage
 
 - 34 dungeon and wing entries, 287 bosses, and 1,335 loot items.
-- 30 entrance locations, with recorded approach points for the Deadmines and
-  Ragefire Chasm. The other mapped entrances show a direct bearing. It can point
+- 34 entrance records across 30 dungeons and wings. Use **Next entrance** to
+  switch between Uldaman's two Badlands entrances or the Searing Gorge and
+  Burning Steppes approaches to Blackrock Mountain. Selecting a map pin uses
+  its coordinates. **All dungeons** prefers the map you're viewing.
+- The Deadmines and Ragefire Chasm have recorded approach
+  points. The other mapped entrances show a direct bearing. It can point
   across terrain and does not account for walls, tunnels, or elevations.
 - 25 classic dungeon and wing entries have client floor-map references. Older
   layouts are labeled as references. Some Forever dungeons lack equivalent
