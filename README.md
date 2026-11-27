@@ -20,13 +20,14 @@ The quest you focus in the game can show objective locations for its unfinished 
 
 Directions survive a UI reload on the same character. They pause on another continent or inside an unrelated instance and end when you reach the destination. Use **Stop directions** on the map to cancel.
 
-A price from your character’s last trainer visit takes precedence. Otherwise the map uses the NPC’s bundled Forever record, then a labeled **Classic** reference where available. An unknown price is displayed as **Price unknown**. Visits are saved per character.
+You can look up a trainer before your first visit. Hover a lesson to see its requirements, the source of the record and where the price came from. A discounted quote shows the visitor’s reputation standing when known. **Beta** and **Classic** mark older references. Your own trainer visit confirms the lessons you see and updates prices for that character.
 
 ## Coverage
 
 - 34 dungeon and wing entries, 71 floors and 302 boss and encounter entries. Of 1,404 audited items, 1,396 have verified Forever requirements for character loot lists. There are 277 map pins before grouping encounters that share a location. Guide estimates are labeled on hover. Dalaran’s Underbelly uses a labeled route sketch. [Boss and loot audit](https://github.com/0xAell/Aeternum/tree/main/docs/boss-audit)
 - 41 outdoor entrance records across all 34 entries. Ten have a recorded approach waypoint, covering the Deadmines, Ragefire Chasm, the four Scarlet Monastery wings, Alcaz Prison, Blackmaw Hold, Krol’dok Stronghold and Shaper’s Terrace. Other doors show a direct bearing. Dire Maul East and West have multiple selectable portals.
-- 562 trainer locations, including eight weapon masters. Quest data covers 5,323 quests, 11,100 start and turn-in records, and 5,207 representative objective sites for 2,097 quests. Availability uses level, race, class, profession rank, quest chains and progress. Reputation and specialization can also affect offers in game.
+- 562 trainer locations cover 561 distinct trainers, including eight weapon masters. 522 have lessons you can browse offline. Recorded trainer windows supply 1,743 distinct spells and recipes. The remaining 39 trainers build their catalogues when you visit. [Trainer records and coverage](https://github.com/0xAell/Aeternum/tree/main/docs/trainer-data)
+- Quest data covers 5,323 quests, 11,100 start and turn-in records, and 5,207 representative objective sites for 2,097 quests. Availability uses level, race, class, profession rank, quest chains and progress. Reputation and specialization can also affect offers in game.
 
 ## Install
 

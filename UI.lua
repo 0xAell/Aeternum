@@ -141,13 +141,24 @@ local function price(lesson)
     return GetMoneyString(lesson.cost, true)
 end
 
+local standings = {[4]="Neutral", [5]="Friendly", [6]="Honored", [7]="Revered", [8]="Exalted"}
+local priceNotes = {
+    [9]="Price shown to a recorded visitor. Their reputation is unknown.",
+    [10]="Listed training price from What's Training. Your reputation can affect the price.",
+    ["Classic reference"]="Price from the Classic trainer catalogue.",
+    ["Bundled trainer record"]="Price from NorgannonDB's trainer catalogue.",
+}
+
 local function lessonRows(menu, lessons)
     for _, lesson in ipairs(lessons) do
         local name = lesson.name
         if lesson.rank and lesson.rank ~= "" then name = name .. " (" .. lesson.rank .. ")" end
         local costText = price(lesson)
         local text = name .. "   " .. costText
+        local standing = standings[lesson.priceBasis]
+        if standing and lesson.priceBasis ~= 4 then text = text .. "  |cff999999" .. standing .. "|r" end
         if lesson.source == "Classic reference" then text = text .. "  |cff999999Classic|r" end
+        if lesson.beta then text = text .. "  |cff999999Beta|r" end
         local row = menu:CreateButton(text, function()
             if lesson.id then showLink("spell", lesson.id, lesson.name) end
         end)
@@ -159,6 +170,9 @@ local function lessonRows(menu, lessons)
             end
             if lesson.statusText then tooltip:AddLine(lesson.statusText, .85, .85, .85) end
             tooltip:AddLine(lesson.source .. " · " .. costText, 1, .82, 0)
+            local note = priceNotes[lesson.priceBasis]
+            if standing then note = "Price recorded at " .. standing .. " standing." end
+            if note and lesson.cost ~= nil then tooltip:AddLine(note, .85, .85, .85, true) end
         end)
     end
 end
@@ -191,7 +205,14 @@ function UI:Trainer(owner, entry)
         if addon.Navigation:IsDestination(entry.point) then stopDirections(menu)
         else self:Route(menu, entry, "Directions to trainer") end
         local lessons = addon.Trainers:Lessons(entry.source.id)
-        if #lessons == 0 then menu:CreateTitle("Visit this trainer to record their lessons.") return end
+        if #lessons == 0 then
+            local npc = entry.source.id
+            local recorded = addon.foreverTraining.offers[npc] or addon.Data.offers[npc]
+                or addon.classicTraining.trainers[npc] or next(AeternumTrainerDB[npc] or {})
+            menu:CreateTitle(recorded and "No recorded lessons for this character."
+                or "Visit this trainer to record their lessons.")
+            return
+        end
         local groups = {current={}, later={}, learned={}}
         for _, lesson in ipairs(lessons) do
             local group, status = addon.Trainers:LessonState(lesson)
