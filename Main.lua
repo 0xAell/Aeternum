@@ -32,12 +32,16 @@ frame:SetScript("OnEvent", function(_, event, arg, second, _, _, success)
     elseif event == "ZONE_CHANGED_INDOORS" or event == "ZONE_CHANGED" then
         addon.DungeonMap:OpenInstance(true)
         addon.Navigation:Restore()
+    elseif event == "SPELLS_CHANGED" then
+        addon.UI:LootSkillsChanged()
     elseif event == "SKILL_LINES_CHANGED" or event == "LEARNED_SPELL_IN_SKILL_LINE" then
         addon.Trainers:Invalidate()
+        addon.UI:LootSkillsChanged()
         addon.Quests:Invalidate()
         addon.RefreshMap()
     else
         if event == "CVAR_UPDATE" and arg ~= "questPOI" then return end
+        if event == "PLAYER_LEVEL_UP" then addon.UI:LootSkillsChanged() end
         addon.Quests:Invalidate(event == "PLAYER_LEVEL_UP" and arg or nil)
         if addon.UI.map and addon.UI.map:IsShown() and not pending then
             pending = true
@@ -46,7 +50,7 @@ frame:SetScript("OnEvent", function(_, event, arg, second, _, _, success)
     end
 end)
 for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "PLAYER_ENTERING_WORLD", "TRAINER_SHOW", "TRAINER_UPDATE",
-    "SKILL_LINES_CHANGED", "LEARNED_SPELL_IN_SKILL_LINE", "QUEST_LOG_UPDATE", "QUEST_ACCEPTED",
+    "SKILL_LINES_CHANGED", "LEARNED_SPELL_IN_SKILL_LINE", "SPELLS_CHANGED", "QUEST_LOG_UPDATE", "QUEST_ACCEPTED",
     "QUEST_TURNED_IN", "QUEST_REMOVED", "PLAYER_LEVEL_UP", "ZONE_CHANGED_INDOORS", "ZONE_CHANGED",
     "BOSS_KILL", "ENCOUNTER_END", "TRAINER_SERVICE_INFO_NAME_UPDATE", "QUEST_WATCH_LIST_CHANGED",
     "SUPER_TRACKING_CHANGED", "QUEST_POI_UPDATE", "CVAR_UPDATE", "ITEM_DATA_LOAD_RESULT"}) do

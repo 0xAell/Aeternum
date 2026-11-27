@@ -387,7 +387,7 @@ Wow.knownEvents = {
     LEARNED_SPELL_IN_SKILL_LINE = true, ZONE_CHANGED_INDOORS = true, ZONE_CHANGED = true,
     BOSS_KILL = true, ENCOUNTER_END = true, TRAINER_SERVICE_INFO_NAME_UPDATE = true,
     QUEST_WATCH_LIST_CHANGED = true, SUPER_TRACKING_CHANGED = true, QUEST_POI_UPDATE = true, CVAR_UPDATE = true,
-    ITEM_DATA_LOAD_RESULT = true,
+    ITEM_DATA_LOAD_RESULT = true, SPELLS_CHANGED = true,
 }
 
 local templates = { UIPanelButtonTemplate = true, PanelTopTabButtonTemplate = true, MinimalScrollBar = true,
@@ -467,6 +467,11 @@ function Wow.new(state)
         local skill = (state.professionSkills or {})[index]
         return nil, nil, (state.professionRanks or {})[skill] or 1, 75, nil, nil, skill
     end
+    local warriorSkills = {[43]=1, [160]=1, [172]=1, [173]=1, [413]=1, [414]=1}
+    env.C_SkillInfo = {GetSkillLineInfoByID = function(id)
+        local ranks = state.skillRanks or ((state.class or "WARRIOR") == "WARRIOR" and warriorSkills)
+        if ranks and ranks[id] then return {skillID=id, rank=ranks[id]} end
+    end}
     env.GetMoneyString = function(copper) return copper .. " copper" end
     env.GetCursorPosition = function() return state.cursorX or 150, state.cursorY or 150 end
     env.GetInstanceInfo = function() return state.instanceName, "party", nil, nil, nil, nil, nil, state.instanceID end

@@ -35,7 +35,8 @@ fi
 "$lua" tools/import_norgannon.lua "$source" "$stage/Data.lua" "$routes/ForeverDungeonRoutes/Data/Entrances.lua"
 "$lua" tools/import_floors.lua "$routes" "$stage/Data.lua" "$stage/FloorData.lua"
 python3 tools/import_classic_training.py "$classic" "$stage/Data.lua" "$stage/ClassicTraining.lua"
-for file in Data.lua FloorData.lua ClassicTraining.lua; do
+python3 tools/import_loot_requirements.py build "$stage/LootData.lua"
+for file in Data.lua FloorData.lua ClassicTraining.lua LootData.lua; do
     cmp "$file" "$stage/$file"
 done
 echo "All bundled data matches the pinned sources."
