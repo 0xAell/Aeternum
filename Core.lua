@@ -5,6 +5,11 @@ local categoryOrder = { dungeon = 1, weapon = 2, class = 3, profession = 4, ques
 local questRoles = { s = "Quest start", t = "Quest turn-in" }
 local factionCodes = { A = "Alliance", H = "Horde" }
 
+function addon.IsReadableNumber(value)
+    return (not issecretvalue or not issecretvalue(value)) and type(value) == "number"
+        and value == value and math.abs(value) < math.huge
+end
+
 addon.categories = {
     { id = "dungeon", label = "Dungeon entrances", icon = "Dungeon" },
     { id = "class", label = "Class trainers", icon = 136455 },
@@ -122,6 +127,7 @@ end
 -- stay packed until their map is first shown.
 local dungeonRecords = {}
 local staticByMap = {}
+local entrancesByDungeon = {}
 
 local function addStatic(entry)
     local entries = staticByMap[entry.mapID]
@@ -135,23 +141,31 @@ end
 for _, dungeon in ipairs(data.dungeons) do
     local levels = addon.DungeonLevel(dungeon)
     dungeonRecords[#dungeonRecords + 1] = record("dungeon", dungeon.name, levels or "Dungeon", nil, dungeon)
+    local doors = {}
+    entrancesByDungeon[dungeon.id] = doors
     for _, entrance in ipairs(dungeon.entrances) do
         local subtitle = entrance.label or "Dungeon entrance"
         if levels then
             subtitle = subtitle .. " · " .. levels
         end
-        addStatic(record("dungeon", dungeon.name, subtitle, entrance, dungeon))
+        local door = record("dungeon", dungeon.name, subtitle, entrance, dungeon)
+        doors[#doors + 1] = door
+        addStatic(door)
     end
 end
 table.sort(dungeonRecords, ordered)
+
+function addon.DungeonEntrances(dungeon)
+    return entrancesByDungeon[dungeon.id]
+end
 
 for _, trainer in ipairs(data.trainers) do
     addStatic(record(trainer.kind, trainer.name, trainer.specialty or "Trainer", trainer, trainer))
 end
 
-local PIN_PATTERN = "(%d+)([st])([AH]?)(%d+),(%d+);"
+local PIN_PATTERN = "(%d+)([st])([AH]?)(%d+),(%d+)([no]%d+);"
 
-local function questRecord(questID, role, faction, x, y, mapID)
+local function questRecord(questID, role, faction, x, y, contact, mapID)
     local quest = addon.Quest(questID)
     local subtitle = questRoles[role]
     if quest.level then
@@ -160,6 +174,7 @@ local function questRecord(questID, role, faction, x, y, mapID)
     local point = { mapID = mapID, x = x / 10000, y = y / 10000, faction = factionCodes[faction] }
     local entry = record("quest", quest.name, subtitle, point, quest)
     entry.questID, entry.role = questID, role == "s" and "start" or "turnin"
+    entry.contact = data.questContacts[contact]
     return entry
 end
 
@@ -211,8 +226,9 @@ function addon.MapRecords(mapID)
     end
     local packed = data.questPins[mapID]
     if packed then
-        for questID, role, faction, x, y in packed:gmatch(PIN_PATTERN) do
-            entries[#entries + 1] = questRecord(tonumber(questID), role, faction, tonumber(x), tonumber(y), mapID)
+        for questID, role, faction, x, y, contact in packed:gmatch(PIN_PATTERN) do
+            entries[#entries + 1] =
+                questRecord(tonumber(questID), role, faction, tonumber(x), tonumber(y), contact, mapID)
         end
     end
     table.sort(entries, ordered)
@@ -220,35 +236,51 @@ function addon.MapRecords(mapID)
     return entries
 end
 
-local startMaps
-
--- The first recorded start of a quest that the player's faction can use.
-function addon.QuestStart(questID)
-    if not startMaps then
-        startMaps = {}
-        for mapID, packed in pairs(data.questPins) do
-            for id, role in packed:gmatch(PIN_PATTERN) do
-                id = tonumber(id)
-                local list = startMaps[id]
-                if role == "s" and (not list or list[#list] ~= mapID) then
-                    if not list then
-                        list = {}
-                        startMaps[id] = list
-                    end
-                    list[#list + 1] = mapID
-                end
+local locations, indexedFaction
+local function locationMaps(questID, role)
+    local faction = UnitFactionGroup("player")
+    local key = role == "turnin" and "t" or "s"
+    if locations and indexedFaction == faction then return locations[key][questID] end
+    indexedFaction = faction
+    locations = {s={}, t={}}
+    local maps = {}
+    for mapID in pairs(data.questPins) do maps[#maps + 1] = mapID end
+    table.sort(maps)
+    for _, mapID in ipairs(maps) do
+        for raw, kind, side in data.questPins[mapID]:gmatch(PIN_PATTERN) do
+            if side == "" or not faction or factionCodes[side] == faction then
+                local id = tonumber(raw)
+                local list = locations[kind][id]
+                if not list then list = {}; locations[kind][id] = list end
+                if list[#list] ~= mapID then list[#list + 1] = mapID end
             end
         end
     end
-    local faction = UnitFactionGroup("player")
-    for _, mapID in ipairs(startMaps[questID] or {}) do
-        for _, entry in ipairs(addon.MapRecords(mapID)) do
-            if entry.questID == questID and entry.role == "start" and addon.FactionAllowed(entry, faction) then
-                return entry
-            end
+    return locations[key][questID]
+end
+
+function addon.HasQuestLocation(questID, role)
+    return locationMaps(questID, role) ~= nil
+end
+
+function addon.QuestLocation(questID, role, preferredMap)
+    local maps = locationMaps(questID, role)
+    if not maps then return end
+    local playerMap = C_Map.GetBestMapForUnit("player")
+    if issecretvalue and issecretvalue(playerMap) then playerMap = nil end
+    local selected = maps[1]
+    for _, mapID in ipairs(maps) do
+        if mapID == preferredMap then selected = mapID; break end
+        if mapID == playerMap then selected = mapID end
+    end
+    for _, entry in ipairs(addon.MapRecords(selected)) do
+        if entry.questID == questID and entry.role == role and addon.FactionAllowed(entry, indexedFaction) then
+            return entry
         end
     end
 end
+
+function addon.QuestStart(questID) return addon.QuestLocation(questID, "start") end
 
 -- Settings -------------------------------------------------------------------
 
@@ -363,6 +395,11 @@ function addon.Entries(mapID, atlas, query)
             result[#result + 1] = entry
         end
     end
+    if addon.CategoryEnabled("quest") then
+        for _, entry in ipairs(addon.Quests:ObjectiveSites(mapID) or {}) do
+            if matches(entry, search) then result[#result + 1] = entry end
+        end
+    end
     return result
 end
 
@@ -371,6 +408,9 @@ function addon.Presentation(entry)
     local category = addon.categoryByID[entry.category]
     if entry.category ~= "quest" then
         return category.icon, nil, entry.subtitle
+    end
+    if entry.role == "objective" then
+        return "Quest-In-Progress-Icon-yellow", nil, entry.detail or entry.subtitle
     end
     local state = addon.Quests:State(entry.questID)
     local style = addon.Quests:Style(state, entry.role)
@@ -382,7 +422,7 @@ function addon.Presentation(entry)
 end
 
 function addon.SetIcon(texture, icon, dim)
-    if icon == "Dungeon" then
+    if type(icon) == "string" then
         texture:SetAtlas(icon)
     else
         texture:SetTexture(icon)

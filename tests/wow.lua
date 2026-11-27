@@ -138,6 +138,7 @@ function Frame:Fire(event, ...)
     end
 end
 function Frame:SetFrameStrata(value) self.strata = value end
+function Frame:SetAlpha(value) self.alpha = value end
 function Frame:GetFrameStrata() return self.strata or "MEDIUM" end
 function Frame:SetFrameLevel(value) self.level = value end
 function Frame:GetFrameLevel() return self.level or 1 end
@@ -271,6 +272,7 @@ end
 local MapCanvas = newClass(Frame)
 function MapCanvas:SetMouseWheelZoomMode(mode) self.ScrollContainer.wheelMode = mode end
 function MapCanvas:GetMapID() return self.mapID end
+function MapCanvas:PanTo(x, y) self.panX, self.panY = x, y end
 function MapCanvas:SetMapID(mapID)
     self.mapID = mapID
     for _, provider in ipairs(self.providers) do
@@ -320,6 +322,9 @@ function MapCanvas:EnumeratePinsByTemplate(template)
     end
 end
 function MapCanvas:GetNumActivePinsByTemplate(template) return #self.pools[template].active end
+function MapCanvas:GetViewRect()
+    return {GetWidth=function() return Wow.state.viewWidth or 1 end}
+end
 -- As in WorldMapMixin: the map's own OnShow and OnHide notify the data providers,
 -- and scripts hooked by add-ons run afterwards.
 function MapCanvas:Show()
@@ -376,6 +381,8 @@ Wow.knownEvents = {
     UI_SCALE_CHANGED = true, DISPLAY_SIZE_CHANGED = true,
     TRAINER_SHOW = true, TRAINER_UPDATE = true, SKILL_LINES_CHANGED = true, PLAYER_ENTERING_WORLD = true,
     LEARNED_SPELL_IN_SKILL_LINE = true, ZONE_CHANGED_INDOORS = true, ZONE_CHANGED = true,
+    BOSS_KILL = true, ENCOUNTER_END = true, TRAINER_SERVICE_INFO_NAME_UPDATE = true,
+    QUEST_WATCH_LIST_CHANGED = true, SUPER_TRACKING_CHANGED = true, QUEST_POI_UPDATE = true, CVAR_UPDATE = true,
 }
 
 local templates = { UIPanelButtonTemplate = true, PanelTopTabButtonTemplate = true, MinimalScrollBar = true,
@@ -443,9 +450,11 @@ function Wow.new(state)
     env.SlashCmdList = {}
     env.AeternumDB = state.savedVariables
     env.AeternumTrainerDB = state.savedTrainerData
+    env.AeternumRouteDB = state.savedRoute
     env.GetProfessions = function() return unpack(state.professionIndices or {}, 1, 7) end
     env.GetProfessionInfo = function(index)
-        return nil, nil, 1, 75, nil, nil, (state.professionSkills or {})[index]
+        local skill = (state.professionSkills or {})[index]
+        return nil, nil, (state.professionRanks or {})[skill] or 1, 75, nil, nil, skill
     end
     env.GetMoneyString = function(copper) return copper .. " copper" end
     env.GetCursorPosition = function() return state.cursorX or 150, state.cursorY or 150 end
@@ -502,6 +511,11 @@ function Wow.new(state)
     env.InCombatLockdown = function() return state.inCombat or false end
     env.IsInInstance = function() return state.inInstance or false end
     env.GetPlayerFacing = function() return state.facing or 0 end
+    env.UnitPosition = function()
+        return state.playerNorth, state.playerWest, 0, state.positionInstance or state.instanceID
+    end
+    env.C_SpellBook = {IsSpellKnown=function(id) return (state.knownSpells or {})[id] or false end}
+    env.C_RaidLocks = {IsEncounterComplete=function(_, id) return (state.lockedEncounters or {})[id] or false end}
     env.UnitFactionGroup = function() return state.faction or "Alliance" end
     env.UnitLevel = function() return state.level or 1 end
     env.UnitRace = function() return "Human", "Human", state.raceID or 1 end
@@ -521,13 +535,17 @@ function Wow.new(state)
             return timer
         end,
     }
-    env.C_CVar = { GetCVarBool = function(name) return name == "rotateMinimap" and state.rotate or false end }
+    env.C_CVar = { GetCVarBool = function(name)
+        if name == "questPOI" then return state.questPOI ~= false end
+        if name == "rotateMinimap" then return state.rotate or false end
+    end }
     env.C_Minimap = {
         GetViewRadius = function() return 200 end,
         IsRotateMinimapIgnored = function() return false end,
     }
     env.C_AddOns = { LoadAddOn = noop }
     env.C_Item = {
+        GetItemCount = function(id) return (state.inventory or {})[id] or 0 end,
         GetItemNameByID = function(itemID) return state.cached[itemID] and ("Cached " .. itemID) or nil end,
         GetItemQualityByID = function(itemID) return state.cached[itemID] and 4 or nil end,
         GetItemQualityColor = function(quality) return quality == 4 and .64 or 1, .21, .93, "ffa335ee" end,
@@ -542,7 +560,26 @@ function Wow.new(state)
             state.requested[itemID] = true
         end,
     }
+    env.C_SuperTrack = {GetSuperTrackedQuestID = function() return state.superQuest end,
+        SetSuperTrackedQuestID = function(id) state.superQuest = id end}
+    local function watches()
+        local ordered = {}
+        for id in pairs(state.watched or {}) do ordered[#ordered + 1] = id end
+        table.sort(ordered)
+        return ordered
+    end
     env.C_QuestLog = {
+        GetNumQuestWatches = function() return #watches() end,
+        GetQuestIDForQuestWatchIndex = function(i) return watches()[i] end,
+        GetQuestsOnMap = function(id) return (state.nativePOI or {})[id] end,
+        GetQuestObjectives = function(id) return (state.objectives or {})[id] end,
+        GetQuestWatchType = function(id) return (state.watched or {})[id] end,
+        AddQuestWatch = function(id)
+            state.watched = state.watched or {}
+            state.watched[id] = 1
+            return true
+        end,
+        RemoveQuestWatch = function(id) state.watched[id] = nil; return true end,
         IsQuestFlaggedCompleted = function(questID) return state.completed[questID] or false end,
         IsOnQuest = function(questID) return state.log[questID] ~= nil end,
         IsComplete = function(questID) return state.complete[questID] or false end,

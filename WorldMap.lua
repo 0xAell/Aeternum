@@ -1,7 +1,6 @@
 local _, addon = ...
 local POINT, ENTRANCE = "AeternumMapPinTemplate", "AeternumEntrancePinTemplate"
-local LIMIT = 150
-local provider, focus, marked
+local provider, focus, marked, highlighted, highlightedQuestState
 local pins = {}
 AeternumMapPinMixin = {}
 
@@ -10,11 +9,35 @@ function pins:OnLoad()
     self:SetScalingLimits(1, 1, 1.2)
     self.icon = self:CreateTexture(nil, "ARTWORK")
     self.icon:SetAllPoints()
+    self.tracked = self:CreateTexture(nil, "OVERLAY")
+    self.tracked:SetAtlas("waypoint-mappin-minimap-tracked")
+    self.tracked:SetSize(10, 10)
+    self.tracked:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 3, -2)
 end
 
 function pins:UpdateStyle()
+    local best, bestScore, tracked = self.entries[1], -1, false
+    for _, entry in ipairs(self.entries) do
+        local dungeon = entry.category == "dungeon" and entry.source.id or nil
+        local active = addon.Navigation:IsDestination(entry.point, dungeon)
+        local score = 0
+        if entry.category == "dungeon" then score = 10
+        elseif entry.category ~= "quest" then score = 5
+        elseif entry.role == "objective" then score = 3
+        elseif entry.role == "turnin" then
+            local state = addon.Quests:State(entry.questID)
+            score = state == "ready" and 4 or (state == "active" and 2 or 0)
+        end
+        if active then tracked = true; score = score + 1 end
+        if score > bestScore then best, bestScore = entry, score end
+    end
+    if self ~= marked and self.entry ~= best then
+        self.entry = best
+        self:SetPosition(best.x, best.y)
+    end
     local icon, _, _, dim = addon.Presentation(self.entry)
     addon.SetIcon(self.icon, icon, dim)
+    self.tracked:SetShown(tracked)
 end
 
 function pins:OnAcquired(entries)
@@ -39,14 +62,24 @@ function pins:OnMouseEnter()
     GameTooltip:SetText(entry.title)
     local _, _, text = addon.Presentation(entry)
     GameTooltip:AddLine(text)
-    if #self.entries > 1 then GameTooltip:AddLine(("%d at this location"):format(#self.entries)) end
+    if #self.entries > 1 then GameTooltip:AddLine(("%d map entries · Click to choose"):format(#self.entries)) end
+    if self.tracked:IsShown() then GameTooltip:AddLine(addon.Navigation:GetStatus(), .7, .85, 1, true) end
     if entry.category == "dungeon" then
+        if entry.point.hint then GameTooltip:AddLine(entry.point.hint, .9, .9, .9, true) end
+        if #entry.source.keys > 0 then
+            local names = {}
+            for _, id in ipairs(entry.source.keys) do names[#names + 1] = addon.ItemName(id) end
+            GameTooltip:AddLine("Keys · " .. table.concat(names, ", "), .85, .85, .85, true)
+        end
         GameTooltip:AddLine("Click for floor map · Right-click for directions", 1, .82, 0)
     elseif entry.category ~= "quest" then
         GameTooltip:AddLine("Click for lessons and prices", 1, .82, 0)
     else
+        if entry.role == "objective" and entry.subtitle ~= text then GameTooltip:AddLine(entry.subtitle) end
+        if entry.contact then GameTooltip:AddLine(entry.contact, 1, 1, 1) end
         local requirement = addon.Quests:Requirement(entry.questID)
         if requirement then GameTooltip:AddLine(requirement) end
+        addon.Quests:AddObjectives(GameTooltip, entry.questID, text)
     end
     GameTooltip:Show()
 end
@@ -63,7 +96,7 @@ function pins:OnMouseClickAction(button)
     if not self.entry then return end
     if button == "LeftButton" then
         addon.UI:PickLocation(self, self.entries)
-    elseif button == "RightButton" and self.entry.category == "dungeon" then
+    elseif button == "RightButton" and self.entries[1].category == "dungeon" then
         addon.UI:Directions(self, self.entries)
     end
 end
@@ -77,47 +110,108 @@ function methods:RemoveAllData()
     self.drawn = nil
 end
 
-function methods:RefreshAllData()
-    self:RemoveAllData()
+local function gridSize(map)
+    local width, height = map.ScrollContainer:GetSize()
+    local rect = map:GetMapID() and map.ScrollContainer.zoomLevels and map:GetViewRect()
+    local range = rect and rect:GetWidth() or 1
+    local scale = range > 0 and math.max(1, math.floor(2 / range + .5) / 2) or 1
+    return math.max(1, math.floor(width * scale / 20)), math.max(1, math.floor(height * scale / 20))
+end
+
+function methods:Layout(entries)
     local map = self:GetMap()
-    if not map:IsShown() then return end
-    self.drawn = addon.Entries(map:GetMapID(), false, "")
+    self:RemoveAllData()
+    self.drawn = entries
+    self.columns, self.rows = gridSize(map)
     local positions, groups = {}, {}
-    for _, entry in ipairs(self.drawn) do
-        local key = ("%.3f:%.3f"):format(entry.x, entry.y)
-        local group = positions[key]
-        if group then
-            group[#group + 1] = entry
-        elseif #groups < LIMIT then
-            group = {entry}
-            groups[#groups + 1], positions[key] = group, group
+    local cells, entrances = {}, {}
+    for _, entry in ipairs(entries) do
+        local position = ("%.4f:%.4f"):format(entry.x, entry.y)
+        local group = positions[position]
+        if not group then
+            local cell, family
+            if entry.category == "dungeon" then
+                local instance = addon.floorData[entry.source.id].instance
+                family = entrances[instance] or {}
+                entrances[instance] = family
+                for _, other in ipairs(family) do
+                    local dx, dy = (entry.x - other[1].x) * self.columns, (entry.y - other[1].y) * self.rows
+                    if dx * dx + dy * dy < .8 then group = other; break end
+                end
+            else
+                local kind = entry.category == "quest" and "q" or "t"
+                cell = ("%s%d:%d"):format(kind, math.floor(entry.x * self.columns), math.floor(entry.y * self.rows))
+                group = cells[cell]
+            end
+            if not group then
+                group = {}
+                groups[#groups + 1] = group
+                if cell then cells[cell] = group end
+                if family then family[#family + 1] = group end
+            end
+            positions[position] = group
         end
+        group[#group + 1] = entry
     end
     for _, group in ipairs(groups) do
         local template = group[1].category == "dungeon" and ENTRANCE or POINT
         map:AcquirePin(template, group)
     end
+    if highlighted then addon.FocusLocation(highlighted) end
 end
 
+function methods:RefreshAllData()
+    local map = self:GetMap()
+    if not map:IsShown() then self:RemoveAllData() return end
+    self:Layout(addon.Entries(map:GetMapID(), false, ""))
+end
+
+function methods:OnCanvasScaleChanged()
+    if self.layoutPending or not self.drawn then return end
+    self.layoutPending = true
+    C_Timer.After(.1, function()
+        self.layoutPending = nil
+        local map = self:GetMap()
+        if not map:IsShown() or not self.drawn then return end
+        local cols, rows = gridSize(map)
+        if cols ~= self.columns or rows ~= self.rows then self:Layout(self.drawn) end
+    end)
+end
+methods.OnCanvasSizeChanged = methods.OnCanvasScaleChanged
+
 function methods:OnMapChanged()
+    highlighted = nil
     addon.DungeonMap:Close()
     self:RefreshAllData()
 end
-methods.OnHide = methods.RemoveAllData
+function methods:OnHide()
+    highlighted = nil
+    self:RemoveAllData()
+end
 
 function addon.RefreshMap()
     if provider then provider:RefreshAllData() end
+end
+
+function addon.UpdateRoutePins()
+    if not provider or not provider:GetMap():IsShown() then return end
+    for _, template in ipairs({POINT, ENTRANCE}) do
+        for pin in provider:GetMap():EnumeratePinsByTemplate(template) do pin:UpdateStyle() end
+    end
 end
 
 function addon.RefreshQuestStates()
     if not provider then return end
     local map = provider:GetMap()
     if not map:IsShown() then return end
+    if highlighted and highlighted.questID and addon.Quests:State(highlighted.questID) ~= highlightedQuestState then
+        addon.FocusLocation(nil)
+    end
     local entries = addon.Entries(map:GetMapID(), false, "")
     local before = provider.drawn or {}
-    if #entries ~= #before then provider:RefreshAllData() return end
+    if #entries ~= #before then provider:Layout(entries) return end
     for i, entry in ipairs(entries) do
-        if before[i] ~= entry then provider:RefreshAllData() return end
+        if before[i] ~= entry then provider:Layout(entries) return end
     end
     for pin in map:EnumeratePinsByTemplate(POINT) do pin:UpdateStyle() end
 end
@@ -126,26 +220,34 @@ function addon.FocusLocation(entry)
     local map = provider:GetMap()
     if focus then map:RemovePin(focus) end
     if marked then
-        marked:OnMouseLeave()
-        marked.entry = marked.entries[1]
-        marked:UpdateStyle()
-        marked:SetSize(17, 17)
+        local old = marked
         marked = nil
+        old:OnMouseLeave()
+        old.entry = old.entries[1]
+        old:SetPosition(old.entry.x, old.entry.y)
+        old:UpdateStyle()
+        old:SetSize(17, 17)
     end
-    if not entry or entry.mapID ~= map:GetMapID() then return end
-    for pin in map:EnumeratePinsByTemplate(POINT) do
-        for _, other in ipairs(pin.entries) do
-            if other == entry then
-                marked = pin
-                pin.entry = entry
-                pin:UpdateStyle()
-                pin:SetSize(23, 23)
-                pin:OnMouseEnter()
-                return
+    highlighted = entry
+    highlightedQuestState = entry and entry.questID and addon.Quests:State(entry.questID)
+    if not entry or entry.mapID ~= map:GetMapID() then highlighted = nil return end
+    local template = entry.category == "dungeon" and ENTRANCE or POINT
+    for _, kind in ipairs({POINT, ENTRANCE}) do
+        for pin in map:EnumeratePinsByTemplate(kind) do
+            for _, other in ipairs(pin.entries) do
+                if other == entry then
+                    marked = pin
+                    pin.entry = entry
+                    pin:SetPosition(entry.x, entry.y)
+                    pin:UpdateStyle()
+                    pin:SetSize(23, 23)
+                    pin:OnMouseEnter()
+                    return
+                end
             end
         end
     end
-    focus = map:AcquirePin(POINT, {entry})
+    focus = map:AcquirePin(template, {entry})
     focus:SetSize(23, 23)
     focus:OnMouseEnter()
 end

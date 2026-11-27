@@ -6,22 +6,23 @@ Press **M**. Aeternum adds dungeon floors, boss loot, trainers, quests and entra
 
 | Where | What to do |
 | --- | --- |
-| Zone or continent | Click a dungeon entrance to see its floor. Right-click the entrance and choose **Show path to…** for minimap directions. Shared entrances let you choose the wing. |
-| Inside a dungeon | Press **M** to see the current floor. Recognized rooms select their floor automatically. Use the floor name to pick another floor or wing. Scroll to zoom and drag to pan. **Back**, **Escape**, or right-clicking empty floor space returns to the zone map. |
-| Boss skull | Click for that boss’s drops. Hover an item for its tooltip, Shift-click to link it, or Ctrl-click to preview it. The floor menu’s **Boss loot** list also includes bosses whose positions are unknown. |
-| Trainer | Click to see the recipes, class ranks or weapon skills that NPC teaches. Prices appear beside each lesson. Hover for level, skill and price source. Your class, learned professions, faction and eligible weapon proficiencies determine which trainers appear. |
-| Quest | Exclamation marks show available starts. Question marks show active turn-ins and turn gold when ready. A dungeon’s **Dungeon quests** menu can show a quest’s starting location on the zone map. |
+| Zone or continent | Click a dungeon entrance to see the floors. Right-click for minimap directions to a specific wing or door. Nearby locations share a pin while zoomed out. Scroll in to separate them or click to choose. |
+| Inside a dungeon | Press **M**. The map follows recognized rooms and floor IDs. An arrow shows your position when the client supplies coordinates for that floor. Click the floor name to change floors, check keys in your bags, or find an outdoor entrance. Scroll to zoom and drag to pan. **Back**, **Escape**, or right-clicking empty floor space returns to the zone map. |
+| Boss skull | Click for drops. If several bosses fight in the same spot, choose whose loot to see. Defeated encounters dim. Hover an item for its tooltip, Shift-click to link it, or Ctrl-click to preview it. **Boss loot** also lists bosses whose positions are unknown. |
+| Trainer | Your class, faction, professions and eligible weapon skills determine which trainers appear. Click a trainer to see lessons and prices. **Later training** and **Learned** hold lessons with unmet requirements and skills you already know. Hover a lesson for its requirements and price source. |
+| Quest | Exclamation marks show available starts. Question marks turn gold when you can hand the quest in. Hover for the NPC or object and your live progress. Click to track the quest or get directions. **Dungeon quests** takes you to the giver before acceptance and the turn-in afterward. |
 
-The mouse wheel zooms outdoor maps, including zones whose art normally has only one zoom level. For other professions or low-level quests, use the map’s existing tracking menu. **Stop directions** is available there and on dungeon entrances while a route is active.
+The quest you focus in the game can show objective locations for its unfinished steps. Without a focus, Aeternum uses your first watched quest. Blizzard’s own objective marker takes precedence. The map’s existing tracking menu controls quest objectives, low-level quests and additional trainers.
+
+Directions survive a UI reload on the same character. They pause on another continent or inside an unrelated instance and end when you reach the destination. Use **Stop directions** on the map to cancel.
 
 A price from your character’s last trainer visit takes precedence. Otherwise the map uses the NPC’s bundled Forever record, then a labeled **Classic** reference where available. An unknown price is displayed as **Price unknown**. Visits are saved per character.
 
 ## Coverage
 
-- 34 dungeon and wing entries, 71 floors, 287 bosses and 1,335 distinct loot items. There are recorded positions for 213 bosses. Dalaran’s Underbelly uses a labeled route sketch.
-- 34 outdoor entrance records, including shared wings and alternate approaches. Alcaz Prison, Blackmaw Hold, Krol’dok Stronghold and Shaper’s Terrace open on entry or through dungeon search while their outdoor entrances are unverified.
-- The Deadmines and Ragefire Chasm have recorded outdoor approach points. Other routes show a direct bearing to the selected entrance. Guidance pauses inside instances and across continents.
-- 562 trainer locations, including eight weapon masters. Quest data covers 5,323 quests and 11,100 start and turn-in records. Quest availability checks level, race, class, prerequisites, exclusivity and quest progress. Profession requirements appear in tooltips. Reputation and specialization can affect availability in game.
+- 34 dungeon and wing entries, 71 floors, 287 bosses and 1,408 distinct loot items. 260 bosses have recorded floor positions. Dalaran’s Underbelly uses a labeled route sketch.
+- 41 outdoor entrance records across all 34 entries. Ten have a recorded approach waypoint, covering the Deadmines, Ragefire Chasm, the four Scarlet Monastery wings, Alcaz Prison, Blackmaw Hold, Krol’dok Stronghold and Shaper’s Terrace. Other doors show a direct bearing. Dire Maul East and West have multiple selectable portals.
+- 562 trainer locations, including eight weapon masters. Quest data covers 5,323 quests, 11,100 start and turn-in records, and 5,207 representative objective sites for 2,097 quests. Availability uses level, race, class, profession rank, quest chains and progress. Reputation and specialization can also affect offers in game.
 
 ## Install
 

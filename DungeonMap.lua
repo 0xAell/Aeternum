@@ -4,6 +4,7 @@ addon.DungeonMap = DungeonMap
 local WIDTH, HEIGHT = 1002, 668
 local missingLegacyArt = {ruRU=true, esMX=true, itIT=true}
 local byInstance = {}
+local killed = {}
 for _, dungeon in ipairs(addon.Data.dungeons) do
     local id = addon.floorData[dungeon.id].instance
     byInstance[id] = byInstance[id] or {}
@@ -29,6 +30,7 @@ local function place(frame)
     frame.art:SetPoint("TOPLEFT", frame, "TOPLEFT", frame.x / scale, -frame.y / scale)
     -- Keep skulls the size of a normal map icon at every zoom.
     for _, pin in ipairs(frame.pins) do pin:SetSize(20 / scale, 20 / scale) end
+    frame.playerArrow:SetSize(22 / scale, 22 / scale)
 end
 
 local function zoom(frame, delta)
@@ -46,8 +48,69 @@ local function clearFloor(frame)
     for _, pin in ipairs(frame.pins) do
         if GameTooltip:IsOwned(pin) then GameTooltip:Hide() end
         pin:Hide()
-        pin.boss = nil
+        pin.boss, pin.members, pin.stop, pin.complete = nil, nil, nil, nil
     end
+end
+
+local function playerPosition()
+    local self = DungeonMap
+    local frame = self.frame
+    local floor = self.dungeon and addon.floorData[self.dungeon.id].floors[self.index]
+    local arrow = frame.playerArrow
+    arrow:Hide()
+    if not (UnitPosition and floor and floor.toMap and self.dungeon == self.playerDungeon
+        and self.index == self.playerFloor) then return end
+    local north, west, _, instance = UnitPosition("player")
+    if not addon.IsReadableNumber(north) or not addon.IsReadableNumber(west)
+        or not addon.IsReadableNumber(instance) or instance ~= self.playerInstance then return end
+    local m = floor.toMap
+    local x, y = m[1]*north + m[2]*west + m[3], m[4]*north + m[5]*west + m[6]
+    if x < 0 or y < 0 or x > 1 or y > 1 then return end
+    local facing = GetPlayerFacing()
+    if not addon.IsReadableNumber(facing) then return end
+    local n, w = math.cos(facing), math.sin(facing)
+    arrow:SetPoint("CENTER", frame.art, "TOPLEFT", x * WIDTH, -y * HEIGHT)
+    arrow:SetRotation(-math.atan2((m[1]*n + m[2]*w)*WIDTH, -(m[4]*n + m[5]*w)*HEIGHT))
+    arrow:Show()
+end
+
+function DungeonMap:UpdatePlayer()
+    if not self.frame then return end
+    local active = self.dungeon ~= nil and self.playerDungeon == self.dungeon and self.playerFloor == self.index
+    self.frame.positionUpdates:SetShown(active)
+    playerPosition()
+end
+
+function DungeonMap:RefreshKills()
+    if not self.dungeon then return end
+    local instance = addon.floorData[self.dungeon.id].instance
+    for _, pin in ipairs(self.frame.pins) do
+        local complete = false
+        if pin.stop and self.playerInstance == instance then
+            for _, encounter in ipairs(pin.stop.encounters or {}) do
+                local locked = C_RaidLocks and C_RaidLocks.IsEncounterComplete
+                    and C_RaidLocks.IsEncounterComplete(instance, encounter, self.difficulty)
+                if killed[encounter] or ((not issecretvalue or not issecretvalue(locked)) and locked) then
+                    complete = true
+                    break
+                end
+            end
+        end
+        pin.complete = complete
+        pin:SetAlpha(complete and .5 or 1)
+    end
+end
+
+function DungeonMap:RecordKill(encounter)
+    if self.playerInstance and addon.IsReadableNumber(encounter) then
+        killed[encounter] = true
+        self:RefreshKills()
+    end
+end
+
+function DungeonMap:NewVisit()
+    wipe(killed)
+    self.chosenWing = nil
 end
 
 local function tile(frame, index, file, x, y, w, h, level, ...)
@@ -120,12 +183,19 @@ local function bossPin(frame, index)
     pin:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
     pin:SetScript("OnEnter", function(self)
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:SetText(self.boss.name)
+        GameTooltip:SetText(#self.members > 1 and (self.stop.label or "Bosses") or self.boss.name)
+        if #self.members > 1 then
+            for _, member in ipairs(self.members) do GameTooltip:AddLine(member.name) end
+        end
+        if self.complete then GameTooltip:AddLine("Encounter complete", .55, .8, .55) end
         GameTooltip:AddLine("Click for loot", 1, .82, 0)
         GameTooltip:Show()
     end)
     pin:SetScript("OnLeave", function(self) if GameTooltip:IsOwned(self) then GameTooltip:Hide() end end)
-    pin:SetScript("OnClick", function(self) addon.UI:Boss(self, self.boss) end)
+    pin:SetScript("OnClick", function(self)
+        if #self.members == 1 then addon.UI:Boss(self, self.boss)
+        else addon.UI:BossGroup(self, self.members, self.stop.label) end
+    end)
     pin:EnableMouseWheel(true)
     pin:SetScript("OnMouseWheel", function(_, delta) zoom(frame, delta) end)
     return pin
@@ -142,15 +212,30 @@ function DungeonMap:SetFloor(index)
     if floor.name ~= name then name = name .. " · " .. floor.name end
     if floor.paths then name = name .. " (route sketch)" end
     frame.dropdown:OverrideText(name)
-    local lookup = {}
+    local lookup, locations, count = {}, {}, 0
     for _, boss in ipairs(dungeon.bosses) do lookup[boss.id] = boss end
-    for i, point in ipairs(floor.bosses) do
-        local pin = bossPin(frame, i)
-        pin.boss = lookup[point[1]]
-        pin:SetPoint("CENTER", frame.art, "TOPLEFT", point[2] * WIDTH, -point[3] * HEIGHT)
-        pin:Show()
+    for _, point in ipairs(floor.bosses) do
+        local key = ("%s:%s"):format(point[2], point[3])
+        local pin = locations[key]
+        if not pin then
+            count = count + 1
+            pin = bossPin(frame, count)
+            locations[key] = pin
+            pin.boss, pin.stop, pin.members = lookup[point[1]], point, {}
+            pin:SetPoint("CENTER", frame.art, "TOPLEFT", point[2] * WIDTH, -point[3] * HEIGHT)
+            pin:Show()
+        end
+        pin.members[#pin.members + 1] = lookup[point[1]]
     end
     place(frame)
+    self:RefreshKills()
+    self:UpdatePlayer()
+end
+
+local function bossFloor(dungeon, boss)
+    for index, floor in ipairs(addon.floorData[dungeon.id].floors) do
+        for _, point in ipairs(floor.bosses) do if point[1] == boss.id then return index end end
+    end
 end
 
 local function floorMenu(_, menu)
@@ -177,11 +262,16 @@ local function floorMenu(_, menu)
     for _, boss in ipairs(dungeon.bosses) do
         bosses:CreateButton(boss.name, function()
             C_Timer.After(0, function()
-                if DungeonMap.dungeon == dungeon then addon.UI:Boss(DungeonMap.frame, boss) end
+                if DungeonMap.dungeon ~= dungeon then return end
+                local index = bossFloor(dungeon, boss)
+                if index and index ~= DungeonMap.index then DungeonMap:SetFloor(index) end
+                addon.UI:Boss(DungeonMap.frame, boss)
             end)
         end)
     end
     if #dungeon.quests > 0 then addon.UI:QuestMenu(menu:CreateButton("Dungeon quests"), dungeon) end
+    if #dungeon.keys > 0 then addon.UI:Keys(menu:CreateButton("Dungeon keys"), dungeon) end
+    addon.UI:EntranceMenu(menu:CreateButton("Entrances"), dungeon)
     menu:CreateButton("Return to zone map", function() DungeonMap:Close() end)
 end
 
@@ -203,6 +293,16 @@ function DungeonMap:EnsureFrame()
     frame.art = CreateFrame("Frame", nil, frame)
     frame.art:SetSize(WIDTH, HEIGHT)
     frame.art:EnableMouse(false)
+    frame.playerArrow = frame.art:CreateTexture(nil, "OVERLAY")
+    frame.playerArrow:SetTexture("Interface\\Minimap\\MinimapArrow")
+    frame.playerArrow:Hide()
+    frame.positionUpdates = CreateFrame("Frame", nil, frame)
+    frame.positionUpdates:Hide()
+    local elapsedPosition = 0
+    frame.positionUpdates:SetScript("OnUpdate", function(_, elapsed)
+        elapsedPosition = elapsedPosition + elapsed
+        if elapsedPosition >= .2 then elapsedPosition = 0; playerPosition() end
+    end)
     frame.tiles, frame.lines, frame.pins = {}, {}, {}
     frame.zoom, frame.x, frame.y = 1, 0, 0
     frame.back = CreateFrame("Button", nil, frame)
@@ -253,14 +353,8 @@ function DungeonMap:Open(dungeon, bossIndex, preferredFloor)
     local strata = addon.UI.map:GetFrameStrata()
     frame:SetFrameStrata((strata == "FULLSCREEN" or strata == "FULLSCREEN_DIALOG") and "FULLSCREEN_DIALOG" or "DIALOG")
     self.dungeon, self.followInstance = dungeon, nil
-    local floors = addon.floorData[dungeon.id].floors
     local boss = bossIndex and dungeon.bosses[bossIndex]
-    local index = preferredFloor or 1
-    if boss then
-        for i, floor in ipairs(floors) do
-            for _, pin in ipairs(floor.bosses) do if pin[1] == boss.id then index = i end end
-        end
-    end
+    local index = preferredFloor or (boss and bossFloor(dungeon, boss)) or 1
     frame:Show()
     self:SetFloor(index)
 end
@@ -270,31 +364,54 @@ function DungeonMap:Close()
     if self.frame then self.frame:Hide() end
 end
 
-function DungeonMap:OpenInstance()
-    local map = addon.UI.map
-    if not map or not map:IsShown() or not IsInInstance() or not GetInstanceInfo then return end
-    local name, _, _, _, _, _, _, id = GetInstanceInfo()
-    if issecretvalue and issecretvalue(id) then return end
+function DungeonMap:IsInside(key)
+    return self.playerDungeon and self.playerDungeon.id == key
+end
+
+function DungeonMap:OpenInstance(onlyFollowing)
+    self.playerInstance, self.playerDungeon, self.playerFloor = nil, nil, nil
+    if not IsInInstance() or not GetInstanceInfo then self:UpdatePlayer(); return end
+    local name, _, difficulty, _, _, _, _, id = GetInstanceInfo()
+    if issecretvalue and issecretvalue(id) then self:UpdatePlayer(); return end
     local wings = byInstance[id]
-    if not wings then return end
+    if not wings then self:UpdatePlayer(); return end
+    self.playerInstance = id
+    self.difficulty = addon.IsReadableNumber(difficulty) and difficulty or nil
     local area = GetSubZoneText and GetSubZoneText()
     if issecretvalue and issecretvalue(area) then area = nil end
     if issecretvalue and issecretvalue(name) then name = nil end
-    local choice, index, matches, namedWing = nil, nil, 0, nil
+    local namedWing
     for _, wing in ipairs(wings) do
         if wing.name == name then namedWing = wing end
     end
     local match = area and area ~= "" and ("|" .. area .. "|")
+    local mapID = C_Map.GetBestMapForUnit("player")
+    if not addon.IsReadableNumber(mapID) then mapID = nil end
+    local choice, index, matches = nil, nil, 0
+    local mapWing, mapFloor, mapMatches = nil, nil, 0
     for _, wing in ipairs(wings) do
-        if match and (not namedWing or namedWing == wing) then
+        if not namedWing or namedWing == wing then
             for i, floor in ipairs(addon.floorData[wing.id].floors) do
-                if floor.zones:find(match, 1, true) then
+                if match and floor.zones:find(match, 1, true) then
                     choice, index, matches = wing, i, matches + 1
                 end
+                if mapID and floor.mapID == mapID then mapWing, mapFloor, mapMatches = wing, i, mapMatches + 1 end
             end
         end
     end
-    if matches ~= 1 then choice, index = namedWing or (#wings == 1 and wings[1]), nil end
+    if matches ~= 1 then
+        local previous = self.chosenWing
+        if previous and addon.floorData[previous.id].instance ~= id then previous = nil end
+        if mapMatches == 1 then choice, index = mapWing, mapFloor
+        else choice, index = namedWing or (#wings == 1 and wings[1]) or previous, nil end
+    end
+    if choice then
+        self.playerDungeon = choice
+        self.playerFloor = index or (#addon.floorData[choice.id].floors == 1 and 1 or nil)
+    end
+    self:UpdatePlayer()
+    local map = addon.UI.map
+    if not map or not map:IsShown() or (onlyFollowing and not self.followInstance) then return end
     if choice then
         if self.dungeon ~= choice or (index and self.index ~= index) then self:Open(choice, nil, index) end
         self.followInstance = true
@@ -306,7 +423,7 @@ function DungeonMap:OpenInstance()
     MenuUtil.CreateContextMenu(map, function(_, menu)
         menu:CreateTitle("Choose a dungeon wing")
         for _, wing in ipairs(wings) do
-            menu:CreateButton(wing.name, function() self:Open(wing); self.followInstance = true end)
+            menu:CreateButton(wing.name, function() self.chosenWing = wing; self:OpenInstance() end)
         end
     end)
 end

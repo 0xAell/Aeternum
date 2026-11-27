@@ -13,13 +13,10 @@ local function readable(value)
     return not issecretvalue or not issecretvalue(value)
 end
 
-local function isNumber(value)
-    return readable(value) and type(value) == "number"
-        and value == value and math.abs(value) < math.huge
-end
+local isNumber = addon.IsReadableNumber
 
 local function isMapPoint(point)
-    return type(point) == "table" and isNumber(point.mapID) and point.mapID > 0
+    return type(point) == "table" and isNumber(point.mapID) and point.mapID > 0 and point.mapID % 1 == 0
         and isNumber(point.x) and point.x >= 0 and point.x <= 1
         and isNumber(point.y) and point.y >= 0 and point.y <= 1
 end
@@ -72,7 +69,8 @@ local function coordinatesFor(point, axesCache)
         }
         axesCache[point.mapID] = axes
     end
-    return { continent = continent, x = x, y = y, axes = axes, label = point.label }
+    local label = type(point.label) == "string" and point.label or nil
+    return { continent = continent, x = x, y = y, axes = axes, label = label }
 end
 
 local function distanceBetween(a, x, y)
@@ -93,8 +91,12 @@ local function firstStep(points, playerX, playerY)
 end
 
 local function facingRotation()
-    local rotate = C_CVar.GetCVarBool("rotateMinimap")
-    if not readable(rotate) or not rotate or C_Minimap.IsRotateMinimapIgnored() then return 1, 0 end
+    local rotate = C_CVar and C_CVar.GetCVarBool and C_CVar.GetCVarBool("rotateMinimap")
+    if not readable(rotate) then return end
+    if not rotate then return 1, 0 end
+    local ignored = C_Minimap and C_Minimap.IsRotateMinimapIgnored and C_Minimap.IsRotateMinimapIgnored()
+    if not readable(ignored) then return end
+    if ignored then return 1, 0 end
     local facing = GetPlayerFacing()
     if isNumber(facing) then return math.cos(facing), math.sin(facing) end
 end
@@ -196,10 +198,18 @@ function Navigation:IsActive()
 end
 
 function Navigation:Stop(message)
-    self.points, self.step, self.target = nil, nil, nil
+    self.points, self.step, self.target, self.destination = nil, nil, nil, nil
+    AeternumRouteDB = nil
     if self.worker then self.worker:Hide() end
     if self.overlay then self.overlay:Hide() end
     self:SetStatus(message or IDLE)
+    if addon.UpdateRoutePins then addon.UpdateRoutePins() end
+end
+
+function Navigation:IsDestination(point, dungeon)
+    local dest = self.destination
+    return dest and point and dest.dungeon == dungeon and dest.mapID == point.mapID
+        and dest.x == point.x and dest.y == point.y
 end
 
 function Navigation:Pause(message)
@@ -211,7 +221,11 @@ function Navigation:Update()
     if not self.points then return end
     local insideInstance = IsInInstance and IsInInstance()
     if insideInstance then
-        self:Pause("Guidance is paused inside an instance.")
+        if self.destination and self.destination.dungeon and addon.DungeonMap:IsInside(self.destination.dungeon) then
+            self:Stop(("Arrived at %s."):format(self.target))
+        else
+            self:Pause("Guidance is paused inside an instance.")
+        end
         return
     end
     local continent, playerX, playerY = playerPoint()
@@ -254,32 +268,44 @@ end
 
 -- Guides the minimap arrow to destination, a map point { mapID, x, y } that may
 -- list recorded approach waypoints. name labels the destination in the status.
-function Navigation:Start(name, destination)
+local function makeRoute(name, destination, dungeon)
     if not isMapPoint(destination) then
-        self:Stop("This location has no map coordinates.")
-        return false
+        return nil, "This location has no map coordinates."
     end
     if not (C_Map and C_Map.GetWorldPosFromMapPos and C_Map.GetBestMapForUnit
         and C_Map.GetPlayerMapPosition and CreateVector2D) then
-        self:Stop("This client does not provide the map APIs for guidance.")
-        return false
+        return nil, "This client does not provide the map APIs for guidance."
     end
 
     local axesCache, points = {}, {}
     local goal = coordinatesFor(destination, axesCache)
     if not goal then
-        self:Stop("A minimap position is unavailable for this location.")
-        return false
+        return nil, "A minimap position is unavailable for this location."
     end
-    for _, waypoint in ipairs(destination.waypoints or {}) do
+    local saved = {name=name, mapID=destination.mapID, x=destination.x, y=destination.y,
+        dungeon=type(dungeon) == "string" and addon.floorData[dungeon] and dungeon or nil}
+    for _, waypoint in ipairs(type(destination.waypoints) == "table" and destination.waypoints or {}) do
         local point = isMapPoint(waypoint) and coordinatesFor(waypoint, axesCache)
         if point and point.continent == goal.continent then
             points[#points + 1] = point
+            saved.waypoints = saved.waypoints or {}
+            saved.waypoints[#saved.waypoints + 1] = {mapID=waypoint.mapID, x=waypoint.x, y=waypoint.y,
+                label=point.label}
         end
     end
     points[#points + 1] = goal
-    self.points, self.step = points, nil
-    self.target = name or "the destination"
+    return points, saved
+end
+
+function Navigation:Start(name, destination, dungeon)
+    name = name or "the destination"
+    local points, saved = makeRoute(name, destination, dungeon)
+    if not points then
+        if not self.points then self:SetStatus(saved) end
+        return false, saved
+    end
+    self.target, self.points, self.step, self.destination = name, points, nil, saved
+    AeternumRouteDB = saved
 
     if not self.worker then
         self.worker = CreateFrame("Frame")
@@ -294,5 +320,17 @@ function Navigation:Start(name, destination)
     end
     self.worker:Show()
     self:Update()
+    if addon.UpdateRoutePins then addon.UpdateRoutePins() end
     return true
+end
+
+function Navigation:Restore()
+    local saved = AeternumRouteDB
+    if self.points or saved == nil then return end
+    if not isMapPoint(saved) or type(saved.name) ~= "string"
+        or (saved.waypoints ~= nil and type(saved.waypoints) ~= "table") then
+        AeternumRouteDB = nil
+        return
+    end
+    self:Start(saved.name, saved, saved.dungeon)
 end

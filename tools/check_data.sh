@@ -24,7 +24,7 @@ if [ -n "${2:-}" ]; then
 else
     folder="$routes/ForeverDungeonRoutes/Data"
     mkdir -p "$folder"
-    for file in Dungeons Floors Rooms Pictures Minimaps DefaultRoutes; do
+    for file in Dungeons Floors Rooms Pictures Minimaps DefaultRoutes Encounters Entrances; do
         curl -fsSL --retry 3 "https://raw.githubusercontent.com/Checkov23/ForeverDungeonRoutes/$routes_commit/ForeverDungeonRoutes/Data/$file.lua" -o "$folder/$file.lua"
     done
 fi
@@ -32,7 +32,7 @@ if [ ! -f "$classic" ]; then
     curl -fsSL --retry 3 "https://raw.githubusercontent.com/cmangos/classic-db/$classic_commit/Full_DB/ClassicDB_1_12_1_z2815.sql.gz" -o "$classic"
 fi
 
-"$lua" tools/import_norgannon.lua "$source" "$stage/Data.lua"
+"$lua" tools/import_norgannon.lua "$source" "$stage/Data.lua" "$routes/ForeverDungeonRoutes/Data/Entrances.lua"
 "$lua" tools/import_floors.lua "$routes" "$stage/Data.lua" "$stage/FloorData.lua"
 python3 tools/import_classic_training.py "$classic" "$stage/Data.lua" "$stage/ClassicTraining.lua"
 for file in Data.lua FloorData.lua ClassicTraining.lua; do

@@ -427,10 +427,48 @@ test("shared entrances retain the chosen wing for both buttons", function()
     env.WorldMapFrame:ClickPin(pin, "RightButton")
     state.menu:Find("Show path to Scarlet Monastery - Library"):Click()
     equal(addon.Navigation:GetTarget(), "Scarlet Monastery - Library entrance", "wing route")
+    equal(env.AeternumRouteDB.x, .8538); equal(env.AeternumRouteDB.y, .3246)
+    equal(env.AeternumRouteDB.waypoints[1].label, "Monastery entrance")
+    env.WorldMapFrame:ClickPin(pin, "RightButton")
+    check(not menuRow(state.menu, "Show path to Scarlet Monastery - Library"), "route to selected wing is active")
+    state.menu:Find("Show path to Scarlet Monastery - Armory")
     env.WorldMapFrame:ClickPin(pin, "LeftButton")
     state.menu:Find("Scarlet Monastery - Cathedral"):Click()
     Wow.flushTimers()
     equal(addon.DungeonMap.dungeon.id, "sm-cathedral", "chosen wing opens on the map")
+end)
+
+test("Dire Maul wing portals agree with the zone map and alternate doors carry distinct directions", function()
+    local addon, env, state = load({mapID=1444, playerMap=1444, playerX=.2, playerY=.2})
+    local east = addon.DungeonEntrances(dungeonNamed(addon, "dm-east"))
+    local north = addon.DungeonEntrances(dungeonNamed(addon, "dm-north"))
+    equal(#east, 3); equal(east[1].x, .6486); equal(north[1].x, .6292)
+    env.WorldMapFrame:Show()
+    local west = locate(env, function(e) return e.source.id == "dm-west" end)
+    env.WorldMapFrame:ClickPin(west, "RightButton")
+    local second = assert(menuRow(state.menu, "60.3, 29.7"))
+    second:Click()
+    equal(env.AeternumRouteDB.y, .2968)
+    state.viewWidth = .25
+    env.WorldMapFrame.providers[1]:OnCanvasScaleChanged()
+    Wow.flushTimers()
+    local a = locate(env, function(e) return e.source.id == "dm-west" and e.y == .2968 end)
+    local b = locate(env, function(e) return e.source.id == "dm-west" and e.y == .3175 end)
+    check(a ~= b and a.tracked:IsShown() and not b.tracked:IsShown(), "zoom separates the two doorways")
+end)
+
+test("a live dungeon map ID identifies the wing before a localized room name is available", function()
+    local addon, env, state = load({inInstance=true, instanceID=189, playerMap=303})
+    env.WorldMapFrame:Show()
+    equal(addon.DungeonMap.dungeon.id, "sm-library")
+    check(not state.menu, "no wing picker required")
+    state.instanceID, state.playerMap = 36, 292
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    equal(addon.DungeonMap.dungeon.id, "deadmines")
+    equal(addon.DungeonMap.index, 2)
+    state.subzone = "Mastraum"
+    Wow.fire("ZONE_CHANGED_INDOORS")
+    equal(addon.DungeonMap.index, 1, "identified current room overrides a stale map ID")
 end)
 
 test("clicking an entrance uses only the existing viewport and named floors", function()
@@ -508,7 +546,8 @@ test("all dungeon floor references and boss stops resolve to their own dungeon",
         end
     end
     equal(floors, 71, "floors")
-    check(stops >= 210 and sketches == 1, "recorded boss stops and one fallback sketch")
+    equal(stops, 260, "recorded boss positions")
+    equal(sketches, 1, "documented fallback sketch")
 end)
 
 test("opening M inside a dungeon automatically shows its floor and leaving restores the zone", function()
@@ -550,9 +589,9 @@ test("unplaced bosses and dungeon quest starts are reachable from the floor itse
     local addon, env, state = openDeadmines()
     local frame = addon.DungeonMap.frame
     local menu = frame.dropdown:OpenMenu()
-    menu:Find("Boss loot"):Find("Miner Johnson"):Click()
+    menu:Find("Boss loot"):Find("Goblin Woodcarver"):Click()
     Wow.flushTimers()
-    equal(state.menu.children[1].label, "Miner Johnson", "encounter list opens loot")
+    equal(state.menu.children[1].label, "Goblin Woodcarver", "encounter list opens loot")
     local d = addon.DungeonMap.dungeon
     local id = findEntry(d.quests, function(q) return addon.QuestStart(q) ~= nil end)
     local start = addon.QuestStart(id)
@@ -578,7 +617,8 @@ test("class and sparse profession slots select relevant trainers and react to sk
 end)
 
 test("a profession trainer shows NPC-specific recipe prices and skill requirements", function()
-    local addon, env, state = load({mapID=1453, professionIndices={1}, professionSkills={171}})
+    local addon, env, state = load({mapID=1453, professionIndices={1}, professionSkills={171},
+        professionRanks={[171]=25}})
     env.WorldMapFrame:Show()
     local pin = locate(env, function(e) return e.source.id == 5499 end)
     check(pin, "Lilyssia Nightbreeze")
@@ -755,6 +795,273 @@ test("optional drop search opens the same map floor and loot as a boss pin", fun
     equal(addon.DungeonMap.dungeon.id, "deadmines", "selected dungeon")
     equal(addon.DungeonMap.index, 2, "boss floor")
     equal(state.menu.children[1].label, "Edwin VanCleef")
+end)
+
+test("every dungeon has an exterior door and recorded approaches reach the selected entrance", function()
+    local addon, env, state = load({mapID=1449, playerMap=1449, playerX=.8, playerY=.8})
+    local count, routes = 0, 0
+    for _, d in ipairs(addon.Data.dungeons) do
+        local doors = addon.DungeonEntrances(d)
+        check(#doors > 0, d.name)
+        for _, entry in ipairs(doors) do
+            check(findEntry(addon.MapRecords(entry.mapID), function(e) return e == entry end), d.name)
+            count = count + 1
+            if entry.point.waypoints then routes = routes + 1 end
+        end
+    end
+    equal(count, 41); equal(routes, 10)
+    env.WorldMapFrame:Show()
+    local pin = locate(env, function(e) return e.source.id == "shapers-terrace" end)
+    env.WorldMapFrame:ClickPin(pin, "RightButton")
+    state.menu:Find("Show path to Shaper's Terrace"):Click()
+    equal(addon.Navigation.points[1].label, "Stone staircase")
+    equal(#addon.Navigation.points, 2)
+    check(pin.tracked:IsShown(), "active door marked on the map")
+    env.WorldMapFrame:ClickPin(pin, "LeftButton")
+    local doorMenu = addon.DungeonMap.frame.dropdown:OpenMenu():Find("Entrances")
+    doorMenu:Find("Stop directions"):Click()
+    doorMenu:Find("Show on zone map"):Click()
+    equal(env.WorldMapFrame.panX, .482); equal(env.WorldMapFrame.panY, .057)
+    check(not addon.DungeonMap.dungeon and not env.AeternumRouteDB, "back at the actual portal")
+end)
+
+test("directions survive a reload and an unrelated instance, then finish on entry to the destination", function()
+    local addon, env = load({playerMap=1436, playerX=.05, playerY=.05})
+    local dungeon = dungeonNamed(addon, "deadmines")
+    check(addon.Navigation:Start(dungeon.name, dungeon.entrances[1], dungeon.id))
+    local saved = env.AeternumRouteDB
+    check(not addon.Navigation:Start("Unknown portal", {mapID=1436}), "invalid replacement rejected")
+    equal(env.AeternumRouteDB, saved, "previous route intact")
+    local nextAddon, client, state = load({savedRoute=saved, inInstance=true, instanceID=189})
+    equal(nextAddon.Navigation:GetTarget(), dungeon.name)
+    equal(nextAddon.Navigation:GetStatus(), "Guidance is paused inside an instance.")
+    state.inInstance, state.playerMap, state.playerX, state.playerY = false, 1436, .05, .05
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    check(nextAddon.Navigation.overlay:IsShown() and client.AeternumRouteDB, "route resumed outdoors")
+    state.inInstance, state.instanceID, state.subzone = true, 36, "Ironclad Cove"
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    check(not nextAddon.Navigation:IsActive() and not client.AeternumRouteDB, "destination reached")
+    check(nextAddon.Navigation:GetStatus():find("Arrived", 1, true))
+    local other = load()
+    check(not other.Navigation:IsActive(), "another character has no route")
+    local corrupt, clean = load({savedRoute={mapID=1436, x=.1, y=.2, name="Old", waypoints=true}})
+    check(not corrupt.Navigation:IsActive() and not clean.AeternumRouteDB, "invalid saved route discarded")
+end)
+
+test("alternate wing routes restore distinct boss positions and group an arena's loot by combatant", function()
+    local addon, env, state = load()
+    for key, expected in pairs({maraudon=9, stratholme=17, ["dm-north"]=7}) do
+        local ids, count = {}, 0
+        for _, floor in ipairs(addon.floorData[key].floors) do
+            equal(#floor.toMap, 6)
+            for _, stop in ipairs(floor.bosses) do
+                check(not ids[stop[1]], "duplicate alternate-route stop")
+                ids[stop[1]], count = true, count + 1
+            end
+        end
+        equal(count, expected, key)
+    end
+    env.WorldMapFrame:Show()
+    addon.DungeonMap:Open(dungeonNamed(addon, "blackrock-depths"))
+    local arena = findEntry(addon.DungeonMap.frame.pins, function(p)
+        return p.stop and p.stop.label == "Ring of Law"
+    end)
+    equal(#arena.members, 6, "one skull for all possible opponents")
+    arena:Click()
+    state.menu:Find("Gorosh the Dervish"):Click()
+    Wow.flushTimers()
+    equal(state.menu.children[1].label, "Gorosh the Dervish")
+    check(menuRow(state.menu, "Savage Gladiator Chain"), "selected boss's own loot")
+end)
+
+test("Forever-specific named drops fill previously empty boss menus", function()
+    local addon, env, state = load()
+    env.WorldMapFrame:Show()
+    local dungeon = dungeonNamed(addon, "alcaz-prison")
+    addon.DungeonMap:Open(dungeon)
+    for boss, id in pairs({["Katerina the Cleaner"]=276738, Blazeroar=276744}) do
+        addon.DungeonMap.frame.dropdown:OpenMenu():Find("Boss loot"):Find(boss):Click()
+        Wow.flushTimers()
+        check(menuRow(state.menu, addon.Data.items[id]), boss)
+        equal(state.menu.children[1].label, boss)
+    end
+end)
+
+test("the indoor player arrow uses the current floor and hides when the client restricts position", function()
+    local addon, env, state = load({inInstance=true, instanceID=36, subzone="Ironclad Cove",
+        playerNorth=-101.09, playerWest=-766.99})
+    env.WorldMapFrame:Show()
+    local map, frame = addon.DungeonMap, addon.DungeonMap.frame
+    local arrow = frame.playerArrow
+    check(arrow:IsVisible() and frame.positionUpdates:IsVisible())
+    check(math.abs(arrow.points[1][4] / 1002 - .5) < .001, "east-west placement")
+    check(math.abs(-arrow.points[1][5] / 668 - .5) < .001, "north-south placement")
+    frame:Fire("OnMouseWheel", 2)
+    check(math.abs(arrow:GetWidth() * frame.art.scale - 22) < .01, "screen size held while zooming")
+    frame.dropdown:OpenMenu():Find("Deadmines"):Click()
+    check(not arrow:IsShown() and not frame.positionUpdates:IsShown(), "viewing another floor")
+    map:SetFloor(2)
+    state.positionInstance = 189
+    frame.positionUpdates:Fire("OnUpdate", .25)
+    check(not arrow:IsShown(), "mismatched instance")
+    state.positionInstance, state.playerNorth = 36, {}
+    env.issecretvalue = function(value) return value == state.playerNorth end
+    frame.positionUpdates:Fire("OnUpdate", .25)
+    check(not arrow:IsShown(), "unreadable coordinates")
+end)
+
+test("only successful encounters or client lockouts dim the appropriate boss skull", function()
+    local addon, env, state = load({inInstance=true, instanceID=36, subzone="Ironclad Cove"})
+    env.WorldMapFrame:Show()
+    local function skull(id)
+        return findEntry(addon.DungeonMap.frame.pins, function(p) return p.boss and p.boss.id == id end)
+    end
+    Wow.fire("ENCOUNTER_END", 2747, "Edwin VanCleef", 1, 5, 0)
+    equal(skull(639).alpha, 1, "wipe leaves boss up")
+    Wow.fire("ENCOUNTER_END", 2747, "Edwin VanCleef", 1, 5, 1)
+    check(skull(639).complete and not skull(647).complete)
+    skull(639):Fire("OnEnter")
+    check(findEntry(env.GameTooltip.lines, function(text) return text == "Encounter complete" end))
+    Wow.fire("BOSS_KILL", 2744, "Captain Greenskin")
+    check(skull(647).complete)
+    state.lockedEncounters = {[2747]=true}
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    check(skull(639).complete and not skull(647).complete, "new visit consults the current lockout")
+end)
+
+test("dungeon keys report bag ownership and alternate doors remain individually selectable", function()
+    local addon, env = load({inventory={[11000]=1}})
+    env.WorldMapFrame:Show()
+    addon.DungeonMap:Open(dungeonNamed(addon, "blackrock-depths"))
+    local keys = addon.DungeonMap.frame.dropdown:OpenMenu():Find("Dungeon keys")
+    check(menuRow(keys, addon.Data.items[11000]).label:find("In bags", 1, true))
+    check(not menuRow(keys, addon.Data.items[11140]).label:find("In bags", 1, true))
+    addon.DungeonMap:Open(dungeonNamed(addon, "uldaman"))
+    local doors = addon.DungeonMap.frame.dropdown:OpenMenu():Find("Entrances")
+    equal(#doors.children, 2)
+    check(doors.children[1].label ~= doors.children[2].label, "two doors in the same zone")
+    doors.children[2]:Find("Show on zone map"):Click()
+    equal(env.WorldMapFrame:GetMapID(), 1418)
+    equal(env.WorldMapFrame.panX, .652)
+end)
+
+test("quest starts, turn-ins and dungeon quest links lead to the correct named contact", function()
+    local addon, env, state = load({mapID=1429, log={[783]=1, [166]=2}, complete={[783]=true, [166]=true}})
+    equal(addon.QuestLocation(783, "start").contact, "Deputy Willem")
+    equal(addon.QuestLocation(783, "turnin").contact, "Marshal McBride")
+    env.WorldMapFrame:Show()
+    local pin = locate(env, function(e) return e.questID == 783 and e.role == "turnin" end)
+    check(pin)
+    local dungeon = dungeonNamed(addon, "deadmines")
+    addon.DungeonMap:Open(dungeon)
+    local turnin = addon.QuestLocation(166, "turnin", env.WorldMapFrame:GetMapID())
+    addon.DungeonMap.frame.dropdown:OpenMenu():Find("Dungeon quests"):Find(addon.Quest(166).name):Click()
+    equal(env.WorldMapFrame:GetMapID(), turnin.mapID)
+    equal(env.WorldMapFrame.panX, turnin.x)
+    equal(env.GameTooltip.lines[1], turnin.title)
+    check(findEntry(env.GameTooltip.lines, function(line) return line == turnin.contact end))
+    state.log[166], state.completed[166] = nil, true
+    Wow.fire("QUEST_TURNED_IN", 166); Wow.flushTimers()
+    check(not locate(env, function(e) return e == turnin end), "completed quest releases its highlighted pin")
+end)
+
+test("only the focused quest's unfinished objectives appear and defer to Blizzard's map pins and filter", function()
+    local addon, env, state = load({mapID=1429, log={[7]=1, [33]=2}, watched={[33]=1}, superQuest=7,
+        objectives={[7]={{text="Kobold Vermin slain: 0/10", finished=false}}}})
+    env.WorldMapFrame:Show()
+    local function site(id) return locate(env, function(e) return e.questID == id and e.role == "objective" end) end
+    local pin, entry = site(7)
+    equal(entry.title, "Kobold Vermin")
+    equal(pin.icon.atlas, "Quest-In-Progress-Icon-yellow")
+    check(not site(33), "one quest at a time")
+    pin:OnMouseEnter()
+    check(findEntry(env.GameTooltip.lines, function(v) return v == state.objectives[7][1].text end))
+    state.nativePOI = {[1429]={{questID=7, mapID=1429, x=.4, y=.55, isQuestStart=false}}}
+    Wow.fire("QUEST_POI_UPDATE"); Wow.flushTimers()
+    check(not site(7), "Blizzard already has a pin")
+    state.nativePOI = nil
+    state.questPOI = false
+    Wow.fire("CVAR_UPDATE", "questPOI"); Wow.flushTimers()
+    check(not site(7), "stock map filter")
+    state.questPOI = true
+    state.objectives[7][1].finished = true
+    Wow.fire("QUEST_LOG_UPDATE"); Wow.flushTimers()
+    check(not site(7), "objective finished")
+    state.superQuest = nil
+    Wow.fire("SUPER_TRACKING_CHANGED"); Wow.flushTimers()
+    check(site(33), "falls back to the first watched quest")
+    addon.UI:Pick(env.WorldMapFrame, addon.QuestLocation(7, "turnin"))
+    state.menu:Find("Focus quest"):Click()
+    equal(state.superQuest, 7, "map action uses Blizzard quest focus")
+    state.menu:Find("Track quest"):Click()
+    equal(state.watched[7], 1)
+end)
+
+test("packed objective sites resolve to their quest, map and named source", function()
+    local addon = load()
+    local quests, count = 0, 0
+    for id, packed in pairs(addon.Data.objectiveSites) do
+        check(addon.Quest(id), "unknown quest " .. id)
+        quests = quests + 1
+        local unique = {}
+        for site in packed:gmatch("([^;]+);") do
+            local n, zone, x, y, target = site:match("^(%d+):(%d+):(%d+),(%d+)([noz]%d+)[AH]?$")
+            check(n and tonumber(n) > 0 and tonumber(zone) > 0, site)
+            check(tonumber(x) <= 10000 and tonumber(y) <= 10000, site)
+            check(target == "z0" or addon.Data.questContacts[target], "no name for " .. target)
+            check(not unique[site], "duplicate site")
+            unique[site], count = true, count + 1
+        end
+    end
+    equal(quests, 2097); equal(count, 5207)
+end)
+
+test("profession ranks gate quest offers and sort trainer lessons as the character learns", function()
+    local addon, env, state = load({mapID=1453, level=8, professionIndices={1}, professionSkills={171},
+        professionRanks={[171]=19}})
+    equal(addon.Quests:State(1581), "locked", "requires Alchemy 20")
+    local trainer = findEntry(addon.MapRecords(1453), function(e) return e.source.id == 5499 end)
+    local function lessons() addon.UI:Trainer(env.WorldMapFrame, trainer); return state.menu end
+    check(menuRow(lessons():Find("Later training"), "Minor Mana Potion"), "requires Alchemy 25")
+    state.professionRanks[171] = 25
+    Wow.fire("SKILL_LINES_CHANGED")
+    equal(addon.Quests:State(1581), "available")
+    check(menuRow(lessons(), "Minor Mana Potion"), "available at this rank")
+    local spell = findEntry(addon.Trainers:Lessons(5499), function(l) return l.name == "Minor Mana Potion" end)
+    state.knownSpells = {[spell.id]=true}
+    Wow.fire("LEARNED_SPELL_IN_SKILL_LINE")
+    check(menuRow(lessons():Find("Learned"), "Minor Mana Potion"))
+    state.professionRanks[171], state.log[1581], state.complete[1581] = 1, 1, true
+    Wow.fire("SKILL_LINES_CHANGED")
+    equal(addon.Quests:State(1581), "ready", "accepted quest can still be turned in")
+end)
+
+test("crowded maps retain every location and separate nearby pins as the player zooms", function()
+    local addon, env, state = load()
+    local entries = {}
+    for i = 1, 220 do
+        local x, y = .1 + ((i - 1) % 40) * .005, .1 + math.floor((i - 1) / 40) * .01
+        local point = {mapID=1429, x=x, y=y}
+        entries[i] = {category="class", title="Trainer " .. i, subtitle="Mage Trainer", source={}, point=point,
+            x=x, y=y, mapID=1429}
+    end
+    addon.Entries = function() return entries end
+    env.WorldMapFrame:Show()
+    local function count()
+        local all, total = pins(env), 0
+        for _, p in ipairs(all) do total = total + #p.entries end
+        equal(total, #entries, "every record reachable from the map")
+        return #all
+    end
+    local grouped = count()
+    check(grouped < 100, "crowded overview")
+    local pin = locate(env, function(e) return e == entries[220] end)
+    env.WorldMapFrame:ClickPin(pin, "LeftButton")
+    state.menu:Find("Trainer 220")
+    state.viewWidth = .25
+    env.WorldMapFrame.providers[1]:OnCanvasScaleChanged()
+    Wow.flushTimers()
+    check(count() > grouped, "more detail at higher zoom")
 end)
 
 print(("%d passed, %d failed"):format(passed, failed))

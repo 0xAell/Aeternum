@@ -21,9 +21,11 @@ local function readProfessions()
     local function collect(...)
         for i = 1, select("#", ...) do
             local index = select(i, ...)
-            if type(index) == "number" and index > 0 then
-                local _, _, _, _, _, _, skillID = GetProfessionInfo(index)
-                if skillID then known[skillID] = true end
+            if addon.IsReadableNumber(index) and index > 0 then
+                local _, _, rank, _, _, _, skillID = GetProfessionInfo(index)
+                if addon.IsReadableNumber(skillID) then
+                    known[skillID] = addon.IsReadableNumber(rank) and rank or true
+                end
             end
         end
     end
@@ -32,6 +34,22 @@ local function readProfessions()
 end
 
 function Trainers:Invalidate() professions = nil end
+
+-- A zero means the character lacks this profession. Nil means the client
+-- cannot give a reliable rank yet, so callers leave that requirement undecided.
+function Trainers:SkillRank(id)
+    if not id then return end
+    professions = professions or readProfessions()
+    if professions and professions[id] then
+        if type(professions[id]) == "number" then return professions[id] end
+        return
+    end
+    if C_SkillInfo and C_SkillInfo.GetSkillLineInfoByID then
+        local skill = C_SkillInfo.GetSkillLineInfoByID(id)
+        if skill and addon.IsReadableNumber(skill.rank) then return skill.rank end
+    end
+    if professions then return 0 end
+end
 
 function Trainers:Relevant(npc)
     if npc.kind == "class" then return npc.classToken == select(2, UnitClass("player")) end
@@ -45,12 +63,8 @@ function Trainers:Relevant(npc)
         return next(AeternumTrainerDB[npc.id] or {}) ~= nil
     end
     if npc.kind == "profession" then
-        professions = professions or readProfessions()
-        if professions then return professions[npc.skillID] end
-        if C_SkillInfo and C_SkillInfo.GetSkillLineInfoByID and npc.skillID then
-            local skill = C_SkillInfo.GetSkillLineInfoByID(npc.skillID)
-            return skill and skill.rank > 0
-        end
+        local rank = self:SkillRank(npc.skillID)
+        return rank == nil or rank > 0
     end
     return true
 end
@@ -92,7 +106,7 @@ function Trainers:Observe()
             AeternumTrainerDB[npcID] = known
             local previous = known[id] or {}
             known[id] = {name = name, rank = rank, id = spell or previous.id, cost = cost or previous.cost,
-                petPoints = pet or nil,
+                petPoints = pet or nil, lastKnown = state == "used" or nil,
                 level = level, skill = skill, requirement = requirement}
         end
     end
@@ -112,7 +126,8 @@ function Trainers:Lessons(npcID)
         if (addon.settings.otherTrainers or fitsClass(id))
             and (not C_Spell or not C_Spell.DoesSpellExist or C_Spell.DoesSpellExist(id)) then
             byID[id] = {id=id, name=localized(id, name), rank=rank, cost=tonumber(cost), level=tonumber(level),
-                skill=data.professions[tonumber(skill)], requirement=tonumber(need), source="Classic reference"}
+                skillID=tonumber(skill), skill=data.professions[tonumber(skill)], requirement=tonumber(need),
+                source="Classic reference"}
         end
     end
     for raw, cost in (data.offers[npcID] or ""):gmatch("(%d+):(%d*)") do
@@ -120,8 +135,8 @@ function Trainers:Lessons(npcID)
         local name, rank, level, skill, need, faction = data.lessons[id]:match("^(.-)|(.-)|(.-)|(.-)|(.-)|(.*)$")
         if faction == "" or faction == UnitFactionGroup("player") then
             byID[id] = {id=id, name=localized(id, name), rank=rank ~= "" and ("Rank " .. rank) or "",
-                cost=tonumber(cost), level=tonumber(level), skill=data.professions[tonumber(skill)],
-                requirement=tonumber(need), source="Bundled trainer record"}
+                cost=tonumber(cost), level=tonumber(level), skillID=tonumber(skill),
+                skill=data.professions[tonumber(skill)], requirement=tonumber(need), source="Bundled trainer record"}
         else
             byID[id] = nil
         end
@@ -142,7 +157,28 @@ function Trainers:Lessons(npcID)
         x, y = a.requirement or 0, b.requirement or 0
         if x ~= y then return x < y end
         if a.name ~= b.name then return a.name < b.name end
-        return tostring(a.rank or "") < tostring(b.rank or "")
+        local rankA = tonumber((a.rank or ""):match("%d+")) or 0
+        local rankB = tonumber((b.rank or ""):match("%d+")) or 0
+        if rankA ~= rankB then return rankA < rankB end
+        return (a.id or 0) < (b.id or 0)
     end)
     return result
+end
+
+function Trainers:LessonState(lesson)
+    if lesson.id and C_SpellBook and C_SpellBook.IsSpellKnown then
+        local known = C_SpellBook.IsSpellKnown(lesson.id)
+        if readable(known) and known then return "learned", "Already learned" end
+    end
+    if lesson.lastKnown then return "learned", "Learned at last visit" end
+    local level = UnitLevel("player")
+    if lesson.level and addon.IsReadableNumber(level) and level < lesson.level then
+        return "later", "Requires level " .. lesson.level
+    end
+    if lesson.skill and lesson.requirement and lesson.requirement > 0 then
+        local rank = self:SkillRank(lesson.skillID)
+        if rank and rank < lesson.requirement then
+            return "later", ("%s %d / %d"):format(lesson.skill, rank, lesson.requirement)
+        end
+    end
 end
