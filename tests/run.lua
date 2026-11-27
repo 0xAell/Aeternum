@@ -420,6 +420,65 @@ test("dungeon right-click offers directions and does not zoom the map", function
     check(not addon.Navigation:IsActive(), "stopped in place")
 end)
 
+test("Westfall entrance artwork has padding for either mouse button and survives focus and pin reuse", function()
+    local addon, env, state = load({mapID=1436})
+    local map = env.WorldMapFrame
+    map:Show()
+    local function isDeadmines(entry) return entry.source.id == "deadmines" end
+    local pin, door = locate(env, isDeadmines)
+    local function size(icon, target)
+        equal(pin.icon:GetWidth(), icon); equal(pin.icon:GetHeight(), icon)
+        equal(pin:GetWidth(), target); equal(pin:GetHeight(), target)
+    end
+    size(30, 40)
+    equal(pin.icon.points[1][1], "CENTER")
+    equal(pin.tracked.points[1][2], pin.icon, "route badge follows the artwork")
+    addon.FocusLocation(door)
+    size(36, 46)
+    addon.FocusLocation(nil)
+    size(30, 40)
+    addon.settings.filters.dungeon = false
+    addon.RefreshMap()
+    addon.FocusLocation(door)
+    pin = locate(env, isDeadmines)
+    size(36, 46)
+    addon.FocusLocation(nil)
+    addon.settings.filters.dungeon = true
+    addon.RefreshMap()
+    equal(locate(env, isDeadmines), pin, "entrance frame reused")
+    size(30, 40)
+    map:ClickPin(pin, "LeftButton", 21, 0)
+    check(not addon.DungeonMap.dungeon, "outside the target")
+    map:ClickPin(pin, "RightButton", -19, 19)
+    state.menu:Find("Show path to The Deadmines")
+    map:ClickPin(pin, "LeftButton", 19, -19)
+    equal(addon.DungeonMap.dungeon, door.source, "padding opens the floor map")
+end)
+
+test("nearby entrances to different dungeons stay selectable and split on zoom", function()
+    local addon, env, state = load({mapID=1413})
+    local map = env.WorldMapFrame
+    map.ScrollContainer:SetSize(400, 320)
+    map:Show()
+    local function kraul(e) return e.source.id == "razorfen-kraul" end
+    local function downs(e) return e.source.id == "razorfen-downs" end
+    local pin = locate(env, kraul)
+    equal(locate(env, downs), pin, "one marker on the small map")
+    map:ClickPin(pin, "RightButton", 19, 0)
+    state.menu:Find("Show path to Razorfen Downs")
+    state.menu:Find("Show path to Razorfen Kraul")
+    map:ClickPin(pin, "LeftButton", -19, 0)
+    state.menu:Find("Razorfen Downs")
+    state.menu:Find("Razorfen Kraul"):Click()
+    Wow.flushTimers()
+    equal(addon.DungeonMap.dungeon.id, "razorfen-kraul")
+    addon.DungeonMap:Close()
+    state.viewWidth = .25
+    map.providers[1]:OnCanvasScaleChanged()
+    Wow.flushTimers()
+    check(locate(env, kraul) ~= locate(env, downs), "each door gets its own target at higher zoom")
+end)
+
 test("shared entrances retain the chosen wing for both buttons", function()
     local addon, env, state = load({mapID=1420, playerMap=1420, playerX=.2, playerY=.2})
     env.WorldMapFrame:Show()
@@ -726,7 +785,9 @@ test("continent entrance pins project into the parent map and route to their ori
     equal(door.point.mapID, 1436, "route in Westfall")
     check(math.abs(door.x - (.1 + door.point.x * .4)) < .00001, "projected coordinate")
     check(not locate(env, function(e) return e.source.id == "ragefire-chasm" end), "other continent excluded")
-    env.WorldMapFrame:ClickPin(pin, "RightButton")
+    equal(pin.icon:GetWidth(), 30, "continent entrance artwork")
+    equal(pin:GetWidth(), 40, "continent entrance target")
+    env.WorldMapFrame:ClickPin(pin, "RightButton", 19, 0)
     state.menu:Find("Show path to The Deadmines"):Click()
     equal(#addon.Navigation.points, 2, "Westfall approach")
 end)
@@ -739,7 +800,10 @@ test("focusing a second map location restores the first pin's style and size", f
         if pin.entry.category ~= "dungeon" then points[#points + 1] = pin end
     end
     local first, second = points[1], points[2]
+    equal(first.icon:GetWidth(), 17, "regular map artwork")
+    equal(first:GetWidth(), 17, "regular click target")
     addon.FocusLocation(first.entries[#first.entries])
+    equal(first.icon:GetWidth(), 23)
     equal(first:GetWidth(), 23)
     addon.FocusLocation(second.entry)
     equal(first:GetWidth(), 17, "old pin restored")

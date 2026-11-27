@@ -1,18 +1,29 @@
 local _, addon = ...
 local POINT, ENTRANCE = "AeternumMapPinTemplate", "AeternumEntrancePinTemplate"
+local POINT_SIZE, ENTRANCE_SIZE, ENTRANCE_TARGET = 17, 30, 40
+local CELL_SIZE = 20
 local provider, focus, marked, highlighted, highlightedQuestState
 local pins = {}
 AeternumMapPinMixin = {}
+
+local function sizePin(pin, focused)
+    local entrance = pin.entry.category == "dungeon"
+    local growth = focused and 6 or 0
+    local iconSize = (entrance and ENTRANCE_SIZE or POINT_SIZE) + growth
+    local targetSize = (entrance and ENTRANCE_TARGET or POINT_SIZE) + growth
+    pin.icon:SetSize(iconSize, iconSize)
+    pin:SetSize(targetSize, targetSize)
+end
 
 function pins:OnLoad()
     self:UseFrameLevelType("PIN_FRAME_LEVEL_AREA_POI")
     self:SetScalingLimits(1, 1, 1.2)
     self.icon = self:CreateTexture(nil, "ARTWORK")
-    self.icon:SetAllPoints()
+    self.icon:SetPoint("CENTER")
     self.tracked = self:CreateTexture(nil, "OVERLAY")
     self.tracked:SetAtlas("waypoint-mappin-minimap-tracked")
     self.tracked:SetSize(10, 10)
-    self.tracked:SetPoint("BOTTOMRIGHT", self, "BOTTOMRIGHT", 3, -2)
+    self.tracked:SetPoint("BOTTOMRIGHT", self.icon, "BOTTOMRIGHT", 3, -2)
 end
 
 function pins:UpdateStyle()
@@ -42,8 +53,8 @@ end
 
 function pins:OnAcquired(entries)
     self.entries, self.entry = entries, entries[1]
-    self:SetSize(17, 17)
     self:UpdateStyle()
+    sizePin(self, false)
     self:SetPosition(self.entry.x, self.entry.y)
 end
 
@@ -115,7 +126,7 @@ local function gridSize(map)
     local rect = map:GetMapID() and map.ScrollContainer.zoomLevels and map:GetViewRect()
     local range = rect and rect:GetWidth() or 1
     local scale = range > 0 and math.max(1, math.floor(2 / range + .5) / 2) or 1
-    return math.max(1, math.floor(width * scale / 20)), math.max(1, math.floor(height * scale / 20))
+    return math.max(1, math.floor(width * scale / CELL_SIZE)), math.max(1, math.floor(height * scale / CELL_SIZE))
 end
 
 function methods:Layout(entries)
@@ -125,18 +136,18 @@ function methods:Layout(entries)
     self.columns, self.rows = gridSize(map)
     local positions, groups = {}, {}
     local cells, entrances = {}, {}
+    -- Compare entrance artwork in grid cells at the current zoom.
+    local entranceSpan = ENTRANCE_SIZE / CELL_SIZE
     for _, entry in ipairs(entries) do
         local position = ("%.4f:%.4f"):format(entry.x, entry.y)
         local group = positions[position]
         if not group then
-            local cell, family
+            local cell
             if entry.category == "dungeon" then
-                local instance = addon.floorData[entry.source.id].instance
-                family = entrances[instance] or {}
-                entrances[instance] = family
-                for _, other in ipairs(family) do
-                    local dx, dy = (entry.x - other[1].x) * self.columns, (entry.y - other[1].y) * self.rows
-                    if dx * dx + dy * dy < .8 then group = other; break end
+                for _, other in ipairs(entrances) do
+                    local dx = math.abs(entry.x - other[1].x) * self.columns
+                    local dy = math.abs(entry.y - other[1].y) * self.rows
+                    if dx < entranceSpan and dy < entranceSpan then group = other; break end
                 end
             else
                 local kind = entry.category == "quest" and "q" or "t"
@@ -146,8 +157,11 @@ function methods:Layout(entries)
             if not group then
                 group = {}
                 groups[#groups + 1] = group
-                if cell then cells[cell] = group end
-                if family then family[#family + 1] = group end
+                if cell then
+                    cells[cell] = group
+                else
+                    entrances[#entrances + 1] = group
+                end
             end
             positions[position] = group
         end
@@ -226,7 +240,7 @@ function addon.FocusLocation(entry)
         old.entry = old.entries[1]
         old:SetPosition(old.entry.x, old.entry.y)
         old:UpdateStyle()
-        old:SetSize(17, 17)
+        sizePin(old, false)
     end
     highlighted = entry
     highlightedQuestState = entry and entry.questID and addon.Quests:State(entry.questID)
@@ -240,7 +254,7 @@ function addon.FocusLocation(entry)
                     pin.entry = entry
                     pin:SetPosition(entry.x, entry.y)
                     pin:UpdateStyle()
-                    pin:SetSize(23, 23)
+                    sizePin(pin, true)
                     pin:OnMouseEnter()
                     return
                 end
@@ -248,7 +262,7 @@ function addon.FocusLocation(entry)
         end
     end
     focus = map:AcquirePin(template, {entry})
-    focus:SetSize(23, 23)
+    sizePin(focus, true)
     focus:OnMouseEnter()
 end
 
