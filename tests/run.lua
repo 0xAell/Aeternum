@@ -1521,10 +1521,16 @@ test("continent pins show dungeon levels, keys request uncached data, and reset 
     addon.DungeonMap:Open(dungeonNamed(addon, "blackrock-depths"))
     addon.DungeonMap.frame.dropdown:OpenMenu():Find("Dungeon keys")
     check(state.requested and state.requested[11000], "uncached dungeon keys requested")
-    -- GET_ITEM_INFO_RECEIVED also updates an open boss loot menu.
-    local boss = findEntry(addon.DungeonMap.dungeon.bosses, function(b) return #b.loot > 0 end)
+    -- GET_ITEM_INFO_RECEIVED also updates an open boss loot menu. The menu lists only drops
+    -- this character can use, so pick one of those that is not cached yet.
+    local usable, boss, itemID = addon.LootFilter(), nil, nil
+    for _, candidate in ipairs(addon.DungeonMap.dungeon.bosses) do
+        for _, id in ipairs(candidate.loot) do
+            if not boss and usable(id) and not state.cached[id] then boss, itemID = candidate, id end
+        end
+    end
+    check(boss, "a boss with an uncached drop this character can use")
     addon.UI:Boss(addon.DungeonMap.frame, boss)
-    local itemID = boss.loot[1]
     state.cached[itemID] = true
     Wow.fire("GET_ITEM_INFO_RECEIVED", itemID, true)
     Wow.flushTimers()
