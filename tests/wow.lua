@@ -273,11 +273,16 @@ end
 -- Map canvas ------------------------------------------------------------------
 
 local MapCanvas = newClass(Frame)
-function MapCanvas:SetMouseWheelZoomMode(mode) self.ScrollContainer.wheelMode = mode end
+-- Blizzard sets the wheel mode once at load; any later write comes from add-on code.
+function MapCanvas:SetMouseWheelZoomMode(mode)
+    self.ScrollContainer.mouseWheelZoomMode = mode
+    Wow.state.wheelModeWritten = true
+end
 function MapCanvas:GetMapID() return self.mapID end
 function MapCanvas:PanTo(x, y) self.panX, self.panY = x, y end
 function MapCanvas:SetMapID(mapID)
     self.mapID = mapID
+    self.ScrollContainer:CreateZoomLevels()
     for _, provider in ipairs(self.providers) do
         provider:OnMapChanged()
     end
@@ -329,13 +334,16 @@ function MapCanvas:GetViewRect()
     return {GetWidth=function() return Wow.state.viewWidth or 1 end}
 end
 -- As in WorldMapMixin: the map's own OnShow and OnHide notify the data providers,
--- and scripts hooked by add-ons run afterwards.
+-- scripts hooked by add-ons run afterwards, and shown children follow the map.
 function MapCanvas:Show()
     if self.shown then return end
     self.shown = true
     for _, provider in ipairs(self.providers) do provider:RefreshAllData(true) end
     for _, provider in ipairs(self.providers) do provider:OnShow() end
     self:Fire("OnShow")
+    for _, child in ipairs(self.children) do
+        if child.shown then visibilityChanged(child, "OnShow") end
+    end
 end
 
 -- A mouse click as the canvas routes it: passed through to the map, or to the pin.
@@ -354,6 +362,10 @@ function MapCanvas:Hide()
     self.shown = false
     for _, provider in ipairs(self.providers) do provider:OnHide() end
     self:Fire("OnHide")
+    -- Shown children become invisible with the map and get OnHide too.
+    for _, child in ipairs(self.children) do
+        if child.shown then visibilityChanged(child, "OnHide") end
+    end
 end
 
 -- World model -----------------------------------------------------------------
@@ -511,18 +523,42 @@ function Wow.new(state)
         if map:IsShown() then map:Hide() else map:Show() end
     end
     env.UISpecialFrames = {}
-    env.GameMenuEscPriority = { AddOn = 8, AddOnPost = 9 }
+    -- As in Blizzard_GameMenuEsc: one shared list, re-sorted on every registration. A call
+    -- from add-on code rewrites its slots insecurely, so each later Escape press runs
+    -- tainted and Blizzard's protected fallbacks are forbidden.
+    env.GameMenuEscPriority = { Dialog = 1, Menu = 2, Casting = 4, FrameworkPre = 5, Framework = 6,
+        FrameworkPost = 7, AddOn = 8, AddOnPost = 9, AddOnPost2 = 10, World = 11 }
     state.escapeHandlers = {}
+    local escapeOrder = 0
     env.RegisterGameMenuEscHandler = function(priority, handler)
-        table.insert(state.escapeHandlers, { priority, handler })
-        table.sort(state.escapeHandlers, function(a, b) return a[1] < b[1] end)
+        if state.blizzardLoaded then state.escapeTainted = true end
+        escapeOrder = escapeOrder + 1
+        table.insert(state.escapeHandlers, { priority, handler, escapeOrder })
+        table.sort(state.escapeHandlers, function(a, b)
+            if a[1] ~= b[1] then return a[1] < b[1] end
+            return a[3] < b[3]
+        end)
     end
-    -- Blizzard closes its windows, the map included, after the add-on handlers.
+    -- Protected: only an untainted Escape press may clear the target.
+    env.ClearTarget = function()
+        if state.escapeTainted then
+            state.forbidden = state.forbidden or {}
+            state.forbidden[#state.forbidden + 1] = "ClearTarget"
+            return false
+        end
+        local hadTarget = state.target ~= nil
+        state.target = nil
+        return hadTarget
+    end
+    -- CloseAllWindows closes the map after the add-on bucket; clearing the target comes last.
     env.RegisterGameMenuEscHandler(env.GameMenuEscPriority.AddOnPost, function()
         if env.WorldMapFrame:IsShown() then
             env.WorldMapFrame:Hide()
             return true
         end
+    end)
+    env.RegisterGameMenuEscHandler(env.GameMenuEscPriority.World, function()
+        return env.ClearTarget()
     end)
     env.InCombatLockdown = function() return state.inCombat or false end
     env.IsInInstance = function() return state.inInstance or false end
@@ -651,12 +687,21 @@ function Wow.new(state)
     map.left, map.scale = state.mapLeft or 0, state.mapScale or 1
     map.ScrollContainer = Wow.region(Frame, map)
     map.ScrollContainer:SetSize(800, 540)
+    -- Blizzard rebuilds the zoom levels for every map and remembers what it wrote, so a
+    -- test can tell whether add-on code changed them afterwards.
+    map.ScrollContainer.mouseWheelZoomMode = 2
     map.ScrollContainer.CreateZoomLevels = function(self)
-        self.zoomLevels = state.zoomLevels or {{scale=1, layerIndex=1}}
+        local levels, made = {}, {}
+        for index, level in ipairs(state.zoomLevels or {{scale=1, layerIndex=1}}) do
+            levels[index] = {scale=level.scale, layerIndex=level.layerIndex}
+            made[index] = {entry=levels[index], scale=level.scale, layerIndex=level.layerIndex}
+        end
+        self.zoomLevels, self.blizzardZoomLevels = levels, made
     end
     map.ScrollContainer:CreateZoomLevels()
     map.strata = state.mapStrata or "HIGH"
     env.WorldMapFrame = map
+    state.blizzardLoaded = true
     return env
 end
 
@@ -665,6 +710,23 @@ function Wow.trackingMenu()
     root:CreateButton("Blizzard map filter")
     Wow.state.menuHooks.MENU_WORLD_MAP_TRACKING(Wow.env.WorldMapFrame, root)
     return root
+end
+
+-- Blizzard-owned map canvas state that add-on code has written since Blizzard set it.
+function Wow.addonMapWrites()
+    local writes = {}
+    local scroll = Wow.env.WorldMapFrame.ScrollContainer
+    if Wow.state.wheelModeWritten then writes[#writes + 1] = "mouseWheelZoomMode" end
+    local levels, made = scroll.zoomLevels, scroll.blizzardZoomLevels
+    local changed = #levels ~= #made
+    for index, level in ipairs(made) do
+        local current = levels[index]
+        if current ~= level.entry or current.scale ~= level.scale or current.layerIndex ~= level.layerIndex then
+            changed = true
+        end
+    end
+    if changed then writes[#writes + 1] = "zoomLevels" end
+    return writes
 end
 
 -- Presses Escape: the first handler that reports it closed something wins.

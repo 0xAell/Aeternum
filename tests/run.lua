@@ -393,18 +393,17 @@ test("M shows dungeon entrances and relevant map pins without any launcher", fun
     check(addon.settings.showMapPins == nil and addon.settings.panelOpen == nil, "obsolete launcher options migrated")
 end)
 
-test("outdoor wheel zoom fills single-layer ranges and preserves native multi-layer zoom", function()
-    local _, env = load()
-    local scroll = env.WorldMapFrame.ScrollContainer
-    equal(scroll.wheelMode, 2, "native wheel enabled")
-    equal(#scroll.zoomLevels, 5, "single-layer zoom stops")
-    scroll:CreateZoomLevels()
-    equal(#scroll.zoomLevels, 5, "rebuild does not duplicate stops")
-    equal(scroll.zoomLevels[5].scale, 4, "4x detail")
-    local native = {{scale=.5, layerIndex=1}, {scale=2, layerIndex=2}}
-    local _, second = load({zoomLevels=native})
-    equal(second.WorldMapFrame.ScrollContainer.zoomLevels, native, "native levels kept")
-    equal(#native, 2, "extra layers unaffected")
+test("the map's zoom levels and wheel mode stay as Blizzard wrote them", function()
+    for _, levels in ipairs({{{scale=1, layerIndex=1}}, {{scale=.5, layerIndex=1}, {scale=2, layerIndex=2}}}) do
+        local _, env = load({mapID=1436, zoomLevels=levels})
+        local map = env.WorldMapFrame
+        map:Show()
+        map:SetMapID(1429)
+        map:SetMapID(1436)
+        map:Hide()
+        map:Show()
+        equal(table.concat(Wow.addonMapWrites(), ", "), "", "add-on writes to Blizzard map state")
+    end
 end)
 
 test("dungeon right-click offers directions and does not zoom the map", function()
@@ -542,7 +541,7 @@ test("clicking an entrance uses only the existing viewport and named floors", fu
     equal(frame.tiles[1].texture, 449591, "native first-floor art")
     frame.dropdown:OpenMenu():Find("Ironclad Cove"):Click()
     equal(frame.tiles[1].texture, 449603, "second-floor art")
-    equal(#state.escapeHandlers, 1, "addon never registers an insecure Escape handler")
+    check(not state.escapeTainted, "addon never registers an insecure Escape handler")
     frame:Fire("OnMouseUp", "RightButton")
     check(not floors.dungeon and env.WorldMapFrame:IsShown(), "right-click returns to zone")
     check(not frame.tiles[1].texture, "closed floor releases tiles")
@@ -550,6 +549,34 @@ test("clicking an entrance uses only the existing viewport and named floors", fu
     Wow.pressEscape()
     check(not env.WorldMapFrame:IsShown() and not floors.dungeon, "Escape closes the map cleanly")
     check(not frame.tiles[1].texture, "closing via Escape releases tiles")
+end)
+
+test("closing the map mid-drag leaves the next floor still and releases its art", function()
+    local addon, env = openDeadmines()
+    local frame = addon.DungeonMap.frame
+    frame:Fire("OnDragStart")
+    check(frame:GetScript("OnUpdate"), "dragging the floor")
+    env.WorldMapFrame:Hide()
+    check(not frame:GetScript("OnUpdate"), "drag ends with the map")
+    check(not frame.tiles[1].texture, "floor art released")
+    env.WorldMapFrame:Show()
+    env.WorldMapFrame:ClickPin(locate(env, function(entry) return entry.title == "The Deadmines" end), "LeftButton")
+    check(frame:IsShown() and not frame:GetScript("OnUpdate"), "next floor opens still")
+end)
+
+test("floor views add no Escape handler, so Blizzard can still clear the target", function()
+    local addon, env, state = openDeadmines()
+    check(addon.DungeonMap.frame:IsShown(), "floor view open")
+    addon.DungeonMap:Close()
+    addon.DungeonMap:Open(dungeonNamed(addon, "deadmines"))
+    check(not state.escapeTainted, "Blizzard's shared Escape list untouched")
+    state.target = "Defias Pillager"
+    Wow.pressEscape()
+    check(not env.WorldMapFrame:IsShown(), "first Escape closes the map")
+    equal(state.target, "Defias Pillager", "target kept while a window closed")
+    Wow.pressEscape()
+    equal(state.target, nil, "second Escape clears the target")
+    equal(state.forbidden, nil, "ADDON_ACTION_FORBIDDEN")
 end)
 
 test("a boss skull opens the correct drop list with modified clicks and native tooltips", function()

@@ -8,7 +8,7 @@ Press **M**. Aeternum adds dungeon floors, boss loot, trainers, quests and entra
 
 | Where | What to do |
 | --- | --- |
-| Zone or continent | Click a dungeon entrance to see the floors. Right-click for minimap directions to a specific wing or door. Nearby locations share a pin while zoomed out. Scroll in to separate them or click to choose. |
+| Zone or continent | Click a dungeon entrance to see the floors. Right-click for minimap directions to a specific wing or door. Nearby locations share a pin. Click it to choose one, or scroll in to separate them on maps the game lets you zoom. |
 | Inside a dungeon | Press **M**. The map follows recognized rooms and floor IDs. An arrow shows your position when the client supplies coordinates for that floor. Click the floor name to change floors, check keys in your bags, or find an outdoor entrance. Scroll to zoom and drag to pan. **Back** or right-clicking empty floor space returns to the zone map; **Escape** closes the map. |
 | Boss skull | Click for drops your character can use. Hover an item for its tooltip, Shift-click to link it, or Ctrl-click to preview it. If bosses share a spot, choose one. **Boss loot** also lists bosses whose positions are unknown. |
 | Trainer | Your class, faction, professions and eligible weapon skills determine which trainers appear. Click a trainer to see lessons and prices. **Later training** and **Learned** hold lessons with unmet requirements and skills you already know. Hover a lesson for its requirements and price source. |
@@ -54,6 +54,14 @@ tools/check_data.sh
 tools/package.sh
 ```
 
-The headless tests exercise the map, stock menu interactions, trainer observations, quest states and minimap directions. CI also regenerates the bundled databases and builds the installable ZIP. See the [Forever interface source](https://github.com/Gethe/wow-ui-source/tree/d9c22e32cb240afb82bb2ecefbb78ef935333f59) and [data sources and regeneration](DATA_SOURCES.md).
+The headless tests exercise the map, stock menu interactions, trainer observations, quest states and minimap directions.
+
+Code that touches Blizzard's interface must not write Blizzard-owned state. A value an add-on writes into a Blizzard table or frame field taints the Blizzard code that later reads it, and the game then blocks that code's protected calls and blames Aeternum. In particular:
+
+- Do not call `RegisterGameMenuEscHandler` or insert into `UISpecialFrames`. The world map closes the floor view.
+- Do not change the map canvas: zoom levels, wheel mode, scroll container methods or Blizzard pins. Aeternum adds its own data provider and pin templates only.
+- Hook Blizzard functions with `hooksecurefunc` and scripts with `HookScript` instead of replacing them.
+
+The mock client in `tests/wow.lua` models these failures, and luacheck rejects the globals involved. CI also regenerates the bundled databases and builds the installable ZIP. See the [Forever interface source](https://github.com/Gethe/wow-ui-source/tree/d9c22e32cb240afb82bb2ecefbb78ef935333f59) and [data sources and regeneration](DATA_SOURCES.md).
 
 Aeternum is licensed under [GPL-3.0](LICENSE).

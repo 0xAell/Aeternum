@@ -8,13 +8,14 @@ globals = {
     "AeternumDB", "AeternumTrainerDB", "AeternumRouteDB", "AeternumMapPinMixin", "SLASH_AETERNUM1", "SlashCmdList",
 }
 
--- Client API the addon reads.
+-- Client API the addon reads. RegisterGameMenuEscHandler, UISpecialFrames and the map canvas
+-- zoom constants are left out on purpose, so luacheck flags any use: calling or writing them
+-- from add-on code taints Blizzard's Escape and map code.
 read_globals = {
     "Menu", "MenuUtil", "C_SkillInfo", "C_Spell", "C_TooltipInfo", "Enum", "GetProfessions", "GetProfessionInfo",
     "GetTrainerServiceInfo", "GetTrainerServiceCost", "GetNumTrainerServices", "GetTrainerServiceSkillReq", "UnitGUID",
     "C_Trainer", "C_SpellBook", "C_RaidLocks", "C_SuperTrack", "UnitPosition", "TRAINING_POINTS_ABBREV",
-    "GetCursorPosition", "GetInstanceInfo", "GetSubZoneText", "GetLocale", "GetMoneyString", "hooksecurefunc",
-    "MAP_CANVAS_MOUSE_WHEEL_ZOOM_BEHAVIOR_FULL",
+    "GetCursorPosition", "GetInstanceInfo", "GetSubZoneText", "GetLocale", "GetMoneyString",
     "C_AddOns", "C_CVar", "C_Item", "C_Map", "C_Minimap", "C_QuestLog", "C_Timer",
     "CreateFrame", "CreateFromMixins", "CreateVector2D", "DEFAULT_CHAT_FRAME", "GameTooltip",
     "GetPlayerFacing", "HandleModifiedItemClick", "InCombatLockdown", "IsInInstance", "IsModifiedClick",

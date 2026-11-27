@@ -274,33 +274,17 @@ function addon.FocusLocation(entry)
     focus:OnMouseEnter()
 end
 
--- Keep the client's zoom levels when it supplies them. Older zone art has
--- only a fit-to-window level; the extra stops reuse that same texture layer.
-local function enableZoom(scroll)
-    local levels = scroll.zoomLevels
-    if not levels or #levels ~= 1 then return end
-    local first = levels[1]
-    if not first.scale or first.scale <= 0 then return end
-    for _, factor in ipairs({1.5, 2, 3, 4}) do
-        levels[#levels + 1] = {scale=first.scale * factor, layerIndex=first.layerIndex}
-    end
-end
-
+-- The map's zoom levels and wheel mode stay Blizzard's. Values the add-on writes into
+-- them would be read by every Blizzard pin as it scales, and pins acquired that way in
+-- combat fail their protected SetPassThroughButtons call.
 function addon.AttachMap()
     if provider then return true end
     if not WorldMapFrame or not MapCanvasDataProviderMixin or not MapCanvasPinMixin or not addon.settings then
         return false
     end
-    local map = WorldMapFrame
     Mixin(AeternumMapPinMixin, MapCanvasPinMixin, pins)
-    addon.UI:Attach(map)
-    local scroll = map.ScrollContainer
-    if scroll and scroll.CreateZoomLevels then
-        hooksecurefunc(scroll, "CreateZoomLevels", enableZoom)
-        enableZoom(scroll)
-        map:SetMouseWheelZoomMode(MAP_CANVAS_MOUSE_WHEEL_ZOOM_BEHAVIOR_FULL)
-    end
+    addon.UI:Attach(WorldMapFrame)
     provider = CreateFromMixins(MapCanvasDataProviderMixin, methods)
-    map:AddDataProvider(provider)
+    WorldMapFrame:AddDataProvider(provider)
     return true
 end
