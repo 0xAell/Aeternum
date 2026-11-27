@@ -43,7 +43,11 @@ function Region:SetPoint(point, ...)
     self.points[#self.points + 1] = { point, ... }
 end
 function Region:ClearAllPoints() self.points = {} end
-function Region:SetAllPoints() self.points = { { "ALL" } } end
+function Region:SetAllPoints(relative)
+    relative = relative or self.parent
+    self.points = { { "ALL", relative } }
+    if relative then self.width, self.height = relative:GetSize() end
+end
 function Region:SetSize(width, height) self.width, self.height = width, height end
 function Region:SetWidth(width) self.width = width end
 function Region:SetHeight(height) self.height = height end
@@ -62,6 +66,8 @@ end
 function Region:GetParent() return self.parent end
 function Region:GetRight() return self.right end
 function Region:GetLeft() return self.left end
+function Region:GetTop() return self.top end
+function Region:SetScale(scale) self.scale = scale end
 function Region:GetEffectiveScale() return self.scale or 1 end
 local function visibilityChanged(region, event)
     if region.isFrame then region:Fire(event) end
@@ -92,6 +98,7 @@ function Texture:SetAtlas(atlas) self.atlas, self.texture = atlas, nil end
 function Texture:SetDesaturated(dim) self.desaturated = dim end
 function Texture:SetAlpha(alpha) self.alpha = alpha end
 function Texture:SetRotation(angle) self.rotation = angle end
+function Texture:SetDrawLayer(layer, sublevel) self.layer, self.sublevel = layer, sublevel end
 function Texture:SetBlendMode(mode) self.blend = mode end
 function Texture:SetColorTexture(...) self.color = { ... } end
 function Texture:SetTexCoord(...) self.texCoord = { ... } end
@@ -108,6 +115,12 @@ function FontString:SetMaxLines() end
 -- Frames ----------------------------------------------------------------------
 
 local Frame = newClass(Region)
+local Line = newClass(Texture)
+function Line:SetThickness(n) self.thickness = n end
+function Line:SetStartPoint(...) self.start = {...} end
+function Line:SetEndPoint(...) self.finish = {...} end
+function Frame:CreateLine() return Wow.region(Line, self) end
+function Frame:SetClipsChildren(value) self.clipped = value end
 
 function Frame:SetScript(event, handler) self.scripts[event] = handler end
 function Frame:GetScript(event) return self.scripts[event] end
@@ -186,6 +199,7 @@ function Description:CreateButton(label, action) return self:CreateCheckbox(labe
 function Description:CreateTitle(label) return self:CreateButton(label) end
 function Description:CreateDivider() return self:CreateButton("") end
 function Description:SetEnabled(value) self.enabled = value end
+function Description:SetTooltip(fn) self.tooltip = fn end
 function Description:SetScrollMode(value) self.scrollHeight = value end
 function Description:Find(text)
     for _, child in ipairs(self.children) do
@@ -236,6 +250,7 @@ function Tooltip:IsOwned(owner) return self.shown and self.owner == owner end
 function Tooltip:SetText(text) self.lines = { text } end
 function Tooltip:AddLine(text) self.lines[#self.lines + 1] = text end
 function Tooltip:SetItemByID(itemID) self.lines = { "item:" .. itemID } end
+function Tooltip:SetSpellByID(id) self.lines = { "spell:" .. id } end
 function Tooltip:SetHyperlink(link) self.lines = { link } end
 
 local classes = {
@@ -254,6 +269,7 @@ end
 -- Map canvas ------------------------------------------------------------------
 
 local MapCanvas = newClass(Frame)
+function MapCanvas:SetMouseWheelZoomMode(mode) self.ScrollContainer.wheelMode = mode end
 function MapCanvas:GetMapID() return self.mapID end
 function MapCanvas:SetMapID(mapID)
     self.mapID = mapID
@@ -358,13 +374,18 @@ Wow.knownEvents = {
     ADDON_LOADED = true, PLAYER_LOGIN = true, GET_ITEM_INFO_RECEIVED = true, QUEST_LOG_UPDATE = true,
     QUEST_ACCEPTED = true, QUEST_TURNED_IN = true, QUEST_REMOVED = true, PLAYER_LEVEL_UP = true,
     UI_SCALE_CHANGED = true, DISPLAY_SIZE_CHANGED = true,
+    TRAINER_SHOW = true, TRAINER_UPDATE = true, SKILL_LINES_CHANGED = true, PLAYER_ENTERING_WORLD = true,
+    LEARNED_SPELL_IN_SKILL_LINE = true, ZONE_CHANGED_INDOORS = true, ZONE_CHANGED = true,
 }
 
 local templates = { UIPanelButtonTemplate = true, PanelTopTabButtonTemplate = true, MinimalScrollBar = true,
     WowStyle1DropdownTemplate = true, WowStyle1FilterDropdownTemplate = true }
 
 local pinXML = assert(io.open("WorldMap.xml", "r"))
-local passThrough = pinXML:read("*a"):match('passThroughButtons="([^"]+)"')
+local pinPolicy = {}
+for template, attrs in pinXML:read("*a"):gmatch('<Frame name="([^"]+)"([^>]*)>') do
+    pinPolicy[template] = {attrs:match('passThroughButtons="([^"]+)"')}
+end
 pinXML:close()
 
 function Wow.CreateFrame(kind, _, parent, template)
@@ -372,13 +393,13 @@ function Wow.CreateFrame(kind, _, parent, template)
     local frame = Wow.region(class, parent)
     frame.template = template
     Wow.state.frames[#Wow.state.frames + 1] = frame
-    if template == "AeternumMapPinTemplate" then
+    if pinPolicy[template] then
         -- The XML applies passthrough at construction, before the pool acquires the frame.
         local env = Wow.env
         for key, value in pairs(env.AeternumMapPinMixin) do
             frame[key] = value
         end
-        frame.passThrough = { passThrough }
+        frame.passThrough = pinPolicy[template]
         frame:SetSize(16, 16)
         frame:OnLoad()
     elseif template == "BasicFrameTemplateWithInset" then
@@ -421,6 +442,34 @@ function Wow.new(state)
     env.DEFAULT_CHAT_FRAME = Wow.region(MessageFrame)
     env.SlashCmdList = {}
     env.AeternumDB = state.savedVariables
+    env.AeternumTrainerDB = state.savedTrainerData
+    env.GetProfessions = function() return unpack(state.professionIndices or {}, 1, 7) end
+    env.GetProfessionInfo = function(index)
+        return nil, nil, 1, 75, nil, nil, (state.professionSkills or {})[index]
+    end
+    env.GetMoneyString = function(copper) return copper .. " copper" end
+    env.GetCursorPosition = function() return state.cursorX or 150, state.cursorY or 150 end
+    env.GetInstanceInfo = function() return state.instanceName, "party", nil, nil, nil, nil, nil, state.instanceID end
+    env.GetSubZoneText = function() return state.subzone end
+    env.GetLocale = function() return state.locale or "enUS" end
+    env.UnitGUID = function(unit) if unit == "npc" then return state.npcGUID end end
+    env.GetNumTrainerServices = function() return #(state.services or {}) end
+    env.GetTrainerServiceInfo = function(i)
+        local row = state.services[i]
+        return row.name, row.status or "available", nil, row.level, row.rank
+    end
+    env.GetTrainerServiceCost = function(i) return state.services[i].cost end
+    env.GetTrainerServiceSkillReq = function(i) return state.services[i].skill, state.services[i].need end
+    env.Enum = {TooltipDataType = {Spell = 1}}
+    env.C_TooltipInfo = {GetTrainerService = function(i)
+        local row = state.services[i]
+        if row.spell then return {type=1, id=row.spell} end
+    end}
+    env.MAP_CANVAS_MOUSE_WHEEL_ZOOM_BEHAVIOR_FULL = 2
+    env.hooksecurefunc = function(owner, method, hook)
+        local original = owner[method]
+        owner[method] = function(...) original(...); hook(...) end
+    end
 
     env.strtrim = function(text) return (text:gsub("^%s+", ""):gsub("%s+$", "")) end
     env.wipe = function(t) for key in pairs(t) do t[key] = nil end return t end
@@ -547,6 +596,11 @@ function Wow.new(state)
     map.right = state.mapRight or 1100
     map.left, map.scale = state.mapLeft or 0, state.mapScale or 1
     map.ScrollContainer = Wow.region(Frame, map)
+    map.ScrollContainer:SetSize(800, 540)
+    map.ScrollContainer.CreateZoomLevels = function(self)
+        self.zoomLevels = state.zoomLevels or {{scale=1, layerIndex=1}}
+    end
+    map.ScrollContainer:CreateZoomLevels()
     map.strata = state.mapStrata or "HIGH"
     env.WorldMapFrame = map
     return env

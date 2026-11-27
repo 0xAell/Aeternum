@@ -1,7 +1,7 @@
 local _, addon = ...
 
 local data = addon.Data
-local categoryOrder = { dungeon = 1, class = 2, profession = 3, quest = 4 }
+local categoryOrder = { dungeon = 1, weapon = 2, class = 3, profession = 4, quest = 5 }
 local questRoles = { s = "Quest start", t = "Quest turn-in" }
 local factionCodes = { A = "Alliance", H = "Horde" }
 
@@ -9,6 +9,7 @@ addon.categories = {
     { id = "dungeon", label = "Dungeon entrances", icon = "Dungeon" },
     { id = "class", label = "Class trainers", icon = 136455 },
     { id = "profession", label = "Profession trainers", icon = 136463 },
+    { id = "weapon", label = "Weapon masters", icon = 135274 },
     { id = "quest", label = "Quests" },
 }
 addon.categoryByID = {}
@@ -18,8 +19,8 @@ end
 
 local defaults = {
     questMode = "available",
-    lowLevelQuests = true,
-    showMapPins = false,
+    lowLevelQuests = false,
+    otherTrainers = false,
 }
 
 function addon.DungeonLevel(dungeon)
@@ -164,6 +165,39 @@ end
 
 local mapRecords = {}
 
+local function isAncestor(zone, target)
+    for _ = 1, 8 do
+        if zone == target then return true end
+        local info = C_Map.GetMapInfo(zone)
+        if not info or not info.parentMapID or info.parentMapID == 0 then return false end
+        zone = info.parentMapID
+    end
+    return false
+end
+
+local function continentEntrances(entries, mapID)
+    local types = Enum and Enum.UIMapType
+    local info = types and C_Map.GetMapInfo(mapID)
+    if not info or not C_Map.GetMapRectOnMap or (info.mapType ~= types.Continent and info.mapType ~= types.World) then
+        return
+    end
+    for _, dungeon in ipairs(data.dungeons) do
+        for _, door in ipairs(dungeon.entrances) do
+            if isAncestor(door.mapID, mapID) then
+                local left, right, top, bottom = C_Map.GetMapRectOnMap(door.mapID, mapID)
+                if left and right and top and bottom and right > left and bottom > top then
+                    local entry = record("dungeon", dungeon.name, addon.ZoneName(door.mapID), door, dungeon)
+                    entry.mapID = mapID
+                    entry.x, entry.y = left + door.x * (right - left), top + door.y * (bottom - top)
+                    if entry.x >= 0 and entry.x <= 1 and entry.y >= 0 and entry.y <= 1 then
+                        entries[#entries + 1] = entry
+                    end
+                end
+            end
+        end
+    end
+end
+
 -- Every record on a world map, sorted, built the first time the map is shown.
 function addon.MapRecords(mapID)
     local entries = mapRecords[mapID]
@@ -171,6 +205,7 @@ function addon.MapRecords(mapID)
         return entries
     end
     entries = {}
+    continentEntrances(entries, mapID)
     for _, entry in ipairs(staticByMap[mapID] or {}) do
         entries[#entries + 1] = entry
     end
@@ -224,10 +259,8 @@ function addon.LoadSettings()
     if type(AeternumDB.filters) ~= "table" then
         AeternumDB.filters = {}
     end
-    if AeternumDB.showMapPins == nil then
-        AeternumDB.showMapPins = AeternumDB.pinsWithPanelClosed == true
-    end
-    AeternumDB.pinsWithPanelClosed, AeternumDB.panelOpen = nil, nil
+    AeternumDB.showMapPins, AeternumDB.pinsWithPanelClosed, AeternumDB.panelOpen = nil, nil, nil
+    if type(AeternumTrainerDB) ~= "table" then AeternumTrainerDB = {} end
     for key, value in pairs(defaults) do
         if type(AeternumDB[key]) ~= type(value) then
             AeternumDB[key] = value
@@ -261,6 +294,9 @@ local function visible(entry, faction)
     if entry.category == "quest" then
         return addon.Quests:IsPinVisible(entry)
     end
+    if entry.category ~= "dungeon" and not addon.settings.otherTrainers then
+        return addon.Trainers:Relevant(entry.source)
+    end
     return true
 end
 
@@ -274,7 +310,7 @@ local function matches(entry, search)
     return entry.search:find(search, 1, true) ~= nil
 end
 
--- The loot catalogue is only searched on the dungeon page. Share folded names
+-- The loot catalogue is searched on request. Share folded names
 -- across bosses that drop the same item, and create rows only for actual hits.
 local foldedNames = {}
 local function nameMatches(name, search)
@@ -330,7 +366,7 @@ function addon.Entries(mapID, atlas, query)
     return result
 end
 
--- The same Blizzard artwork appears in the guide and on its map pins.
+-- Choose the Blizzard icon and tooltip for a map pin.
 function addon.Presentation(entry)
     local category = addon.categoryByID[entry.category]
     if entry.category ~= "quest" then

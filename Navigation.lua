@@ -1,7 +1,7 @@
 local _, addon = ...
 
-local IDLE = "Choose a location and click Guide to start guidance."
-local Navigation = { status = IDLE, listeners = {} }
+local IDLE = "No active directions."
+local Navigation = { status = IDLE }
 addon.Navigation = Navigation
 
 local UPDATE_INTERVAL = 0.12
@@ -180,17 +180,7 @@ function Navigation:Draw(playerX, playerY, cosine, sine)
 end
 
 function Navigation:SetStatus(message)
-    if message ~= self.status then
-        self.status = message
-        for _, listener in ipairs(self.listeners) do
-            listener(message)
-        end
-    end
-end
-
--- listener(status) runs whenever the guidance status text changes.
-function Navigation:AddListener(listener)
-    self.listeners[#self.listeners + 1] = listener
+    self.status = message
 end
 
 function Navigation:GetStatus()

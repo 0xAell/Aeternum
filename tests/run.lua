@@ -64,8 +64,8 @@ end
 
 local function pins(env)
     local result = {}
-    for pin in env.WorldMapFrame:EnumeratePinsByTemplate("AeternumMapPinTemplate") do
-        result[#result + 1] = pin
+    for _, template in ipairs({"AeternumMapPinTemplate", "AeternumEntrancePinTemplate"}) do
+        for pin in env.WorldMapFrame:EnumeratePinsByTemplate(template) do result[#result + 1] = pin end
     end
     return result
 end
@@ -83,8 +83,6 @@ local function questPin(addon, mapID, questID, role)
         return entry.questID == questID and entry.role == role
     end)
 end
-
--- Data ------------------------------------------------------------------------
 
 test("bundled data is consistent", function()
     local addon = load()
@@ -139,183 +137,12 @@ test("packed quest rules decode to the source fields", function()
     check(addon.Quest(999999) == nil, "unknown quest")
 end)
 
--- Loading and the panel -------------------------------------------------------
-
-test("a normal map visit creates no guide, map pins or minimap overlay", function()
-    local addon, env, state = load()
-    local map = env.WorldMapFrame
-    local frames = #state.frames
-    map:Show()
-    check(addon.settings and not addon.UI.window, "only the provider is attached")
-    equal(#state.frames, frames, "no addon widgets created on open")
-    equal(#pins(env), 0, "no map pins by default")
-    check(not addon.Navigation.overlay, "no minimap overlay")
-    slash(env)
-    check(addon.UI:IsBrowsing(), "explicit browse opens the guide")
-    equal(#pins(env), 0, "browsing alone keeps the map clear")
-    equal(addon.UI.window.TitleText:GetText(), "Elwynn Forest", "zone title")
-end)
-
 test("unknown slash commands print help", function()
     local _, env, state = load()
     slash(env, "nonsense")
-    check(#state.messages >= 4, "help printed")
+    check(#state.messages > 0, "help printed")
 end)
 
-test("old open-state data never reopens the guide and filter choices survive", function()
-    local addon, env = load({savedVariables = {panelOpen = true, filters = {quest = false}}})
-    env.WorldMapFrame:Show()
-    check(not addon.UI.window and not addon.CategoryEnabled("quest"), "old open flag is transient")
-    slash(env)
-    env.WorldMapFrame:Hide()
-    env.WorldMapFrame:Show()
-    check(not addon.UI:IsOpen() and not env.AeternumDB.panelOpen, "normal map visits stay quiet")
-end)
-
-test("category filters and search narrow the list", function()
-    local addon, env = load()
-    slash(env)
-    local list = addon.UI.sidebar.list
-    local all = #list:GetEntries()
-    addon.UI.sidebar.filter:OpenMenu():Find("Quests"):Click()
-    equal(env.AeternumDB.filters.quest, false, "quest filter saved")
-    local withoutQuests = #list:GetEntries()
-    check(withoutQuests < all, "quests removed")
-    check(not findEntry(list:GetEntries(), function(entry) return entry.category == "quest" end), "no quests")
-    addon.UI.sidebar.search:SetText("mage")
-    for _, entry in ipairs(list:GetEntries()) do
-        check(entry.search:find("mage", 1, true), "search match")
-    end
-end)
-
-test("the dungeon atlas lists every dungeon and filters by search", function()
-    local addon, env = load()
-    slash(env)
-    addon.UI.sidebar.mode:Click()
-    check(addon.UI:IsAtlas(), "atlas mode")
-    equal(#addon.UI.sidebar.list:GetEntries(), 34, "dungeons")
-    addon.UI.sidebar.search:SetText("the deadmines")
-    local entries = addon.UI.sidebar.list:GetEntries()
-    equal(#entries, 1, "search")
-    equal(entries[1].title, "The Deadmines", "match")
-end)
-
-test("boss and item searches open the drop source and preserve the query on Back", function()
-    local addon, env, state = load()
-    slash(env, "dungeons")
-    local panel = addon.UI.sidebar
-    panel.search:SetText("  cRUel BarB  ")
-    local hit = panel.list.rows[1].entry
-    equal(hit.itemID, 5191, "Cruel Barb")
-    equal(hit.subtitle, "Edwin VanCleef · The Deadmines", "drop source")
-    check(not state.requested, "search uses the local catalogue")
-    panel.list.rows[1]:Fire("OnEnter")
-    equal(env.GameTooltip.lines[1], "item:5191", "game item tooltip in search results")
-    state.modified = true
-    panel.list.rows[1]:Click()
-    check(state.modifiedClick:find("Hitem:5191", 1, true) and addon.UI:IsBrowsing(), "link from search")
-    state.modified = false
-    panel.list.rows[1]:Click()
-    local detail = addon.UI.detail
-    equal(detail.tab, "loot", "direct to loot")
-    equal(detail.boss:GetText(), "Edwin VanCleef", "matching boss")
-    check(findEntry(detail.loot.rows, function(row) return row.entry == 5191 and row.highlighted end),
-        "matching item is visible and highlighted")
-    Wow.pressEscape()
-    equal(panel.search:GetText(), "  cRUel BarB  ", "atlas search restored")
-    panel.search:SetText("vancleef")
-    panel.list.rows[1]:Click()
-    equal(detail.boss:GetText(), "Edwin VanCleef", "direct boss search")
-    equal(detail.tab, "loot", "boss opens to loot")
-    detail.back:Click()
-    panel.search:SetText("Scarlet Leggings")
-    local hits = panel.list:GetEntries()
-    check(#hits >= 2 and hits[1].subtitle ~= hits[2].subtitle, "separate sources for a shared item")
-    panel.search:SetText("[%")
-    equal(#panel.list:GetEntries(), 0, "search punctuation is literal")
-end)
-
-test("Back keeps the atlas scroll position and the two pages keep their own searches", function()
-    local addon, env = load()
-    slash(env)
-    local panel = addon.UI.sidebar
-    panel.search:SetText("trainer")
-    panel.mode:Click()
-    equal(panel.search:GetText(), "", "new atlas search")
-    panel.list:SetOffset(10)
-    local expected = panel.list.rows[1].entry.title
-    panel.list.rows[1]:Click()
-    Wow.pressEscape()
-    equal(panel.list:GetOffset(), 10, "list stays in place")
-    equal(panel.list.rows[1].entry.title, expected, "same result visible")
-    panel.search:SetText("West")
-    panel.mode:Click()
-    equal(panel.search:GetText(), "trainer", "zone search intact")
-    panel.mode:Click()
-    equal(panel.search:GetText(), "West", "atlas search intact")
-    Wow.pressEscape()
-    check(not addon.UI:IsOpen() and env.WorldMapFrame:IsShown(), "guide closes before the game map")
-    Wow.pressEscape()
-    check(not env.WorldMapFrame:IsShown(), "map handles the next Escape")
-end)
-
-test("typing in the atlas keeps map pins and their tooltips in place", function()
-    local addon, env, state = load()
-    slash(env, "pins")
-    slash(env, "dungeons")
-    local pinned = pins(env)[1]
-    pinned:OnMouseEnter()
-    local panel = addon.UI.sidebar
-    panel.search:SetText("Cruel Barb")
-    check(env.GameTooltip:IsOwned(pinned), "search did not release the hovered map pin")
-    state.cached[5191] = true
-    Wow.fire("GET_ITEM_INFO_RECEIVED", 5191, true)
-    equal(panel.list.rows[1].title.textColor[1], .64, "a cached drop gains its quality colour")
-    equal(#panel.list:GetEntries(), 1, "search kept")
-end)
-
-test("reset restores defaults", function()
-    local addon, env = load({ savedVariables = { questMode = "all", filters = { dungeon = false } } })
-    slash(env, "reset")
-    equal(addon.settings.questMode, "available", "quest mode")
-    check(addon.CategoryEnabled("dungeon"), "filters")
-    check(Wow.trackingMenu():Find("Aeternum"):Find("Dungeon entrances").checked(), "menu reflects reset")
-end)
-
-test("pins can stay on the map with the panel closed", function()
-    local addon, env = load()
-    env.WorldMapFrame:Show()
-    equal(#pins(env), 0, "hidden by default")
-    slash(env, "pins")
-    check(addon.settings.showMapPins, "setting saved")
-    check(#pins(env) > 0, "pins shown")
-end)
-
-test("map tracking filters and quest progress work before the guide has ever opened", function()
-    local addon, env, state = load({ level = 1 })
-    env.WorldMapFrame:Show()
-    local function showsQuest(role)
-        for _, pin in ipairs(pins(env)) do
-            if findEntry(pin.entries, function(entry) return entry.questID == 783 and entry.role == role end) then
-                return true
-            end
-        end
-    end
-    Wow.trackingMenu():Find("Aeternum"):Find("Show pins on map"):Click()
-    check(showsQuest("start"), "start visible")
-    state.log[783] = 1
-    Wow.fire("QUEST_ACCEPTED", 783)
-    Wow.flushTimers()
-    check(showsQuest("turnin") and not showsQuest("start"), "quest pins follow the character")
-    Wow.trackingMenu():Find("Aeternum"):Find("Quests"):Click()
-    check(not showsQuest("turnin") and not addon.UI.window, "filtered without opening a guide")
-    Wow.trackingMenu():Find("Aeternum"):Find("Browse this map"):Click()
-    check(not addon.UI.sidebar.filter:OpenMenu():Find("Quests").checked(), "same setting in the browse filter")
-end)
-
--- Quests ----------------------------------------------------------------------
-
--- Northshire: A Threat Within (783) leads to Kobold Camp Cleanup (7).
 test("quest pins follow the character's progress", function()
     local addon, env, state = load({ level = 1 })
     slash(env)
@@ -337,19 +164,6 @@ test("quest pins follow the character's progress", function()
     check(not questPin(addon, 1429, 783, "turnin"), "turn-in hidden once done")
     equal(addon.Quests:State(783), "done", "done")
     check(questPin(addon, 1429, 7, "start"), "follow-up unlocked")
-end)
-
-test("quest log events refresh the map after a short delay", function()
-    local addon, env, state = load({ level = 1 })
-    slash(env)
-    state.completed[783] = true
-    Wow.fire("QUEST_TURNED_IN", 783)
-    check(findEntry(addon.UI.sidebar.list:GetEntries(), function(entry) return entry.questID == 783 end),
-        "unchanged until the refresh runs")
-    Wow.flushTimers()
-    check(not findEntry(addon.UI.sidebar.list:GetEntries(), function(entry)
-        return entry.questID == 783 and entry.role == "start"
-    end), "refreshed")
 end)
 
 test("level, class, and race rules apply", function()
@@ -384,21 +198,6 @@ test("level, class, and race rules apply", function()
     equal(addon.Quests:State(raceID95) ~= "unavailable", allowed95, "race above 2^32")
 end)
 
-test("low-level quests can be hidden and all quests shown", function()
-    local addon, env = load({ level = 20 })
-    slash(env)
-    check(questPin(addon, 1429, 783, "start"), "trivial shown by default")
-    equal(addon.Quests:State(783), "trivial", "trivial")
-    addon.UI.sidebar.filter:OpenMenu():Find("Low-level quests"):Click()
-    check(not questPin(addon, 1429, 783, "start"), "trivial hidden")
-    addon.UI.sidebar.filter:OpenMenu():Find("All quest locations"):Click()
-    equal(addon.settings.questMode, "all", "all quests")
-    local low = addon.UI.sidebar.filter:OpenMenu():Find("Low-level quests")
-    equal(low.enabled, false, "low-level option disabled in all mode")
-    check(questPin(addon, 1429, 783, "start"), "all mode shows it")
-    check(questPin(addon, 1429, 783, "turnin"), "all mode shows turn-ins")
-end)
-
 test("faction-specific pins stay with their faction", function()
     local addon = load({ faction = "Horde", level = 10 })
     addon.settings.questMode = "all"
@@ -409,7 +208,6 @@ end)
 
 test("pins show quest marks coloured by state", function()
     local _, env = load({ level = 1 })
-    slash(env, "pins")
     slash(env)
     local found
     for _, pin in ipairs(pins(env)) do
@@ -425,8 +223,6 @@ test("pins show quest marks coloured by state", function()
     check(env.GameTooltip:IsOwned(found), "tooltip")
     check(env.GameTooltip.lines[2]:find("Available", 1, true), "state in tooltip")
 end)
-
--- Guidance --------------------------------------------------------------------
 
 test("the arrow points at the target on a fixed minimap", function()
     local addon, _, state = load()
@@ -489,209 +285,6 @@ test("guidance rejects points without coordinates", function()
     check(not addon.Navigation:IsActive(), "inactive")
 end)
 
-test("any pin can be guided to from the sidebar and stopped", function()
-    local addon, env, state = load()
-    state.playerMap, state.playerX, state.playerY = 1429, .1, .1
-    slash(env)
-    local panel = addon.UI.sidebar
-    check(not panel.guide:IsShown(), "guide hidden without a selection")
-    local trainer = findEntry(panel.list:GetEntries(), function(entry) return entry.category == "class" end)
-    addon.UI:Select(trainer)
-    check(panel.selection:GetText():find(trainer.title, 1, true), "selection shown")
-    panel.guide:Click()
-    check(addon.Navigation:IsActive(), "guiding")
-    check(addon.UI.status:GetText():find(trainer.title, 1, true), "sidebar status")
-    check(addon.UI.tracking:IsVisible(), "route footer shown")
-    addon.UI.stop:Click()
-    check(not addon.Navigation:IsActive(), "stopped")
-    check(not addon.UI.tracking:IsShown(), "route footer removed")
-end)
-
-test("a trainer pin starts guidance without opening a guide", function()
-    local addon, env, state = load()
-    state.playerMap, state.playerX, state.playerY = 1429, .1, .1
-    slash(env, "pins")
-    env.WorldMapFrame:Show()
-    local pin = findEntry(pins(env), function(p) return p.entry.category == "class" and #p.entries == 1 end)
-    check(pin, "single trainer pin")
-    env.WorldMapFrame:ClickPin(pin, "LeftButton")
-    check(addon.Navigation:IsActive() and not addon.UI.window, "guide started directly")
-    slash(env, "stop")
-    check(not addon.Navigation:IsActive(), "stopped by command")
-end)
-
-test("one Scarlet Monastery pin lets the player pick any of the four wings", function()
-    local addon, env, state = load({ mapID = 1420 })
-    slash(env, "pins")
-    env.WorldMapFrame:Show()
-    local pin = findEntry(pins(env), function(p) return p.entry.source.id == "sm-armory" end)
-    equal(#pin.entries, 4, "one shared entrance")
-    env.WorldMapFrame:ClickPin(pin, "LeftButton")
-    check(not addon.UI.window, "choose a wing before opening the guide")
-    state.menu:Find("Scarlet Monastery - Library"):Click()
-    equal(addon.UI.detail.dungeon.id, "sm-library", "exact wing selected")
-    Wow.pressEscape()
-    check(not addon.UI:IsOpen() and env.WorldMapFrame:IsShown(), "a pin opens just one guide page")
-end)
-
--- Dungeon panel ---------------------------------------------------------------
-
-local function openDeadmines(addon, env)
-    slash(env)
-    env.WorldMapFrame:SetMapID(1436)
-    local entry = findEntry(addon.UI.sidebar.list:GetEntries(), function(candidate)
-        return candidate.title == "The Deadmines"
-    end)
-    check(entry, "Deadmines entrance on Westfall")
-    addon.UI:Select(entry)
-    return addon.UI.detail, entry
-end
-
-test("a dungeon opens with floors, bosses, loot, and its entrance", function()
-    local addon, env, state = load()
-    local detail, entry = openDeadmines(addon, env)
-    check(detail:IsShown(), "detail shown")
-    equal(addon.UI.window.TitleText:GetText(), "The Deadmines", "title")
-    check(detail.facts:GetText():find("5 players", 1, true), "group size")
-    local bosses = entry.source.bosses
-    equal(detail.tab, "map", "floor shown first")
-    check(not state.requested and not detail.loot:IsVisible(), "no loot fetched on the floor tab")
-    detail.tabs.loot:Click()
-    equal(detail.boss:GetText(), bosses[1].name, "first boss")
-    detail.boss:OpenMenu():Find(bosses[#bosses].name):Click()
-    equal(detail.boss:GetText(), bosses[#bosses].name, "direct boss selection")
-    local loot = detail.loot:GetEntries()
-    equal(loot, bosses[#bosses].loot, "loot keeps the source order")
-    check(state.requested[loot[1]], "item data requested")
-    check(detail.entranceText:GetText():find("Moonbrook", 1, true), "authored approach label")
-    check(addon.UI.selected == entry, "entrance selected")
-    detail.route:Click()
-    check(addon.Navigation:GetTarget() == "The Deadmines entrance", "guiding to the entrance")
-    equal(addon.UI.status:GetText(), addon.Navigation:GetStatus(), "shared route status")
-end)
-
-test("dungeon floor paging reuses client tiles and releases art on other tabs", function()
-    local addon, env = load()
-    local detail = openDeadmines(addon, env)
-    local floor = detail.floorMap
-    local view = findEntry(floor.children, function(child) return child.tiles ~= nil end)
-    local nextPage = findEntry(floor.children, function(child)
-        return child.normal and child.normal:find("NextPage", 1, true)
-    end)
-    equal(#view.tiles, 12, "client tile grid")
-    equal(view.tiles[1].texture, 449591, "Deadmines first floor")
-    nextPage:Click()
-    equal(floor.floorIndex, 2, "second floor")
-    equal(view.tiles[1].texture, 449603, "second floor art")
-    check(not nextPage:IsEnabled(), "last floor")
-    detail.tabs.quests:Click()
-    for _, tile in ipairs(view.tiles) do
-        check(not tile.texture and not tile:IsShown(), "hidden floor art released")
-    end
-    detail.tabs.map:Click()
-    equal(view.tiles[1].texture, 449603, "same floor after returning")
-end)
-
-test("loot rows show item details and support modified clicks", function()
-    local addon, env, state = load()
-    local detail = openDeadmines(addon, env)
-    detail.tabs.loot:Click()
-    local itemID = detail.loot:GetEntries()[1]
-    state.cached[itemID] = true
-    addon.UI:OnItemInfo(itemID)
-    local row
-    for _, frame in ipairs(state.frames) do
-        if frame.entry == itemID and frame.title then
-            row = frame
-        end
-    end
-    check(row, "loot row")
-    equal(row.title:GetText(), "Cached " .. itemID, "client name")
-    equal(row.title.textColor[1], .64, "quality colour")
-    equal(row.icon.texture, 1000000 + itemID, "icon")
-    row:Fire("OnEnter")
-    equal(env.GameTooltip.lines[1], "item:" .. itemID, "item tooltip")
-    row:Click()
-    check(state.itemRef and state.itemRef[1] == "item:" .. itemID, "item opened")
-    state.modified = true
-    row:Click()
-    check(state.modifiedClick and state.modifiedClick:find("Hitem:" .. itemID, 1, true), "linked")
-end)
-
-test("the quests tab lists dungeon quests and shows where they start", function()
-    local addon, env = load({ level = 18 })
-    local detail = openDeadmines(addon, env)
-    detail.tabs.quests:Click()
-    check(detail.quests:IsShown() and not detail.loot:IsShown(), "quests tab")
-    local quests = detail.quests:GetEntries()
-    check(#quests > 0, "dungeon quests")
-    local target
-    for _, questID in ipairs(quests) do
-        local start = addon.QuestStart(questID)
-        if start and start.mapID ~= 1436 then
-            target = questID
-            break
-        end
-    end
-    check(target, "a quest that starts on another map")
-    addon.UI:ShowQuestStart(target)
-    check(not detail:IsShown(), "detail closed")
-    equal(env.WorldMapFrame:GetMapID(), addon.QuestStart(target).mapID, "map moved")
-    equal(addon.UI.selected, addon.QuestStart(target), "start selected")
-end)
-
-test("dungeons without floor art or entrances still open", function()
-    local addon, env = load()
-    slash(env)
-    addon.UI.sidebar.mode:Click()
-    addon.UI.sidebar.search:SetText("Alcaz")
-    local entry = addon.UI.sidebar.list:GetEntries()[1]
-    addon.UI:Select(entry)
-    local detail = addon.UI.detail
-    check(detail:IsShown(), "shown")
-    check(not detail.route:IsEnabled(), "no guidance without an entrance")
-    equal(detail.entranceText:GetText(), "Entrance not recorded", "explained")
-    equal(detail.tab, "loot", "opens to useful content without a floor")
-end)
-
-test("the busiest map draws every location in reference mode", function()
-    local addon, env = load({ mapID = 1453 })
-    addon.settings.questMode = "all"
-    slash(env, "pins")
-    slash(env)
-    local locations = {}
-    for _, entry in ipairs(addon.Entries(1453, false, "")) do
-        locations[("%0.3f:%0.3f"):format(entry.x, entry.y)] = true
-    end
-    local count = 0
-    for _ in pairs(locations) do count = count + 1 end
-    equal(#pins(env), count, "one pin per location")
-    check(not addon.UI.sidebar.summary:find("off map", 1, true), "nothing left off")
-end)
-
-test("a location past the map pin limit can still be previewed from the list", function()
-    local addon, env = load()
-    local entries = {}
-    for i = 1, 151 do
-        local x = i / 200
-        entries[i] = { title = "Trainer " .. i, category = "class", subtitle = "Trainer", mapID = 1429,
-            x = x, y = .5, point = {mapID = 1429, x = x, y = .5} }
-    end
-    addon.Entries = function() return entries end
-    slash(env, "pins")
-    slash(env)
-    equal(#pins(env), 150, "normal layer capped")
-    check(addon.UI.sidebar.summary:find("1 off map", 1, true), "omitted location accounted for")
-    addon.HighlightPin(entries[151])
-    equal(#pins(env), 151, "temporary pin for the requested location")
-    addon.HighlightPin(entries[1])
-    equal(#pins(env), 150, "previous preview released")
-    addon.HighlightPin(nil)
-    for _, pin in ipairs(pins(env)) do equal(pin:GetWidth(), 16, "regular pin size restored") end
-end)
-
--- Regressions ---------------------------------------------------------------
-
 test("a quest in the log stays turn-in-able whatever its offer rules say", function()
     local addon, _, state = load({ level = 60 })
     local seasonal
@@ -721,55 +314,6 @@ test("a new level from PLAYER_LEVEL_UP survives later quest events", function()
     equal(addon.Quests:State(783), "trivial", "level 7")
 end)
 
-test("quest events restyle in place without moving the list or dropping tooltips", function()
-    local addon, env = load({ level = 1 })
-    slash(env, "pins")
-    slash(env)
-    local list = addon.UI.sidebar.list
-    list:SetOffset(5)
-    local before = pins(env)
-    before[1]:OnMouseEnter()
-    Wow.fire("QUEST_LOG_UPDATE")
-    Wow.flushTimers()
-    local after = pins(env)
-    equal(after[1], before[1], "same pin objects")
-    check(env.GameTooltip:IsOwned(before[1]), "tooltip kept")
-    equal(list:GetOffset(), 5, "scroll kept")
-end)
-
-test("a quest event that changes the visible quests redraws but keeps the scroll", function()
-    local addon, env, state = load({ level = 1 })
-    slash(env)
-    local list = addon.UI.sidebar.list
-    list:SetOffset(2)
-    state.log[783] = 1
-    Wow.fire("QUEST_ACCEPTED", 783)
-    Wow.flushTimers()
-    check(findEntry(list:GetEntries(), function(entry)
-        return entry.questID == 783 and entry.role == "turnin"
-    end), "turn-in listed")
-    equal(list:GetOffset(), 2, "scroll kept")
-end)
-
-test("a selected location survives hover and clears when that quest is accepted", function()
-    local addon, env, state = load({ level = 1 })
-    slash(env)
-    local start = questPin(addon, 1429, 783, "start")
-    addon.UI:Select(start)
-    equal(pins(env)[1].entry, start, "selection preview")
-    local row = findEntry(addon.UI.sidebar.list.rows, function(r) return r.entry ~= start end)
-    row:Fire("OnEnter")
-    equal(#pins(env), 1, "single preview while hovering")
-    equal(pins(env)[1].entry, row.entry, "hover preview")
-    row:Fire("OnLeave")
-    equal(pins(env)[1].entry, start, "selection restored")
-    state.log[783] = 1
-    Wow.fire("QUEST_LOG_UPDATE")
-    Wow.flushTimers()
-    check(not addon.UI.selected and not addon.UI.sidebar.guide:IsShown(), "clears the unavailable start")
-    equal(#pins(env), 0, "no stale map pin")
-end)
-
 test("the edge arrow becomes a waypoint at the target's true minimap distance", function()
     local addon, _, state = load()
     -- Elwynn is 2000 yards tall, so .05 of the map is 100 yards: half the 200-yard view radius.
@@ -783,204 +327,6 @@ test("the edge arrow becomes a waypoint at the target's true minimap distance", 
     check(overlay.marker:IsVisible() and not overlay.arrow:IsVisible(), "one waypoint inside the minimap")
     equal(overlay.marker.atlas, "waypoint-mappin-minimap-tracked", "stock minimap waypoint")
     check(math.abs(point[5] - 35) < .01, "35 pixels on a 140-pixel minimap, got " .. point[5])
-end)
-
-test("dungeon and browse pages share one window above the maximised map", function()
-    local addon, env = load({mapStrata = "FULLSCREEN", mapRight = 1900})
-    slash(env)
-    local window = addon.UI.window
-    equal(window:GetFrameStrata(), "FULLSCREEN_DIALOG", "window above the map")
-    local detail = openDeadmines(addon, env)
-    equal(detail:GetParent(), addon.UI.sidebar:GetParent(), "one content area")
-    check(window == addon.UI.window and not addon.UI.sidebar:IsShown(), "only the dungeon page is displayed")
-end)
-
--- Layout and interaction ------------------------------------------------------
-
-local function anchoredTo(frame, relative)
-    for _, point in ipairs(frame.points) do
-        if point[2] == relative then
-            return point
-        end
-    end
-end
-
-test("guide docks on either side with room and stays bounded when maximised", function()
-    for _, layout in ipairs({{0, 1100, "TOPLEFT", "TOPRIGHT"}, {500, 1900, "TOPRIGHT", "TOPLEFT"}}) do
-        local addon, env = load({mapLeft = layout[1], mapRight = layout[2]})
-        slash(env)
-        local point = anchoredTo(addon.UI.window, env.WorldMapFrame)
-        check(point and point[1] == layout[3] and point[3] == layout[4], "outside map")
-    end
-    local addon, env = load({mapRight = 1900})
-    slash(env)
-    check(anchoredTo(addon.UI.window, env.WorldMapFrame.ScrollContainer), "compact layout")
-    equal(addon.UI.window:GetWidth(), 328, "bounded width")
-    equal(addon.UI.window:GetHeight(), 334, "bounded height")
-    equal(#env.WorldMapFrame.ScrollContainer.points, 0, "native viewport anchors intact")
-end)
-
-test("the title moves only the guide and display changes recalculate its dock", function()
-    local addon, env, state = load({mapRight = 1300, mapScale = 1.5})
-    slash(env)
-    local window = addon.UI.window
-    check(anchoredTo(window, env.WorldMapFrame.ScrollContainer), "scaled map has no outside space")
-    local title = findEntry(state.frames, function(frame) return frame.dragButtons ~= nil end)
-    check(window.movable and window.dontSavePosition and title:GetParent() == window, "session-only title drag")
-    title:Fire("OnDragStart")
-    check(window.moving and not env.WorldMapFrame.moving, "only the guide moves")
-    title:Fire("OnDragStop")
-    check(not window.moving, "released")
-    env.UIParent:SetSize(2560, 1440)
-    Wow.fire("DISPLAY_SIZE_CHANGED")
-    check(anchoredTo(window, env.WorldMapFrame), "docks outside with more space")
-    env.WorldMapFrame.scale = 2
-    Wow.fire("UI_SCALE_CHANGED")
-    check(anchoredTo(window, env.WorldMapFrame.ScrollContainer), "bounds reconsidered on scale change")
-    equal(#env.WorldMapFrame.ScrollContainer.points, 0, "world map canvas untouched")
-end)
-
-test("the native tracking menu opens either page and preserves Blizzard's menu", function()
-    local addon, env = load()
-    env.WorldMapFrame:Show()
-    local root = Wow.trackingMenu()
-    equal(root.children[1].label, "Blizzard map filter", "existing menu entry retained")
-    local menu = root:Find("Aeternum")
-    menu:Find("Dungeon guide"):Click()
-    check(addon.UI:IsAtlas() and addon.UI:IsBrowsing(), "atlas open")
-    Wow.trackingMenu():Find("Aeternum"):Find("Browse this map"):Click()
-    check(not addon.UI:IsAtlas() and addon.UI:IsBrowsing(), "zone open")
-    check(not addon.UI.toggle, "no extra button on the canvas")
-end)
-
-test("closing the map closes the dungeon panel even with the sidebar closed", function()
-    local addon, env = load()
-    slash(env, "pins")
-    env.WorldMapFrame:Show()
-    env.WorldMapFrame:SetMapID(1436)
-    local entrance
-    for _, pin in ipairs(pins(env)) do
-        if pin.entry.category == "dungeon" then entrance = pin end
-    end
-    entrance:OnClick("LeftButton")
-    check(addon.UI.detail:IsShown(), "opened from a pin")
-    Wow.pressEscape()
-    check(not addon.UI.detail:IsShown() and env.WorldMapFrame:IsShown(), "Escape closes the panel first")
-    entrance:OnClick("LeftButton")
-    env.WorldMapFrame:Hide()
-    check(not addon.UI.detail:IsShown(), "closed with the map")
-end)
-
-test("right-click on addon pins follows Blizzard's map zoom in and out of combat", function()
-    local addon, env, state = load()
-    slash(env, "pins")
-    env.WorldMapFrame:Show()
-    for _, combat in ipairs({false, true}) do
-        state.inCombat = combat
-        addon.RefreshMap()
-        local pin = pins(env)[1]
-        equal(pin.scalingLimits[2], 1, "steady pin size")
-        check(pin.OnClick == env.MapCanvasPinMixin.OnClick, "native click dispatch")
-        env.WorldMapFrame.zoomedOut = false
-        env.WorldMapFrame:ClickPin(pin, "RightButton")
-        check(env.WorldMapFrame.zoomedOut and not addon.Navigation:IsActive(), "native zoom")
-    end
-end)
-
-test("lists draw only visible rows and scroll with the wheel", function()
-    local addon, env = load()
-    addon.settings.questMode = "all"
-    slash(env)
-    local list = addon.UI.sidebar.list
-    local total = #list:GetEntries()
-    check(total > #list.rows, "fewer rows than entries")
-    check(list.bar:IsShown(), "scroll bar shown")
-    local first = list.rows[1].entry
-    list:Fire("OnMouseWheel", -1)
-    equal(list:GetOffset(), 3, "three rows per notch")
-    check(list.rows[1].entry ~= first, "rows refilled")
-    list:Fire("OnMouseWheel", 1)
-    list:Fire("OnMouseWheel", 1)
-    equal(list:GetOffset(), 0, "clamped at the top")
-end)
-
-test("hovering a row highlights its pin", function()
-    local addon, env = load()
-    slash(env)
-    local row = addon.UI.sidebar.list.rows[1]
-    row:Fire("OnEnter")
-    local found
-    for _, pin in ipairs(pins(env)) do
-        for _, entry in ipairs(pin.entries) do
-            if entry == row.entry then found = pin end
-        end
-    end
-    equal(found.width, 22, "highlighted")
-    equal(#pins(env), 1, "only the hovered location")
-    check(env.GameTooltip:IsOwned(row), "row tooltip")
-    row:Fire("OnLeave")
-    equal(#pins(env), 0, "temporary pin removed")
-end)
-
-test("rows use the same game art as their pin", function()
-    local addon, env = load({ level = 1 })
-    slash(env)
-    for _, row in ipairs(addon.UI.sidebar.list.rows) do
-        if row.entry then
-            local icon = addon.Presentation(row.entry)
-            equal(row.icon.atlas or row.icon.texture, icon, "shared icon")
-        end
-    end
-end)
-
-test("old explicit pin choices migrate without opening a window", function()
-    local addon, env = load({savedVariables = {panelOpen = true, pinsWithPanelClosed = true}})
-    env.WorldMapFrame:Show()
-    check(#pins(env) > 0 and not addon.UI.window, "pins only")
-    equal(addon.settings.showMapPins, true, "old choice migrated")
-    check(not addon.settings.panelOpen and not addon.settings.pinsWithPanelClosed, "obsolete fields cleared")
-end)
-
-test("a current off preference takes priority over an old on preference", function()
-    local addon, env = load({savedVariables = {pinsWithPanelClosed = true, showMapPins = false}})
-    env.WorldMapFrame:Show()
-    check(not addon.settings.showMapPins and #pins(env) == 0, "keeps current preference")
-end)
-
-test("combat allows pins and an open map guide without toggling a protected map", function()
-    local addon, env, state = load()
-    state.inCombat = true
-    slash(env)
-    check(not env.WorldMapFrame:IsShown() and not addon.UI.window, "closed map left to the client")
-    env.WorldMapFrame:Show()
-    slash(env, "pins")
-    slash(env)
-    check(#pins(env) > 0 and addon.UI:IsBrowsing(), "already open map remains usable")
-    env.WorldMapFrame:SetMapID(1453)
-    check(#pins(env) > 0, "pins redrawn in combat")
-end)
-
-test("a narrower list starts at the top", function()
-    local addon, env = load()
-    addon.settings.questMode = "all"
-    slash(env)
-    local list = addon.UI.sidebar.list
-    list:SetOffset(60)
-    equal(list:GetOffset(), 60, "scrolled down")
-    -- 39 results: fewer than the old offset, so the scroll bar's range narrows past it.
-    addon.UI.sidebar.search:SetText("turn-in · level 1")
-    equal(#list:GetEntries(), 39, "narrower list")
-    equal(list:GetOffset(), 0, "back at the top")
-end)
-
-test("modified clicks on uncached items pass a hyperlink", function()
-    local addon, env, state = load()
-    local detail = openDeadmines(addon, env)
-    detail.tabs.loot:Click()
-    local itemID = detail.loot:GetEntries()[1]
-    state.modified = true
-    detail.loot.rows[1]:Click()
-    check(state.modifiedClick:find("|Hitem:" .. itemID .. "|h[", 1, true), "hyperlink text")
 end)
 
 test("completed quests read as completed in reference mode", function()
@@ -1007,6 +353,408 @@ test("opening the map refreshes the pins once", function()
     end
     env.WorldMapFrame:Show()
     equal(refreshes, 1, "one refresh")
+end)
+
+
+local function dungeonNamed(addon, id)
+    return assert(findEntry(addon.Data.dungeons, function(dungeon) return dungeon.id == id end))
+end
+
+local function locate(env, predicate)
+    for _, pin in ipairs(pins(env)) do
+        for _, entry in ipairs(pin.entries) do
+            if predicate(entry) then return pin, entry end
+        end
+    end
+end
+
+local function menuRow(menu, name)
+    return findEntry(menu.children, function(row) return row.label:find(name, 1, true) end)
+end
+
+local function openDeadmines()
+    local addon, env, state = load({mapID=1436})
+    env.WorldMapFrame:Show()
+    local pin = locate(env, function(entry) return entry.title == "The Deadmines" end)
+    env.WorldMapFrame:ClickPin(pin, "LeftButton")
+    return addon, env, state
+end
+
+test("M shows dungeon entrances and relevant map pins without any launcher", function()
+    local addon, env = load({mapID=1436, savedVariables={panelOpen=true, showMapPins=false}})
+    env.WorldMapFrame:Show()
+    check(locate(env, function(entry) return entry.title == "The Deadmines" end), "entrance visible on first visit")
+    check(not addon.DungeonMap.frame and not addon.Navigation.overlay, "outdoors opens no extra surface")
+    for _, entry in ipairs(Wow.trackingMenu().children) do check(entry.label ~= "Aeternum", "no addon submenu") end
+    equal(#env.WorldMapFrame.ScrollContainer.points, 0, "game canvas anchors unchanged")
+    check(addon.settings.showMapPins == nil and addon.settings.panelOpen == nil, "obsolete launcher options migrated")
+end)
+
+test("outdoor wheel zoom fills single-layer ranges and preserves native multi-layer zoom", function()
+    local _, env = load()
+    local scroll = env.WorldMapFrame.ScrollContainer
+    equal(scroll.wheelMode, 2, "native wheel enabled")
+    equal(#scroll.zoomLevels, 5, "single-layer zoom stops")
+    scroll:CreateZoomLevels()
+    equal(#scroll.zoomLevels, 5, "rebuild does not duplicate stops")
+    equal(scroll.zoomLevels[5].scale, 4, "4x detail")
+    local native = {{scale=.5, layerIndex=1}, {scale=2, layerIndex=2}}
+    local _, second = load({zoomLevels=native})
+    equal(second.WorldMapFrame.ScrollContainer.zoomLevels, native, "native levels kept")
+    equal(#native, 2, "extra layers unaffected")
+end)
+
+test("dungeon right-click offers directions and does not zoom the map", function()
+    local addon, env, state = load({mapID=1436, playerMap=1436, playerX=.2, playerY=.2, inCombat=true})
+    env.WorldMapFrame:Show()
+    local pin = locate(env, function(entry) return entry.source.id == "deadmines" end)
+    env.WorldMapFrame:ClickPin(pin, "RightButton")
+    check(not env.WorldMapFrame.zoomedOut and not addon.Navigation:IsActive(), "menu first")
+    state.menu:Find("Show path to The Deadmines"):Click()
+    equal(addon.Navigation:GetTarget(), "The Deadmines entrance", "clicked entrance")
+    equal(#addon.Navigation.points, 2, "recorded outdoor approach included")
+    check(addon.Navigation.overlay:IsShown() and not addon.DungeonMap.frame, "minimap only")
+    env.WorldMapFrame:ClickPin(pin, "RightButton")
+    state.menu:Find("Stop directions"):Click()
+    check(not addon.Navigation:IsActive(), "stopped in place")
+end)
+
+test("shared entrances retain the chosen wing for both buttons", function()
+    local addon, env, state = load({mapID=1420, playerMap=1420, playerX=.2, playerY=.2})
+    env.WorldMapFrame:Show()
+    local pin = locate(env, function(entry) return entry.source.id == "sm-armory" end)
+    equal(#pin.entries, 4, "one pin")
+    env.WorldMapFrame:ClickPin(pin, "RightButton")
+    state.menu:Find("Show path to Scarlet Monastery - Library"):Click()
+    equal(addon.Navigation:GetTarget(), "Scarlet Monastery - Library entrance", "wing route")
+    env.WorldMapFrame:ClickPin(pin, "LeftButton")
+    state.menu:Find("Scarlet Monastery - Cathedral"):Click()
+    Wow.flushTimers()
+    equal(addon.DungeonMap.dungeon.id, "sm-cathedral", "chosen wing opens on the map")
+end)
+
+test("clicking an entrance uses only the existing viewport and named floors", function()
+    local addon, env = openDeadmines()
+    local floors, frame = addon.DungeonMap, addon.DungeonMap.frame
+    equal(floors.dungeon.id, "deadmines", "map opened from pin")
+    equal(frame:GetParent(), env.WorldMapFrame, "part of the map")
+    equal(frame.points[1][2], env.WorldMapFrame.ScrollContainer, "fits existing canvas")
+    equal(frame.tiles[1].texture, 449591, "native first-floor art")
+    frame.dropdown:OpenMenu():Find("Ironclad Cove"):Click()
+    equal(frame.tiles[1].texture, 449603, "second-floor art")
+    Wow.pressEscape()
+    check(not floors.dungeon and env.WorldMapFrame:IsShown(), "first Escape returns to zone")
+    check(not frame.tiles[1].texture, "closed floor releases tiles")
+    Wow.pressEscape()
+    check(not env.WorldMapFrame:IsShown(), "native map closes next")
+end)
+
+test("a boss skull opens the correct drop list with modified clicks and native tooltips", function()
+    local addon, _, state = openDeadmines()
+    local frame = addon.DungeonMap.frame
+    check(not state.requested, "viewing a floor requests no loot")
+    frame.dropdown:OpenMenu():Find("Ironclad Cove"):Click()
+    local skull = findEntry(frame.pins, function(pin) return pin.boss and pin.boss.id == 639 end)
+    check(skull and skull:IsVisible(), "VanCleef has a floor-bound skull")
+    equal(skull.normal, 137025, "Blizzard skull")
+    skull:Click()
+    check(state.requested[5191] and not state.requested[5443], "only VanCleef's loot requested")
+    equal(state.menu.children[1].label, "Edwin VanCleef", "correct boss")
+    local barb = menuRow(state.menu, "Cruel Barb")
+    local _, env = addon, Wow.env
+    barb.tooltip(env.GameTooltip)
+    equal(env.GameTooltip.lines[1], "item:5191", "Blizzard item tooltip")
+    state.modified = true
+    barb:Click()
+    check(state.modifiedClick:find("Hitem:5191", 1, true), "chat or dressing-room link")
+end)
+
+test("floor zoom follows the cursor and dragging stays within its viewport", function()
+    local addon, _, state = openDeadmines()
+    local frame = addon.DungeonMap.frame
+    state.cursorX, state.cursorY, frame.top = 650, 340, 540
+    local before = (650 - frame.x) / frame.art.scale
+    frame:Fire("OnMouseWheel", 2)
+    check(frame.zoom > 1, "wheel zoom")
+    check(math.abs((650 - frame.x) / frame.art.scale - before) < .01, "point under cursor stays put")
+    frame:Fire("OnDragStart")
+    state.cursorX = 590
+    frame:Fire("OnUpdate")
+    check(frame.x <= 0, "pan clamped")
+    frame:Fire("OnDragStop")
+    check(not frame:GetScript("OnUpdate"), "idle map has no drag update")
+    frame:Fire("OnMouseWheel", 99)
+    equal(frame.zoom, 4, "upper bound")
+    frame:Fire("OnMouseWheel", -99)
+    equal(frame.zoom, 1, "lower bound")
+end)
+
+test("all dungeon floor references and boss stops resolve to their own dungeon", function()
+    local addon = load()
+    local floors, stops, sketches = 0, 0, 0
+    for _, d in ipairs(addon.Data.dungeons) do
+        local geo = addon.floorData[d.id]
+        check(geo.instance > 0 and #geo.floors > 0, d.name)
+        for _, floor in ipairs(geo.floors) do
+            floors = floors + 1
+            if floor.tiles then equal(#floor.tiles, 12, d.name)
+            elseif floor.pieces then check(#floor.pieces > 0 and #floor.pieces[1] == 14, "client minimap geometry")
+            else check(#floor.paths > 0, "surveyed route sketch"); sketches = sketches + 1 end
+            for _, stop in ipairs(floor.bosses) do
+                check(findEntry(d.bosses, function(b) return b.id == stop[1] end), d.name .. " boss identity")
+                check(stop[2]>=0 and stop[2]<=1 and stop[3]>=0 and stop[3]<=1, "coordinates inside floor")
+                stops = stops + 1
+            end
+        end
+    end
+    equal(floors, 71, "floors")
+    check(stops >= 210 and sketches == 1, "recorded boss stops and one fallback sketch")
+end)
+
+test("opening M inside a dungeon automatically shows its floor and leaving restores the zone", function()
+    local addon, env, state = load({inInstance=true, instanceID=36, subzone="Ironclad Cove"})
+    env.WorldMapFrame:Show()
+    equal(addon.DungeonMap.dungeon.id, "deadmines", "inside instance")
+    equal(addon.DungeonMap.index, 2, "correct named floor")
+    state.inInstance = false
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    check(not addon.DungeonMap.dungeon and env.WorldMapFrame:IsShown(), "outdoors restored")
+end)
+
+test("an ambiguous instance ID asks for its wing only until one can be identified", function()
+    local addon, env, state = load({inInstance=true, instanceID=189})
+    env.WorldMapFrame:Show()
+    check(not addon.DungeonMap.dungeon, "never guesses a wing")
+    state.menu:Find("Scarlet Monastery - Library"):Click()
+    equal(addon.DungeonMap.dungeon.id, "sm-library", "player's choice")
+    env.WorldMapFrame:Hide()
+    state.subzone = "Cathedral"
+    env.WorldMapFrame:Show()
+    equal(addon.DungeonMap.dungeon.id, "sm-cathedral", "match on reopen")
+end)
+
+test("Forever-only floors draw client minimap tiles and Dalaran's unmapped floor draws its recorded route", function()
+    local addon, env = load()
+    env.WorldMapFrame:Show()
+    addon.DungeonMap:Open(dungeonNamed(addon, "hall-of-thanes"))
+    local frame = addon.DungeonMap.frame
+    check(#frame.tiles >= 30 and #frame.tiles[1].texCoord == 8, "client minimap mosaic")
+    addon.DungeonMap:Open(dungeonNamed(addon, "city-of-dalaran"), nil, 2)
+    check(#frame.lines > 0 and frame.lines[1]:IsShown(), "documented fallback")
+    check(frame.dropdown:GetText():find("route sketch", 1, true), "sketch identified")
+    env.WorldMapFrame:SetMapID(1436)
+    check(not addon.DungeonMap.dungeon and not frame:IsShown(), "stock map navigation dismisses dungeon layer")
+end)
+
+test("unplaced bosses and dungeon quest starts are reachable from the floor itself", function()
+    local addon, env, state = openDeadmines()
+    local frame = addon.DungeonMap.frame
+    local menu = frame.dropdown:OpenMenu()
+    menu:Find("Boss loot"):Find("Miner Johnson"):Click()
+    Wow.flushTimers()
+    equal(state.menu.children[1].label, "Miner Johnson", "encounter list opens loot")
+    local d = addon.DungeonMap.dungeon
+    local id = findEntry(d.quests, function(q) return addon.QuestStart(q) ~= nil end)
+    local start = addon.QuestStart(id)
+    menu:Find("Dungeon quests"):Find(addon.Quest(id).name):Click()
+    equal(env.WorldMapFrame:GetMapID(), start.mapID, "quest start shown in the world map")
+    check(not frame:IsShown(), "back outdoors")
+    check(locate(env, function(e) return e == start end), "quest start pin even when normally filtered")
+end)
+
+test("class and sparse profession slots select relevant trainers and react to skill changes", function()
+    local _, env, state = load({mapID=1453, class="MAGE", professionIndices={[4]=17}, professionSkills={[17]=171}})
+    env.WorldMapFrame:Show()
+    check(locate(env, function(e) return e.source.classToken == "MAGE" end), "mage trainers")
+    check(not locate(env, function(e) return e.source.classToken == "WARRIOR" end), "other classes hidden")
+    check(locate(env, function(e) return e.source.skillID == 171 end), "alchemy in a sparse profession slot")
+    check(not locate(env, function(e) return e.source.skillID == 164 end), "blacksmiths hidden")
+    state.professionSkills[17] = 164
+    Wow.fire("SKILL_LINES_CHANGED")
+    check(locate(env, function(e) return e.source.skillID == 164 end), "learned profession")
+    check(not locate(env, function(e) return e.source.skillID == 171 end), "abandoned profession")
+    Wow.trackingMenu():Find("Trainers"):Find("Other classes and professions"):Click()
+    check(locate(env, function(e) return e.source.classToken == "WARRIOR" end), "optional native tracking override")
+end)
+
+test("a profession trainer shows NPC-specific recipe prices and skill requirements", function()
+    local addon, env, state = load({mapID=1453, professionIndices={1}, professionSkills={171}})
+    env.WorldMapFrame:Show()
+    local pin = locate(env, function(e) return e.source.id == 5499 end)
+    check(pin, "Lilyssia Nightbreeze")
+    env.WorldMapFrame:ClickPin(pin, "LeftButton")
+    if #pin.entries > 1 then state.menu:Find("Lilyssia Nightbreeze"):Click(); Wow.flushTimers() end
+    local potion = assert(menuRow(state.menu, "Minor Mana Potion"))
+    check(potion.label:find("100 copper", 1, true), "price at this NPC")
+    potion.tooltip(env.GameTooltip)
+    check(findEntry(env.GameTooltip.lines, function(line) return line == "Alchemy 25" end), "recipe skill required")
+    local function cost(npcID)
+        return findEntry(addon.Trainers:Lessons(npcID), function(lesson) return lesson.id == 2159 end).cost
+    end
+    equal(cost(4212), 250, "first leatherworker")
+    equal(cost(1385), 550, "same recipe, different teacher")
+end)
+
+test("weapon masters teach only class-appropriate proficiencies by default", function()
+    local addon, env = load({mapID=1455, class="PALADIN"})
+    env.WorldMapFrame:Show()
+    check(locate(env, function(e) return e.source.id == 11865 end), "Buliwyf teaches paladins")
+    check(not locate(env, function(e) return e.source.id == 13084 end), "Bixi has no paladin proficiency")
+    local lessons = addon.Trainers:Lessons(11867)
+    local swords = findEntry(lessons, function(row) return row.id == 201 end)
+    equal(swords.cost, 1000, "Woo Ping sword skill price")
+    equal(swords.source, "Classic reference", "price provenance")
+    check(not findEntry(lessons, function(row) return row.id == 5011 end), "paladin cannot learn crossbows")
+    Wow.trackingMenu():Find("Trainers"):Find("Other classes and professions"):Click()
+    check(locate(env, function(e) return e.source.id == 13084 end), "reference mode includes Bixi")
+end)
+
+test("observed trainer prices override references for that NPC and that character only", function()
+    local addon, env, state = load({npcGUID="Creature-0-1-1-1-11867-000A", services={
+        {name="One-Handed Swords", spell=201, cost=900}, {name="Private Lesson", cost=0},
+    }})
+    Wow.fire("TRAINER_SHOW")
+    local function sword()
+        return findEntry(addon.Trainers:Lessons(11867), function(lesson) return lesson.id == 201 end)
+    end
+    equal(sword().source, "Last visit", "personal price takes priority")
+    equal(sword().cost, 900, "discounted local quote")
+    state.services = {{name="Private Lesson", cost=0}}
+    Wow.fire("TRAINER_UPDATE")
+    equal(sword().cost, 900, "filtered trainer view never removes earlier observations")
+    local row = findEntry(addon.Trainers:Lessons(11867), function(lesson) return lesson.name == "Private Lesson" end)
+    equal(row.cost, 0, "free and unknown prices differ")
+    local saved = env.AeternumTrainerDB
+    local reload = load({savedTrainerData=saved})
+    equal(findEntry(reload.Trainers:Lessons(11867), function(l) return l.id == 201 end).cost, 900, "after reload")
+    local other = load()
+    equal(findEntry(other.Trainers:Lessons(11867), function(l) return l.id == 201 end).cost, 1000, "other character")
+end)
+
+test("class skills have ranks, levels and prices before a first visit", function()
+    local addon = load()
+    local spell = findEntry(addon.Trainers:Lessons(328), function(l) return l.name == "Frostbolt" end)
+    check(spell and spell.rank == "Rank 1" and spell.level > 0 and spell.cost == 100, "mage lesson")
+    local druid = findEntry(addon.Trainers:Lessons(5504), function(l) return l.source == "Bundled trainer record" end)
+    check(druid and druid.id and druid.cost ~= nil, "observed Forever class data wins over reference")
+end)
+
+test("non-dungeon pins pass right-click through even when recycled in combat", function()
+    local _, env, state = load({mapID=1453})
+    env.WorldMapFrame:Show()
+    state.inCombat = true
+    env.WorldMapFrame:SetMapID(1429)
+    local pin = locate(env, function(e) return e.category ~= "dungeon" end)
+    env.WorldMapFrame:ClickPin(pin, "RightButton")
+    check(env.WorldMapFrame.zoomedOut and not state.menu, "Blizzard's zoom-out handler")
+end)
+
+test("quest pins restyle in place and redraw only when the quest list changes", function()
+    local _, env, state = load({level=1})
+    env.WorldMapFrame:Show()
+    local fn = function(e) return e.questID == 783 and e.role == "start" end
+    local start = locate(env, fn)
+    Wow.fire("QUEST_LOG_UPDATE"); Wow.flushTimers()
+    equal(locate(env, fn), start, "same pin after an unrelated log update")
+    state.log[783] = 1
+    Wow.fire("QUEST_ACCEPTED", 783); Wow.flushTimers()
+    check(not locate(env, fn), "accepted start removed")
+    check(locate(env, function(e) return e.questID == 783 and e.role == "turnin" end), "turn-in drawn")
+end)
+
+test("unrecorded or missing prices are never reported as free", function()
+    local addon = load({npcGUID="Creature-0-1-1-1-11867-000B", services={{name="Unknown cost"}}})
+    Wow.fire("TRAINER_UPDATE")
+    equal(findEntry(addon.Trainers:Lessons(11867), function(l) return l.name == "Unknown cost" end).cost, nil)
+end)
+
+test("continent entrance pins project into the parent map and route to their original zone", function()
+    local addon, env, state = load({mapID=1415, playerMap=1436, playerX=.2, playerY=.2})
+    env.Enum.UIMapType = {World=0, Continent=1}
+    env.C_Map.GetMapInfo = function(id)
+        if id == 1415 then return {mapType=1, name="Eastern Kingdoms"} end
+        return {mapType=3, parentMapID=id == 1436 and 1415 or 0, name="Westfall"}
+    end
+    env.C_Map.GetMapRectOnMap = function(id, parent)
+        equal(id, 1436); equal(parent, 1415)
+        return .1, .5, .2, .6
+    end
+    env.WorldMapFrame:Show()
+    local pin, door = locate(env, function(e) return e.source.id == "deadmines" end)
+    equal(door.mapID, 1415, "displayed on continent")
+    equal(door.point.mapID, 1436, "route in Westfall")
+    check(math.abs(door.x - (.1 + door.point.x * .4)) < .00001, "projected coordinate")
+    check(not locate(env, function(e) return e.source.id == "ragefire-chasm" end), "other continent excluded")
+    env.WorldMapFrame:ClickPin(pin, "RightButton")
+    state.menu:Find("Show path to The Deadmines"):Click()
+    equal(#addon.Navigation.points, 2, "Westfall approach")
+end)
+
+test("focusing a second map location restores the first pin's style and size", function()
+    local addon, env = load({mapID=1453})
+    env.WorldMapFrame:Show()
+    local points = {}
+    for _, pin in ipairs(pins(env)) do
+        if pin.entry.category ~= "dungeon" then points[#points + 1] = pin end
+    end
+    local first, second = points[1], points[2]
+    addon.FocusLocation(first.entries[#first.entries])
+    equal(first:GetWidth(), 23)
+    addon.FocusLocation(second.entry)
+    equal(first:GetWidth(), 17, "old pin restored")
+    equal(first.entry, first.entries[1])
+    equal(second:GetWidth(), 23)
+    addon.FocusLocation(nil)
+    equal(second:GetWidth(), 17)
+end)
+
+test("dungeon floors follow unambiguous localized rooms until the player chooses a floor", function()
+    local addon, env, state = load({inInstance=true, instanceID=36, subzone="Mastraum"})
+    env.WorldMapFrame:Show()
+    equal(addon.DungeonMap.index, 1)
+    state.subzone = "Crique du cuirassé"
+    Wow.fire("ZONE_CHANGED_INDOORS")
+    equal(addon.DungeonMap.index, 2, "localized room identifies next floor")
+    addon.DungeonMap.frame.dropdown:OpenMenu():Find("Deadmines"):Click()
+    Wow.fire("ZONE_CHANGED")
+    equal(addon.DungeonMap.index, 1, "manual choice survives a room change")
+end)
+
+test("locale with missing legacy art draws the equivalent client minimap mosaic", function()
+    local addon, env = load({inInstance=true, instanceID=36, locale="esMX"})
+    env.WorldMapFrame:Show()
+    local floor = addon.floorData.deadmines.floors[1]
+    local texture = addon.DungeonMap.frame.tiles[1]
+    equal(texture.texture, tonumber(floor.fallback:match("^%d+")))
+    equal(#texture.texCoord, 8, "rotated client minimap fragment")
+end)
+
+test("a name-only trainer quote gains its spell ID and latest price without duplicate lessons", function()
+    local addon, _, state = load({npcGUID="Creature-0-1-1-1-11867-000A",
+        services={{name="One-Handed Swords", cost=950}}})
+    Wow.fire("TRAINER_SHOW")
+    state.services = {{name="One-Handed Swords", spell=201, cost=900}}
+    Wow.fire("TRAINER_UPDATE")
+    state.services = {{name="One-Handed Swords", status="used", cost=0}}
+    Wow.fire("TRAINER_UPDATE")
+    local count = 0
+    for _, lesson in ipairs(addon.Trainers:Lessons(11867)) do
+        if lesson.name == "One-Handed Swords" then
+            equal(lesson.id, 201); equal(lesson.cost, 900)
+            count = count + 1
+        end
+    end
+    equal(count, 1, "one last-visit lesson")
+end)
+
+test("optional drop search opens the same map floor and loot as a boss pin", function()
+    local addon, env, state = load()
+    slash(env, "dungeons Cruel Barb")
+    menuRow(state.menu, "Cruel Barb"):Click()
+    Wow.flushTimers()
+    equal(addon.DungeonMap.dungeon.id, "deadmines", "selected dungeon")
+    equal(addon.DungeonMap.index, 2, "boss floor")
+    equal(state.menu.children[1].label, "Edwin VanCleef")
 end)
 
 print(("%d passed, %d failed"):format(passed, failed))

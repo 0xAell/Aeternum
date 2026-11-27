@@ -194,29 +194,41 @@ local approaches = {
     },
 }
 
-local function entrances(id, row)
-    local result = {}
-    if row.entrance then
-        local entrance = coord(row.entrance.area, row.entrance.x, row.entrance.y)
-        if entrance then
-            local approach = approaches[id]
-            if approach and approach.waypoint.mapID == entrance.mapID then
-                entrance.label = approach.label
-                entrance.waypoints = {approach.waypoint}
-            end
-            result[1] = entrance
+local function findEntrance(entrances, point)
+    for index, entrance in ipairs(entrances) do
+        if entrance.mapID == point.mapID and entrance.x == point.x and entrance.y == point.y then
+            return index
         end
     end
-    if #result == 0 then
-        local fallback = db.dungeons[row.area]
-        for _, rowEntrance in ipairs((fallback and fallback.entrances) or {}) do
-            local entrance = coord(rowEntrance[1], rowEntrance[2], rowEntrance[3])
-            if entrance then
-                result[#result + 1] = entrance
-            end
+end
+
+local function dungeonEntrances(id, row)
+    local entrances = {}
+    local area = db.dungeons[row.area]
+    for _, entry in ipairs(area and area.entrances or {}) do
+        local point = coord(entry[1], entry[2], entry[3])
+        if point and not findEntrance(entrances, point) then
+            entrances[#entrances + 1] = point
         end
     end
-    return result
+
+    local entry = row.entrance
+    local primary = entry and coord(entry.area, entry.x, entry.y)
+    if not primary then return entrances end
+
+    local approach = approaches[id]
+    if approach and approach.waypoint.mapID == primary.mapID then
+        primary.label = approach.label
+        primary.waypoints = {approach.waypoint}
+    end
+
+    -- An area can describe several wings. Only add its other entrances when
+    -- the list also identifies this dungeon's primary on the same map.
+    local match = findEntrance(entrances, primary)
+    if not match then return {primary} end
+    table.remove(entrances, match)
+    table.insert(entrances, 1, primary)
+    return entrances
 end
 
 local function bosses(row)
@@ -245,7 +257,7 @@ local function importDungeons(quests)
         local name = dungeonName(row)
         if name and not row.raid and #(row.bosses or {}) > 0 then
             local dungeon = {
-                id = id, name = name, entrances = entrances(id, row), bosses = bosses(row),
+                id = id, name = name, entrances = dungeonEntrances(id, row), bosses = bosses(row),
                 levelMin = row.levels and row.levels.min, levelMax = row.levels and row.levels.max,
                 size = row.size, note = row.note, keys = {}, quests = {},
             }
@@ -290,6 +302,7 @@ local professionTokens = {
 
 local function classifyTrainer(title)
     local lower = title:lower()
+    if lower == "weapon master" then return "weapon", "Weapon Master" end
     for _, key in ipairs(keys(classes)) do
         if lower:find(classes[key]:lower(), 1, true) then
             return "class", classes[key]
@@ -330,6 +343,9 @@ local function importTrainers()
     for id in pairs(db.categories.trainer.npcs) do candidates[id] = true end
     for id in pairs(inferredClass) do candidates[id] = true end
     for id in pairs(inferredProfession) do candidates[id] = true end
+    local classTokens, skillIDs = {}, {}
+    for token, name in pairs(classes) do classTokens[name] = token end
+    for skillID, name in pairs(professions) do skillIDs[name] = skillID end
     for _, id in ipairs(keys(candidates)) do
         local npc = entity("npcs", id)
         if npc and npc.name then
@@ -343,12 +359,47 @@ local function importTrainers()
                 for _, point in ipairs(positions(npc.spawns)) do
                     point.id, point.name, point.kind = id, npc.name, kind
                     point.specialty, point.faction = specialty, factions[npc.reaction]
+                    point.classToken, point.skillID = classTokens[specialty], skillIDs[specialty]
                     trainers[#trainers + 1] = point
                 end
             end
         end
     end
     return trainers
+end
+
+-- A lesson can cost different amounts at different NPCs. Keep the price on
+-- the NPC assignment and store common spell details only once.
+local function importLessons(trainers)
+    local spells, offers, packed = {}, {}, {}
+    local function offer(npcID, id, price, name, rank, level, skill, need, faction)
+        if not offers[npcID] then return end
+        spells[id] = table.concat({name, rank or "", level or "", skill or "", need or "", faction or ""}, "|")
+        offers[npcID][id] = price or ""
+    end
+    for _, npc in ipairs(trainers) do offers[npc.id] = {} end
+    for _, class in ipairs(keys(db.training)) do
+        for id, spell in pairs(db.training[class]) do
+            if not spell.pet and not spell.how then
+                for _, npcID in ipairs(spell.trainers or {}) do
+                    offer(npcID, id, spell.cost, spell.name, spell.rank, spell.level, nil, nil, spell.faction)
+                end
+            end
+        end
+    end
+    for id, recipe in pairs(db.recipes) do
+        for npcID, cost in pairs(recipe.trainers or {}) do
+            offer(npcID, id, cost, recipe.name, nil, nil, recipe.skill, recipe.learn)
+        end
+    end
+    for npcID, assignments in pairs(offers) do
+        local parts = {}
+        for _, id in ipairs(keys(assignments)) do
+            parts[#parts + 1] = id .. ":" .. assignments[id]
+        end
+        if #parts > 0 then packed[npcID] = table.concat(parts, ";") end
+    end
+    return spells, packed
 end
 
 -- Packing --------------------------------------------------------------------
@@ -477,6 +528,9 @@ file:write("-- SPDX-License-Identifier: GPL-3.0-only\n",
     "local _, addon = ...\n\naddon.Data = {\n")
 section("dungeons", dungeons)
 section("trainers", trainers)
+local lessons, offers = importLessons(trainers)
+map("lessons", lessons)
+map("offers", offers)
 local packedQuests = {}
 for id, quest in pairs(quests) do
     packedQuests[id] = packQuest(quest)
@@ -484,6 +538,7 @@ end
 map("questPins", packPins(questPinRows))
 map("quests", packedQuests)
 map("items", items)
+for id, name in pairs(professions) do usedProfessions[id] = name end
 map("professions", usedProfessions)
 map("raceMasks", db.enums.raceMaskById)
 local classMasks = {}
