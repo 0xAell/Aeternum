@@ -1,3 +1,5 @@
+<img align="right" src="https://raw.githubusercontent.com/0xAell/Aeternum/main/artwork/aeternum-curseforge.png" width="80" height="80" alt="A brass dungeon arch with a winding trail">
+
 # Aeternum
 
 Press **M**. Aeternum adds dungeon floors, boss loot, trainers, quests and entrance directions to the World of Warcraft: Forever map. It uses Blizzard’s artwork, menus and tooltips. The data ships with the addon and works offline.
