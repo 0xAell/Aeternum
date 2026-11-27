@@ -1,7 +1,5 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
     <Frame name="AeternumMapPinTemplate" mixin="AeternumMapPinMixin" virtual="true" enableMouse="true"
-           passThroughButtons="RightButton"><Size x="17" y="17"/></Frame>
-    <Frame name="AeternumEntrancePinTemplate" mixin="AeternumMapPinMixin" virtual="true" enableMouse="true">
-        <Size x="17" y="17"/>
-    </Frame>
+           passThroughButtons="RightButton"/>
+    <Frame name="AeternumEntrancePinTemplate" mixin="AeternumMapPinMixin" virtual="true" enableMouse="true"/>
 </Ui>

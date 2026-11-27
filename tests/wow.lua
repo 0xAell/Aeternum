@@ -339,7 +339,8 @@ function MapCanvas:Show()
 end
 
 -- A mouse click as the canvas routes it: passed through to the map, or to the pin.
-function MapCanvas:ClickPin(pin, button)
+function MapCanvas:ClickPin(pin, button, offsetX, offsetY)
+    if math.abs(offsetX or 0) > pin:GetWidth() / 2 or math.abs(offsetY or 0) > pin:GetHeight() / 2 then return end
     for _, passed in ipairs(pin.passThrough or {}) do
         if passed == button then
             if button == "RightButton" then self.zoomedOut = true end
@@ -411,7 +412,6 @@ function Wow.CreateFrame(kind, _, parent, template)
             frame[key] = value
         end
         frame.passThrough = pinPolicy[template]
-        frame:SetSize(16, 16)
         frame:OnLoad()
     elseif template == "BasicFrameTemplateWithInset" then
         frame.TitleText = frame:CreateFontString()
