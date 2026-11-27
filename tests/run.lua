@@ -6,8 +6,17 @@ local Wow = require("wow")
 local ADDON = "Aeternum"
 local passed, failed = 0, 0
 
+-- Every test also fails if add-on code wrote Blizzard-owned state while it ran: in the
+-- client that taints Blizzard's code and the game blocks its protected calls.
 local function test(name, body)
+    Wow.state, Wow.env = nil, nil
     local ok, problem = xpcall(body, debug.traceback)
+    if ok and Wow.state and Wow.env then
+        local writes = Wow.addonMapWrites()
+        if #writes > 0 then
+            ok, problem = false, "add-on code wrote Blizzard-owned state: " .. table.concat(writes, ", ")
+        end
+    end
     if ok then
         passed = passed + 1
     else
@@ -54,8 +63,10 @@ local function load(state)
             check(file == "WorldMap.xml", "unexpected TOC file " .. file)
         end
     end
+    -- The client's login sequence.
     Wow.fire("ADDON_LOADED", ADDON)
     Wow.fire("PLAYER_LOGIN")
+    Wow.fire("PLAYER_ENTERING_WORLD", true, false)
     return addon, env, state
 end
 
@@ -393,18 +404,17 @@ test("M shows dungeon entrances and relevant map pins without any launcher", fun
     check(addon.settings.showMapPins == nil and addon.settings.panelOpen == nil, "obsolete launcher options migrated")
 end)
 
-test("outdoor wheel zoom fills single-layer ranges and preserves native multi-layer zoom", function()
-    local _, env = load()
-    local scroll = env.WorldMapFrame.ScrollContainer
-    equal(scroll.wheelMode, 2, "native wheel enabled")
-    equal(#scroll.zoomLevels, 5, "single-layer zoom stops")
-    scroll:CreateZoomLevels()
-    equal(#scroll.zoomLevels, 5, "rebuild does not duplicate stops")
-    equal(scroll.zoomLevels[5].scale, 4, "4x detail")
-    local native = {{scale=.5, layerIndex=1}, {scale=2, layerIndex=2}}
-    local _, second = load({zoomLevels=native})
-    equal(second.WorldMapFrame.ScrollContainer.zoomLevels, native, "native levels kept")
-    equal(#native, 2, "extra layers unaffected")
+test("the map's zoom levels and wheel mode stay as Blizzard wrote them", function()
+    for _, levels in ipairs({{{scale=1, layerIndex=1}}, {{scale=.5, layerIndex=1}, {scale=2, layerIndex=2}}}) do
+        local _, env = load({mapID=1436, zoomLevels=levels})
+        local map = env.WorldMapFrame
+        map:Show()
+        map:SetMapID(1429)
+        map:SetMapID(1436)
+        map:Hide()
+        map:Show()
+        equal(table.concat(Wow.addonMapWrites(), ", "), "", "add-on writes to Blizzard map state")
+    end
 end)
 
 test("dungeon right-click offers directions and does not zoom the map", function()
@@ -542,7 +552,7 @@ test("clicking an entrance uses only the existing viewport and named floors", fu
     equal(frame.tiles[1].texture, 449591, "native first-floor art")
     frame.dropdown:OpenMenu():Find("Ironclad Cove"):Click()
     equal(frame.tiles[1].texture, 449603, "second-floor art")
-    equal(#state.escapeHandlers, 1, "addon never registers an insecure Escape handler")
+    check(not state.escapeTainted, "addon never registers an insecure Escape handler")
     frame:Fire("OnMouseUp", "RightButton")
     check(not floors.dungeon and env.WorldMapFrame:IsShown(), "right-click returns to zone")
     check(not frame.tiles[1].texture, "closed floor releases tiles")
@@ -550,6 +560,34 @@ test("clicking an entrance uses only the existing viewport and named floors", fu
     Wow.pressEscape()
     check(not env.WorldMapFrame:IsShown() and not floors.dungeon, "Escape closes the map cleanly")
     check(not frame.tiles[1].texture, "closing via Escape releases tiles")
+end)
+
+test("closing the map mid-drag leaves the next floor still and releases its art", function()
+    local addon, env = openDeadmines()
+    local frame = addon.DungeonMap.frame
+    frame:Fire("OnDragStart")
+    check(frame:GetScript("OnUpdate"), "dragging the floor")
+    env.WorldMapFrame:Hide()
+    check(not frame:GetScript("OnUpdate"), "drag ends with the map")
+    check(not frame.tiles[1].texture, "floor art released")
+    env.WorldMapFrame:Show()
+    env.WorldMapFrame:ClickPin(locate(env, function(entry) return entry.title == "The Deadmines" end), "LeftButton")
+    check(frame:IsShown() and not frame:GetScript("OnUpdate"), "next floor opens still")
+end)
+
+test("floor views add no Escape handler, so Blizzard can still clear the target", function()
+    local addon, env, state = openDeadmines()
+    check(addon.DungeonMap.frame:IsShown(), "floor view open")
+    addon.DungeonMap:Close()
+    addon.DungeonMap:Open(dungeonNamed(addon, "deadmines"))
+    check(not state.escapeTainted, "Blizzard's shared Escape list untouched")
+    state.target = "Defias Pillager"
+    Wow.pressEscape()
+    check(not env.WorldMapFrame:IsShown(), "first Escape closes the map")
+    equal(state.target, "Defias Pillager", "target kept while a window closed")
+    Wow.pressEscape()
+    equal(state.target, nil, "second Escape clears the target")
+    equal(state.forbidden, nil, "ADDON_ACTION_FORBIDDEN")
 end)
 
 test("a boss skull opens the correct drop list with modified clicks and native tooltips", function()
@@ -677,6 +715,7 @@ test("class and sparse profession slots select relevant trainers and react to sk
     check(not locate(env, function(e) return e.source.skillID == 164 end), "blacksmiths hidden")
     state.professionSkills[17] = 164
     Wow.fire("SKILL_LINES_CHANGED")
+    Wow.flushTimers()
     check(locate(env, function(e) return e.source.skillID == 164 end), "learned profession")
     check(not locate(env, function(e) return e.source.skillID == 171 end), "abandoned profession")
     Wow.trackingMenu():Find("Trainers"):Find("Other classes and professions"):Click()
@@ -1020,7 +1059,9 @@ test("every dungeon has an exterior door and recorded approaches reach the selec
     local doorMenu = addon.DungeonMap.frame.dropdown:OpenMenu():Find("Entrances")
     doorMenu:Find("Stop directions"):Click()
     doorMenu:Find("Show on zone map"):Click()
-    equal(env.WorldMapFrame.panX, .482); equal(env.WorldMapFrame.panY, .057)
+    equal(env.WorldMapFrame:GetMapID(), 1449, "the door is on the open map")
+    equal(env.WorldMapFrame.panX, nil, "Blizzard's map is never panned")
+    equal(env.GameTooltip.owner.entry.x, .482); equal(env.GameTooltip.owner.entry.y, .057)
     check(not addon.DungeonMap.dungeon and not env.AeternumRouteDB, "back at the actual portal")
 end)
 
@@ -1247,11 +1288,21 @@ test("only successful encounters or client lockouts dim the appropriate boss sku
     check(skull(647).complete)
     state.lockedEncounters = {[2747]=true}
     Wow.fire("PLAYER_ENTERING_WORLD")
-    check(skull(639).complete and not skull(647).complete, "new visit consults the current lockout")
+    check(skull(639).complete and skull(647).complete, "a loading screen inside the same run keeps its kills")
+    state.inInstance, state.dead = false, true
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    state.inInstance, state.dead = true, false
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    check(skull(639).complete and skull(647).complete, "dying, releasing and running back keeps the kills")
+    state.inInstance = false
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    state.inInstance = true
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    check(skull(639).complete and not skull(647).complete, "leaving alive forgets kills; the lockout still counts")
 end)
 
 test("dungeon keys report bag ownership and alternate doors remain individually selectable", function()
-    local addon, env = load({inventory={[11000]=1}})
+    local addon, env, state = load({inventory={[11000]=1}})
     env.WorldMapFrame:Show()
     addon.DungeonMap:Open(dungeonNamed(addon, "blackrock-depths"))
     local keys = addon.DungeonMap.frame.dropdown:OpenMenu():Find("Dungeon keys")
@@ -1262,8 +1313,10 @@ test("dungeon keys report bag ownership and alternate doors remain individually 
     equal(#doors.children, 2)
     check(doors.children[1].label ~= doors.children[2].label, "two doors in the same zone")
     doors.children[2]:Find("Show on zone map"):Click()
-    equal(env.WorldMapFrame:GetMapID(), 1418)
-    equal(env.WorldMapFrame.panX, .652)
+    equal(env.WorldMapFrame:GetMapID(), 1429, "the add-on never moves Blizzard's map")
+    check(state.messages[#state.messages]:find(addon.ZoneName(1418), 1, true), "chat names the door's zone")
+    env.WorldMapFrame:SetMapID(1418)
+    equal(env.GameTooltip.owner.entry.x, .652, "door marked when the player opens its map")
 end)
 
 test("quest starts, turn-ins and dungeon quest links lead to the correct named contact", function()
@@ -1276,9 +1329,13 @@ test("quest starts, turn-ins and dungeon quest links lead to the correct named c
     local dungeon = dungeonNamed(addon, "deadmines")
     addon.DungeonMap:Open(dungeon)
     local turnin = addon.QuestLocation(166, "turnin", env.WorldMapFrame:GetMapID())
+    check(turnin.mapID ~= 1429, "the turn-in is in another zone")
     addon.DungeonMap.frame.dropdown:OpenMenu():Find("Dungeon quests"):Find(addon.Quest(166).name):Click()
-    equal(env.WorldMapFrame:GetMapID(), turnin.mapID)
-    equal(env.WorldMapFrame.panX, turnin.x)
+    equal(env.WorldMapFrame:GetMapID(), 1429, "the add-on never moves Blizzard's map")
+    local note = state.messages[#state.messages]
+    check(note:find(turnin.contact, 1, true) and note:find(addon.ZoneName(turnin.mapID), 1, true), "chat note")
+    env.WorldMapFrame:SetMapID(turnin.mapID)
+    equal(env.WorldMapFrame.panX, nil, "Blizzard's map is never panned")
     equal(env.GameTooltip.lines[1], turnin.title)
     check(findEntry(env.GameTooltip.lines, function(line) return line == turnin.contact end))
     state.log[166], state.completed[166] = nil, true
@@ -1403,7 +1460,8 @@ test("a clicked door takes precedence over the viewed zone and the primary entra
     env.WorldMapFrame:ClickPin(pin, "LeftButton")
     check(doors()[1].label:find("65.2, 43.5", 1, true), "back door clicked in Badlands")
     doors()[1]:Find("Show on zone map"):Click()
-    equal(env.WorldMapFrame.panX, .652)
+    equal(env.WorldMapFrame:GetMapID(), 1418, "the back door is on the open map")
+    equal(env.GameTooltip.owner.entry.x, .652)
     local other = addon.DungeonEntrances(depths)[2]
     other.faction = "Horde"
     equal(#addon.DungeonEntrances(depths, other.point, 1428), 1, "ineligible door filtered before preference")
@@ -1692,6 +1750,54 @@ test("observed trainer visits preserve prior requirements and resolve profession
     equal(addon.ItemQualityColor(5191), nil)
     equal(addon.ItemQualityColor(5191), nil)
     equal(colorCalls, 1, "missing quality color cached negatively")
+end)
+
+
+test("/aeternum opens the map through ShowUIPanel's secure path", function()
+    local _, env = load()
+    slash(env, "")
+    check(env.WorldMapFrame:IsShown(), "map open")
+    equal(table.concat(Wow.addonMapWrites(), ", "), "", "no Blizzard map state written")
+end)
+
+test("a location waiting for its zone is dropped when the map closes", function()
+    local addon, env = load()
+    env.WorldMapFrame:Show()
+    addon.DungeonMap:Open(dungeonNamed(addon, "uldaman"))
+    addon.DungeonMap.frame.dropdown:OpenMenu():Find("Entrances").children[2]:Find("Show on zone map"):Click()
+    check(addon.UI.waitingLocation, "waiting for Badlands")
+    env.WorldMapFrame:Hide()
+    check(not addon.UI.waitingLocation, "dropped with the map")
+    env.WorldMapFrame:Show()
+    env.GameTooltip:Hide()
+    env.WorldMapFrame:SetMapID(1418)
+    check(not env.GameTooltip.shown, "nothing pops up on a later visit")
+end)
+
+test("skill-ups refresh once after a short delay and keep unchanged pins in place", function()
+    local _, env = load({mapID=1453, class="MAGE"})
+    local map = env.WorldMapFrame
+    map:Show()
+    local acquired, acquire = 0, map.AcquirePin
+    map.AcquirePin = function(...) acquired = acquired + 1 return acquire(...) end
+    for _ = 1, 3 do Wow.fire("SKILL_LINES_CHANGED") end
+    equal(acquired, 0, "pins redrawn before the delay")
+    Wow.flushTimers()
+    equal(acquired, 0, "pins redrawn although no location changed")
+end)
+
+test("a focused location keeps its tooltip shut when the map redraws", function()
+    local addon, env, state = load({mapID=1436})
+    env.WorldMapFrame:Show()
+    local entry = locate(env, function(e) return e.title == "The Deadmines" end).entry
+    addon.UI:ShowLocation(entry)
+    check(env.GameTooltip.shown, "focus shows the tooltip once")
+    env.GameTooltip:Hide()
+    state.viewWidth = .25
+    env.WorldMapFrame.providers[1]:OnCanvasScaleChanged()
+    Wow.flushTimers()
+    check(not env.GameTooltip.shown, "redraw reopened the tooltip")
+    check(env.WorldMapFrame:GetMapID() == 1436 and not env.WorldMapFrame.panX, "map left where it was")
 end)
 
 print(("%d passed, %d failed"):format(passed, failed))

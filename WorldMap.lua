@@ -121,12 +121,20 @@ function methods:RemoveAllData()
     self.drawn = nil
 end
 
+-- The share of the map in view, from the scroll container's read-only math. GetViewRect
+-- would cache its result on Blizzard's scroll container from add-on code.
+local function viewWidth(scroll)
+    if not (scroll.CalculateViewRect and scroll.GetCanvasScale) then return 1 end
+    local scale = scroll:GetCanvasScale()
+    if not addon.IsReadableNumber(scale) or scale <= 0 then return 1 end
+    return scroll:CalculateViewRect(scale):GetWidth()
+end
+
 local function gridSize(map)
     local width, height = map.ScrollContainer:GetSize()
     width = addon.IsReadableNumber(width) and width or 0
     height = addon.IsReadableNumber(height) and height or 0
-    local rect = map:GetMapID() and map.ScrollContainer.zoomLevels and map:GetViewRect()
-    local range = rect and rect:GetWidth()
+    local range = map:GetMapID() and map.ScrollContainer.zoomLevels and viewWidth(map.ScrollContainer)
     local scale = addon.IsReadableNumber(range) and range > 0 and math.max(1, math.floor(2 / range + .5) / 2) or 1
     return math.max(1, math.floor(width * scale / CELL_SIZE)), math.max(1, math.floor(height * scale / CELL_SIZE))
 end
@@ -173,7 +181,7 @@ function methods:Layout(entries)
         local template = group[1].category == "dungeon" and ENTRANCE or POINT
         map:AcquirePin(template, group)
     end
-    if highlighted then addon.FocusLocation(highlighted) end
+    if highlighted then addon.FocusLocation(highlighted, true) end
 end
 
 function methods:RefreshAllData()
@@ -199,9 +207,15 @@ function methods:OnMapChanged()
     highlighted = nil
     addon.DungeonMap:Close()
     self:RefreshAllData()
+    local waiting = addon.UI.waitingLocation
+    if waiting and waiting.mapID == self:GetMap():GetMapID() then
+        addon.UI.waitingLocation = nil
+        addon.FocusLocation(waiting)
+    end
 end
 function methods:OnHide()
     highlighted = nil
+    addon.UI.waitingLocation = nil
     self:RemoveAllData()
 end
 
@@ -237,7 +251,9 @@ function addon.RefreshQuestStates()
     for pin in map:EnumeratePinsByTemplate(POINT) do refreshPin(pin) end
 end
 
-function addon.FocusLocation(entry)
+-- Marks entry on the map. quiet re-applies an existing focus after a redraw without
+-- reopening its tooltip.
+function addon.FocusLocation(entry, quiet)
     if not provider then return end
     local map = provider:GetMap()
     if focus then map:RemovePin(focus) end
@@ -263,7 +279,7 @@ function addon.FocusLocation(entry)
                     pin:SetPosition(entry.x, entry.y)
                     pin:UpdateStyle()
                     sizePin(pin, true)
-                    pin:OnMouseEnter()
+                    if not quiet then pin:OnMouseEnter() end
                     return
                 end
             end
@@ -271,36 +287,20 @@ function addon.FocusLocation(entry)
     end
     focus = map:AcquirePin(template, {entry})
     sizePin(focus, true)
-    focus:OnMouseEnter()
+    if not quiet then focus:OnMouseEnter() end
 end
 
--- Keep the client's zoom levels when it supplies them. Older zone art has
--- only a fit-to-window level; the extra stops reuse that same texture layer.
-local function enableZoom(scroll)
-    local levels = scroll.zoomLevels
-    if not levels or #levels ~= 1 then return end
-    local first = levels[1]
-    if not first.scale or first.scale <= 0 then return end
-    for _, factor in ipairs({1.5, 2, 3, 4}) do
-        levels[#levels + 1] = {scale=first.scale * factor, layerIndex=first.layerIndex}
-    end
-end
-
+-- The map's zoom levels and wheel mode stay Blizzard's. Values the add-on writes into
+-- them would be read by every Blizzard pin as it scales, and pins acquired that way in
+-- combat fail their protected SetPassThroughButtons call.
 function addon.AttachMap()
     if provider then return true end
     if not WorldMapFrame or not MapCanvasDataProviderMixin or not MapCanvasPinMixin or not addon.settings then
         return false
     end
-    local map = WorldMapFrame
     Mixin(AeternumMapPinMixin, MapCanvasPinMixin, pins)
-    addon.UI:Attach(map)
-    local scroll = map.ScrollContainer
-    if scroll and scroll.CreateZoomLevels then
-        hooksecurefunc(scroll, "CreateZoomLevels", enableZoom)
-        enableZoom(scroll)
-        map:SetMouseWheelZoomMode(MAP_CANVAS_MOUSE_WHEEL_ZOOM_BEHAVIOR_FULL)
-    end
+    addon.UI:Attach(WorldMapFrame)
     provider = CreateFromMixins(MapCanvasDataProviderMixin, methods)
-    map:AddDataProvider(provider)
+    WorldMapFrame:AddDataProvider(provider)
     return true
 end
