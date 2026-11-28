@@ -71,9 +71,9 @@ local function detailsRows(pin, boss, usable)
     addon.UI:AddBossDetails(left, boss)
     if boss == pin.members[1] then
         if pin.complete then left:AddLine("Encounter complete", .55, .8, .55) end
-        if pin.stop.pull then
+        if pin.stop and pin.stop.pull then
             left:AddLine("Recorded pull location", .75, .75, .75)
-        elseif pin.stop.approximate then
+        elseif pin.stop and pin.stop.approximate then
             left:AddLine("Approximate location", .75, .75, .75)
         end
     end
@@ -85,7 +85,19 @@ end
 
 local function tipEnter(row)
     if not row.item then return end
-    GameTooltip:SetOwner(row, "ANCHOR_RIGHT")
+    -- Both frames share the TOOLTIP strata, so place the item tooltip beside the panel
+    -- rather than over it, on whichever side has room.
+    local panel = Hover.panel
+    GameTooltip:SetOwner(row, "ANCHOR_NONE")
+    GameTooltip:ClearAllPoints()
+    local right, rowLeft, rowRight = panel.left + panel:GetWidth(), row:GetLeft(), row:GetRight()
+    if rowLeft and rowRight and UIParent:GetWidth() - right >= 320 then
+        GameTooltip:SetPoint("TOPLEFT", row, "TOPRIGHT", right - rowRight + 4, 0)
+    elseif rowLeft then
+        GameTooltip:SetPoint("TOPRIGHT", row, "TOPLEFT", panel.left - rowLeft - 4, 0)
+    else
+        GameTooltip:SetPoint("TOPLEFT", panel, "TOPRIGHT", 4, 0)
+    end
     GameTooltip:SetItemByID(row.item)
     GameTooltip:Show()
 end

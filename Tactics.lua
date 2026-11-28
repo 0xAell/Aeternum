@@ -241,7 +241,7 @@ local function tagSet(entry, bossID)
     local cast = addon.bossCasts[bossID]
     local function record(spells)
         for _, id in ipairs(spells or {}) do
-            local spell = addon.castSpells[id]
+            local spell = addon.castSpells[id] or {}
             for i = 3, 4 do
                 local key = spell[i]
                 if key then
@@ -619,7 +619,7 @@ function Tactics:AddCasts(tooltip, boss)
             tooltip:AddLine(group[2], 1, .82, 0)
             local names = {}
             for _, id in ipairs(ids) do
-                local spell = addon.castSpells[id]
+                local spell = addon.castSpells[id] or {}
                 local name = self:SpellIcon(id, 13) .. " " .. self:SpellName(id)
                 names[#names + 1] = spell[3] and (name .. " · " .. formatTag(spell[3])) or name
             end
@@ -642,7 +642,7 @@ local function castMenu(parent, heading, ids)
     if not ids then return end
     local menu = parent:CreateButton(heading)
     for _, id in ipairs(ids) do
-        local spell = addon.castSpells[id]
+        local spell = addon.castSpells[id] or {}
         local label = Tactics:SpellIcon(id, 16) .. " " .. Tactics:SpellName(id)
         if spell[3] then label = label .. " · " .. formatTag(spell[3]) end
         local row = menu:CreateButton(label)
