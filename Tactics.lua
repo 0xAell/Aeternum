@@ -201,11 +201,16 @@ function Tactics:SpellTooltip(tooltip, spellID, name)
     tooltip:ClearLines()
     tooltip:SetSpellByID(spellID)
     local lines = tooltip:NumLines()
-    if lines > 1 then return end
 
     local cast = addon.castSpells[spellID]
     local description = C_Spell and C_Spell.GetSpellDescription and C_Spell.GetSpellDescription(spellID)
-    if not hasText(description) then description = cast and cast.description end
+    if hasText(description) then
+        if lines > 1 then return end
+    else
+        -- Native tooltips may have a cast time without describing the spell's effect.
+        description = cast and cast.description
+        if lines > 1 and not description then return end
+    end
     if lines == 0 then
         tooltip:SetText(self:SpellIcon(spellID, 18) .. " " .. (name or self:SpellName(spellID)))
     end

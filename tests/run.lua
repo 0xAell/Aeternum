@@ -2004,7 +2004,8 @@ end)
 
 test("boss guide gives friendly abilities and individual enemy spells their own hover targets", function()
     local addon, env, state = openDeadmines({class="SHAMAN", level=60, allClassSpells=true,
-        nativeSpellDetails={[8143]="Native Tremor Totem details"}, unavailableSpells={[7399]=true}})
+        nativeSpellDetails={[8143]="Native Tremor Totem details", [5141]="Instant"},
+        unavailableSpells={[7399]=true}})
     env.UIParent:SetSize(740, 360)
     local shared = assert(findEntry(addon.DungeonMap.frame.pins, function(pin)
         return pin:IsShown() and #pin.members > 1
@@ -2030,6 +2031,9 @@ test("boss guide gives friendly abilities and individual enemy spells their own 
     check(terrify.text:GetText():find("|cff3399ffMagic|r", 1, true))
     eject:Fire("OnEnter")
     equal(env.GameTooltip.lines[1], "spell:5141")
+    equal(env.GameTooltip.lines[2], "Instant")
+    equal(env.GameTooltip.lines[3], addon.castSpells[5141].description,
+        "casts with only a native cast time still show the audited description")
     terrify:Click()
     equal(state.itemRef, nil, "hover spell rows do not open an item or spell link")
 

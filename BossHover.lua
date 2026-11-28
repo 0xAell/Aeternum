@@ -94,8 +94,13 @@ local function tipEnter(row)
         GameTooltip:SetItemByID(row.item)
     else
         local panel = Hover.panel
-        local roomOnRight = UIParent:GetWidth() - panel.left - panel:GetWidth()
-        GameTooltip:SetOwner(row, roomOnRight >= panel.left and "ANCHOR_RIGHT" or "ANCHOR_LEFT")
+        local rightEdge = panel.left + panel:GetWidth()
+        local roomOnRight = UIParent:GetWidth() - rightEdge
+        if roomOnRight >= panel.left then
+            GameTooltip:SetOwner(row, "ANCHOR_RIGHT", rightEdge - (row:GetRight() or rightEdge) + 5)
+        else
+            GameTooltip:SetOwner(row, "ANCHOR_LEFT", panel.left - (row:GetLeft() or panel.left) - 5)
+        end
         addon.Tactics:SpellTooltip(GameTooltip, row.spell, row.spellName)
     end
     GameTooltip:Show()
