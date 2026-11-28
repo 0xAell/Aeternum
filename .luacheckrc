@@ -6,6 +6,7 @@ exclude_files = { "Data.lua", "ClassicTraining.lua", "ForeverTraining.lua", "Flo
 -- Globals the addon defines.
 globals = {
     "AeternumDB", "AeternumTrainerDB", "AeternumRouteDB", "AeternumMapPinMixin", "SLASH_AETERNUM1", "SlashCmdList",
+    "Aeternum_OnAddonCompartmentClick", "Aeternum_OnAddonCompartmentEnter", "Aeternum_OnAddonCompartmentLeave",
 }
 
 -- Client API the addon reads. RegisterGameMenuEscHandler, UISpecialFrames, ToggleWorldMap and
@@ -24,6 +25,7 @@ read_globals = {
     "UnitQuestTrivialLevelRange", "UnitRace", "WorldMapFrame", "canaccesstable", "issecretvalue",
     "hooksecurefunc", "strtrim", "wipe",
     "InputUtil", "LEVEL", "MAP_AREA_LABEL_TYPE", "QuestDifficultyColors", "GetQuestDifficultyColor",
+    "GetRelativeDifficultyColor", "TooltipDataProcessor", "ItemRefTooltip",
 }
 
 files["tests/**"] = { std = "+luajit", globals = { "setfenv" } }

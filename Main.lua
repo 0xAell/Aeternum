@@ -31,6 +31,8 @@ frame:SetScript("OnEvent", function(_, event, arg, second, _, _, success)
         addon.DungeonMap:OpenInstance()
         addon.Navigation:Restore()
         if addon.Navigation:IsActive() then addon.Navigation:Update() end
+    elseif event == "ENCOUNTER_START" then
+        addon.DungeonMap:EncounterStarted(arg)
     elseif event == "BOSS_KILL" or event == "ENCOUNTER_END" then
         if event == "BOSS_KILL" or (addon.IsReadableNumber(success) and success == 1) then
             addon.DungeonMap:RecordKill(arg)
@@ -59,10 +61,41 @@ end)
 for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "PLAYER_ENTERING_WORLD", "TRAINER_SHOW", "TRAINER_UPDATE",
     "SKILL_LINES_CHANGED", "LEARNED_SPELL_IN_SKILL_LINE", "SPELLS_CHANGED", "QUEST_LOG_UPDATE", "QUEST_ACCEPTED",
     "QUEST_TURNED_IN", "QUEST_REMOVED", "PLAYER_LEVEL_UP", "ZONE_CHANGED_INDOORS", "ZONE_CHANGED",
-    "BOSS_KILL", "ENCOUNTER_END", "TRAINER_SERVICE_INFO_NAME_UPDATE", "QUEST_WATCH_LIST_CHANGED",
+    "BOSS_KILL", "ENCOUNTER_START", "ENCOUNTER_END", "TRAINER_SERVICE_INFO_NAME_UPDATE", "QUEST_WATCH_LIST_CHANGED",
     "SUPER_TRACKING_CHANGED", "QUEST_POI_UPDATE", "CVAR_UPDATE", "ITEM_DATA_LOAD_RESULT",
     "GET_ITEM_INFO_RECEIVED"}) do
     pcall(frame.RegisterEvent, frame, event)
+end
+
+-- Opens the world map, then runs andThen. OpenWorldMap without a map ID only calls ShowUIPanel,
+-- which shows the map from Blizzard's secure delegate. ToggleWorldMap would go on to rebuild the
+-- map's zoom state from this add-on code and taint it for the session.
+local function withMap(andThen)
+    if not addon.settings then addon.LoadSettings() end
+    if not addon.AttachMap() and C_AddOns and C_AddOns.LoadAddOn then C_AddOns.LoadAddOn("Blizzard_WorldMap") end
+    if not addon.AttachMap() then return end
+    if not WorldMapFrame:IsShown() then
+        if InCombatLockdown() then DEFAULT_CHAT_FRAME:AddMessage("Open the map after combat."); return end
+        OpenWorldMap()
+    end
+    if andThen and WorldMapFrame:IsShown() then andThen() end
+end
+
+-- The minimap's addon compartment, Blizzard's own launcher, opens the dungeon list.
+function Aeternum_OnAddonCompartmentClick()
+    withMap(function() addon.UI:Search("") end)
+end
+
+function Aeternum_OnAddonCompartmentEnter(_, button)
+    GameTooltip:SetOwner(button, "ANCHOR_LEFT")
+    GameTooltip:SetText("Aeternum")
+    GameTooltip:AddLine("Browse dungeons by level", 1, 1, 1)
+    GameTooltip:AddLine("Type /aeternum <name> to find a dungeon, boss or drop", .75, .75, .75, true)
+    GameTooltip:Show()
+end
+
+function Aeternum_OnAddonCompartmentLeave(_, button)
+    if GameTooltip:IsOwned(button) then GameTooltip:Hide() end
 end
 
 SLASH_AETERNUM1 = "/aeternum"
@@ -82,7 +115,8 @@ SlashCmdList.AETERNUM = function(message)
         DEFAULT_CHAT_FRAME:AddMessage("Aeternum map filters reset.")
         return
     end
-    local help = "Use /aeternum to open the map, /aeternum <name> to search, or /aeternum stop to end directions."
+    local help = "Use /aeternum to open the map, /aeternum dungeons to browse by level, /aeternum <name> to search, "
+        .. "or /aeternum stop to end directions."
     if command == "help" or command == "?" then
         DEFAULT_CHAT_FRAME:AddMessage(help)
         return
@@ -93,15 +127,5 @@ SlashCmdList.AETERNUM = function(message)
         if #results == 0 then DEFAULT_CHAT_FRAME:AddMessage(help); return end
         command, query = "dungeons", text
     end
-    if not addon.settings then addon.LoadSettings() end
-    if not addon.AttachMap() and C_AddOns and C_AddOns.LoadAddOn then C_AddOns.LoadAddOn("Blizzard_WorldMap") end
-    if not addon.AttachMap() then return end
-    if not WorldMapFrame:IsShown() then
-        if InCombatLockdown() then DEFAULT_CHAT_FRAME:AddMessage("Open the map after combat."); return end
-        -- OpenWorldMap without a map ID only calls ShowUIPanel, which shows the map from
-        -- Blizzard's secure delegate. ToggleWorldMap would go on to rebuild the map's zoom
-        -- state from this add-on code and taint it for the session.
-        OpenWorldMap()
-    end
-    if command == "dungeons" then addon.UI:Search(query, results) end
+    withMap(command == "dungeons" and function() addon.UI:Search(query, results) end or nil)
 end

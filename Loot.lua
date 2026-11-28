@@ -55,3 +55,70 @@ function addon.LootFilter()
         return answers[rule]
     end
 end
+
+-- Item tooltips name the bosses that drop the item, wherever the item is shown: bags, chat
+-- links, the auction house, quest rewards. Only verified sources count: a boss's own recorded
+-- drops and its encounter rolls. Other recorded drops may come from anywhere, and guide-listed
+-- items are unconfirmed.
+local MAX_SOURCES = 3
+local sources
+
+local function addSource(itemID, boss, dungeon)
+    local list = sources[itemID]
+    if not list then
+        list = {}
+        sources[itemID] = list
+    end
+    for _, known in ipairs(list) do
+        if known.boss == boss.name and known.dungeon == dungeon.name then return end
+    end
+    list[#list + 1] = {boss = boss.name, dungeon = dungeon.name}
+end
+
+function addon.ItemSources(itemID)
+    if not sources then
+        sources = {}
+        for _, dungeon in ipairs(addon.Data.dungeons) do
+            for _, boss in ipairs(dungeon.bosses) do
+                local sections = boss.lootSections or {}
+                local unverified = {}
+                for _, name in ipairs({"other", "guide"}) do
+                    local start = sections[name]
+                    if start then
+                        -- A section runs until the next section starts.
+                        local stop = #boss.loot + 1
+                        for _, other in pairs(sections) do
+                            if other > start and other < stop then stop = other end
+                        end
+                        for index = start, stop - 1 do unverified[index] = true end
+                    end
+                end
+                for index, id in ipairs(boss.loot) do
+                    if not unverified[index] then addSource(id, boss, dungeon) end
+                end
+            end
+        end
+    end
+    return sources[itemID]
+end
+
+local function addDropLines(tooltip, data)
+    if tooltip ~= GameTooltip and tooltip ~= ItemRefTooltip then return end
+    if not data or (canaccesstable and not canaccesstable(data)) then return end
+    local id = data.id
+    if not addon.IsReadableNumber(id) then return end
+    local list = addon.ItemSources(id)
+    if not list then return end
+    for index = 1, math.min(#list, MAX_SOURCES) do
+        local source = list[index]
+        local label = index == 1 and "|cffffd100Drops from|r " or "|cffffd100      or|r "
+        tooltip:AddLine(label .. source.boss .. " · " .. source.dungeon, 1, 1, 1)
+    end
+    if #list > MAX_SOURCES then
+        tooltip:AddLine(("|cffffd100      and %d more bosses|r"):format(#list - MAX_SOURCES))
+    end
+end
+
+if TooltipDataProcessor and TooltipDataProcessor.AddTooltipPostCall and Enum and Enum.TooltipDataType then
+    TooltipDataProcessor.AddTooltipPostCall(Enum.TooltipDataType.Item, addDropLines)
+end

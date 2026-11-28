@@ -273,7 +273,11 @@ function Tooltip:SetOwner(owner) self.owner, self.lines = owner, {} end
 function Tooltip:IsOwned(owner) return self.shown and self.owner == owner end
 function Tooltip:SetText(text) self.lines = { text } end
 function Tooltip:AddLine(text) self.lines[#self.lines + 1] = text end
-function Tooltip:SetItemByID(itemID) self.lines = { "item:" .. itemID } end
+-- As the client: post-call hooks registered for item tooltips run after the item is set.
+function Tooltip:SetItemByID(itemID)
+    self.lines = { "item:" .. itemID }
+    for _, hook in ipairs(Wow.state.tooltipPostCalls[0] or {}) do hook(self, {type = 0, id = itemID}) end
+end
 function Tooltip:SetSpellByID(id) self.lines = { "spell:" .. id } end
 function Tooltip:SetHyperlink(link) self.lines = { link } end
 
@@ -433,7 +437,7 @@ Wow.knownEvents = {
     UI_SCALE_CHANGED = true, DISPLAY_SIZE_CHANGED = true,
     TRAINER_SHOW = true, TRAINER_UPDATE = true, SKILL_LINES_CHANGED = true, PLAYER_ENTERING_WORLD = true,
     LEARNED_SPELL_IN_SKILL_LINE = true, ZONE_CHANGED_INDOORS = true, ZONE_CHANGED = true,
-    BOSS_KILL = true, ENCOUNTER_END = true, TRAINER_SERVICE_INFO_NAME_UPDATE = true,
+    BOSS_KILL = true, ENCOUNTER_START = true, ENCOUNTER_END = true, TRAINER_SERVICE_INFO_NAME_UPDATE = true,
     QUEST_WATCH_LIST_CHANGED = true, SUPER_TRACKING_CHANGED = true, QUEST_POI_UPDATE = true, CVAR_UPDATE = true,
     ITEM_DATA_LOAD_RESULT = true, SPELLS_CHANGED = true,
 }
@@ -504,6 +508,8 @@ function Wow.new(state)
     env.Minimap = Wow.region(Frame)
     env.Minimap:SetSize(140, 140)
     env.GameTooltip = Wow.region(Tooltip)
+    env.ItemRefTooltip = Wow.region(Tooltip)
+    env.ShoppingTooltip1 = Wow.region(Tooltip)
     env.GameTooltip:Hide()
     env.DEFAULT_CHAT_FRAME = Wow.region(MessageFrame)
     env.SlashCmdList = {}
@@ -533,7 +539,12 @@ function Wow.new(state)
     end
     env.GetTrainerServiceCost = function(i) return state.services[i].cost end
     env.GetTrainerServiceSkillReq = function(i) return state.services[i].skill, state.services[i].need end
-    env.Enum = {TooltipDataType = {Spell = 1}, UIMapType = {World = 1, Continent = 2, Zone = 3}}
+    env.Enum = {TooltipDataType = {Item = 0, Spell = 1}, UIMapType = {World = 1, Continent = 2, Zone = 3}}
+    state.tooltipPostCalls = {}
+    env.TooltipDataProcessor = {AddTooltipPostCall = function(kind, hook)
+        state.tooltipPostCalls[kind] = state.tooltipPostCalls[kind] or {}
+        table.insert(state.tooltipPostCalls[kind], hook)
+    end}
     env.C_TooltipInfo = {GetTrainerService = function(i)
         local row = state.services[i]
         if row.spell then return {type=1, id=row.spell} end
@@ -620,6 +631,17 @@ function Wow.new(state)
     env.UnitRace = function() return "Human", "Human", state.raceID or 1 end
     env.UnitClass = function() return "Warrior", state.class or "WARRIOR", 1 end
     env.UnitQuestTrivialLevelRange = function() return 5 end
+    -- As QuestDifficultyColors and DifficultyUtil.GetRelativeDifficultyColor in the client.
+    env.QuestDifficultyColors = {impossible = {r = 1, g = .1, b = .1}, verydifficult = {r = 1, g = .5, b = .25},
+        difficult = {r = 1, g = .82, b = 0}, standard = {r = .25, g = .75, b = .25}, trivial = {r = .5, g = .5, b = .5}}
+    env.GetRelativeDifficultyColor = function(unitLevel, challengeLevel)
+        local diff, colors = challengeLevel - unitLevel, env.QuestDifficultyColors
+        if diff >= 5 then return colors.impossible end
+        if diff >= 3 then return colors.verydifficult end
+        if diff >= -4 then return colors.difficult end
+        if -diff <= env.UnitQuestTrivialLevelRange("player") then return colors.standard end
+        return colors.trivial
+    end
     env.IsModifiedClick = function() return state.modified or false end
     env.HandleModifiedItemClick = function(link)
         state.modifiedClick = link

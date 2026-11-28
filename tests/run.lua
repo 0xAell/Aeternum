@@ -2096,6 +2096,123 @@ test("a focused location keeps its tooltip shut when the map redraws", function(
     check(env.WorldMapFrame:GetMapID() == 1436 and not env.WorldMapFrame.panX, "map left where it was")
 end)
 
+test("dungeon level ranges take the character's difficulty colour", function()
+    for _, case in ipairs({{12, "ff1a1a"}, {20, "ffd100"}, {40, "808080"}}) do
+        local _, env = load({mapID=1436, level=case[1]})
+        env.WorldMapFrame:Show()
+        locate(env, function(e) return e.title == "The Deadmines" end):OnMouseEnter()
+        check(findEntry(env.GameTooltip.lines, function(line)
+            return line == "Moonbrook entrance approach · |cff" .. case[2] .. "Levels 17–26|r"
+        end), "level " .. case[1] .. " colours the range " .. case[2])
+    end
+end)
+
+test("/aeternum dungeons lists every dungeon by level and opens the chosen floors", function()
+    local addon, env, state = load({level=20})
+    slash(env, "dungeons")
+    check(env.WorldMapFrame:IsShown(), "map open")
+    local menu = state.menu
+    equal(menu.children[1].label, "Dungeons by level")
+    equal(#menu.children - 1, #addon.Data.dungeons, "every dungeon and wing")
+    local last = 0
+    for _, entry in ipairs(addon.DungeonsByLevel()) do
+        check(entry.source.levelMin >= last, "ordered by level")
+        last = entry.source.levelMin
+    end
+    equal(menu.children[2].label:match("^(.-)  "), addon.DungeonsByLevel()[1].title, "lowest range first")
+    local row = findEntry(menu.children, function(r) return r.label:find("^The Deadmines  ") end)
+    equal(row.label, "The Deadmines  |cffffd10017–26|r")
+    row.tooltip(env.GameTooltip)
+    check(findEntry(env.GameTooltip.lines, function(line) return line == "5 players · 9 bosses" end),
+        "group size and bosses")
+    row:Click()
+    Wow.flushTimers()
+    equal(addon.DungeonMap.dungeon.id, "deadmines", "floor view opened")
+end)
+
+test("the map's tracking menu offers the dungeon list", function()
+    local addon, env = load({level=30})
+    env.WorldMapFrame:Show()
+    local index = Wow.trackingMenu():Find("Dungeons by level")
+    equal(#index.children, #addon.Data.dungeons)
+    index.children[1]:Click()
+    Wow.flushTimers()
+    equal(addon.DungeonMap.dungeon, addon.DungeonsByLevel()[1].source, "lowest dungeon's floors")
+end)
+
+test("the addon compartment entry opens the dungeon list through the secure map path", function()
+    local _, env, state = load()
+    local named = 0
+    for line in io.lines(ADDON .. ".toc") do
+        local field, value = line:match("^## (AddonCompartmentFunc%w*): (%S+)")
+        if field then
+            equal(type(env[value]), "function", field .. " names a function the addon defines")
+            named = named + 1
+        end
+    end
+    equal(named, 3, "click, enter and leave handlers")
+    env.Aeternum_OnAddonCompartmentEnter(ADDON, env.UIParent)
+    equal(env.GameTooltip.lines[1], "Aeternum")
+    env.Aeternum_OnAddonCompartmentLeave(ADDON, env.UIParent)
+    check(not env.GameTooltip.shown, "tooltip hidden on leave")
+    state.inCombat = true
+    env.Aeternum_OnAddonCompartmentClick(ADDON, "LeftButton")
+    check(not env.WorldMapFrame:IsShown(), "no map in combat")
+    equal(state.messages[#state.messages], "Open the map after combat.")
+    state.inCombat = false
+    env.Aeternum_OnAddonCompartmentClick(ADDON, "LeftButton")
+    check(env.WorldMapFrame:IsShown(), "map open")
+    equal(state.menu.children[1].label, "Dungeons by level")
+end)
+
+test("item tooltips name the bosses that drop the item, from verified sources only", function()
+    local addon, env = load()
+    local tip = env.GameTooltip
+    tip:SetItemByID(5191)
+    equal(tip.lines[2], "|cffffd100Drops from|r Edwin VanCleef · The Deadmines", "Cruel Barb")
+    local unverified, shared
+    for _, dungeon in ipairs(addon.Data.dungeons) do
+        for _, boss in ipairs(dungeon.bosses) do
+            local start = boss.lootSections and boss.lootSections.guide
+            if start and not unverified and not addon.ItemSources(boss.loot[start]) then
+                unverified = boss.loot[start]
+            end
+            for _, id in ipairs(boss.loot) do
+                local list = addon.ItemSources(id)
+                if not shared and list and #list > 1 then shared = id end
+            end
+        end
+    end
+    check(unverified, "a guide-only item exists")
+    tip:SetItemByID(unverified)
+    equal(#tip.lines, 1, "no drop line for an item only a guide lists")
+    if shared then
+        tip:SetItemByID(shared)
+        check(tip.lines[3]:find("^|cffffd100      or|r "), "further bosses listed")
+    end
+    env.ItemRefTooltip:SetItemByID(5191)
+    equal(env.ItemRefTooltip.lines[2], "|cffffd100Drops from|r Edwin VanCleef · The Deadmines", "chat links")
+    env.ShoppingTooltip1:SetItemByID(5191)
+    equal(#env.ShoppingTooltip1.lines, 1, "comparison tooltips unchanged")
+end)
+
+test("a boss fight shows the player's floor when rooms and positions are unknown", function()
+    local addon, env = load({inInstance=true, instanceID=36})
+    local floors = addon.DungeonMap
+    env.WorldMapFrame:Show()
+    equal(floors.dungeon.id, "deadmines")
+    equal(floors.index, 1, "no room name or position: first floor")
+    Wow.fire("ENCOUNTER_START", 2747, "Edwin VanCleef", 1, 5)
+    equal(floors.index, 2, "the floor view follows VanCleef's fight to Ironclad Cove")
+    equal(floors.playerFloor, 2)
+    env.WorldMapFrame:Hide()
+    env.WorldMapFrame:Show()
+    equal(floors.index, 2, "reopening the map without a room name keeps the fight's floor")
+    floors.frame.dropdown:OpenMenu():Find("Deadmines"):Click()
+    Wow.fire("ENCOUNTER_START", 2747, "Edwin VanCleef", 1, 5)
+    equal(floors.index, 1, "a floor chosen by hand stays put")
+end)
+
 test("grouped trainer and quest pins list stacked entries and surface ready turn-ins", function()
     local _, env, state = load({mapID=1455, class="SHAMAN", raceID=3, level=10})
     env.WorldMapFrame:Show()
