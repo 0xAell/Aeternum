@@ -2033,7 +2033,11 @@ test("boss guide gives friendly abilities and individual enemy spells their own 
         return assert(findEntry(panel.rows, function(row) return row:IsShown() and row.spell == id end))
     end
     local tremor = spellRow(8143)
-    check(tremor.text:GetText():find("|T136108:18:18", 1, true), "larger friendly spell icon")
+    equal(select(2, tremor.text:GetFont()), 15, "encounter text uses 125% of the native font size")
+    check(tremor.text:GetText():find("|T136108:23:23", 1, true), "larger friendly spell icon")
+    check(findEntry(hoverTexts(addon), function(text)
+        return text:find("UI-LFG-ICON-PORTRAITROLES:20:20", 1, true)
+    end), "role icons grow with the guide")
     tremor:Fire("OnEnter")
     check(env.GameTooltip:IsOwned(tremor))
     equal(env.GameTooltip.anchor, "ANCHOR_LEFT", "right-side guide opens spell detail toward more room")

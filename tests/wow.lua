@@ -134,6 +134,10 @@ function FontString:SetTextColor(...) self.textColor = { ... } end
 function FontString:SetJustifyH(value) self.justify = value end
 function FontString:SetWordWrap() end
 function FontString:SetMaxLines() end
+function FontString:GetFont() return self.fontPath or "MockFont", self.fontSize or 12, self.fontFlags or "" end
+function FontString:SetFont(path, size, flags)
+    self.fontPath, self.fontSize, self.fontFlags = path, size, flags
+end
 function FontString:GetStringHeight()
     return math.max(1, math.ceil(#(self.text or "") / math.max(1, self.width / 6))) * 13
 end

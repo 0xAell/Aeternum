@@ -3,8 +3,16 @@ local Hover = {}
 addon.BossHover = Hover
 
 local PADDING, GAP, SCROLLBAR = 14, 14, 24
-local MAX_WIDTH, MAX_HEIGHT = 680, 620
-local ICON_SIZE = 18
+local MAX_WIDTH, MAX_HEIGHT = 740, 660
+local TEXT_SCALE = 1.25
+local ICON_SIZE = math.floor(18 * TEXT_SCALE + .5)
+
+local function createText(parent, template)
+    local text = parent:CreateFontString(nil, "OVERLAY", template)
+    local font, size, flags = text:GetFont()
+    text:SetFont(font, size * TEXT_SCALE, flags)
+    return text
+end
 
 local function trackPointer(panel, elapsed)
     local pin = Hover.pin
@@ -42,11 +50,11 @@ local function ensurePanel()
     panel:EnableMouse(true)
     panel:EnableMouseWheel(true)
     panel:SetScript("OnUpdate", trackPointer)
-    panel.title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    panel.title = createText(panel, "GameFontNormalLarge")
     panel.title:SetPoint("TOPLEFT", PADDING, -12)
     panel.title:SetJustifyH("LEFT")
     panel.title:SetWordWrap(true)
-    panel.more = panel:CreateFontString(nil, "OVERLAY", "GameFontDisableSmall")
+    panel.more = createText(panel, "GameFontDisableSmall")
     panel.more:SetPoint("BOTTOMLEFT", PADDING, 10)
     panel.more:SetText("Scroll for more")
     panel.scroll = CreateFrame("ScrollFrame", nil, panel, "UIPanelScrollFrameTemplate")
@@ -119,7 +127,7 @@ local function setRow(panel, index, x, y, width, data)
         row:SetScript("OnLeave", tipLeave)
         row:SetScript("OnClick", function(self) if self.item then addon.UI:OpenItem(self.item) end end)
         row:SetScript("OnMouseWheel", function(_, delta) scrollBy(panel.scroll, delta) end)
-        row.text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        row.text = createText(row, "GameFontHighlight")
         row.text:SetPoint("TOPLEFT", 0, -1)
         row.text:SetJustifyH("LEFT")
         row.text:SetWordWrap(true)
@@ -133,7 +141,7 @@ local function setRow(panel, index, x, y, width, data)
     row.text:SetWidth(width)
     row.text:SetText(data.item and addon.UI.ItemLabel(data.item, false, ICON_SIZE) or data.text)
     row.text:SetTextColor(data.r or 1, data.g or 1, data.b or 1)
-    local minimum = interactive and 21 or 16
+    local minimum = interactive and ICON_SIZE + 4 or 19
     local height = data.text == " " and 5 or math.max(minimum, math.ceil(row.text:GetStringHeight()) + 3)
     row:ClearAllPoints()
     row:SetPoint("TOPLEFT", panel.content, "TOPLEFT", x, -y)
@@ -178,8 +186,8 @@ function Hover:Draw(pin, offset)
     panel:SetWidth(width)
 
     local contentWidth = width - PADDING - SCROLLBAR
-    local dual = contentWidth >= 425
-    local leftWidth = dual and math.floor((contentWidth - GAP) * .58) or contentWidth
+    local dual = contentWidth >= 480
+    local leftWidth = dual and math.floor((contentWidth - GAP) * .62) or contentWidth
     local rightWidth = dual and contentWidth - GAP - leftWidth or contentWidth
     local rightX = dual and leftWidth + GAP or 0
     local body, count, usable = 0, 0, addon.LootFilter()
@@ -206,7 +214,7 @@ function Hover:Draw(pin, offset)
     local header = math.max(42, math.ceil(panel.title:GetStringHeight()) + 23)
     local maximum = math.min(MAX_HEIGHT, math.floor(screenHeight * .74))
     local more = header + body + 13 > maximum
-    local footer = more and 29 or 13
+    local footer = more and 34 or 13
     panel.more:SetShown(more)
     panel.scroll:ClearAllPoints()
     panel.scroll:SetPoint("TOPLEFT", panel, "TOPLEFT", PADDING, -header)
