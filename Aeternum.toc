@@ -40,4 +40,5 @@ AtlasPins.lua
 Atlas.lua
 WorldMap.lua
 WorldMap.xml
+DialogKeys.lua
 Main.lua

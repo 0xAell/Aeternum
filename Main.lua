@@ -119,6 +119,11 @@ SlashCmdList.AETERNUM = function(message)
     local text = addon.Trim(message)
     local command, query = text:match("^(%S*)%s*(.-)$")
     command = command:lower()
+    if command == "dialog" then
+        if not addon.settings then addon.LoadSettings() end
+        addon.DialogKeyCommand(query)
+        return
+    end
     if command == "stop" then
         local active = addon.Navigation:IsActive()
         addon.Navigation:Stop()
@@ -132,7 +137,7 @@ SlashCmdList.AETERNUM = function(message)
         return
     end
     local help = "Use /aeternum to open the map, /aeternum dungeons to browse by level, /aeternum <name> to search, "
-        .. "or /aeternum stop to end directions."
+        .. "/aeternum stop to end directions, or /aeternum dialog for dialog keys."
     if command == "help" or command == "?" then
         DEFAULT_CHAT_FRAME:AddMessage(help)
         return

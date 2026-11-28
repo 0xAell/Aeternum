@@ -80,6 +80,12 @@ Exclamation marks show quests you can pick up, and question marks turn gold when
 
 *Open **Dungeon quests** from any floor menu to check every quest for the instance and locate its giver or turn-in.*
 
+### Keyboard shortcuts for NPCs and quests
+
+Enable **Dialog keys** with `/aeternum dialog on`. **Space** selects the first NPC option, advances normal quest steps, or confirms supported popups. **1–9** and **0** select numbered options or rewards. Space jumps as usual outside eligible dialogs. When a quest offers a choice, select the reward before turning it in. [Inspired by Foxthorn’s DialogKey](https://www.curseforge.com/wow/addons/dialogkey)
+
+Keys pause while typing, using the gamepad UI, or in combat. Enable only one dialog shortcut addon at a time. Use `/aeternum dialog` to see your settings and available commands.
+
 ## Install
 
 ### CurseForge (recommended)
@@ -122,6 +128,12 @@ Install directly from the **[CurseForge project page](https://www.curseforge.com
 | `/aeternum <search>` | Search dungeons, bosses, or usable drops in any word order (e.g. `/aeternum herod scarlet`) |
 | `/aeternum dungeons [name]` | List every dungeon by level, or jump straight to a matching boss or item (e.g. `/aeternum dungeons Cruel Barb`) |
 | `/aeternum stop` | Stop active minimap directions |
+| `/aeternum dialog on\|off` | Enable or disable keyboard shortcuts for NPCs and quests |
+| `/aeternum dialog key CTRL-SPACE` | Change the advance key from Space |
+| `/aeternum dialog second F` | Assign a second advance key. Use `second none` to clear it |
+| `/aeternum dialog popup off` | Leave confirmation popups to the mouse |
+| `/aeternum dialog scroll on` | Scroll a quest window with the wheel when the pointer is outside it |
+| `/aeternum dialog add [FrameName]` | Track a named button. Omit the name to use a hovered button. Use `remove` to stop tracking it |
 | `/aeternum reset` | Reset Aeternum's map filters to defaults |
 | `/aeternum help` | Show available commands in chat |
 

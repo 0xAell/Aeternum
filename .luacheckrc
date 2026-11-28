@@ -27,6 +27,13 @@ read_globals = {
     "InputUtil", "LEVEL", "MAP_AREA_LABEL_TYPE", "QuestDifficultyColors", "GetQuestDifficultyColor",
     "GetRelativeDifficultyColor", "TooltipDataProcessor", "ItemRefTooltip",
     "AuraUtil", "UnitGroupRolesAssigned",
+    "C_GossipInfo", "ClearOverrideBindings", "EventRegistry", "GameTooltip_ShowCompareItem", "GetCurrentKeyBoardFocus",
+    "GetMouseFoci",
+    "GetNumActiveQuests", "GossipFrame", "PopupEventManager", "QuestDetailScrollFrame", "QuestFrame",
+    "QuestFrameAcceptButton", "QuestFrameCompleteButton", "QuestFrameCompleteQuestButton", "QuestFrameDetailPanel",
+    "QuestFrameGreetingPanel", "QuestFrameProgressPanel", "QuestFrameRewardPanel", "QuestGreetingScrollFrame",
+    "QuestInfoFrame", "QuestInfoRewardsFrame", "QuestProgressScrollFrame", "QuestRewardScrollFrame",
+    "RegisterStateDriver", "SetOverrideBindingClick", "StaticPopup_ForEachShownDialog",
 }
 
 files["tests/**"] = { std = "+luajit", globals = { "setfenv" } }
