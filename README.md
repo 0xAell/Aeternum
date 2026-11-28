@@ -20,6 +20,8 @@
 
 Press **M** and everything you need is already on the map. Aeternum adds dungeon floors, character-aware boss loot, offline trainer catalogues, quest pins, and minimap directions directly to Blizzard's world map. It uses native menus, tooltips, and map art, ships with its full database offline, and needs no setup or other addons.
 
+Aeternum automatically detects your character’s **class, race, and learned professions** to tailor boss tips, usable loot, trainer pins, and quest availability.
+
 ## Features
 
 ### Dungeon floors, boss tactics and loot
