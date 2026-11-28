@@ -212,33 +212,37 @@ local function isAncestor(zone, target)
     return false
 end
 
-local function projectEntrance(door, left, right, top, bottom)
+local function projectEntrance(door, allowEdge, left, right, top, bottom)
     if addon.IsReadableNumber(left) and addon.IsReadableNumber(right)
         and addon.IsReadableNumber(top) and addon.IsReadableNumber(bottom)
         and right > left and bottom > top then
         local x, y = left + door.x * (right - left), top + door.y * (bottom - top)
         if x >= 0 and x <= 1 and y >= 0 and y <= 1 then return x, y end
+        -- Ragefire is just north of the Durotar artwork. Keep the pin visible at the edge.
+        if allowEdge and x >= -.01 and x <= 1.01 and y >= -.01 and y <= 1.01 then
+            return math.max(.02, math.min(.98, x)), math.max(.02, math.min(.98, y)), true
+        end
     end
 end
 
 local function overviewEntrances(entries, mapID)
     local bounds = addon.overviewBounds[mapID]
     local types = Enum and Enum.UIMapType
-    if not bounds then
-        local info = types and C_Map.GetMapInfo(mapID)
-        if not info or (info.mapType ~= types.Continent and info.mapType ~= types.World) then return end
-    end
+    local info = types and C_Map.GetMapInfo(mapID)
+    if not bounds and not (info and (info.mapType == types.Continent or info.mapType == types.World)) then return end
+    local zone = info and info.mapType == types.Zone
     for _, dungeon in ipairs(data.dungeons) do
         local levels = addon.DungeonLevel(dungeon)
         for _, door in ipairs(dungeon.entrances) do
-            local x, y
+            local x, y, atEdge
             if C_Map.GetMapRectOnMap and door.mapID ~= mapID and isAncestor(door.mapID, mapID) then
-                x, y = projectEntrance(door, C_Map.GetMapRectOnMap(door.mapID, mapID))
+                x, y = projectEntrance(door, false, C_Map.GetMapRectOnMap(door.mapID, mapID))
             end
             local fallback = bounds and bounds[door.mapID]
-            if not x and fallback then x, y = projectEntrance(door, unpack(fallback)) end
+            if not x and fallback then x, y, atEdge = projectEntrance(door, zone, unpack(fallback)) end
             if x then
                 local subtitle = addon.ZoneName(door.mapID)
+                if atEdge then subtitle = subtitle .. " · Beyond the map edge" end
                 if levels then subtitle = subtitle .. " · " .. levels end
                 local entry = record("dungeon", dungeon.name, subtitle, door, dungeon)
                 entry.mapID, entry.x, entry.y = mapID, x, y
