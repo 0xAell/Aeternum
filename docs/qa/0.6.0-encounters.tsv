@@ -1,0 +1,303 @@
+dungeon	boss	npc_id	map_access	role_tldrs_passed	shaman_actions	recorded_spells	reference_spells	visible_loot_rows
+Alcaz Prison	Blazeroar	255702	Skull	3	1	8	0	4
+Alcaz Prison	Katerina the Cleaner	257016	Skull	3	4	0	2	1
+Alcaz Prison	Overseer Wrex	255391	Skull	3	0	2	0	3
+Alcaz Prison	The Questioner	256236	Skull	3	3	2	0	3
+Alcaz Prison	Tidemistress Ca'zass	255997	Skull	3	2	3	0	2
+Blackfathom Deeps	Aku'mai	4829	Skull	3	2	2	0	2
+Blackfathom Deeps	Gelihast	6243	Skull	3	1	2	0	4
+Blackfathom Deeps	Ghamoo-ra	4887	Skull	3	0	1	0	2
+Blackfathom Deeps	Lady Sarevess	4831	Skull	3	1	4	0	1
+Blackfathom Deeps	Lorgus Jett	12902	Skull	3	2	2	0	1
+Blackfathom Deeps	Old Serra'kis	4830	Skull	3	0	0	0	2
+Blackfathom Deeps	Twilight Lord Kelris	4832	Skull	3	2	1	1	3
+Blackmaw Hold	Blackmaw Behemoth	247207	Skull	3	3	5	0	2
+Blackmaw Hold	Bonesnout the Unbroken	247198	Skull	3	1	2	0	1
+Blackmaw Hold	Elder Shaman Bloodmane	247209	Skull	3	2	3	0	2
+Blackmaw Hold	Gortek the Apprentice	269111	Skull	3	1	0	0	2
+Blackmaw Hold	Impaan the Imprisoner	247206	Floor menu	3	2	2	0	2
+Blackmaw Hold	Moontouched Wanderer	269104	Skull	3	0	0	0	1
+Blackmaw Hold	Tunnelweb Matriarch	250034	Floor menu	3	2	0	0	0
+Blackmaw Hold	Unbound Spirit	247231	Skull	3	2	2	0	2
+Blackmaw Hold	Varrox Bleakhoof	247234	Skull	3	2	4	0	3
+Blackmaw Hold	Withermaw	247195	Skull	3	2	3	0	3
+Blackrock Depths	Ambassador Flamelash	9156	Skull	3	1	0	1	3
+Blackrock Depths	Anub'shiah	9031	Shared skull	3	3	0	6	2
+Blackrock Depths	Bael'Gar	9016	Skull	3	1	0	1	3
+Blackrock Depths	Doom'rel	9039	Skull	3	2	0	0	5
+Blackrock Depths	Emperor Dagran Thaurissan	9019	Skull	3	0	0	2	12
+Blackrock Depths	Eviscerator	9029	Shared skull	3	2	0	3	2
+Blackrock Depths	Fineous Darkvire	9056	Skull	3	1	0	5	3
+Blackrock Depths	General Angerforge	9033	Skull	3	1	0	1	5
+Blackrock Depths	Golem Lord Argelmach	8983	Skull	3	3	0	3	7
+Blackrock Depths	Gorosh the Dervish	9027	Shared skull	3	2	0	3	2
+Blackrock Depths	Grizzle	9028	Shared skull	3	1	0	2	1
+Blackrock Depths	Hedrum the Creeper	9032	Shared skull	3	3	0	1	1
+Blackrock Depths	High Interrogator Gerstahn	9018	Skull	3	3	0	4	4
+Blackrock Depths	Houndmaster Grebmar	9319	Skull	3	2	0	3	1
+Blackrock Depths	Hurley Blackbreath	9537	Skull	3	1	0	1	5
+Blackrock Depths	Lord Incendius	9017	Skull	3	0	0	4	4
+Blackrock Depths	Lord Roccor	9025	Skull	3	0	0	3	2
+Blackrock Depths	Magmus	9938	Skull	3	0	0	2	5
+Blackrock Depths	Ok'thor the Breaker	9030	Shared skull	3	2	0	0	3
+Blackrock Depths	Panzor the Invincible	8923	Skull	3	0	0	0	2
+Blackrock Depths	Phalanx	9502	Skull	3	0	0	3	2
+Blackrock Depths	Plugger Spazzring	9499	Skull	3	2	0	4	4
+Blackrock Depths	Princess Moira Bronzebeard	8929	Skull	3	2	0	3	3
+Blackrock Depths	Pyromancer Loregrain	9024	Skull	3	3	0	4	2
+Blackrock Depths	Ribbly Screwspigot	9543	Skull	3	1	0	2	2
+Blackrock Depths	Verek	9042	Shared skull	3	0	0	1	2
+Blackrock Depths	Warder Stilgiss	9041	Shared skull	3	2	0	4	2
+Blackrock Depths	Watchman Doomgrip	9476	Skull	3	1	0	2	0
+Blackrock Spire - Lower	Bannok Grimaxe	9596	Skull	3	0	0	0	1
+Blackrock Spire - Lower	Burning Felguard	10263	Floor menu	3	0	0	4	1
+Blackrock Spire - Lower	Crystal Fang	10376	Skull	3	2	0	0	2
+Blackrock Spire - Lower	Ghok Bashguud	9718	Skull	3	0	0	0	3
+Blackrock Spire - Lower	Gizrul the Slavener	10268	Skull	3	1	0	3	4
+Blackrock Spire - Lower	Halycon	10220	Skull	3	2	0	2	2
+Blackrock Spire - Lower	Highlord Omokk	9196	Skull	3	1	0	2	5
+Blackrock Spire - Lower	Mother Smolderweb	10596	Skull	3	3	0	3	3
+Blackrock Spire - Lower	Overlord Wyrmthalak	9568	Skull	3	1	0	2	6
+Blackrock Spire - Lower	Quartermaster Zigris	9736	Skull	3	0	0	4	3
+Blackrock Spire - Lower	Shadow Hunter Vosh'gajin	9236	Skull	3	2	0	2	4
+Blackrock Spire - Lower	Spirestone Battle Lord	9218	Floor menu	3	0	0	0	1
+Blackrock Spire - Lower	Spirestone Butcher	9219	Skull	3	0	0	0	2
+Blackrock Spire - Lower	Spirestone Lord Magus	9217	Floor menu	3	2	0	4	3
+Blackrock Spire - Lower	Urok Doomhowl	10584	Skull	3	3	0	3	4
+Blackrock Spire - Lower	War Master Voone	9237	Skull	3	0	0	7	3
+Blackrock Spire - Upper	General Drakkisath	10363	Skull	3	1	0	1	14
+Blackrock Spire - Upper	Goraluk Anvilcrack	10899	Skull	3	0	0	3	2
+Blackrock Spire - Upper	Gyth	10339	Shared skull	3	0	0	0	3
+Blackrock Spire - Upper	Jed Runewatcher	10509	Skull	3	0	0	3	2
+Blackrock Spire - Upper	Lord Valthalak	16042	Skull	3	1	0	3	6
+Blackrock Spire - Upper	Pyroguard Emberseer	9816	Skull	3	1	0	2	7
+Blackrock Spire - Upper	Solakar Flamewreath	10264	Skull	3	1	0	1	5
+Blackrock Spire - Upper	The Beast	10430	Skull	3	1	0	6	7
+Blackrock Spire - Upper	Warchief Rend Blackhand	10429	Shared skull	3	1	0	3	6
+City of Dalaran	Arcane Anomaly	245999	Skull	3	1	3	1	2
+City of Dalaran	Arcanic Enigma	246016	Skull	3	2	3	1	2
+City of Dalaran	Atrexis the Grave Knight	247126	Skull	3	2	5	0	2
+City of Dalaran	Fel Ancient	246003	Skull	3	0	4	2	2
+City of Dalaran	Lyn the Ignored	247032	Skull	3	1	3	0	2
+City of Dalaran	Mana Devourer	246008	Skull	3	1	2	0	2
+City of Dalaran	Mana Wraith	246931	Floor menu	3	0	0	1	0
+City of Dalaran	Shade of the Archmage	246020	Skull	3	1	6	2	3
+City of Dalaran	Unstable Sentinel	246017	Skull	3	0	2	1	2
+Dire Maul - East	Alzzin the Wildshaper	11492	Skull	3	4	8	2	6
+Dire Maul - East	Hydrospawn	13280	Skull	3	1	4	0	6
+Dire Maul - East	Lethtendris	14327	Skull	3	3	4	2	4
+Dire Maul - East	Pusillin	14354	Skull	3	2	4	0	4
+Dire Maul - East	Zevrim Thornhoof	11490	Skull	3	0	2	0	2
+Dire Maul - North	Captain Kromcrush	14325	Skull	3	2	0	5	2
+Dire Maul - North	Cho'Rush the Observer	14324	Skull	3	3	0	11	2
+Dire Maul - North	Guard Fengus	14321	Skull	3	0	0	5	5
+Dire Maul - North	Guard Mol'dar	14326	Skull	3	0	0	1	9
+Dire Maul - North	Guard Slip'kik	14323	Skull	3	0	0	5	8
+Dire Maul - North	King Gordok	11501	Skull	3	0	0	4	6
+Dire Maul - North	Stomper Kreeg	14322	Skull	3	0	0	5	1
+Dire Maul - West	Illyanna Ravenoak	11488	Skull	3	1	0	4	2
+Dire Maul - West	Immol'thar	11496	Skull	3	2	0	5	8
+Dire Maul - West	Lord Hel'nurath	14506	Skull	3	2	0	4	2
+Dire Maul - West	Magister Kalendris	11487	Skull	3	2	0	5	4
+Dire Maul - West	Prince Tortheldrin	11486	Skull	3	0	0	5	5
+Dire Maul - West	Revanchion	14690	Floor menu	3	0	0	2	0
+Dire Maul - West	Tendris Warpwood	11489	Skull	3	0	0	4	3
+Dire Maul - West	Tsu'zee	11467	Skull	3	0	0	4	3
+Excavation Site: Wetlands	Highland Horror	260808	Skull	3	2	0	2	1
+Excavation Site: Wetlands	Relic Guardian	260326	Skull	3	1	3	1	2
+Excavation Site: Wetlands	Saltspine	260322	Skull	3	0	2	1	2
+Excavation Site: Wetlands	Shadetooth	260325	Skull	3	3	3	0	2
+Gnomeregan	Crowd Pummeler 9-60	6229	Skull	3	0	3	0	3
+Gnomeregan	Dark Iron Ambassador	6228	Skull	3	3	0	4	3
+Gnomeregan	Electrocutioner 6000	6235	Skull	3	1	1	2	3
+Gnomeregan	Grubbis	7361	Skull	3	1	0	0	2
+Gnomeregan	Mekgineer Thermaplugg	7800	Skull	3	1	6	0	4
+Gnomeregan	Viscous Fallout	7079	Skull	3	2	0	0	2
+Krol'dok Stronghold	Bossman Toof	264773	Skull	3	2	3	0	3
+Krol'dok Stronghold	Nar'gurk	258964	Skull	3	3	2	0	2
+Krol'dok Stronghold	Overlord Mugg	258968	Skull	3	1	3	0	6
+Krol'dok Stronghold	Slavecrusher Grox	258966	Skull	3	2	3	0	1
+Krol'dok Stronghold	Twilight Commander Zarmok	258972	Skull	3	1	4	0	2
+Krol'dok Stronghold	War Handler Ashka	259281	Skull	3	1	3	0	1
+Maraudon	Celebras the Cursed	12225	Skull	3	2	3	1	2
+Maraudon	Landslide	12203	Skull	3	1	4	0	2
+Maraudon	Lord Vyletongue	12236	Skull	3	1	4	0	3
+Maraudon	Meshlok the Harvester	12237	Skull	3	0	2	0	2
+Maraudon	Noxxion	13282	Skull	3	3	3	0	2
+Maraudon	Princess Theradras	12201	Skull	3	1	4	0	4
+Maraudon	Razorlash	12258	Skull	3	1	1	1	4
+Maraudon	Rotgrip	13596	Skull	3	1	0	2	3
+Maraudon	Tinkerer Gizlock	13601	Skull	3	1	4	0	1
+Ragefire Chasm	Bazzalan	11519	Skull	3	2	1	0	2
+Ragefire Chasm	Jergosh the Invoker	11518	Skull	3	1	2	0	1
+Ragefire Chasm	Oggleflint	11517	Skull	3	0	1	0	2
+Ragefire Chasm	Taragaman the Hungerer	11520	Skull	3	0	2	0	3
+Razorfen Downs	Amnennar the Coldbringer	7358	Skull	3	3	4	0	4
+Razorfen Downs	Glutton	8567	Skull	3	1	1	1	3
+Razorfen Downs	Lady Falther'ess	14686	Floor menu	3	1	0	4	0
+Razorfen Downs	Mordresh Fire Eye	7357	Skull	3	2	2	0	3
+Razorfen Downs	Plaguemaw the Rotting	7356	Skull	3	1	1	1	2
+Razorfen Downs	Ragglesnout	7354	Skull	3	2	0	4	1
+Razorfen Downs	Tuten'kash	7355	Skull	3	3	2	0	2
+Razorfen Kraul	Agathelos the Raging	4422	Skull	3	0	1	2	1
+Razorfen Kraul	Aggem Thorncurse	4424	Skull	3	2	2	1	2
+Razorfen Kraul	Blind Hunter	4425	Skull	3	0	0	0	2
+Razorfen Kraul	Charlga Razorflank	4421	Skull	3	2	3	1	7
+Razorfen Kraul	Death Speaker Jargba	4428	Skull	3	2	2	0	3
+Razorfen Kraul	Earthcaller Halmgar	4842	Skull	3	2	0	3	2
+Razorfen Kraul	Overlord Ramtusk	4420	Skull	3	1	3	0	1
+Razorfen Kraul	Razorfen Spearhide	4438	Skull	3	0	2	0	0
+Razorfen Kraul	Roogug	6168	Skull	3	2	1	1	4
+Ruins of Lordaeron	Bjork	256097	Skull	3	0	2	0	2
+Ruins of Lordaeron	Lordaeron Captain	255699	Skull	3	0	0	0	0
+Ruins of Lordaeron	Rath'mael	250657	Skull	3	1	1	0	3
+Ruins of Lordaeron	The Abandoned	250631	Skull	3	2	2	0	2
+Ruins of Lordaeron	The Baron	250660	Skull	3	0	3	0	2
+Ruins of Lordaeron	Viktor the Vile	256035	Skull	3	3	1	0	1
+Ruins of Lordaeron	Witherfang	250483	Skull	3	3	1	0	2
+Scarlet Monastery - Armory	Herod	3975	Skull	3	1	4	0	2
+Scarlet Monastery - Cathedral	High Inquisitor Fairbanks	4542	Skull	3	3	6	0	2
+Scarlet Monastery - Cathedral	High Inquisitor Whitemane	3977	Shared skull	3	4	5	0	3
+Scarlet Monastery - Cathedral	Scarlet Commander Mograine	3976	Shared skull	3	0	5	0	2
+Scarlet Monastery - Graveyard	Azshir the Sleepless	6490	Skull	3	1	0	3	2
+Scarlet Monastery - Graveyard	Bloodmage Thalnos	4543	Skull	3	1	3	1	2
+Scarlet Monastery - Graveyard	Fallen Champion	6488	Skull	3	1	0	2	2
+Scarlet Monastery - Graveyard	Interrogator Vishas	3983	Skull	3	0	1	1	2
+Scarlet Monastery - Graveyard	Ironspine	6489	Skull	3	2	2	0	2
+Scarlet Monastery - Library	Arcanist Doan	6487	Skull	3	1	5	0	4
+Scarlet Monastery - Library	Houndmaster Loksey	3974	Skull	3	2	1	1	3
+Scholomance	Darkmaster Gandling	1853	Skull	3	2	3	1	11
+Scholomance	Death Knight Darkreaver	14516	Floor menu	3	3	5	0	3
+Scholomance	Doctor Theolen Krastinov	11261	Skull	3	1	3	0	18
+Scholomance	Instructor Malicia	10505	Skull	3	2	6	0	16
+Scholomance	Jandice Barov	10503	Skull	3	2	3	0	6
+Scholomance	Kirtonos the Herald	10506	Skull	3	1	5	3	4
+Scholomance	Kormok	16118	Skull	3	2	0	6	3
+Scholomance	Lady Illucia Barov	10502	Skull	3	2	5	0	15
+Scholomance	Lord Alexei Barov	10504	Skull	3	1	2	1	15
+Scholomance	Lord Blackwood	14695	Floor menu	3	0	0	4	0
+Scholomance	Lorekeeper Polkelt	10901	Skull	3	1	3	0	16
+Scholomance	Marduk Blackpool	10433	Skull	3	1	0	3	1
+Scholomance	Ras Frostwhisper	10508	Skull	3	3	5	1	12
+Scholomance	Rattlegore	11622	Skull	3	0	3	0	7
+Scholomance	The Ravenian	10507	Skull	3	0	4	0	16
+Scholomance	Vectus	10432	Skull	3	1	0	2	4
+Shadowfang Keep	Archmage Arugal	4275	Skull	3	2	3	0	3
+Shadowfang Keep	Arugal's Voidwalker	4627	Floor menu	3	0	1	0	0
+Shadowfang Keep	Baron Silverlaine	3887	Skull	3	0	1	0	2
+Shadowfang Keep	Commander Springvale	4278	Skull	3	2	3	0	4
+Shadowfang Keep	Deathsworn Captain	3872	Skull	3	0	0	2	0
+Shadowfang Keep	Fel Steed	3864	Floor menu	3	0	1	0	2
+Shadowfang Keep	Fenrus the Devourer	4274	Skull	3	2	1	0	2
+Shadowfang Keep	Odo the Blindwatcher	4279	Skull	3	1	3	0	3
+Shadowfang Keep	Razorclaw the Butcher	3886	Skull	3	0	0	0	2
+Shadowfang Keep	Rethilgore	3914	Skull	3	1	1	0	3
+Shadowfang Keep	Wolf Master Nandos	3927	Skull	3	1	2	1	3
+Shaper's Terrace	Bolt	262081	Skull	3	0	0	2	1
+Shaper's Terrace	Cinder	261974	Skull	3	0	0	3	1
+Shaper's Terrace	Direhorn Matriarch	262127	Skull	3	0	0	3	2
+Shaper's Terrace	King Op	261993	Floor menu	3	0	0	0	0
+Shaper's Terrace	Nanaya	261809	Skull	3	0	0	4	4
+Shaper's Terrace	Ravasaur Hunters	253214	Skull	3	0	0	0	1
+Shaper's Terrace	Snowtalon	262297	Skull	3	0	0	2	0
+Shaper's Terrace	Thunderhoof	261812	Skull	3	0	0	4	1
+Shaper's Terrace	Titanosaur	253201	Skull	3	1	0	1	2
+Shaper's Terrace	Venomridge	261813	Skull	3	2	0	2	2
+Shaper's Terrace	Vitrix	272561	Skull	3	2	0	2	2
+Stratholme	Archivist Galford	10811	Skull	3	1	0	3	6
+Stratholme	Balnazzar	10813	Skull	3	1	0	0	7
+Stratholme	Balzaphon	14684	Floor menu	3	2	0	3	0
+Stratholme	Baron Rivendare	10440	Skull	3	1	5	2	13
+Stratholme	Baroness Anastari	10436	Skull	3	2	3	1	7
+Stratholme	Black Guard Swordsmith	11121	Skull	3	0	0	1	4
+Stratholme	Cannon Master Willey	10997	Skull	3	1	0	4	7
+Stratholme	Crimson Hammersmith	11120	Skull	3	0	0	1	5
+Stratholme	Ezra Grimm	11058	Skull	3	0	0	2	5
+Stratholme	Hearthsinger Forresten	10558	Skull	3	1	0	5	3
+Stratholme	Magistrate Barthilas	10435	Skull	3	0	3	2	4
+Stratholme	Maleki the Pallid	10438	Skull	3	1	4	0	8
+Stratholme	Malor the Zealous	11032	Skull	3	1	0	4	2
+Stratholme	Nerub'enkan	10437	Skull	3	1	4	1	5
+Stratholme	Postmaster Malown	11143	Skull	3	2	0	4	6
+Stratholme	Ramstein the Gorger	10439	Skull	3	1	2	0	7
+Stratholme	Skul	10393	Skull	3	2	0	4	1
+Stratholme	Stonespine	10809	Skull	3	1	0	1	2
+Stratholme	The Unforgiven	10516	Skull	3	1	0	1	4
+Stratholme	Timmy the Cruel	10808	Skull	3	0	0	3	2
+Sunken Temple	Atal'alarion	8580	Skull	3	0	2	0	2
+Sunken Temple	Avatar of Hakkar	8440	Skull	3	3	4	0	6
+Sunken Temple	Dreamscythe	5721	Skull	3	0	2	0	5
+Sunken Temple	Gasher	5713	Floor menu	3	0	0	0	3
+Sunken Temple	Hazzas	5722	Skull	3	0	2	0	5
+Sunken Temple	Hukku	5715	Floor menu	3	2	2	0	3
+Sunken Temple	Jammal'an the Prophet	5710	Skull	3	3	4	0	4
+Sunken Temple	Loro	5714	Floor menu	3	0	1	0	3
+Sunken Temple	Mijan	5717	Floor menu	3	3	3	0	3
+Sunken Temple	Morphaz	5719	Skull	3	0	2	0	5
+Sunken Temple	Ogom the Wretched	5711	Floor menu	3	1	3	0	2
+Sunken Temple	Shade of Eranikus	5709	Skull	3	1	4	0	4
+Sunken Temple	Spawn of Hakkar	5708	Floor menu	3	2	1	0	2
+Sunken Temple	Weaver	5720	Skull	3	0	2	0	5
+Sunken Temple	Zolo	5712	Floor menu	3	2	2	0	3
+Sunken Temple	Zul'Lor	5716	Floor menu	3	0	2	0	3
+The Deadmines	Captain Greenskin	647	Skull	3	3	2	0	2
+The Deadmines	Cookie	645	Skull	3	1	2	0	3
+The Deadmines	Edwin VanCleef	639	Skull	3	1	2	0	5
+The Deadmines	Gilnid	1763	Skull	3	1	1	0	3
+The Deadmines	Miner Johnson	3586	Skull	3	0	0	1	2
+The Deadmines	Mr. Smite	646	Skull	3	1	3	1	3
+The Deadmines	Rhahk'Zor	644	Skull	3	1	1	0	3
+The Deadmines	Sneed	643	Shared skull	3	0	1	0	2
+The Deadmines	Sneed's Shredder	642	Shared skull	3	1	3	0	1
+The Drowned City	"""Pyromancer"" Braxton"	260468	Skull	3	0	0	1	2
+The Drowned City	Captain Dreadrise	260042	Skull	3	2	2	0	1
+The Drowned City	Deathless Guardians	260213	Skull	3	1	1	0	0
+The Drowned City	Deathless Marrow	260202	Floor menu	3	2	2	0	2
+The Drowned City	Gill	264177	Skull	3	0	1	0	1
+The Drowned City	Min'loth the Serpent	260243	Skull	3	3	6	0	2
+The Drowned City	Primeval Elemental	263886	Skull	3	1	2	0	3
+The Drowned City	Umbra	264172	Floor menu	3	2	0	0	1
+The Drowned City	Var'Taka	258924	Skull	3	2	3	0	2
+The Drowned City	Zul'Alai	258905	Skull	3	1	3	0	2
+The Hall of Thanes	Durgen Dirgehammer	261319	Skull	3	3	3	0	4
+The Hall of Thanes	Faldrim Anvilmar	261306	Skull	3	1	2	0	3
+The Hall of Thanes	Magmatus	261316	Skull	3	1	2	0	1
+The Hall of Thanes	Plunder	261311	Skull	3	0	3	0	1
+The Stockade	Bazil Thredd	1716	Skull	3	0	2	0	3
+The Stockade	Bruegal Ironknuckle	1720	Skull	3	0	0	0	1
+The Stockade	Dextren Ward	1663	Skull	3	1	3	1	3
+The Stockade	Hamhock	1717	Skull	3	2	2	0	2
+The Stockade	Kam Deepfury	1666	Skull	3	0	2	1	4
+The Stockade	Targorr the Dread	1696	Skull	3	0	2	0	4
+Uldaman	Ancient Stone Keeper	7206	Skull	3	0	2	0	1
+Uldaman	Archaedas	2748	Skull	3	1	3	0	4
+Uldaman	Baelog	6906	Shared skull	3	1	2	0	0
+Uldaman	"Eric ""The Swift"""	6907	Shared skull	3	1	1	0	2
+Uldaman	Galgann Firehammer	7291	Skull	3	2	4	0	3
+Uldaman	Grimlok	4854	Skull	3	3	4	1	3
+Uldaman	Ironaya	7228	Skull	3	0	2	1	3
+Uldaman	Obsidian Sentinel	7023	Skull	3	1	2	0	3
+Uldaman	Olaf	6908	Shared skull	3	1	1	0	3
+Uldaman	Revelosh	6910	Skull	3	1	1	1	3
+Wailing Caverns	Deviate Faerie Dragon	5912	Skull	3	0	0	0	1
+Wailing Caverns	Kresh	3653	Skull	3	0	0	0	3
+Wailing Caverns	Lady Anacondra	3671	Skull	3	2	4	0	5
+Wailing Caverns	Lord Cobrahn	3669	Skull	3	4	4	0	3
+Wailing Caverns	Lord Pythas	3670	Skull	3	2	4	0	4
+Wailing Caverns	Lord Serpentis	3673	Skull	3	2	3	0	4
+Wailing Caverns	Mutanus the Devourer	3654	Skull	3	2	3	0	3
+Wailing Caverns	Skum	3674	Skull	3	1	1	0	2
+Wailing Caverns	Verdan the Everliving	5775	Skull	3	0	1	0	3
+Zul'Farrak	Antu'sul	8127	Skull	3	2	6	2	2
+Zul'Farrak	Chief Ukorz Sandscalp	7267	Skull	3	1	3	1	3
+Zul'Farrak	Dustwraith	10081	Skull	3	0	0	1	1
+Zul'Farrak	Gahz'rilla	7273	Skull	3	0	3	0	2
+Zul'Farrak	Hydromancer Velratha	7795	Skull	3	2	4	0	3
+Zul'Farrak	Nekrum Gutchewer	7796	Skull	3	2	1	0	2
+Zul'Farrak	Ruuzlu	7797	Floor menu	3	0	2	1	3
+Zul'Farrak	Sandarr Dunereaver	10080	Skull	3	0	0	3	8
+Zul'Farrak	Sergeant Bly	7604	Skull	3	2	2	0	2
+Zul'Farrak	Shadowpriest Sezz'ziz	7275	Skull	3	3	4	0	3
+Zul'Farrak	Theka the Martyr	7272	Skull	3	1	1	1	2
+Zul'Farrak	Witch Doctor Zum'rah	7271	Skull	3	2	4	0	3
+Zul'Farrak	Zerillis	10082	Skull	3	0	2	1	2
