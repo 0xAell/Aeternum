@@ -1996,7 +1996,7 @@ test("boss guide stays open for scrolling and loot, then closes on leave or floo
     panel:Fire("OnUpdate", .30)
     check(panel:IsShown(), "crossing from skull into panel keeps the guide open")
     panel.scroll:Fire("OnMouseWheel", -2)
-    equal(panel.scroll:GetVerticalScroll(), 92)
+    equal(panel.scroll:GetVerticalScroll(), 112)
     local item = assert(findEntry(panel.rows, function(row) return row:IsShown() and row.item end))
     local id = item.item
     item.left = point[4] + 14
@@ -2033,7 +2033,7 @@ test("boss guide gives friendly abilities and individual enemy spells their own 
         return assert(findEntry(panel.rows, function(row) return row:IsShown() and row.spell == id end))
     end
     local tremor = spellRow(8143)
-    check(tremor.text:GetText():find("|T136108:18:18", 1, true), "larger friendly spell icon")
+    check(tremor.text:GetText():find("|T136108:22:22", 1, true), "larger friendly spell icon")
     tremor:Fire("OnEnter")
     check(env.GameTooltip:IsOwned(tremor))
     equal(env.GameTooltip.anchor, "ANCHOR_LEFT", "right-side guide opens spell detail toward more room")

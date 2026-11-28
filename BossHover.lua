@@ -3,8 +3,8 @@ local Hover = {}
 addon.BossHover = Hover
 
 local PADDING, GAP, SCROLLBAR = 14, 14, 24
-local MAX_WIDTH, MAX_HEIGHT = 680, 620
-local ICON_SIZE = 18
+local MAX_WIDTH, MAX_HEIGHT = 780, 680
+local ICON_SIZE = 22
 
 local function trackPointer(panel, elapsed)
     local pin = Hover.pin
@@ -23,7 +23,7 @@ local function trackPointer(panel, elapsed)
 end
 
 local function scrollBy(scroll, delta)
-    local offset = scroll:GetVerticalScroll() - delta * 46
+    local offset = scroll:GetVerticalScroll() - delta * 56
     scroll:SetVerticalScroll(math.max(0, math.min(scroll:GetVerticalScrollRange(), offset)))
 end
 
@@ -42,7 +42,7 @@ local function ensurePanel()
     panel:EnableMouse(true)
     panel:EnableMouseWheel(true)
     panel:SetScript("OnUpdate", trackPointer)
-    panel.title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    panel.title = panel:CreateFontString(nil, "OVERLAY", "GameFontNormalHuge")
     panel.title:SetPoint("TOPLEFT", PADDING, -12)
     panel.title:SetJustifyH("LEFT")
     panel.title:SetWordWrap(true)
@@ -119,7 +119,7 @@ local function setRow(panel, index, x, y, width, data)
         row:SetScript("OnLeave", tipLeave)
         row:SetScript("OnClick", function(self) if self.item then addon.UI:OpenItem(self.item) end end)
         row:SetScript("OnMouseWheel", function(_, delta) scrollBy(panel.scroll, delta) end)
-        row.text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+        row.text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightMedium")
         row.text:SetPoint("TOPLEFT", 0, -1)
         row.text:SetJustifyH("LEFT")
         row.text:SetWordWrap(true)
@@ -133,7 +133,7 @@ local function setRow(panel, index, x, y, width, data)
     row.text:SetWidth(width)
     row.text:SetText(data.item and addon.UI.ItemLabel(data.item, false, ICON_SIZE) or data.text)
     row.text:SetTextColor(data.r or 1, data.g or 1, data.b or 1)
-    local minimum = interactive and 21 or 16
+    local minimum = interactive and 25 or 19
     local height = data.text == " " and 5 or math.max(minimum, math.ceil(row.text:GetStringHeight()) + 3)
     row:ClearAllPoints()
     row:SetPoint("TOPLEFT", panel.content, "TOPLEFT", x, -y)
