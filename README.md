@@ -112,4 +112,6 @@ To contribute code or rebuild the bundled datasets locally, see **[CONTRIBUTING.
 
 [Data Sources & Credits](DATA_SOURCES.md) · [Contributing](CONTRIBUTING.md) · [GPL-3.0 License](LICENSE)
 
+<sub>README by Neon 4</sub>
+
 </div>
