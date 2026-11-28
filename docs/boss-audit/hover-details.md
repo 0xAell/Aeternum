@@ -1,0 +1,9 @@
+# Boss hover details
+
+`BossDetails.lua` maps metadata to the exact NPC IDs in the 302-entry [boss roster](bosses.tsv). It supplies 298 creature types, 300 elite, rare or boss ranks, and 125 summaries of encounter adds, paired enemies or nearby priority packs. The add notes flag timing or phase changes where the guide describes them. An absent add note means the hover has no dedicated summary for that encounter. [Reviewed tactics and spell sources](mechanics.md)
+
+Creature metadata uses the English Forever NPC export downloaded on November 28, 2026. The export combines Forever client records, EG Link observations and the Classic reference database. The release joins on NPC ID and checks the name against the roster. Separately named phases keep their own types, including the Mechanical Shredder and the Humanoid Sneed. [EverlookDB export](https://everlookdb.com/downloads/npcs.csv) · [Provenance](https://everlookdb.com/credits.html) · [Sneed encounter](https://azeroth.wiki/forever/dungeons/the-deadmines/sneed)
+
+The linked Forever records supply or correct Ezra Grimm (11058), Tunnelweb Matriarch (250034), King Op (261993) and Umbra (264172). Four encounter entries have no usable creature type in the source records. Their hover still has a rank and tactics. [Ezra Grimm](https://kovarel.com/wow-forever/npcs/11058-ezra-grimm) · [Rare elite beasts](https://db.icy-veins.com/wow-forever/npcs/beast/rare-elite/) · [Rare elite humanoids](https://db.icy-veins.com/wow-forever/npcs/humanoid/rare-elite/) · [Avatar of Hakkar](https://azeroth.wiki/forever/dungeons/sunken-temple/avatar-of-hakkar)
+
+A boss's creature type describes the named NPC. Adds may have different types and immunities. For example, the Deadmines field guide identifies the two Defias Watchmen near Rhahk'Zor and the additional Blackguards who arrive when VanCleef reaches half health. [Deadmines Forever field guide](https://www.method.gg/wow-forever/dungeons/the-deadmines)

@@ -2,7 +2,7 @@
 ## Title: Aeternum
 ## Notes: Dungeon maps, boss tactics and loot, trainers, quests, and minimap directions for WoW Forever.
 ## Author: Ael
-## Version: 0.6.0
+## Version: 0.6.1
 ## X-WoW-Flavor: Forever
 ## IconAtlas: Dungeon
 ## Category: Map & Minimap
@@ -18,6 +18,7 @@ LootData.lua
 FloorData.lua
 TacticsData.lua
 BossCasts.lua
+BossDetails.lua
 ClassicTraining.lua
 ForeverTraining.lua
 Core.lua
@@ -26,6 +27,7 @@ Trainers.lua
 Loot.lua
 Tactics.lua
 Navigation.lua
+BossHover.lua
 DungeonMap.lua
 UI.lua
 ZoneLevels.lua

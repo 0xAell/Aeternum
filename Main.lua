@@ -39,6 +39,7 @@ frame:SetScript("OnEvent", function(_, event, arg, second, _, _, success)
         end
     elseif event == "ITEM_DATA_LOAD_RESULT" or event == "GET_ITEM_INFO_RECEIVED" then
         addon.UI:ItemLoaded(arg, second)
+        addon.BossHover:ItemLoaded(arg, second)
     elseif event == "TRAINER_SHOW" or event == "TRAINER_UPDATE" or event == "TRAINER_SERVICE_INFO_NAME_UPDATE" then
         addon.Trainers:Observe()
     elseif event == "ZONE_CHANGED_INDOORS" or event == "ZONE_CHANGED" then
@@ -46,14 +47,21 @@ frame:SetScript("OnEvent", function(_, event, arg, second, _, _, success)
         addon.Navigation:Restore()
     elseif event == "SPELLS_CHANGED" then
         addon.UI:LootSkillsChanged()
+        addon.BossHover:Refresh()
+    elseif event == "PLAYER_ROLES_ASSIGNED" then
+        addon.BossHover:Refresh()
     elseif event == "SKILL_LINES_CHANGED" or event == "LEARNED_SPELL_IN_SKILL_LINE" then
         addon.Trainers:Invalidate()
         addon.UI:LootSkillsChanged()
+        addon.BossHover:Refresh()
         addon.Quests:Invalidate()
         scheduleRefresh()
     else
         if event == "CVAR_UPDATE" and arg ~= "questPOI" then return end
-        if event == "PLAYER_LEVEL_UP" then addon.UI:LootSkillsChanged() end
+        if event == "PLAYER_LEVEL_UP" then
+            addon.UI:LootSkillsChanged()
+            addon.BossHover:Refresh()
+        end
         addon.Quests:Invalidate(event == "PLAYER_LEVEL_UP" and arg or nil)
         scheduleRefresh()
     end
@@ -63,7 +71,7 @@ for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "PLAYER_ENTERING_WORLD",
     "QUEST_TURNED_IN", "QUEST_REMOVED", "PLAYER_LEVEL_UP", "ZONE_CHANGED_INDOORS", "ZONE_CHANGED",
     "BOSS_KILL", "ENCOUNTER_START", "ENCOUNTER_END", "TRAINER_SERVICE_INFO_NAME_UPDATE", "QUEST_WATCH_LIST_CHANGED",
     "SUPER_TRACKING_CHANGED", "QUEST_POI_UPDATE", "CVAR_UPDATE", "ITEM_DATA_LOAD_RESULT",
-    "GET_ITEM_INFO_RECEIVED"}) do
+    "GET_ITEM_INFO_RECEIVED", "PLAYER_ROLES_ASSIGNED"}) do
     pcall(frame.RegisterEvent, frame, event)
 end
 

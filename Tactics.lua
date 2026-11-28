@@ -557,7 +557,7 @@ local function roleLine(tooltip, role, entry, classInfo)
     tooltip:AddLine(label .. Tactics:FormatText(entry[role[2]]), 1, 1, 1, true)
 end
 
-function Tactics:AddTooltip(tooltip, boss, full)
+function Tactics:AddGuide(tooltip, boss, full)
     local entry = boss and self:ForBoss(boss.id)
     if not entry then return end
     local dispels = self:DispelText(entry, boss.id)
@@ -565,7 +565,6 @@ function Tactics:AddTooltip(tooltip, boss, full)
     local assigned = playerRole()
 
     if full then
-        tooltip:SetText(boss.name .. " — Tactics")
         if dispels then
             tooltip:AddLine("Effects: " .. dispels, 1, 1, 1, true)
         end
@@ -606,6 +605,29 @@ function Tactics:AddTooltip(tooltip, boss, full)
     end
 end
 
+function Tactics:AddTooltip(tooltip, boss, full)
+    if full then tooltip:SetText(boss.name .. " — Tactics") end
+    self:AddGuide(tooltip, boss, full)
+end
+
+function Tactics:AddCasts(tooltip, boss)
+    local casts = addon.bossCasts[boss.id]
+    if not casts then return end
+    for _, group in ipairs({{"live", "Recorded Forever casts"}, {"reference", "Reference spells"}}) do
+        local ids = casts[group[1]]
+        if ids and #ids > 0 then
+            tooltip:AddLine(group[2], 1, .82, 0)
+            local names = {}
+            for _, id in ipairs(ids) do
+                local spell = addon.castSpells[id]
+                local name = self:SpellIcon(id, 13) .. " " .. self:SpellName(id)
+                names[#names + 1] = spell[3] and (name .. " · " .. formatTag(spell[3])) or name
+            end
+            tooltip:AddLine(table.concat(names, "  ·  "), .88, .88, .88, true)
+        end
+    end
+end
+
 local function roleRow(menu, boss, role, entry, dispels)
     local row = menu:CreateButton(("%s |cff%s%s TLDR|r"):format(role[3], role[4], role[1]))
     row:SetTooltip(function(tooltip)
@@ -634,10 +656,6 @@ function Tactics:AddMenu(menu, boss, linkSpell)
     local dispels = self:DispelText(entry, boss.id)
     local label = TACTICS_ICON .. " Tactics" .. (dispels and (" · " .. dispels) or "")
     local sub = menu:CreateButton(label)
-    sub:SetTooltip(function(tooltip)
-        self:AddTooltip(tooltip, boss, true)
-    end)
-
     if dispels then
         sub:CreateTitle("Effects: " .. dispels)
     end
