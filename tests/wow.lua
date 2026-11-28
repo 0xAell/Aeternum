@@ -156,6 +156,23 @@ function Frame:SetBackdropColor(...) self.backdropColor = {...} end
 function Frame:SetBackdropBorderColor(...) self.borderColor = {...} end
 function Frame:IsMouseOver() return self.mouseOver == true end
 
+function Frame:SetAttribute(key, value)
+    if Wow.state.inCombat then error("protected attribute write in combat") end
+    self.attributes = self.attributes or {}
+    self.attributes[key] = value
+end
+function Frame:GetAttribute(key) return self.attributes and self.attributes[key] end
+function Frame:WrapScript(frame, event, code)
+    assert(event == "OnClick", "unsupported secure script")
+    frame.clickGate = setfenv(assert(loadstring(code)), {
+        SecureCmdOptionParse = function(condition)
+            local combat, otherwise = condition:match("^%[combat%] (%w+); (%w+)$")
+            assert(combat, "unsupported macro condition")
+            return Wow.state.inCombat and combat or otherwise
+        end,
+    })
+end
+function Frame:GetName() return self.name end
 function Frame:SetScript(event, handler) self.scripts[event] = handler end
 function Frame:GetScript(event) return self.scripts[event] end
 function Frame:HookScript(event, handler)
@@ -198,6 +215,7 @@ function Frame:RegisterEvent(event)
     end
     self.events[event] = true
 end
+function Frame:IsForbidden() return false end
 function Frame:CreateTexture() return Wow.region(Texture, self) end
 function Frame:CreateFontString() return Wow.region(FontString, self) end
 
@@ -215,7 +233,14 @@ function Button:SetPushedTexture(texture) self.pushed = texture end
 function Button:SetDisabledTexture(texture) self.disabled = texture end
 function Button:Click(button)
     if self:IsEnabled() then
-        self:Fire("OnClick", button or "LeftButton")
+        button = button or "LeftButton"
+        self:Fire("PreClick", button)
+        if not self.clickGate or self.clickGate() ~= false then
+            self:Fire("OnClick", button)
+            local target = self:GetAttribute("clickbutton")
+            if target then target:Click(button) end
+        end
+        self:Fire("PostClick", button)
     end
 end
 
@@ -478,11 +503,13 @@ Wow.knownEvents = {
     QUEST_WATCH_LIST_CHANGED = true, SUPER_TRACKING_CHANGED = true, QUEST_POI_UPDATE = true, CVAR_UPDATE = true,
     ITEM_DATA_LOAD_RESULT = true, SPELLS_CHANGED = true, PLAYER_ROLES_ASSIGNED = true,
     PLAYER_REGEN_DISABLED = true, GAME_PAD_ACTIVE_CHANGED = true, MAP_EXPLORATION_UPDATED = true,
+    PLAYER_REGEN_ENABLED = true, GOSSIP_SHOW = true, GOSSIP_CLOSED = true, QUEST_DETAIL = true, QUEST_GREETING = true,
+    QUEST_PROGRESS = true, QUEST_COMPLETE = true, QUEST_FINISHED = true,
 }
 
 local templates = { UIPanelButtonTemplate = true, PanelTopTabButtonTemplate = true, MinimalScrollBar = true,
     WowStyle1DropdownTemplate = true, WowStyle1FilterDropdownTemplate = true, BackdropTemplate = true,
-    UIPanelScrollFrameTemplate = true }
+    UIPanelScrollFrameTemplate = true, SecureHandlerStateTemplate = true, SecureActionButtonTemplate = true }
 
 local pinXML = assert(io.open("WorldMap.xml", "r"))
 local pinPolicy = {}
@@ -491,10 +518,11 @@ for template, attrs in pinXML:read("*a"):gmatch('<Frame name="([^"]+)"([^>]*)>')
 end
 pinXML:close()
 
-function Wow.CreateFrame(kind, _, parent, template)
+function Wow.CreateFrame(kind, name, parent, template)
     local class = classes[kind] or error("unsupported frame type " .. tostring(kind))
     local frame = Wow.region(class, parent)
-    frame.template = template
+    frame.template, frame.name = template, name
+    if name then Wow.env[name] = frame end
     Wow.state.frames[#Wow.state.frames + 1] = frame
     if pinPolicy[template] then
         -- The XML applies passthrough at construction, before the pool acquires the frame.
@@ -517,6 +545,16 @@ function Wow.CreateFrame(kind, _, parent, template)
     return frame
 end
 
+local function eventRegistry()
+    local callbacks = {}
+    return {
+        RegisterCallback = function(_, event, callback) callbacks[event] = callback end,
+        TriggerEvent = function(_, event)
+            if callbacks[event] then callbacks[event]() end
+        end,
+    }
+end
+
 function Wow.new(state)
     local env = setmetatable({}, { __index = _G })
     Wow.env = env
@@ -527,6 +565,12 @@ function Wow.new(state)
     state.cached = state.cached or {}
 
     env.CreateFrame = Wow.CreateFrame
+    env.EventRegistry = eventRegistry()
+    env.PopupEventManager = eventRegistry()
+    env.GetCurrentKeyBoardFocus = function() return state.editing end
+    env.StaticPopup_ForEachShownDialog = function(callback)
+        for _, popup in ipairs(state.popups or {}) do callback(popup) end
+    end
     env.BaseScrollBoxEvents = { OnScroll = "OnScroll" }
     env.Menu = { ModifyMenu = function(tag, callback) state.menuHooks[tag] = callback end }
     env.MenuUtil = {SetElementText = function(row, label) row.label = label end}

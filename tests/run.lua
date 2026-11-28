@@ -58,9 +58,10 @@ end
 local dataChunk = assert(loadfile("Data.lua"))
 
 -- Loads the addon into a fresh client. state sets the character and saved data.
-local function load(state)
+local function load(state, initialize)
     state = state or {}
     local env = Wow.new(state)
+    if initialize then initialize(env, state) end
     local addon = {}
     for _, file in ipairs(tocFiles()) do
         if file:match("%.lua$") then
@@ -3086,6 +3087,290 @@ test("zone hover clears on pins, city maps, water, and dungeon floors without st
     equal(hover(947, 2521, "Zephras Isle", "Zephras Isle"), "Level 1–12")
     state.gamepad = true
     equal(hover(1414, 2482, "Mount Hyjal", "Mount Hyjal"), "Level 55–60")
+end)
+
+local function dialogClient(settings)
+    local state = { savedVariables = settings }
+    local _, env = load(state, function(client)
+        client._G = client
+        local overrides, drivers = {}, {}
+        state.press = function(key)
+            local slot = overrides[key]
+            if slot then client[slot]:Click() end
+            return slot ~= nil
+        end
+        client.RegisterStateDriver = function(owner, key, condition)
+            equal(key, "aeternumcombat")
+            equal(condition, "[combat] combat; safe")
+            drivers[#drivers + 1] = owner
+        end
+        state.combat = function(active)
+            state.inCombat = active
+            if active then
+                for _, owner in ipairs(drivers) do
+                    check(owner:GetAttribute("_onstate-aeternumcombat"):find("self:ClearBindings()", 1, true))
+                end
+                overrides = {}
+            end
+            Wow.fire(active and "PLAYER_REGEN_DISABLED" or "PLAYER_REGEN_ENABLED")
+        end
+        client.ClearOverrideBindings = function()
+            check(not state.inCombat, "addon attempted to modify bindings in combat")
+            overrides = {}
+        end
+        client.SetOverrideBindingClick = function(_, priority, key, name)
+            check(not state.inCombat, "addon attempted to modify bindings in combat")
+            check(not priority, "dialog override should be non-priority")
+            overrides[key] = name
+        end
+        client.GetMouseFoci = function() return state.mouseFoci or {} end
+        local function panel(name)
+            local frame = client.CreateFrame("Frame", name, client.QuestFrame)
+            frame:Hide()
+            return frame
+        end
+        client.QuestFrame = client.CreateFrame("Frame", "QuestFrame", client.UIParent)
+        local detail = panel("QuestFrameDetailPanel")
+        local progress = panel("QuestFrameProgressPanel")
+        local reward = panel("QuestFrameRewardPanel")
+        panel("QuestFrameGreetingPanel")
+        local function button(name, parent)
+            return client.CreateFrame("Button", name, parent)
+        end
+        client.QuestFrameAcceptButton = button("QuestFrameAcceptButton", detail)
+        client.QuestFrameCompleteButton = button("QuestFrameCompleteButton", progress)
+        client.QuestFrameCompleteQuestButton = button("QuestFrameCompleteQuestButton", reward)
+        client.QuestInfoFrame = { itemChoice = 0 }
+        client.QuestInfoRewardsFrame = { RewardButtons = {} }
+        local function rewards(name, index, kind)
+            local choice = button(name, reward)
+            choice.type = kind
+            choice.GetID = function() return index end
+            choice:SetScript("OnClick", function() client.QuestInfoFrame.itemChoice = index end)
+            table.insert(client.QuestInfoRewardsFrame.RewardButtons, choice)
+        end
+        rewards("RewardOne", 1, "choice")
+        rewards("GuaranteedReward", 4, "reward")
+        rewards("RewardTwo", 2, "choice")
+        client.GameTooltip.SetQuestItem = function(_, kind, index) state.tooltip = { kind, index } end
+        client.GameTooltip_ShowCompareItem = function() state.rewardComparison = true end
+
+        client.GossipFrame = client.CreateFrame("Frame", "GossipFrame", client.UIParent)
+        client.GossipFrame:Hide()
+        local data = {
+            { buttonType = 1 },
+            { index = 1, buttonType = 5, info = { questID = 17 } },
+            { buttonType = 2 },
+            { index = 2, buttonType = 4, info = { questID = 23 } },
+            { index = 3, buttonType = 3, info = { orderIndex = 9 } },
+        }
+        local row = button("VisibleGossipRow", client.GossipFrame)
+        row.GetElementData = function() return data[4] end
+        local provider = { Enumerate = function() return ipairs(data) end }
+        client.GossipFrame.GreetingPanel = { ScrollBox = {
+            GetView = function() return true end,
+            GetDataProvider = function() return provider end,
+            EnumerateFrames = function() return ipairs({ row }) end,
+        } }
+        client.C_GossipInfo = {}
+        for _, method in ipairs({ "SelectAvailableQuest", "SelectActiveQuest", "SelectOptionByIndex" }) do
+            client.C_GossipInfo[method] = function(id) state.selected = { method, id } end
+        end
+        local scroll = client.CreateFrame("Frame", "QuestDetailScrollFrame", detail)
+        scroll.GetVerticalScrollRange = function() return 130 end
+        scroll.ScrollBar = { ScrollWheelInDirection = function(_, direction) state.wheel = direction end }
+    end)
+    return env, state
+end
+
+test("dialog keys default on and advance only visible enabled quest steps", function()
+    local env, state = dialogClient()
+    check(env.AeternumDB.dialogKeys)
+    check(not state.press("SPACE"))
+    env.QuestFrameDetailPanel:Show()
+    check(state.press("SPACE"))
+    local accepted, continued, completed = 0, 0, 0
+    env.QuestFrameAcceptButton:SetScript("OnClick", function()
+        accepted = accepted + 1
+        env.QuestFrameDetailPanel:Hide()
+        env.QuestFrameProgressPanel:Show()
+    end)
+    env.QuestFrameCompleteButton:SetScript("OnClick", function()
+        continued = continued + 1
+        env.QuestFrameProgressPanel:Hide()
+        env.QuestFrameRewardPanel:Show()
+    end)
+    env.QuestFrameCompleteQuestButton:SetScript("OnClick", function()
+        if env.QuestInfoFrame.itemChoice == 0 then return end
+        completed = completed + 1
+        env.QuestFrameRewardPanel:Hide()
+    end)
+    env.QuestFrameAcceptButton:SetEnabled(false)
+    Wow.fire("QUEST_DETAIL")
+    check(not state.press("SPACE"))
+    env.QuestFrameAcceptButton:SetEnabled(true)
+    Wow.fire("QUEST_DETAIL")
+    check(state.press("SPACE"))
+    equal(accepted, 1)
+    equal(continued, 0)
+    check(state.press("SPACE"))
+    equal(continued, 1)
+    check(state.press("SPACE"))
+    equal(completed, 0)
+    check(not state.press("4"))
+    check(state.press("2"))
+    equal(env.QuestInfoFrame.itemChoice, 2)
+    equal(state.tooltip[1], "choice")
+    equal(state.tooltip[2], 2)
+    check(state.rewardComparison)
+    check(state.press("SPACE"))
+    equal(completed, 1)
+    check(not state.press("SPACE"))
+    check(not state.press("2"))
+    check(not env.GameTooltip:IsShown())
+end)
+
+test("dialog opt-out survives map reset and login", function()
+    local env, state = dialogClient({ filters = { dungeon = false } })
+    check(env.AeternumDB.dialogKeys)
+    env.GossipFrame:Show()
+    check(state.press("SPACE"))
+    slash(env, "dialog off")
+    check(not state.press("SPACE"))
+    check(not state.press("2"))
+    slash(env, "reset")
+    equal(env.AeternumDB.dialogKeys, false)
+
+    env, state = dialogClient(env.AeternumDB)
+    env.GossipFrame:Show()
+    equal(env.AeternumDB.dialogKeys, false)
+    check(not state.press("SPACE"))
+    check(not state.press("2"))
+    slash(env, "dialog on")
+    check(state.press("SPACE"))
+end)
+
+test("dialog keys follow native gossip order even when rows are virtualized", function()
+    local env, state = dialogClient({ dialogKeys = true })
+    env.GossipFrame:Show()
+    check(state.press("SPACE"))
+    equal(state.selected[1], "SelectAvailableQuest")
+    equal(state.selected[2], 17)
+    check(state.press("2"))
+    equal(state.selected[1], "SelectActiveQuest")
+    equal(state.selected[2], 23)
+    check(state.press("3"))
+    equal(state.selected[1], "SelectOptionByIndex")
+    equal(state.selected[2], 9)
+    check(not state.press("4"))
+    env.GossipFrame:Hide()
+    check(not state.press("SPACE"))
+    check(not state.press("2"))
+end)
+
+test("the front popup masks quest shortcuts and only supported confirmations bind", function()
+    local env, state = dialogClient({ dialogKeys = true })
+    env.GossipFrame:Show()
+    local popup = env.CreateFrame("Frame", nil, env.UIParent)
+    local accept = env.CreateFrame("Button", nil, popup)
+    local confirms = 0
+    popup.GetButton1 = function() return accept end
+    accept:SetScript("OnClick", function() confirms = confirms + 1 end)
+    popup.which = "LOOT_BIND"
+    state.popups = { popup }
+    env.PopupEventManager:TriggerEvent("PopupOpened")
+    check(not state.press("2"))
+    check(state.press("SPACE"))
+    equal(confirms, 1)
+    check(not state.selected)
+    popup.which = "DELETE_ITEM"
+    env.PopupEventManager:TriggerEvent("PopupOpened")
+    check(not state.press("SPACE"))
+    check(not state.press("2"))
+    equal(confirms, 1)
+    popup.which = "LOOT_BIND"
+    slash(env, "dialog popup off")
+    check(not state.press("SPACE"))
+    popup:Hide()
+    env.PopupEventManager:TriggerEvent("PopupClosed")
+    check(state.press("SPACE"))
+    equal(state.selected[2], 17)
+end)
+
+test("dialog overrides suspend during chat and combat and preserve rebinding and scrolling settings", function()
+    local env, state = dialogClient({ dialogKeys = true })
+    env.QuestFrameDetailPanel:Show()
+    check(state.press("SPACE"))
+    check(not state.press("MOUSEWHEELUP"))
+    slash(env, "dialog key CTRL-SPACE")
+    slash(env, "dialog second F")
+    slash(env, "dialog scroll on")
+    check(not state.press("SPACE"))
+    check(state.press("CTRL-SPACE"))
+    check(state.press("F"))
+    check(state.press("MOUSEWHEELDOWN"))
+    equal(state.wheel, 1)
+    state.editing = true
+    env.EventRegistry:TriggerEvent("ChatFrame.OnEditBoxFocusGained")
+    check(not state.press("F"))
+    check(not state.press("MOUSEWHEELDOWN"))
+    state.editing = false
+    env.EventRegistry:TriggerEvent("ChatFrame.OnEditBoxFocusLost")
+    check(state.press("F"))
+    local accepted = 0
+    env.QuestFrameAcceptButton:SetScript("OnClick", function() accepted = accepted + 1 end)
+    state.inCombat = true
+    -- Combat lock can start before the secure state driver removes a binding.
+    check(state.press("F"))
+    equal(accepted, 0)
+
+    state.combat(true)
+    check(not state.press("F"))
+    check(not state.press("CTRL-SPACE"))
+    state.combat(false)
+    check(state.press("F"))
+    equal(accepted, 1)
+    slash(env, "reset")
+    equal(env.AeternumDB.dialogPrimary, "CTRL-SPACE")
+    slash(env, "dialog off")
+    check(not state.press("F"))
+    check(not state.press("MOUSEWHEELDOWN"))
+end)
+
+test("quest greetings number active quests before available quests in pooled frames", function()
+    local env, state = dialogClient({ dialogKeys = true })
+    local panel = env.QuestFrameGreetingPanel
+    local active = env.CreateFrame("Button", nil, panel)
+    local available = env.CreateFrame("Button", nil, panel)
+    env.GetNumActiveQuests = function() return 1 end
+    active.isActive, available.isActive = 1, 0
+    active.GetID, available.GetID = function() return 1 end, function() return 1 end
+    active:SetScript("OnClick", function() state.selected = "active" end)
+    available:SetScript("OnClick", function() state.selected = "available" end)
+    panel.titleButtonPool = { EnumerateActive = function() return next, { [available] = true, [active] = true } end }
+    panel:Show()
+    check(state.press("SPACE"))
+    equal(state.selected, "active")
+    check(state.press("2"))
+    equal(state.selected, "available")
+end)
+
+test("custom dialog keys can track and remove a hovered named button", function()
+    local env, state = dialogClient({ dialogKeys = true })
+    env.QuestFrame:Hide()
+    local button = env.CreateFrame("Button", "OtherDialogButton", env.UIParent)
+    button:SetScript("OnClick", function() state.selected = "custom" end)
+    state.mouseFoci = { button }
+    check(not state.press("SPACE"))
+    slash(env, "dialog add")
+    check(state.press("SPACE"))
+    equal(state.selected, "custom")
+    button:Hide()
+    check(not state.press("SPACE"))
+    button:Show()
+    check(state.press("SPACE"))
+    slash(env, "dialog remove OtherDialogButton")
+    check(not state.press("SPACE"))
 end)
 
 print(("%d passed, %d failed"):format(passed, failed))

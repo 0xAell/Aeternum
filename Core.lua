@@ -28,6 +28,11 @@ for _, category in ipairs(addon.categories) do
 end
 
 local defaults = {
+    dialogKeys = true,
+    dialogPrimary = "SPACE",
+    dialogSecondary = "",
+    dialogPopups = true,
+    dialogScroll = false,
     questMode = "available",
     lowLevelQuests = false,
     otherTrainers = false,
@@ -380,11 +385,18 @@ function addon.LoadSettings()
     if AeternumDB.questMode ~= "all" then
         AeternumDB.questMode = "available"
     end
+    if type(AeternumDB.dialogButtons) ~= "table" then AeternumDB.dialogButtons = {} end
     addon.settings = AeternumDB
 end
 
 function addon.ResetSettings()
-    AeternumDB = nil
+    local settings = addon.settings
+    AeternumDB = {}
+    if settings then
+        for key, value in pairs(settings) do
+            if type(key) == "string" and key:match("^dialog") then AeternumDB[key] = value end
+        end
+    end
     addon.LoadSettings()
 end
 
