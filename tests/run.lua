@@ -519,12 +519,13 @@ test("the atlas zooms toward the pointer and pans without moving the native map"
     local zone = frame.byID[1436]
     check(math.abs(camera.x - (zone.left + (zone.right - zone.left) * state.playerX)) < .0001,
         "middle click centers on the player")
-    check(atlasTexture(frame, 103), "Westfall artwork comes in at zone zoom")
+    check(atlasTexture(frame, 102), "one continent map covers the viewport")
+    check(not atlasTexture(frame, 101) and not atlasTexture(frame, 103), "world and zone art do not overlap")
     equal(frame.location:GetText(), "Westfall · Level 9–18", "the atlas identifies the zone and its level range")
     equal(env.WorldMapFrame:GetMapID(), 947, "native map ID is untouched")
     frame:Fire("OnMouseUp", "RightButton")
     check(not frame:IsShown() and env.WorldMapFrame:IsShown(), "return to the original map")
-    check(not atlasTexture(frame, 103), "closed atlas releases map tiles")
+    check(not atlasTexture(frame, 102), "closed atlas releases map tiles")
 end)
 
 test("atlas zoom reverses immediately and keeps moving while the map is dragged", function()
@@ -575,7 +576,10 @@ end)
 
 test("the atlas refreshes a newly explored landmark while keeping its base artwork", function()
     local addon, _, state = loadAtlas(1436)
+    addon.settings.atlasTerrain = false
     local frame = openAtlas(addon)
+    frame.camera.zoom = frame.camera.zoom * 1.22
+    addon.Atlas:Refresh()
     local base = assert(atlasTexture(frame, 103), "zone parchment")
     check(not atlasTexture(frame, 104), "the landmark is unexplored")
     state.mapExploration = {[1436] = {
@@ -590,7 +594,7 @@ test("the atlas refreshes a newly explored landmark while keeping its base artwo
     check(not atlasTexture(frame, 105), "mouseover-only art stays hidden")
 end)
 
-test("close atlas zoom blends aligned client terrain and clears it when disabled", function()
+test("close atlas zoom uses an opaque terrain canvas with shared tile edges", function()
     local addon, _, state = loadAtlas(1436)
     addon.atlasTerrain = {[1415] = {
         left=0, top=0, stepX=.02, stepY=.02, tiles={},
@@ -602,17 +606,49 @@ test("close atlas zoom blends aligned client terrain and clears it when disabled
     local col = math.floor((zone.left + zone.width / 2 - continent.left) / (continent.width * grid.stepX))
     local row = math.floor((zone.top + zone.height / 2 - continent.top) / (continent.height * grid.stepY))
     grid.tiles[row * 64 + col] = 750104
+    grid.tiles[row * 64 + col + 1] = 750105
+    grid.tiles[(row + 1) * 64 + col] = 750106
+    frame:SetScale(1.17)
+    addon.Atlas:Refresh()
+    local terrain = frame.terrain.frame
+    local tile = assert(frame.terrain.active[row * 64 + col], "correct terrain tile loads on zoom")
+    local neighbor = assert(frame.terrain.active[row * 64 + col + 1], "adjacent terrain tile loads")
+    local below = assert(frame.terrain.active[(row + 1) * 64 + col], "terrain tile on the next row loads")
+    check(terrain:IsShown() and terrain.alpha == 1 and tile:IsVisible(), "terrain replaces the painted map")
+    equal(tile.points[1][4] + tile:GetWidth(), neighbor.points[1][4], "neighbors share one horizontal edge")
+    equal(tile.points[1][5] - tile:GetHeight(), below.points[1][5], "neighbors share one vertical edge")
+    check(not atlasTexture(frame, 103), "native zone rectangles stay off the terrain")
     frame.left, frame.top = 0, 540
-    state.cursorX, state.cursorY = 400, 270
+    state.cursorX, state.cursorY = 400 * 1.17, 270 * 1.17
+    frame:Fire("OnMouseWheel", -4)
+    settleMap(frame)
+    check(not terrain:IsShown(), "zooming out returns to the overview")
+    check(atlasTexture(frame, 102), "the illustrated continent remains usable")
     frame:Fire("OnMouseWheel", 99)
     settleMap(frame)
     equal(frame.camera.zoom, 40, "close zoom can reach terrain detail")
-    local tile = assert(atlasTexture(frame, 750104), "correct terrain tile loads on zoom")
-    check(tile.alpha > 0 and tile.alpha < 1, "terrain blends with the illustrated map")
-    check(atlasTexture(frame, 103), "the native illustrated layer remains present")
+    check(terrain:IsShown(), "terrain becomes visible again")
     Wow.trackingMenu():Find("Terrain at close zoom"):Click()
-    check(not atlasTexture(frame, 750104), "turning terrain off releases the tile")
+    check(not terrain:IsShown() and not next(frame.terrain.active), "turning terrain off releases every tile")
     check(atlasTexture(frame, 103), "turning terrain off keeps the illustrated layer")
+end)
+
+test("the terrain canvas waits for its textures before replacing parchment", function()
+    local addon, _, state = loadAtlas(1436)
+    local grid = {left=0, top=0, stepX=.02, stepY=.02, tiles={}}
+    addon.atlasTerrain = {[1415]=grid}
+    grid.tiles[37 * 64 + 20] = 750104
+    state.pendingTextures = {[750104]=true}
+    local frame = openAtlas(addon)
+    local terrain = frame.terrain.frame
+    check(next(frame.terrain.active), "the visible terrain has been requested")
+    equal(terrain.alpha, 0, "parchment stays fully visible while terrain loads")
+    terrain:Fire("OnUpdate", .05)
+    equal(terrain.alpha, 0, "a pending texture keeps the canvas hidden")
+    state.pendingTextures = nil
+    terrain:Fire("OnUpdate", .05)
+    equal(terrain.alpha, 1, "loaded terrain replaces the parchment in one pass")
+    check(not terrain:GetScript("OnUpdate"), "tracking stops when the terrain is ready")
 end)
 
 test("native map changes and combat dismiss the atlas without altering Escape", function()
@@ -846,6 +882,29 @@ test("clicking an entrance uses only the existing viewport and named floors", fu
     Wow.pressEscape()
     check(not env.WorldMapFrame:IsShown() and not floors.dungeon, "Escape closes the map cleanly")
     check(not frame.tiles[1].texture, "closing via Escape releases tiles")
+end)
+
+test("showing a shorter dungeon builds its floor menu with the new floor index", function()
+    local addon = openDeadmines()
+    local floors = addon.DungeonMap
+    floors:SetFloor(2)
+    floors:Close()
+    local shorter
+    for _, dungeon in ipairs(addon.Data.dungeons) do
+        if #addon.floorData[dungeon.id].floors == 1 then
+            shorter = dungeon
+            break
+        end
+    end
+    check(shorter, "single-floor fixture")
+    local dropdown = floors.frame.dropdown
+    dropdown:HookScript("OnShow", function()
+        local menu = dropdown:OpenMenu()
+        check(menu:Find("Boss loot"), "boss menu is available on show")
+        equal(floors.index, 1)
+    end)
+    floors:Open(shorter)
+    equal(floors.dungeon, shorter)
 end)
 
 test("closing the map mid-drag leaves the next floor still and releases its art", function()

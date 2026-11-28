@@ -543,6 +543,8 @@ function DungeonMap:Open(dungeon, bossIndex, preferredFloor, entrance)
     self.dungeon, self.followInstance, self.entrance = dungeon, nil, entrance
     local boss = bossIndex and dungeon.bosses[bossIndex]
     local index = clamp(preferredFloor or (boss and bossFloor(dungeon, boss)) or 1, 1, #info.floors)
+    -- Showing the dropdown can build its menu before SetFloor draws the art.
+    self.index = index
     frame:Show()
     self:SetFloor(index)
 end

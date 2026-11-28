@@ -123,9 +123,13 @@ function Texture:SetAlpha(alpha) self.alpha = alpha end
 function Texture:SetRotation(angle) self.rotation = angle end
 function Texture:SetDrawLayer(layer, sublevel) self.layer, self.sublevel = layer, sublevel end
 function Texture:SetBlendMode(mode) self.blend = mode end
+function Texture:SetSnapToPixelGrid(value) self.snapToPixelGrid = value end
+function Texture:SetTexelSnappingBias(value) self.texelSnappingBias = value end
 function Texture:SetColorTexture(...) self.color = { ... } end
 function Texture:SetTexCoord(...) self.texCoord = { ... } end
-function Texture:IsObjectLoaded() return true end
+function Texture:IsObjectLoaded()
+    return not (Wow.state.pendingTextures and Wow.state.pendingTextures[self.texture])
+end
 
 local FontString = newClass(Region)
 function FontString:SetText(text) self.text = text end
@@ -216,7 +220,12 @@ function Frame:RegisterEvent(event)
     self.events[event] = true
 end
 function Frame:IsForbidden() return false end
-function Frame:CreateTexture() return Wow.region(Texture, self) end
+function Frame:CreateTexture(_, _, inherits)
+    if inherits ~= nil and type(inherits) ~= "string" then
+        error("CreateTexture expects an inherited template as its third argument", 2)
+    end
+    return Wow.region(Texture, self)
+end
 function Frame:CreateFontString() return Wow.region(FontString, self) end
 
 local Button = newClass(Frame)

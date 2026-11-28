@@ -169,9 +169,9 @@ local function draw(frame)
     camera.y = clampAxis(camera.y, extent.top * margin, 1 + (extent.bottom - 1) * margin, height)
     local left, top = camera.x - width / 2, camera.y - height / 2
     local region = camera.zoom >= 2 and regionAt(frame, camera.x, camera.y) or frame.byID[WORLD]
-    frame.art:Draw(left, top, width, height, camera.zoom, region.id)
+    frame.art:Draw(left, top, width, height, region, addon.settings.atlasTerrain)
     if addon.settings.atlasTerrain then
-        frame.terrain:Draw(left, top, width, height, camera.zoom, region.id)
+        frame.terrain:Draw(left, top, width, height, camera.zoom, region)
     else
         frame.terrain:Clear()
     end
@@ -262,11 +262,11 @@ local function createOverlay(map)
     frame.maps, frame.byID, frame.extent = geography()
     frame.camera = {zoom=1, x=.5, y=.5}
     frame.zoomMotion = {}
-    frame.art = addon.AtlasArt.New(frame, frame.maps)
-    frame.terrain = addon.AtlasTerrain.New(frame, frame.byID, frame.art.frame)
+    frame.art = addon.AtlasArt.New(frame, frame.byID[WORLD])
+    frame.terrain = addon.AtlasTerrain.New(frame, frame.maps, frame.art.frame)
     frame.markers = addon.AtlasPins.New(frame, frame.maps, frame.byID)
     local positionUpdates = CreateFrame("Frame", nil, frame)
-    positionUpdates:SetFrameLevel(frame:GetFrameLevel() + 1)
+    positionUpdates:SetFrameLevel(frame:GetFrameLevel() + 2)
     frame.playerArrow = positionUpdates:CreateTexture(nil, "OVERLAY")
     frame.playerArrow:SetSize(22, 22)
     frame.playerArrow:SetTexture("Interface\\Minimap\\MinimapArrow")
