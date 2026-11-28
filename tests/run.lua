@@ -2040,7 +2040,7 @@ test("boss guide gives friendly abilities and individual enemy spells their own 
     equal(env.GameTooltip.lines[1], "spell:8143")
     equal(env.GameTooltip.lines[2], "Native Tremor Totem details")
     tremor:Fire("OnMouseWheel", -1)
-    equal(panel.scroll:GetVerticalScroll(), 46, "wheel scrolls even while pointing at a spell")
+    equal(panel.scroll:GetVerticalScroll(), 56, "wheel scrolls even while pointing at a spell")
 
     local eject, terrify, disarm = spellRow(5141), spellRow(7399), spellRow(6713)
     check(eject ~= terrify and disarm ~= terrify, "different casts and phases have separate rows")
