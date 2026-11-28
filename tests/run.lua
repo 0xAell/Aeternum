@@ -2019,6 +2019,7 @@ test("boss guide gives friendly abilities and individual enemy spells their own 
     check(tremor.text:GetText():find("|T136108:18:18", 1, true), "larger friendly spell icon")
     tremor:Fire("OnEnter")
     check(env.GameTooltip:IsOwned(tremor))
+    equal(env.GameTooltip.anchor, "ANCHOR_LEFT", "right-side guide opens spell detail toward more room")
     equal(env.GameTooltip.lines[1], "spell:8143")
     equal(env.GameTooltip.lines[2], "Native Tremor Totem details")
     tremor:Fire("OnMouseWheel", -1)
@@ -2034,6 +2035,8 @@ test("boss guide gives friendly abilities and individual enemy spells their own 
 
     local effect = addon.castSpells[7399]
     effect.description = "Verified offline Terrify details"
+    addon.Tactics:SpellTooltip(env.GameTooltip, 7399)
+    check(env.GameTooltip.lines[1]:find("Terrify", 1, true), "failed native lookup replaces stale tooltip lines")
     terrify:Fire("OnEnter")
     check(env.GameTooltip:IsOwned(terrify))
     check(env.GameTooltip.lines[1]:find("Terrify", 1, true))
@@ -2048,7 +2051,11 @@ test("boss guide gives friendly abilities and individual enemy spells their own 
     addon.BossHover:Refresh()
     Wow.flushTimers()
     check(not env.GameTooltip:IsShown(), "redraw clears a tooltip for a recycled row")
+    shared.left, shared.right = 635, 655
+    addon.BossHover:Refresh()
+    Wow.flushTimers()
     spellRow(7399):Fire("OnEnter")
+    equal(env.GameTooltip.anchor, "ANCHOR_RIGHT", "left-side guide opens spell detail toward more room")
     addon.DungeonMap:SetFloor(2)
     check(not env.GameTooltip:IsShown(), "floor changes clear the row's tooltip")
 end)
