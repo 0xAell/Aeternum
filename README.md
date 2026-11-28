@@ -4,6 +4,8 @@
 
 Press **M**. Aeternum adds dungeon floors, boss loot, trainers, quests and entrance directions to the World of Warcraft: Forever map. It uses Blizzard’s artwork, menus and tooltips. The data ships with the addon and works offline.
 
+[CurseForge project](https://www.curseforge.com/wow/addons/aeternum) · [Download the latest GitHub release](https://github.com/0xAell/Aeternum/releases/latest)
+
 ## On the map
 
 | Where | What to do |
