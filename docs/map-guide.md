@@ -4,7 +4,7 @@ Press **M** to open the world map. The map’s tracking menu controls quest obje
 
 ## Dungeon entrances and directions
 
-Click an entrance on a zone or continent map to browse the dungeon. Right-click it for minimap directions to a specific wing or door. Nearby locations can share a pin. Click it to choose one, or zoom in to separate them on maps that support zoom.
+Click a dungeon entrance to browse its floors. Right-click for minimap directions to a specific wing or door. The pin glows when it’s under the pointer. Entrance pins stay compact until you zoom in close on a zone. If nearby entrances share a pin, click it to choose one.
 
 Ten of the 41 marked entrances have a recorded approach waypoint, covering the Deadmines, Ragefire Chasm, the four Scarlet Monastery wings, Alcaz Prison, Blackmaw Hold, Krol’dok Stronghold, and Shaper’s Terrace. Other doors show a direct bearing. Dire Maul East and West each have more than one selectable portal.
 

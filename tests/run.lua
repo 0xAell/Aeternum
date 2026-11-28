@@ -433,7 +433,7 @@ test("dungeon right-click offers directions and does not zoom the map", function
 end)
 
 test("Westfall entrance artwork has padding for either mouse button and survives focus and pin reuse", function()
-    local addon, env, state = load({mapID=1436})
+    local addon, env, state = load({mapID=1436, viewWidth=.5})
     local map = env.WorldMapFrame
     map:Show()
     local function isDeadmines(entry) return entry.source.id == "deadmines" end
@@ -467,7 +467,40 @@ test("Westfall entrance artwork has padding for either mouse button and survives
     equal(addon.DungeonMap.dungeon, door.source, "padding opens the floor map")
 end)
 
-test("nearby entrances to different dungeons stay selectable and split on zoom", function()
+test("a zone entrance grows only on close zoom and lights up only under the mouse", function()
+    local addon, env, state = load({mapID=1436, viewWidth=.61})
+    local map = env.WorldMapFrame
+    map:Show()
+    local function deadmines(entry) return entry.source.id == "deadmines" end
+    local pin, entrance = locate(env, deadmines)
+    equal(pin.icon:GetWidth(), 7.5, "zoomed-out artwork")
+    equal(pin:GetWidth(), 7.5, "no invisible padding at overview zoom")
+    addon.FocusLocation(entrance)
+    equal(pin:GetWidth(), 9, "focused overview still uses quarter size")
+    check(env.GameTooltip:IsOwned(pin))
+    check(not pin.hoverGlow or not pin.hoverGlow:IsShown(), "focus does not simulate a mouseover")
+    addon.FocusLocation(nil)
+    pin:OnMouseEnter()
+    check(pin.hoverGlow and pin.hoverGlow:IsShown() and env.GameTooltip:IsOwned(pin), "glow and tooltip")
+    equal(pin.hoverGlow.atlas, "UI-QuestPoi-OuterGlow")
+    equal(pin:GetWidth(), 7.5, "hover leaves click area alone")
+    pin:OnMouseLeave()
+    check(not pin.hoverGlow:IsShown() and not env.GameTooltip:IsShown(), "leave clears both")
+    pin:OnMouseEnter()
+    state.viewWidth = .59
+    map.providers[1]:OnCanvasScaleChanged()
+    Wow.flushTimers()
+    pin = locate(env, deadmines)
+    equal(pin.icon:GetWidth(), 30, "close up even within the same layout grid size")
+    equal(pin:GetWidth(), 40, "close-up click padding")
+    check(not pin.hoverGlow or not pin.hoverGlow:IsShown(), "recycled pin starts unhighlighted")
+    state.viewWidth = .61
+    map.providers[1]:OnCanvasScaleChanged()
+    Wow.flushTimers()
+    equal(locate(env, deadmines):GetWidth(), 7.5, "zooming out restores the tight click area")
+end)
+
+test("adjacent Razorfen entrances have distinct click targets in the zone overview", function()
     local addon, env, state = load({mapID=1413})
     local map = env.WorldMapFrame
     map.ScrollContainer:SetSize(400, 320)
@@ -475,14 +508,11 @@ test("nearby entrances to different dungeons stay selectable and split on zoom",
     local function kraul(e) return e.source.id == "razorfen-kraul" end
     local function downs(e) return e.source.id == "razorfen-downs" end
     local pin = locate(env, kraul)
-    equal(locate(env, downs), pin, "one marker on the small map")
-    map:ClickPin(pin, "RightButton", 19, 0)
-    state.menu:Find("Show path to Razorfen Downs")
+    check(locate(env, downs) ~= pin, "compact entrances fit separately")
+    map:ClickPin(pin, "RightButton", 3, 0)
     state.menu:Find("Show path to Razorfen Kraul")
-    map:ClickPin(pin, "LeftButton", -19, 0)
-    state.menu:Find("Razorfen Downs")
-    state.menu:Find("Razorfen Kraul"):Click()
-    Wow.flushTimers()
+    check(not menuRow(state.menu, "Show path to Razorfen Downs"), "only the door clicked is in the menu")
+    map:ClickPin(pin, "LeftButton", -3, 0)
     equal(addon.DungeonMap.dungeon.id, "razorfen-kraul")
     addon.DungeonMap:Close()
     state.viewWidth = .25
@@ -492,7 +522,7 @@ test("nearby entrances to different dungeons stay selectable and split on zoom",
 end)
 
 test("shared entrances retain the chosen wing for both buttons", function()
-    local addon, env, state = load({mapID=1420, playerMap=1420, playerX=.2, playerY=.2})
+    local addon, env, state = load({mapID=1420, viewWidth=.5, playerMap=1420, playerX=.2, playerY=.2})
     env.WorldMapFrame:Show()
     local pin = locate(env, function(entry) return entry.source.id == "sm-armory" end)
     equal(#pin.entries, 4, "one pin")
@@ -515,13 +545,14 @@ test("Dire Maul wing portals agree with the zone map and alternate doors carry d
     local east = addon.DungeonEntrances(dungeonNamed(addon, "dm-east"))
     local north = addon.DungeonEntrances(dungeonNamed(addon, "dm-north"))
     equal(#east, 3); equal(east[1].x, .6486); equal(north[1].x, .6292)
+    env.WorldMapFrame.ScrollContainer:SetSize(400, 320)
     env.WorldMapFrame:Show()
     local west = locate(env, function(e) return e.source.id == "dm-west" end)
     env.WorldMapFrame:ClickPin(west, "RightButton")
     local second = assert(menuRow(state.menu, "60.3, 29.7"))
     second:Click()
     equal(env.AeternumRouteDB.y, .2968)
-    state.viewWidth = .25
+    state.viewWidth = .125
     env.WorldMapFrame.providers[1]:OnCanvasScaleChanged()
     Wow.flushTimers()
     local a = locate(env, function(e) return e.source.id == "dm-west" and e.y == .2968 end)
@@ -941,28 +972,44 @@ test("unrecorded or missing prices are never reported as free", function()
     equal(findEntry(addon.Trainers:Lessons(11867), function(l) return l.name == "Unknown cost" end).cost, nil)
 end)
 
-test("continent entrance pins project into the parent map and route to their original zone", function()
-    local addon, env, state = load({mapID=1415, playerMap=1436, playerX=.2, playerY=.2})
-    env.Enum.UIMapType = {World=0, Continent=1}
+test("world and continent entrance pins keep tight hitboxes and route to their original zone", function()
+    local addon, env, state = load({mapID=947, viewWidth=.25, playerMap=1436, playerX=.2, playerY=.2})
+    local types = env.Enum.UIMapType
+    local parents = {[1414]=947, [1415]=947, [1436]=1415, [1454]=1414}
     env.C_Map.GetMapInfo = function(id)
-        if id == 1415 then return {mapType=1, name="Eastern Kingdoms"} end
-        return {mapType=3, parentMapID=id == 1436 and 1415 or 0, name="Westfall"}
+        local mapType = id == 947 and types.World or
+            ((id == 1414 or id == 1415) and types.Continent or types.Zone)
+        return {mapType=mapType, parentMapID=parents[id] or 0, name=tostring(id)}
     end
     env.C_Map.GetMapRectOnMap = function(id, parent)
-        equal(id, 1436); equal(parent, 1415)
+        if id == 1454 and parent == 947 then return .55, .95, .2, .6 end
         return .1, .5, .2, .6
     end
-    env.WorldMapFrame:Show()
+    local map = env.WorldMapFrame
+    map:Show()
+    for _, overview in ipairs({{947, "deadmines"}, {1414, "ragefire-chasm"}, {1415, "deadmines"}}) do
+        map:SetMapID(overview[1])
+        local pin = locate(env, function(e) return e.source.id == overview[2] end)
+        equal(pin.icon:GetWidth(), 7.5, "overview artwork stays small even when zoomed")
+        equal(pin:GetWidth(), 7.5, "horizontal target matches artwork")
+        equal(pin:GetHeight(), 7.5, "vertical target matches artwork")
+        map:ClickPin(pin, "LeftButton", 4, 0)
+        check(not addon.DungeonMap.dungeon, "outside click misses entrance")
+        map:ClickPin(pin, "RightButton", 0, -4)
+        check(not state.menu, "outside click leaves the native right click free")
+        map:ClickPin(pin, "LeftButton", 3, 3)
+        equal(addon.DungeonMap.dungeon.id, overview[2], "inside click opens the dungeon")
+        addon.DungeonMap:Close()
+    end
     local pin, door = locate(env, function(e) return e.source.id == "deadmines" end)
     equal(door.mapID, 1415, "displayed on continent")
     equal(door.point.mapID, 1436, "route in Westfall")
     check(math.abs(door.x - (.1 + door.point.x * .4)) < .00001, "projected coordinate")
     check(not locate(env, function(e) return e.source.id == "ragefire-chasm" end), "other continent excluded")
-    equal(pin.icon:GetWidth(), 30, "continent entrance artwork")
-    equal(pin:GetWidth(), 40, "continent entrance target")
-    env.WorldMapFrame:ClickPin(pin, "RightButton", 19, 0)
+    map:ClickPin(pin, "RightButton", 3, 0)
     state.menu:Find("Show path to The Deadmines"):Click()
     equal(#addon.Navigation.points, 2, "Westfall approach")
+    check(pin.tracked:IsShown() and pin.tracked:GetWidth() < pin.icon:GetWidth(), "compact route badge fits the pin")
 end)
 
 test("focusing a second map location restores the first pin's style and size", function()

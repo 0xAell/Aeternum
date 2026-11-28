@@ -523,7 +523,7 @@ function Wow.new(state)
     end
     env.GetTrainerServiceCost = function(i) return state.services[i].cost end
     env.GetTrainerServiceSkillReq = function(i) return state.services[i].skill, state.services[i].need end
-    env.Enum = {TooltipDataType = {Spell = 1}}
+    env.Enum = {TooltipDataType = {Spell = 1}, UIMapType = {World = 1, Continent = 2, Zone = 3}}
     env.C_TooltipInfo = {GetTrainerService = function(i)
         local row = state.services[i]
         if row.spell then return {type=1, id=row.spell} end
@@ -675,7 +675,7 @@ function Wow.new(state)
         IsComplete = function(questID) return state.complete[questID] or false end,
     }
     env.C_Map = {
-        GetMapInfo = function(mapID) return { name = mapFor(mapID).name } end,
+        GetMapInfo = function(mapID) return {name=mapFor(mapID).name, mapType=env.Enum.UIMapType.Zone} end,
         GetBestMapForUnit = function() return state.playerMap end,
         GetPlayerMapPosition = function()
             if state.playerX then return { x = state.playerX, y = state.playerY } end
