@@ -14,19 +14,21 @@ Ten of the 41 marked entrances have a recorded approach waypoint, covering the D
 
 Directions survive a UI reload on the same character. They pause on another continent or inside an unrelated instance and end when you reach the destination. Choose **Stop directions** on the map to cancel.
 
-## Dungeon floors and boss loot
+## Dungeon floors and encounters
 
 Inside a dungeon, press **M** to see the floor. The map follows recognized rooms and floor IDs, and moves to a boss's floor when the fight starts. That helps where the game gives no room name or position. After a fight, the map opens on that boss's floor until a room name says otherwise. A floor you choose yourself stays put. A player arrow appears when the client supplies coordinates for that floor. Scroll to zoom and drag to pan. Choose **Back** or right-click empty floor space to return to the zone map. **Escape** closes the map.
 
 Click the floor name to change floors, check which dungeon keys are in your bags, or find an outdoor entrance. Under **Entrances**, **Show on zone map** marks the door when you open its zone. If you’re viewing a different zone, the addon names the destination in chat.
 
-Click a boss skull to see its drops. If bosses share a spot, choose one. The floor menu’s **Boss loot** list also includes bosses whose positions are unknown. Hover an item for its tooltip, Shift-click to link it, or Ctrl-click to preview it.
+Hover a boss skull to open the encounter guide. A shared skull lists every encounter at that spot in the same guide. Move your pointer onto the guide to scroll through longer fights or hover an item for its native tooltip.
 
-Hover a skull for your assigned role and relevant abilities from your character's spellbook. Open **Tactics** to read the tank, healer and DPS plans, even when playing solo. You can hover a class spell for its native tooltip and the action to take. Magic, Curse, Disease and Poison have text labels and Blizzard's aura colors. **Recorded Forever casts** shows abilities seen in that dungeon. **Reference spells** covers additional abilities from encounter guides or databases. [Mechanics coverage by boss](boss-audit/mechanics.md)
+Each encounter shows quick tactics for tanks, healers, and DPS and relevant abilities from your character’s spellbook. The guide includes the boss’s creature type, rank, and named adds when those details are documented. Magic, Curse, Disease, and Poison use Blizzard’s aura colors. **Recorded Forever casts** shows abilities seen in that dungeon, and **Reference spells** lists additional abilities from encounter guides or databases. [Mechanics coverage by boss](boss-audit/mechanics.md)
+
+Click a skull to open the boss menu. From there, Shift-click an item to link it or Ctrl-click to preview it. If you’re looking for a boss whose position is unknown, open **Boss loot** from the floor dropdown or type `/aeternum <boss name>`.
 
 Item tooltips anywhere in the game, such as your bags, chat links, and the auction house, name the bosses that drop the item. Only recorded drops and encounter rolls count. Guide-listed items stay off the tooltip until a player drop confirms them.
 
-Both boss menus and loot search use your class and trained weapon and armor proficiencies. Higher-level gear stays visible if you already use that equipment type. Recipes appear when you have the profession, rank, and specialization to learn them. Learning a recipe removes it from the list. Other recorded drops, encounter rolls, and guide-listed drops have separate submenus when they contain a match.
+The encounter guide, boss menus, and loot search use your class and trained weapon and armor proficiencies. Higher-level gear stays visible if you already use that equipment type. Recipes appear when you have the profession, rank, and specialization to learn them. Learning a recipe removes it from the list. Loot labels distinguish verified boss drops, other recorded drops, encounter rolls, and guide-listed items.
 
 The atlas covers 34 dungeons and wings, 71 floors, and 302 boss and encounter entries. There are 277 map pins before grouping encounters that share a location. Hover a pin to see whether its position is a guide estimate. Dalaran’s Underbelly uses a labeled route sketch. Of 1,428 audited items, 1,420 have verified Forever requirements for character loot lists. [Boss and loot audit](boss-audit/README.md)
 

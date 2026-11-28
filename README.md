@@ -25,11 +25,11 @@ Press **M** and everything you need is already on the map. Aeternum adds dungeon
 ### Dungeon floors, boss tactics and loot
 Click any entrance on the Azeroth, continent, or zone map to browse all 34 dungeons and wings across 71 floors. Not sure where to go next? **Dungeons by level** lists every dungeon from the lowest level range to the highest, colored for your character the way the game colors quests. Inside an instance, pressing **M** opens your current floor automatically and shows your position wherever the client reports coordinates. The floor also follows boss fights, which helps where the game gives no room name.
 
-- Hover a skull for your role's plan and the counters your class knows, such as Tremor Totem for Sneed's Shredder. Open **Tactics** for all three roles, color-coded effects and the boss's spells. [Boss mechanics and sources](docs/boss-audit/mechanics.md)
-- Click a boss skull (or open **Boss loot** in the floor menu for unplaced bosses) to see gear your class and trained proficiencies can use, plus recipes you have the profession, rank, and specialization to learn. Already-learned recipes drop off the list.
-- Hover items for standard WoW tooltips, **Shift-click** to link in chat, **Ctrl-click** to preview in the dressing room, and check which **Dungeon keys** are already in your bags. Defeated bosses dim as you clear the run.
-- Item tooltips anywhere in the game, from your bags and chat links to the auction house, name the bosses that drop the item. Only verified drops and encounter rolls count.
-- Verified boss drops appear directly in the main menu, while other recorded corpse drops, encounter rolls, and guide-listed drops stay separated in submenus so you can see what has live player evidence.
+- Hover a skull to open the encounter guide. It shows class counters like Tremor Totem for Sneed's Shredder, quick tactics for tanks, healers, and DPS, and color-coded effects. When the records identify them, the guide also shows the boss's creature type, rank, and adds. Recorded Forever casts and reference spells have separate labels. [Boss mechanics and sources](docs/boss-audit/mechanics.md)
+- Tactics and usable loot appear side by side, with every encounter listed when bosses share a skull. Move into the guide to scroll or hover an item for its stats. Loot uses your class, proficiencies, and professions, and recipes you already know drop off the list.
+- Click a skull for the boss menu, with **Shift-click** to link an item in chat and **Ctrl-click** to preview it in the dressing room. Find bosses whose positions are unknown under **Boss loot** in the floor menu or by searching for their name.
+- The loot list labels verified boss drops, other recorded drops, encounter rolls, and guide-listed items. The game’s item tooltips name drop sources for verified drops and encounter rolls.
+- Check which **Dungeon keys** are in your bags from the floor menu. Defeated bosses dim as you clear the run.
 
 ### Entrances and minimap directions
 Hover over a zone to see its recommended levels, on the Azeroth, continent, and zone maps, including unexplored terrain.
@@ -66,7 +66,7 @@ Install directly from the **[CurseForge project page](https://www.curseforge.com
 3. Launch the game (or run `/reload` if you're already logged in) and press **M**.
 
 > [!TIP]
-> **Quick check in game:** Open Westfall on the world map and click **The Deadmines** near Moonbrook to browse its floors and boss drops, or right-click the entrance for minimap directions down through Moonbrook.
+> **Quick check in game:** Open Westfall, click **The Deadmines** near Moonbrook, and hover a boss skull to see its tactics and loot. Right-click the entrance for minimap directions down through Moonbrook.
 
 ## Controls & Commands
 
@@ -76,7 +76,9 @@ Install directly from the **[CurseForge project page](https://www.curseforge.com
 | --- | --- |
 | **Left-click** a dungeon entrance | Open its floor map and boss pins |
 | **Right-click** a dungeon entrance | Start or stop minimap directions to a wing or door |
-| **Left-click** a boss skull | View usable boss drops (or pick a boss when several share a spot) |
+| **Hover** a boss skull | Read tactics, spells, adds, and usable loot for every encounter on that pin |
+| **Scroll** inside the boss guide | Read longer encounter and loot lists |
+| **Left-click** a boss skull | Open the boss menu for item links, previews, and encounter selection |
 | **Left-click** a trainer or quest pin | Browse lessons and prices, track a quest, or start directions |
 | **Scroll / drag** on a dungeon floor | Zoom in and pan around the floor |
 | **Back** button or **Right-click** empty floor | Return to the outdoor zone map (**Escape** closes the map) |

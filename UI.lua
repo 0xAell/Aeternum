@@ -18,6 +18,10 @@ local function showLink(kind, id, name)
     if SetItemRef then SetItemRef(ref, link, "LeftButton") end
 end
 
+function UI:OpenItem(id)
+    showLink("item", id, addon.ItemName(id))
+end
+
 local function colorChannel(value)
     return math.floor(math.max(0, math.min(1, value or 0)) * 255 + .5)
 end
@@ -34,6 +38,8 @@ local function itemLabel(id, bags)
     return text
 end
 
+UI.ItemLabel = itemLabel
+
 local function itemRow(menu, id, bags)
     local row = menu:CreateButton(itemLabel(id, bags), function() showLink("item", id, addon.ItemName(id)) end)
     row:SetTooltip(function(tooltip) tooltip:SetItemByID(id) end)
@@ -45,6 +51,63 @@ local lootSections = {
     {"encounter", "Encounter rolls", "Players rolled on these items during this encounter."},
     {"guide", "Guide-listed drops", "Forever dungeon guides list these items. A matching player drop is unverified."},
 }
+
+local function eachDrop(boss, usable, yield)
+    local starts = {}
+    for _, section in ipairs(lootSections) do
+        local start = boss.lootSections and boss.lootSections[section[1]]
+        if start then starts[start] = section end
+    end
+    local section, found
+    for index, id in ipairs(boss.loot) do
+        section = starts[index] or section
+        if usable(id) then
+            found = true
+            yield(id, section)
+        end
+    end
+    return found
+end
+
+local function emptyLoot(boss)
+    return #boss.loot == 0 and "No documented drops" or "No usable drops found for your character"
+end
+
+function UI:AddBossLoot(tooltip, boss, usable, addItem)
+    local previous
+    tooltip:AddLine("Usable loot", 1, .82, 0)
+    if not eachDrop(boss, usable, function(id, section)
+        if section ~= previous then tooltip:AddLine(section[2], .74, .74, .74) end
+        previous = section
+        if addItem then addItem(id) else tooltip:AddLine(itemLabel(id), 1, 1, 1, true) end
+    end) then
+        tooltip:AddLine(emptyLoot(boss), .75, .75, .75, true)
+    end
+end
+
+function UI:AddBossDetails(tooltip, boss)
+    local details = addon.BossDetails:ForBoss(boss.id)
+    local kind = boss.event and (boss.event .. " event") or "Boss"
+    if details then
+        if details.classification then
+            kind = boss.event and (kind .. " · " .. details.classification) or details.classification
+        end
+        if details.creatureType then kind = kind .. " · " .. details.creatureType end
+    end
+    tooltip:AddLine(kind, .8, .8, .8, true)
+    if details and details.phase then tooltip:AddLine(details.phase, .8, .8, .8, true) end
+    if details and details.adds and #details.adds > 0 then
+        tooltip:AddLine("Adds and nearby packs: " .. table.concat(details.adds, ", "), 1, .82, 0, true)
+    end
+end
+
+function UI:BossTooltip(tooltip, boss)
+    tooltip:SetText(boss.name .. " — Tactics & Loot")
+    self:AddBossDetails(tooltip, boss)
+    addon.Tactics:AddGuide(tooltip, boss, true)
+    addon.Tactics:AddCasts(tooltip, boss)
+    self:AddBossLoot(tooltip, boss, addon.LootFilter())
+end
 
 local function sectionMenu(menu, section)
     local parent = menu:CreateButton(section[2])
@@ -69,23 +132,15 @@ function UI:Boss(owner, boss)
             addon.Tactics:AddMenu(menu, boss, showLink)
             menu:CreateDivider()
         end
-        local starts = {}
-        for _, section in ipairs(lootSections) do
-            local start = boss.lootSections and boss.lootSections[section[1]]
-            if start then starts[start] = section end
-        end
-        local parent, section = menu, nil
-        for index, id in ipairs(boss.loot) do
-            if starts[index] then parent, section = nil, starts[index] end
-            if usable(id) then
-                visible[id] = true
-                parent = parent or sectionMenu(menu, section)
-                local row = itemRow(parent, id)
-                if not addon.ItemCached(id) then pending[id] = row end
-            end
-        end
-        if not next(visible) then
-            menu:CreateTitle(#boss.loot == 0 and "No documented drops" or "No usable drops found for your character")
+        local parent, previous = menu, nil
+        if not eachDrop(boss, usable, function(id, section)
+            if section ~= previous then parent = sectionMenu(menu, section) end
+            previous = section
+            visible[id] = true
+            local row = itemRow(parent, id)
+            if not addon.ItemCached(id) then pending[id] = row end
+        end) then
+            menu:CreateTitle(emptyLoot(boss))
         end
     end)
     if not openMenu then return end
@@ -134,9 +189,7 @@ function UI:BossGroup(owner, members, label)
                     if addon.DungeonMap.dungeon == dungeon then self:Boss(addon.DungeonMap.frame, boss) end
                 end)
             end)
-            if boss.id and addon.Tactics and addon.Tactics:ForBoss(boss.id) then
-                row:SetTooltip(function(tooltip) addon.Tactics:AddTooltip(tooltip, boss, true) end)
-            end
+            row:SetTooltip(function(tooltip) self:BossTooltip(tooltip, boss) end)
         end
     end)
 end
@@ -450,9 +503,14 @@ function UI:Search(query, results)
         if #entries == 0 then menu:CreateTitle("No matching dungeons, bosses or items") end
         for _, entry in ipairs(entries) do
             local label = entry.bossIndex and (entry.title .. " · " .. entry.subtitle) or dungeonLabel(entry)
-            menu:CreateButton(label, function()
+            local row = menu:CreateButton(label, function()
                 C_Timer.After(0, function() if self.map:IsShown() then self:Pick(self.map, entry) end end)
             end)
+            if entry.bossIndex then
+                row:SetTooltip(function(tooltip)
+                    self:BossTooltip(tooltip, entry.source.bosses[entry.bossIndex])
+                end)
+            end
         end
     end)
     if query and query ~= "" then

@@ -43,6 +43,7 @@ local function place(frame)
     -- Keep skulls the size of a normal map icon at every zoom.
     for _, pin in ipairs(frame.pins) do pin:SetSize(20 / scale, 20 / scale) end
     frame.playerArrow:SetSize(22 / scale, 22 / scale)
+    addon.BossHover:Refresh()
 end
 
 local function zoom(frame, delta)
@@ -55,6 +56,7 @@ local function zoom(frame, delta)
 end
 
 local function clearFloor(frame)
+    addon.BossHover:Hide()
     for _, texture in ipairs(frame.tiles) do texture:Hide(); texture:SetTexture(nil) end
     for _, line in ipairs(frame.lines) do line:Hide() end
     for _, pin in ipairs(frame.pins) do
@@ -111,6 +113,7 @@ function DungeonMap:RefreshKills()
         pin.complete = complete
         pin:SetAlpha(complete and .5 or 1)
     end
+    addon.BossHover:Refresh()
 end
 
 function DungeonMap:RecordKill(encounter)
@@ -239,27 +242,11 @@ local function bossPin(frame, index)
     pin:SetNormalTexture(137025) -- Blizzard's target-frame skull
     pin:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
     pin:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:SetText(#self.members > 1 and (self.label or "Bosses") or self.boss.name)
-        if #self.members > 1 then
-            for _, member in ipairs(self.members) do GameTooltip:AddLine(member.name) end
-        elseif self.boss.event then
-            GameTooltip:AddLine(self.boss.event .. " event", .85, .85, .85)
-        end
-        if self.complete then GameTooltip:AddLine("Encounter complete", .55, .8, .55) end
-        if self.stop.pull then
-            GameTooltip:AddLine("Recorded pull location", .8, .8, .8)
-        elseif self.stop.approximate then
-            GameTooltip:AddLine("Approximate location", .8, .8, .8)
-        end
-        if #self.members == 1 and addon.Tactics then
-            addon.Tactics:AddTooltip(GameTooltip, self.boss, false)
-        end
-        GameTooltip:AddLine("Click for tactics & loot", 1, .82, 0)
-        GameTooltip:Show()
+        if self.members and #self.members > 0 then addon.BossHover:Show(self) end
     end)
-    pin:SetScript("OnLeave", function(self) if GameTooltip:IsOwned(self) then GameTooltip:Hide() end end)
     pin:SetScript("OnClick", function(self)
+        addon.BossHover:Hide()
+        if not self.members then return end
         if #self.members == 1 then addon.UI:Boss(self, self.boss)
         else addon.UI:BossGroup(self, self.members, self.label) end
     end)
@@ -354,9 +341,7 @@ local function floorMenu(_, menu)
                 addon.UI:Boss(DungeonMap.frame, boss)
             end)
         end)
-        if boss.id and addon.Tactics and addon.Tactics:ForBoss(boss.id) then
-            row:SetTooltip(function(tooltip) addon.Tactics:AddTooltip(tooltip, boss, true) end)
-        end
+        row:SetTooltip(function(tooltip) addon.UI:BossTooltip(tooltip, boss) end)
     end
     if #dungeon.quests > 0 then addon.UI:QuestMenu(menu:CreateButton("Dungeon quests"), dungeon) end
     if #dungeon.keys > 0 then addon.UI:Keys(menu:CreateButton("Dungeon keys"), dungeon) end

@@ -2,9 +2,11 @@ Press **M** in **World of Warcraft: Forever** to browse dungeon floors, boss tac
 
 **Dungeons, boss tactics and loot**
 
-Click a dungeon entrance to open its floor map. Click a boss to see equipment your character can use and recipes they have the profession and skill to learn. Aeternum covers 34 dungeons and wings across 71 floors. Hover a boss pin to see when its position is estimated. Item tooltips everywhere name the bosses that drop the item.
+Click a dungeon entrance to open its floor map, then hover a boss skull for tactics and loot side by side. Each guide includes tank, healer, and DPS tactics, class abilities your character knows, color-coded effects, and spells. The boss’s creature type, rank, and named adds appear when documented. Recorded Forever casts and reference spells are marked separately.
 
-Hover a boss skull for your assigned role’s plan and the abilities your character knows. A Shaman who has learned Tremor Totem, for example, sees its icon beside advice for the Shredder’s Terrify in the Deadmines. Open **Tactics** for tank, healer, and DPS notes on all 302 encounters. Dispel types use Blizzard’s aura colors, and the spell lists distinguish recorded Forever casts from guide references.
+A shared skull shows every encounter at that spot. Move onto the guide to scroll or hover an item for its stats. Gear and recipes are filtered by your class, proficiencies, and professions. Click a skull for item links and previews. For bosses without a mapped position, open **Boss loot** in the floor menu or search by name.
+
+Aeternum covers 302 encounters across 34 dungeons and wings and 71 floors. The guide marks estimated boss positions. Item tooltips throughout the game show verified boss drops and encounter rolls.
 
 **Dungeons by level**, in the map’s tracking menu and the minimap’s addon compartment, lists every dungeon from the lowest level range to the highest, colored for your character the way the game colors quests.
 

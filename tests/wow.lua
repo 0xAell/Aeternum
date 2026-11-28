@@ -134,6 +134,9 @@ function FontString:SetTextColor(...) self.textColor = { ... } end
 function FontString:SetJustifyH(value) self.justify = value end
 function FontString:SetWordWrap() end
 function FontString:SetMaxLines() end
+function FontString:GetStringHeight()
+    return math.max(1, math.ceil(#(self.text or "") / math.max(1, self.width / 6))) * 13
+end
 
 -- Frames ----------------------------------------------------------------------
 
@@ -144,6 +147,10 @@ function Line:SetStartPoint(...) self.start = {...} end
 function Line:SetEndPoint(...) self.finish = {...} end
 function Frame:CreateLine() return Wow.region(Line, self) end
 function Frame:SetClipsChildren(value) self.clipped = value end
+function Frame:SetBackdrop(backdrop) self.backdrop = backdrop end
+function Frame:SetBackdropColor(...) self.backdropColor = {...} end
+function Frame:SetBackdropBorderColor(...) self.borderColor = {...} end
+function Frame:IsMouseOver() return self.mouseOver == true end
 
 function Frame:SetScript(event, handler) self.scripts[event] = handler end
 function Frame:GetScript(event) return self.scripts[event] end
@@ -268,6 +275,21 @@ end
 function ScrollBar:SetVisibleExtentPercentage(value) self.visibleExtent = value end
 function ScrollBar:SetPanExtentPercentage(value) self.panExtent = value end
 
+local ScrollFrame = newClass(Frame)
+function ScrollFrame:SetScrollChild(child) self.scrollChild = child end
+function ScrollFrame:SetVerticalScroll(value) self.verticalScroll = value end
+function ScrollFrame:GetVerticalScroll() return self.verticalScroll or 0 end
+function ScrollFrame:UpdateScrollChildRect() end
+function ScrollFrame:GetVerticalScrollRange()
+    local top, bottom
+    for _, point in ipairs(self.points) do
+        if point[1] == "TOPLEFT" then top = -point[5] end
+        if point[1] == "BOTTOMRIGHT" then bottom = point[5] end
+    end
+    local height = self.parent:GetHeight() - (top or 0) - (bottom or 0)
+    return math.max(0, self.scrollChild:GetHeight() - height)
+end
+
 local Tooltip = newClass(Frame)
 function Tooltip:SetOwner(owner) self.owner, self.lines = owner, {} end
 function Tooltip:IsOwned(owner) return self.shown and self.owner == owner end
@@ -283,6 +305,7 @@ function Tooltip:SetHyperlink(link) self.lines = { link } end
 
 local classes = {
     Frame = Frame, Button = Button, DropdownButton = Dropdown, EditBox = EditBox, EventFrame = ScrollBar,
+    ScrollFrame = ScrollFrame,
 }
 
 function Wow.region(class, parent)
@@ -439,11 +462,12 @@ Wow.knownEvents = {
     LEARNED_SPELL_IN_SKILL_LINE = true, ZONE_CHANGED_INDOORS = true, ZONE_CHANGED = true,
     BOSS_KILL = true, ENCOUNTER_START = true, ENCOUNTER_END = true, TRAINER_SERVICE_INFO_NAME_UPDATE = true,
     QUEST_WATCH_LIST_CHANGED = true, SUPER_TRACKING_CHANGED = true, QUEST_POI_UPDATE = true, CVAR_UPDATE = true,
-    ITEM_DATA_LOAD_RESULT = true, SPELLS_CHANGED = true,
+    ITEM_DATA_LOAD_RESULT = true, SPELLS_CHANGED = true, PLAYER_ROLES_ASSIGNED = true,
 }
 
 local templates = { UIPanelButtonTemplate = true, PanelTopTabButtonTemplate = true, MinimalScrollBar = true,
-    WowStyle1DropdownTemplate = true, WowStyle1FilterDropdownTemplate = true }
+    WowStyle1DropdownTemplate = true, WowStyle1FilterDropdownTemplate = true, BackdropTemplate = true,
+    UIPanelScrollFrameTemplate = true }
 
 local pinXML = assert(io.open("WorldMap.xml", "r"))
 local pinPolicy = {}

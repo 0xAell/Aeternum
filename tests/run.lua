@@ -37,6 +37,14 @@ local function equal(actual, expected, message)
     end
 end
 
+local function hoverTexts(addon)
+    local texts = {}
+    for _, row in ipairs(addon.BossHover.panel.rows) do
+        if row:IsShown() then texts[#texts + 1] = row.text:GetText() end
+    end
+    return texts
+end
+
 local function tocFiles()
     local files = {}
     for line in io.lines(ADDON .. ".toc") do
@@ -1546,7 +1554,7 @@ test("only successful encounters or client lockouts dim the appropriate boss sku
     Wow.fire("ENCOUNTER_END", 2747, "Edwin VanCleef", 1, 5, 1)
     check(skull(639).complete and not skull(647).complete)
     skull(639):Fire("OnEnter")
-    check(findEntry(env.GameTooltip.lines, function(text) return text == "Encounter complete" end))
+    check(findEntry(hoverTexts(addon), function(text) return text == "Encounter complete" end))
     Wow.fire("BOSS_KILL", 2744, "Captain Greenskin")
     check(skull(647).complete)
     state.lockedEncounters = {[2747]=true}
@@ -1941,12 +1949,15 @@ test("every trainer location opens its lesson list and every eligible reference 
 end)
 
 test("grouped boss pins keep encounter labels even when only a later member carries the label", function()
-    local addon, env, state = openDeadmines()
+    local addon, _, state = openDeadmines()
     local frame = addon.DungeonMap.frame
     local sneed = findEntry(frame.pins, function(p) return p:IsShown() and #p.members > 1 end)
     check(sneed and sneed.label == "Sneed's Shredder", "Deadmines Sneed group keeps encounter label")
     sneed:Fire("OnEnter")
-    equal(env.GameTooltip.lines[1], "Sneed's Shredder", "hover title uses encounter label")
+    equal(addon.BossHover.panel.title:GetText(), "Sneed's Shredder", "hover title uses encounter label")
+    check(findEntry(hoverTexts(addon), function(text) return text == "Sneed" end), "second phase is visible")
+    check(findEntry(hoverTexts(addon), function(text) return text == "Elite · Mechanical" end), "Shredder type")
+    check(findEntry(hoverTexts(addon), function(text) return text == "Elite · Humanoid" end), "pilot type")
     sneed:Click()
     equal(state.menu.children[1].label, "Sneed's Shredder", "boss-group menu uses encounter label")
     addon.DungeonMap:Open(dungeonNamed(addon, "sm-cathedral"))
@@ -1955,6 +1966,40 @@ test("grouped boss pins keep encounter labels even when only a later member carr
     addon.DungeonMap:Open(dungeonNamed(addon, "ubrs"), nil, 3)
     local rend = findEntry(frame.pins, function(p) return p:IsShown() and #p.members > 1 end)
     equal(rend.label, "Warchief Rend Blackhand", "UBRS Rend group keeps encounter label")
+end)
+
+test("boss guide stays open for scrolling and loot, then closes on leave or floor changes", function()
+    local addon, env, state = openDeadmines()
+    local map = addon.DungeonMap
+    env.UIParent:SetSize(740, 360)
+    local shared = assert(findEntry(map.frame.pins, function(p) return p:IsShown() and #p.members > 1 end))
+    shared.left, shared.right, shared.top = 356, 376, 30
+    shared:Fire("OnEnter")
+    local panel = addon.BossHover.panel
+    check(panel:IsVisible() and panel.more:IsShown() and not state.menu)
+    check(panel:GetHeight() < env.UIParent:GetHeight())
+    local point = panel.points[1]
+    check(point[4] >= 0 and point[4] + panel:GetWidth() <= 740 and point[5] <= 360, "panel stays on screen")
+    state.cursorX, state.cursorY = point[4] + 10, point[5] - 10
+    panel:Fire("OnUpdate", .30)
+    check(panel:IsShown(), "crossing from skull into panel keeps the guide open")
+    panel.scroll:Fire("OnMouseWheel", -2)
+    equal(panel.scroll:GetVerticalScroll(), 92)
+    local item = assert(findEntry(panel.rows, function(row) return row:IsShown() and row.item end))
+    local id = item.item
+    item:Fire("OnEnter")
+    check(env.GameTooltip:IsOwned(item), "loot detail on hover")
+    equal(env.GameTooltip.lines[1], "item:" .. id)
+    item:Click()
+    equal(state.itemRef[1], "item:" .. id)
+    item:Fire("OnLeave")
+    check(not env.GameTooltip:IsShown())
+    state.cursorX, state.cursorY = 0, 0
+    panel:Fire("OnUpdate", .30)
+    check(not panel:IsShown())
+    shared:Fire("OnEnter")
+    map:SetFloor(2)
+    check(not panel:IsShown(), "recycled pins cannot retain their guides")
 end)
 
 test("maximizing the map updates dungeon floor strata and manual boss jump pauses auto-follow", function()
@@ -2107,6 +2152,7 @@ test("all 302 bosses provide role TLDRs, color-coded dispels, and tips across al
     for _, dungeon in ipairs(addon.Data.dungeons) do
         for _, boss in ipairs(dungeon.bosses) do
             seen[boss.id] = true
+            check(addon.BossDetails:ForBoss(boss.id), "missing encounter details for " .. boss.name)
             local entry = addon.Tactics:ForBoss(boss.id)
             check(entry, "missing tactics for " .. boss.name .. " (" .. boss.id .. ")")
             check(entry.t ~= "" and entry.h ~= "" and entry.d ~= "", "empty role TLDR for " .. boss.name)
@@ -2205,19 +2251,18 @@ test("shaman, priest, paladin, mage, hunter, and racial mechanics show icons and
     end)
     check(blazeroarPin, "Blazeroar skull pin shown")
     blazeroarPin:Fire("OnEnter")
-    local lines = env.GameTooltip.lines
+    local lines = hoverTexts(addon)
     check(findEntry(lines, function(l) return l:find("|cff3399ffMagic|r", 1, true) end), "hover dispels")
     check(findEntry(lines, function(l) return l:find("|T136108:", 1, true) end), "hover Tremor icon")
-    check(findEntry(lines, function(l) return l == "Click for tactics & loot" end))
+    check(findEntry(lines, function(l) return l == "Usable loot" end))
+    check(findEntry(lines, function(l) return l:find("Tank:", 1, true) end))
+    check(findEntry(lines, function(l) return l:find("Healer:", 1, true) end))
+    check(findEntry(lines, function(l) return l:find("DPS:", 1, true) end))
 
     blazeroarPin:Click()
     local tactics = assert(menuRow(state.menu, "Tactics"))
     check(tactics.label:find("|cff3399ffMagic|r", 1, true), "Tactics row previews dispel colors")
-    tactics.tooltip(env.GameTooltip)
-    check(findEntry(env.GameTooltip.lines, function(l) return l:find("UI-LFG-ICON-PORTRAITROLES", 1, true) end))
-    check(findEntry(env.GameTooltip.lines, function(l) return l:find("Tank:", 1, true) end))
-    check(findEntry(env.GameTooltip.lines, function(l) return l:find("Healer:", 1, true) end))
-    check(findEntry(env.GameTooltip.lines, function(l) return l:find("DPS:", 1, true) end))
+    check(not tactics.tooltip, "Tactics parent cannot obscure its own submenu")
     local tremorRow = assert(menuRow(tactics, "Tremor Totem"))
     tremorRow.tooltip(env.GameTooltip)
     equal(env.GameTooltip.lines[1], "spell:8143", "submenu ability row opens Blizzard spell tooltip")
@@ -2316,7 +2361,7 @@ test("bosses name the actual fear and only recommend learned counters from the c
     local refs = assert(menuRow(menu, "Reference spells"))
     check(menuRow(refs, "Deadly Poison").label:find("[Poison]Poison", 1, true))
     check(menuRow(refs, "Grievous Garrote").label:find("[Bleed]Bleed", 1, true))
-    menu.tooltip(env.GameTooltip)
+    addon.Tactics:AddTooltip(env.GameTooltip, kat, true)
     check(findEntry(env.GameTooltip.lines, function(l) return l:find("Guide-based tactics", 1, true) end))
     state.class, state.knownSpells = "WARLOCK", {[19244]=true}
     equal(#tactics:ClassTips(269111), 0, "player spellbank does not represent a Felhunter")
