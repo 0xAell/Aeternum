@@ -2,6 +2,8 @@
 
 Press **M** to open the world map. The map’s tracking menu controls quest objectives, low-level quests, and additional trainers.
 
+Hover over a zone on Azeroth or either continent to see its recommended level range under the map’s area name. On a zone map, the range also appears over named places and unexplored land. Zephras Isle shows its range on its own map. The color uses Blizzard’s quest difficulty scale for your character.
+
 ## Dungeon entrances and directions
 
 Click a dungeon entrance to browse its floors. Right-click for minimap directions to a specific wing or door. All entrances are available on the world map and their continent map. You can also open the Stockade from Elwynn Forest, Ragefire Chasm from Durotar, and the Hall of Thanes from Dun Morogh. Hover over a shared pin to see the dungeons it covers, then click to choose one. If a dungeon has multiple doors at the same pin, the menu lists their local coordinates. Zoom in to separate nearby entrances.

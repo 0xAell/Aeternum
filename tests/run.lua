@@ -2096,5 +2096,143 @@ test("a focused location keeps its tooltip shut when the map redraws", function(
     check(env.WorldMapFrame:GetMapID() == 1436 and not env.WorldMapFrame.panX, "map left where it was")
 end)
 
+local function hoverClient()
+    local addon, env, state = load({mapID=1415, level=18})
+    local map = env.WorldMapFrame
+    local label = env.CreateFrame("Frame", nil, map)
+    label.Name, label.Description = label:CreateFontString(), label:CreateFontString()
+    local area = {}
+    label.labelInfoByType = {[3]=area}
+    label.GetHighestPriorityLabelInfo = function() return state.priority or (area.name and area) end
+    label:SetScript("OnUpdate", function(self) self.Name:SetText(area.name or "") end)
+    env.MAP_AREA_LABEL_TYPE, env.LEVEL = {AREA_NAME=3}, "Level"
+    env.QuestDifficultyColors = {difficult={r=1,g=.82,b=0}}
+    env.GetQuestDifficultyColor = function(level)
+        state.difficultyFor = level
+        return {r=.5,g=.5,b=.5}
+    end
+    env.InputUtil = {IsGamepadUIEnabled=function() return state.gamepad end}
+    map.IsCanvasMouseFocus = function() return not state.outside end
+    map.HasGamepadCursorInput = function() return state.gamepad end
+    map.IsCanvasMouseFocusOrPinFocus = map.IsCanvasMouseFocus
+    map.GetNormalizedCursorPosition = function() return state.x or .5, state.y or .5 end
+    map.GetNormalizedGamepadCursorPosition = function() return .3, .7 end
+    env.C_Map.GetMapInfoAtPosition = function() return state.hover end
+    env.C_Map.GetMapLevels = function() return state.low, state.high end
+    env.C_Map.GetMapRectOnMap = function() return 0,0,0,0 end
+    local provider = env.CreateFromMixins(env.MapCanvasDataProviderMixin)
+    provider.Label = label
+    map:AddDataProvider(provider)
+    local text = label.children[3]
+    local function hover(mapID, zoneID, zoneName, title)
+        map.mapID = mapID
+        state.hover = zoneID and {mapID=zoneID, name=zoneName} or nil
+        area.name = title
+        label:Fire("OnUpdate")
+        return text:IsShown() and text:GetText()
+    end
+    return hover, state, env, addon, label
+end
+
+test("zone hover uses the map's localized name, zone recommendations and character difficulty", function()
+    local hover, state, env, _, label = hoverClient()
+    env.LEVEL = "Stufe"
+    equal(hover(1415, 1436, "Westfall", "Westfall"), "Stufe 9–18")
+    equal(label.Name:GetText(), "Westfall")
+    equal(hover(1415, 1433, "Rotkammgebirge", "Rotkammgebirge"), "Stufe 15–25")
+    state.level = 10
+    equal(hover(1433, 1433, "Rotkammgebirge", "Seenhain"), "Rotkammgebirge (15–25)")
+    equal(state.difficultyFor, 15)
+    state.level = 60
+    equal(hover(1433, 1433, "Rotkammgebirge", "Seenhain"), "Rotkammgebirge (15–25)")
+    equal(state.difficultyFor, 23)
+    state.low, state.high = 60, 60
+    equal(hover(1414, 2482, "Hyjal", "Hyjal"), "Stufe 60")
+    check(not hover(1414, 2482, "Hyjal", "Hyjal|cffffffff (60)|r"), "respects a native range")
+end)
+
+test("Azeroth resolves the zone from the continent terrain and respects map edges", function()
+    local hover, state, env, addon = hoverClient()
+    for _, sample in ipairs({{1415, 1436, "Westfall", "9–18"}, {1414, 1413, "The Barrens", "10–25"}}) do
+        local continent, zone, name, levels = unpack(sample)
+        local l,r,t,b = unpack(addon.overviewBounds[947][continent])
+        state.x, state.y = l + .4*(r-l), t + .6*(b-t)
+        env.C_Map.GetMapInfoAtPosition = function(id, x, y)
+            if id == 947 then return {mapID=continent, name="Continent"} end
+            equal(id, continent)
+            check(math.abs(x-.4) < .00001 and math.abs(y-.6) < .00001, "cursor is in continent coordinates")
+            return {mapID=zone, name=name}
+        end
+        equal(hover(947, nil, nil, "Continent"), name .. " (" .. levels .. ")")
+    end
+    state.x, state.y = .99, .99
+    check(not hover(947, nil, nil, "Continent"), "outside continent bounds")
+    env.C_Map.GetMapInfoAtPosition = function(id)
+        if id == 947 then return {mapID=1415, name="Eastern Kingdoms"} end
+        return {mapID=1415, name="Eastern Kingdoms"}
+    end
+    state.x, state.y = .69,.5
+    check(not hover(947, nil, nil, "Eastern Kingdoms"), "no zone over ocean")
+    state.x = .7
+    env.C_Map.GetMapRectOnMap = function() return .4,.8,.3,.7 end
+    env.C_Map.GetMapInfoAtPosition = function(id, x, y)
+        if id == 947 then return {mapID=1415, name="Eastern Kingdoms"} end
+        check(math.abs(x-.75) < .00001 and math.abs(y-.5) < .00001, "prefer live rectangle")
+        return {mapID=2548, name="Riverglades"}
+    end
+    equal(hover(947, nil, nil, "Eastern Kingdoms"), "Riverglades (36–44)")
+end)
+
+test("unexplored zone maps use the continent terrain under the cursor", function()
+    local hover, state, env, addon = hoverClient()
+    local zone = {mapID=1428, parentMapID=1415, name="Burning Steppes"}
+    local land = zone
+    local left,right,top,bottom = unpack(addon.overviewBounds[1415][zone.mapID])
+    env.C_Map.GetMapInfo = function(id)
+        if id == zone.mapID then return zone end
+        if id == 2521 then return {mapID=2521, name="Zephras Isle"} end
+    end
+    env.C_Map.GetMapInfoAtPosition = function(id, x, y)
+        if id == zone.mapID or id == 2521 then return nil end
+        equal(id, 1415)
+        check(math.abs(x - (left + state.x*(right-left))) < .00001, "project longitude to the continent")
+        check(math.abs(y - (top + state.y*(bottom-top))) < .00001, "project latitude to the continent")
+        return land
+    end
+    state.x, state.y = .5, .6
+    equal(hover(1428, nil, nil, nil), "Burning Steppes (50–59)")
+    state.x, land = .6, {mapID=1427, name="Searing Gorge"}
+    equal(hover(1428, nil, nil, nil), "Searing Gorge (43–48)")
+    state.x, land = .7, {mapID=1453, name="Stormwind City"}
+    check(not hover(1428, nil, nil, nil), "city has no questing range")
+    state.x, land = .8, nil
+    check(not hover(1428, nil, nil, nil), "no zone over open water")
+    equal(hover(2521, nil, nil, nil), "Zephras Isle (1–12)")
+end)
+
+test("zone hover clears on pins, city maps, water, and dungeon floors without stealing the map label", function()
+    local hover, state, _, addon, label = hoverClient()
+    equal(hover(1414, 2652, "Shen'dralas", "Shen'dralas"), "Level 38–45")
+    state.priority = {name="Dungeon"}
+    check(not hover(1414, 2652, "Shen'dralas", "Shen'dralas"))
+    state.priority = nil
+    state.outside = true
+    check(not hover(1414, 2652, "Shen'dralas", "Shen'dralas"))
+    state.outside = nil
+    equal(hover(1414, 2652, "Shen'dralas", "Shen'dralas"), "Level 38–45")
+    label.labelInfoByType[3].description = "Native detail"
+    check(not hover(1414, 2652, "Shen'dralas", "Shen'dralas"))
+    label.labelInfoByType[3].description = nil
+    addon.DungeonMap.dungeon = {}
+    check(not hover(1414, 2652, "Shen'dralas", "Shen'dralas"))
+    addon.DungeonMap.dungeon = nil
+    check(not hover(1415, 1453, "Stormwind City", "Stormwind City"))
+    check(not hover(1453, 1453, "Stormwind City", "Trade District"))
+    check(not hover(1436, 1436, "Westfall", nil), "unidentified terrain")
+    equal(hover(947, 2521, "Zephras Isle", "Zephras Isle"), "Level 1–12")
+    state.gamepad = true
+    equal(hover(1414, 2482, "Mount Hyjal", "Mount Hyjal"), "Level 55–60")
+end)
+
 print(("%d passed, %d failed"):format(passed, failed))
 os.exit(failed == 0 and 0 or 1)

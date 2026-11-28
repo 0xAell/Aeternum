@@ -54,28 +54,34 @@ def main():
     door_ids = subprocess.check_output(
         [os.environ.get("LUA", "luajit"), "-", str(ROOT / "Data.lua")], input=READ_DOORS, text=True
     )
-    rectangles = defaultdict(dict)
-    for zone_id in sorted(set(map(int, door_ids.splitlines()))):
-        continent_id = int(maps[zone_id]["ParentUiMapID"])
-        world_id = int(maps[continent_id]["ParentUiMapID"])
-        zone, = assignments[zone_id]
-        targets = [continent_id, world_id]
+    targets = defaultdict(set)
+    for map_id, info in maps.items():
+        parent = int(info["ParentUiMapID"])
+        if map_id in (1414, 1415) or (info["Type"] == "3" and parent in (1414, 1415)):
+            targets[map_id].add(parent)
+    for zone_id in set(map(int, door_ids.splitlines())):
+        continent = int(maps[zone_id]["ParentUiMapID"])
+        targets[zone_id].update((continent, int(maps[continent]["ParentUiMapID"])))
         if zone_id in CITY_SURROUNDINGS:
-            targets.append(CITY_SURROUNDINGS[zone_id])
-        for overview_id in targets:
-            overview, = (row for row in assignments[overview_id] if row["MapID"] == zone["MapID"])
-            rectangles[overview_id][zone_id] = map_rect(zone, overview)
+            targets[zone_id].add(CITY_SURROUNDINGS[zone_id])
+
+    rectangles = defaultdict(dict)
+    for map_id, parents in targets.items():
+        zone, = assignments[map_id]
+        for parent in parents:
+            overview, = (row for row in assignments[parent] if row["MapID"] == zone["MapID"])
+            rectangles[parent][map_id] = map_rect(zone, overview)
 
     lines = [
         "-- Generated from Forever 1.60.1.71139 UiMap and UiMapAssignment. See DATA_SOURCES.md.",
         "local _, addon = ...",
         "",
-        "-- Display map ID, then entrance zone or city ID. Rectangles are left, right, top, bottom.",
+        "-- Display map ID, then child map ID. Rectangles are left, right, top, bottom.",
         "addon.overviewBounds = {",
     ]
     for overview_id, zones in sorted(rectangles.items()):
         lines.append(f"    [{overview_id}] = {{")
-        for zone_id, rect in zones.items():
+        for zone_id, rect in sorted(zones.items()):
             bounds = ", ".join(f"{value:.6f}" for value in rect)
             lines.append(f"        [{zone_id}] = {{{bounds}}},")
         lines.append("    },")

@@ -360,6 +360,7 @@ function addon.AttachMap()
     end
     Mixin(AeternumMapPinMixin, MapCanvasPinMixin, pins)
     addon.UI:Attach(WorldMapFrame)
+    addon.AttachZoneLevels(WorldMapFrame)
     provider = CreateFromMixins(MapCanvasDataProviderMixin, methods)
     WorldMapFrame:AddDataProvider(provider)
     hooksecurefunc(WorldMapFrame, "SetGlobalPinScale", function() provider:OnCanvasScaleChanged() end)
