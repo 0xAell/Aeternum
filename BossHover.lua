@@ -5,7 +5,8 @@ addon.BossHover = Hover
 local PADDING, GAP, SCROLLBAR = 14, 14, 24
 local MAX_WIDTH, MAX_HEIGHT = 740, 660
 local TEXT_SCALE = 1.25
-local ICON_SIZE = math.floor(18 * TEXT_SCALE + .5)
+-- The client scales embedded icons along with their font string.
+local ICON_SIZE = 18
 
 local function createText(parent, template)
     local text = parent:CreateFontString(nil, "OVERLAY", template)
@@ -141,7 +142,7 @@ local function setRow(panel, index, x, y, width, data)
     row.text:SetWidth(width)
     row.text:SetText(data.item and addon.UI.ItemLabel(data.item, false, ICON_SIZE) or data.text)
     row.text:SetTextColor(data.r or 1, data.g or 1, data.b or 1)
-    local minimum = interactive and ICON_SIZE + 4 or 19
+    local minimum = interactive and math.ceil(ICON_SIZE * TEXT_SCALE) + 3 or 19
     local height = data.text == " " and 5 or math.max(minimum, math.ceil(row.text:GetStringHeight()) + 3)
     row:ClearAllPoints()
     row:SetPoint("TOPLEFT", panel.content, "TOPLEFT", x, -y)

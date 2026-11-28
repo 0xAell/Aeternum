@@ -5,9 +5,9 @@ addon.Tactics = Tactics
 local TACTICS_ICON = "|T133741:16:16:0:0:64:64:4:60:4:60|t"
 
 local ROLE_ICON = {
-    tank   = "|TInterface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES:%d:%d:0:0:64:64:0:19:22:41|t",
-    healer = "|TInterface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES:%d:%d:0:0:64:64:20:39:1:20|t",
-    dps    = "|TInterface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES:%d:%d:0:0:64:64:20:39:22:41|t",
+    tank   = "|TInterface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES:16:16:0:0:64:64:0:19:22:41|t",
+    healer = "|TInterface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES:16:16:0:0:64:64:20:39:1:20|t",
+    dps    = "|TInterface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES:16:16:0:0:64:64:20:39:22:41|t",
 }
 
 local ROLES = {
@@ -576,10 +576,9 @@ function Tactics:ClassTips(bossID)
     return tips, classFile, classInfo
 end
 
-local function roleLine(tooltip, role, entry, classInfo, iconSize)
+local function roleLine(tooltip, role, entry, classInfo)
     local class = classInfo and ("|cff" .. classInfo.hex .. classInfo.name .. "|r · ") or ""
-    local size = iconSize or 16
-    local label = role[3]:format(size, size) .. " " .. class .. "|cff" .. role[4] .. role[1] .. ":|r "
+    local label = role[3] .. " " .. class .. "|cff" .. role[4] .. role[1] .. ":|r "
     tooltip:AddLine(label .. Tactics:FormatText(entry[role[2]]), 1, 1, 1, true)
 end
 
@@ -606,10 +605,9 @@ function Tactics:AddGuide(tooltip, boss, full, addSpell, iconSize)
             end
         end
         tooltip:AddLine(" ")
-        local roleIconSize = iconSize and math.floor(iconSize * 16 / 18 + .5)
-        if assigned then roleLine(tooltip, assigned, entry, classInfo, roleIconSize) end
+        if assigned then roleLine(tooltip, assigned, entry, classInfo) end
         for _, token in ipairs(ROLE_ORDER) do
-            if ROLES[token] ~= assigned then roleLine(tooltip, ROLES[token], entry, nil, roleIconSize) end
+            if ROLES[token] ~= assigned then roleLine(tooltip, ROLES[token], entry) end
         end
         local casts = addon.bossCasts[boss.id]
         if not (casts and casts.live) then
@@ -666,7 +664,7 @@ function Tactics:AddCasts(tooltip, boss, addSpell, iconSize)
 end
 
 local function roleRow(menu, boss, role, entry, dispels)
-    local row = menu:CreateButton(("%s |cff%s%s TLDR|r"):format(role[3]:format(16, 16), role[4], role[1]))
+    local row = menu:CreateButton(("%s |cff%s%s TLDR|r"):format(role[3], role[4], role[1]))
     row:SetTooltip(function(tooltip)
         tooltip:SetText(boss.name .. " — " .. role[1])
         if dispels then tooltip:AddLine("Effects: " .. dispels, 1, 1, 1, true) end
