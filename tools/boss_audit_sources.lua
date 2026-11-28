@@ -127,7 +127,7 @@ local function scan(node, instance, header)
             end
             emit("att", instance, npc, kind == "Encounter" and node.id, header, table.concat(loot, ","))
         end
-        if kind == "Encounter" and not npc and props.crs then
+        if (kind == "Encounter" or kind == "CustomHeader") and not npc and props.crs then
             local loot = {}
             for _, child in ipairs(node.children) do
                 if child.item and not child.props.cost and not child.props.providers then loot[#loot+1] = child.item end

@@ -522,6 +522,29 @@ test("adjacent Razorfen entrances have distinct click targets in the zone overvi
     check(locate(env, kraul) ~= locate(env, downs), "each door gets its own target at higher zoom")
 end)
 
+test("native pin scale regroups close entrances and a tracked member keeps its group's anchor", function()
+    local addon, env = load({mapID=1413, playerMap=1413})
+    local map = env.WorldMapFrame
+    map.ScrollContainer:SetSize(400, 320)
+    map:Show()
+    local function kraul(e) return e.source.id == "razorfen-kraul" end
+    local function downs(e) return e.source.id == "razorfen-downs" end
+    check(locate(env, kraul) ~= locate(env, downs))
+    map:SetGlobalPinScale(1.5)
+    Wow.flushTimers()
+    local pin, door = locate(env, kraul)
+    equal(pin, locate(env, downs), "the larger hitboxes overlap")
+    equal(pin.scale, 3, "pooled pin adopts the current canvas and native pin scales immediately")
+    local x, y = pin.x, pin.y
+    addon.Navigation:Start(door.title, door.point, door.source.id)
+    addon.UpdateRoutePins()
+    check(pin.tracked:IsShown())
+    equal(pin.x, x); equal(pin.y, y)
+    map:SetGlobalPinScale(1)
+    Wow.flushTimers()
+    check(locate(env, kraul) ~= locate(env, downs), "the smaller targets separate")
+end)
+
 test("shared entrances retain the chosen wing for both buttons", function()
     local addon, env, state = load({mapID=1420, viewWidth=.5, playerMap=1420, playerX=.2, playerY=.2})
     env.WorldMapFrame:Show()
@@ -556,8 +579,13 @@ test("Dire Maul wing portals agree with the zone map and alternate doors carry d
     state.viewWidth = .125
     env.WorldMapFrame.providers[1]:OnCanvasScaleChanged()
     Wow.flushTimers()
-    local a = locate(env, function(e) return e.source.id == "dm-west" and e.y == .2968 end)
-    local b = locate(env, function(e) return e.source.id == "dm-west" and e.y == .3175 end)
+    local function backDoor(e) return e.source.id == "dm-west" and e.y == .2968 end
+    local function frontDoor(e) return e.source.id == "dm-west" and e.y == .3175 end
+    equal(locate(env, backDoor), locate(env, frontDoor), "these targets still overlap on the letterboxed terrain")
+    state.viewWidth = .10
+    env.WorldMapFrame.providers[1]:OnCanvasScaleChanged()
+    Wow.flushTimers()
+    local a, b = locate(env, backDoor), locate(env, frontDoor)
     check(a ~= b and a.tracked:IsShown() and not b.tracked:IsShown(), "zoom separates the two doorways")
 end)
 
@@ -1013,6 +1041,17 @@ test("world and continent entrance pins keep tight hitboxes and route to their o
     check(pin.tracked:IsShown() and pin.tracked:GetWidth() < pin.icon:GetWidth(), "compact route badge fits the pin")
 end)
 
+local function entranceMenuLabel(addon, pin, entry)
+    for _, other in ipairs(pin.entries) do
+        if other ~= entry and other.category == "dungeon" and other.title == entry.title then
+            local point = entry.point
+            local zone = point.mapID ~= entry.mapID and addon.ZoneName(point.mapID) .. " " or ""
+            return ("%s · %s%.1f, %.1f"):format(entry.title, zone, point.x * 100, point.y * 100)
+        end
+    end
+    return entry.title
+end
+
 test("all dungeon entrances are selectable on unzoomed overviews even without client rectangles", function()
     local addon, env, state = load({mapID=947, playerMap=1420, playerX=.63, playerY=.62})
     local types = env.Enum.UIMapType
@@ -1056,7 +1095,9 @@ test("all dungeon entrances are selectable on unzoomed overviews even without cl
                 equal(addon.DungeonMap.dungeon, pin.entries[1].source, "pin opens the dungeon")
                 addon.DungeonMap:Close()
             else
-                for _, entry in ipairs(pin.entries) do state.menu:Find(entry.title) end
+                for _, entry in ipairs(pin.entries) do
+                    state.menu:Find(entranceMenuLabel(addon, pin, entry))
+                end
             end
         end
         for door, dungeon in pairs(original) do
@@ -1076,6 +1117,78 @@ test("all dungeon entrances are selectable on unzoomed overviews even without cl
     equal(env.AeternumRouteDB.mapID, 1420, "route still leads to the outdoor entrance")
     equal(env.AeternumRouteDB.x, world.point.x)
     equal(env.AeternumRouteDB.y, world.point.y)
+end)
+
+test("every zone and city exposes exactly its doors at both zoom levels and honors the map filter", function()
+    local addon, env, state = load({mapID=1436, playerX=.2, playerY=.2})
+    local map, expected = env.WorldMapFrame, {}
+    local surrounding = {[1453]=1429, [1454]=1411, [1455]=1426}
+    local function expect(id, point, dungeon)
+        expected[id] = expected[id] or {}
+        expected[id][point] = dungeon
+    end
+    for _, dungeon in ipairs(addon.Data.dungeons) do
+        for _, point in ipairs(dungeon.entrances) do
+            expect(point.mapID, point, dungeon)
+            if surrounding[point.mapID] then expect(surrounding[point.mapID], point, dungeon) end
+        end
+    end
+    map:Show()
+    for id, doors in pairs(expected) do
+        map:SetMapID(id)
+        for _, side in ipairs({"Alliance", "Horde"}) do
+            state.faction = side
+            for _, width in ipairs({1, .45}) do
+                state.viewWidth = width
+                addon.RefreshMap()
+                local seen = {}
+                for pin in map:EnumeratePinsByTemplate("AeternumEntrancePinTemplate") do
+                    local close = width < .6
+                    equal(pin.icon:GetWidth(), close and 44 or 34)
+                    equal(pin:GetWidth(), close and 48 or 22)
+                    for _, entry in ipairs(pin.entries) do
+                        if entry.category == "dungeon" then
+                            equal(entry.source, doors[entry.point], "right door on map " .. id)
+                            check(not seen[entry.point], "duplicate door")
+                            seen[entry.point] = true
+                        end
+                    end
+                end
+                for point, dungeon in pairs(doors) do check(seen[point], side .. " / " .. dungeon.name) end
+                Wow.trackingMenu():Find("Dungeon entrances"):Click()
+                equal(map:GetNumActivePinsByTemplate("AeternumEntrancePinTemplate"), 0)
+                Wow.trackingMenu():Find("Dungeon entrances"):Click()
+                check(map:GetNumActivePinsByTemplate("AeternumEntrancePinTemplate") > 0)
+            end
+        end
+    end
+end)
+
+test("both mouse buttons select each recorded entrance from its home map", function()
+    local addon, env, state = load({playerX=.2, playerY=.2})
+    local map = env.WorldMapFrame
+    map:Show()
+    for _, dungeon in ipairs(addon.Data.dungeons) do
+        for _, door in ipairs(dungeon.entrances) do
+            map:SetMapID(door.mapID)
+            local pin, entry = locate(env, function(e) return e.point == door end)
+            local label = entranceMenuLabel(addon, pin, entry)
+            map:ClickPin(pin, "LeftButton")
+            if #pin.entries > 1 then
+                state.menu:Find(label):Click()
+                Wow.flushTimers()
+            end
+            equal(addon.DungeonMap.dungeon, dungeon, label)
+            equal(addon.DungeonMap.entrance, door, label)
+            addon.DungeonMap:Close()
+            map:ClickPin(pin, "RightButton")
+            state.menu:Find("Show path to " .. label):Click()
+            equal(env.AeternumRouteDB.mapID, door.mapID, label)
+            equal(env.AeternumRouteDB.x, door.x, label)
+            equal(env.AeternumRouteDB.y, door.y, label)
+            addon.Navigation:Stop()
+        end
+    end
 end)
 
 test("capital entrances open from the surrounding zone and route to the real city door", function()
@@ -1795,7 +1908,7 @@ test("all shipped floors open and every boss menu shows its eligible recorded dr
         if not rule then unverified = unverified + 1
         elseif rule.teaches then learnable = learnable + 1 end
     end
-    equal(total, 1404); equal(unverified, 8); equal(learnable, 139)
+    equal(total, 1428); equal(unverified, 8); equal(learnable, 141)
 end)
 
 test("every trainer location opens its lesson list and every eligible reference pin survives grouping", function()
@@ -2098,6 +2211,224 @@ test("a boss fight shows the player's floor when rooms and positions are unknown
     floors.frame.dropdown:OpenMenu():Find("Deadmines"):Click()
     Wow.fire("ENCOUNTER_START", 2747, "Edwin VanCleef", 1, 5)
     equal(floors.index, 1, "a floor chosen by hand stays put")
+end)
+
+test("grouped trainer and quest pins list stacked entries and surface ready turn-ins", function()
+    local _, env, state = load({mapID=1455, class="SHAMAN", raceID=3, level=10})
+    env.WorldMapFrame:Show()
+    local pin = locate(env, function(e) return e.source and e.source.id == 258098 end)
+    check(pin and #pin.entries >= 2, "Eldrun Stormbreaker shares a pin with available Shaman quests")
+    equal(pin.entry.source.id, 258098, "trainer wins over an available quest start")
+    pin:OnMouseEnter()
+    check(findEntry(env.GameTooltip.lines, function(line) return line:find("Call of Fire", 1, true) end),
+        "stacked quest is named on hover")
+    check(findEntry(env.GameTooltip.lines, function(line) return line:find("Click to choose", 1, true) end),
+        "chooser prompt shown")
+    check(not findEntry(env.GameTooltip.lines, function(line) return line == "Click for lessons and prices" end),
+        "single-entry trainer prompt omitted when clicking opens a chooser")
+    state.log[97168], state.complete[97168] = 1, true
+    Wow.fire("QUEST_LOG_UPDATE")
+    Wow.flushTimers()
+    pin = locate(env, function(e) return e.questID == 97168 and e.role == "turnin" end)
+    check(pin, "ready turn-in pin at trainer")
+    equal(pin.entry.questID, 97168, "ready turn-in icon surfaces above the trainer")
+    equal(pin.icon.texture, 132048, "Blizzard turn-in question mark")
+    check(not pin.icon.desaturated, "ready turn-in is gold")
+end)
+
+test("weapon master relevance checks Forever training records as well as Classic references", function()
+    local addon = load({class="PALADIN"})
+    addon.foreverTraining.offers[999999] = "201::::1000:5:1"
+    check(addon.Trainers:Relevant({id=999999, kind="weapon"}), "Forever-only compatible weapon master shown")
+    addon.foreverTraining.offers[999998] = "266::::1000:5:1"
+    check(not addon.Trainers:Relevant({id=999998, kind="weapon"}), "Forever-only incompatible weapon master hidden")
+end)
+
+test("shared encounters and live rare drops appear while generic green world drops stay withheld", function()
+    local addon, env, state = load({class="WARRIOR", level=60, skillRanks={[55]=300, [413]=300, [414]=300, [293]=300},
+        professionIndices={1}, professionSkills={171}, professionRanks={[171]=300}})
+    env.WorldMapFrame:Show()
+
+    -- Stratholme: Balnazzar (10813) carries his full encounter drop table.
+    local strat = dungeonNamed(addon, "stratholme")
+    local balnazzar = assert(findEntry(strat.bosses, function(b) return b.id == 10813 end))
+    addon.UI:Boss(env.WorldMapFrame, balnazzar)
+    local guide = state.menu:Find("Guide-listed drops")
+    check(menuRow(guide, "Demonshear"), "Balnazzar 2H sword")
+    check(menuRow(guide, "Star of Mystaria"), "Balnazzar neck")
+    check(menuRow(guide, "Recipe: Flask of Distilled Wisdom"), "Balnazzar alchemy recipe")
+
+    -- Sunken Temple: shared drakes (5719-5722) and Atal'ai minibosses (5712-5717).
+    local st = dungeonNamed(addon, "sunken-temple")
+    local morphaz = assert(findEntry(st.bosses, function(b) return b.id == 5719 end))
+    addon.UI:Boss(env.WorldMapFrame, morphaz)
+    check(menuRow(state.menu:Find("Encounter rolls"), "Drakestone"), "Morphaz live encounter roll")
+    check(menuRow(state.menu:Find("Guide-listed drops"), "Drakeclaw Band"), "Morphaz drake ring")
+    for _, npc in ipairs({5720, 5721, 5722}) do
+        local drake = assert(findEntry(st.bosses, function(b) return b.id == npc end))
+        check(findEntry(drake.loot, function(id) return id == 12463 end), "drake shared drop " .. npc)
+    end
+    local zolo = assert(findEntry(st.bosses, function(b) return b.id == 5712 end))
+    addon.UI:Boss(env.WorldMapFrame, zolo)
+    check(menuRow(state.menu, "Atal'ai Breastplate"), "Zolo live verified drop featured")
+
+    -- Live repeated rare drops on Ruuzlu (7797) and Min'loth (260243).
+    local zf = dungeonNamed(addon, "zulfarrak")
+    local ruuzlu = assert(findEntry(zf.bosses, function(b) return b.id == 7797 end))
+    addon.UI:Boss(env.WorldMapFrame, ruuzlu)
+    check(menuRow(state.menu:Find("Other recorded drops"), "Embrace of the Lycan"), "Ruuzlu live rare drop")
+    local drowned = dungeonNamed(addon, "drowned-city")
+    local minloth = assert(findEntry(drowned.bosses, function(b) return b.id == 260243 end))
+    addon.UI:Boss(env.WorldMapFrame, minloth)
+    check(menuRow(state.menu:Find("Other recorded drops"), "Linken's Boots of Iron"), "Min'loth live rare drop")
+
+    -- Random green BoE world drops remain withheld.
+    local wc = dungeonNamed(addon, "wailing-caverns")
+    local mutanus = assert(findEntry(wc.bosses, function(b) return b.id == 3654 end))
+    check(not findEntry(mutanus.loot, function(id) return id == 6576 or id == 6581 end), "Mutanus world-drop greens")
+    local pythas = assert(findEntry(wc.bosses, function(b) return b.id == 3670 end))
+    check(not findEntry(pythas.loot, function(id) return id == 15506 end), "Pythas world-drop green")
+    local gnome = dungeonNamed(addon, "gnomeregan")
+    local thermaplugg = assert(findEntry(gnome.bosses, function(b) return b.id == 7800 end))
+    check(not findEntry(thermaplugg.loot, function(id) return id == 9855 end), "Thermaplugg world-drop green")
+end)
+
+local function hoverClient()
+    local addon, env, state = load({mapID=1415, level=18})
+    local map = env.WorldMapFrame
+    local label = env.CreateFrame("Frame", nil, map)
+    label.Name, label.Description = label:CreateFontString(), label:CreateFontString()
+    local area = {}
+    label.labelInfoByType = {[3]=area}
+    label.GetHighestPriorityLabelInfo = function() return state.priority or (area.name and area) end
+    label:SetScript("OnUpdate", function(self) self.Name:SetText(area.name or "") end)
+    env.MAP_AREA_LABEL_TYPE, env.LEVEL = {AREA_NAME=3}, "Level"
+    env.QuestDifficultyColors = {difficult={r=1,g=.82,b=0}}
+    env.GetQuestDifficultyColor = function(level)
+        state.difficultyFor = level
+        return {r=.5,g=.5,b=.5}
+    end
+    env.InputUtil = {IsGamepadUIEnabled=function() return state.gamepad end}
+    map.IsCanvasMouseFocus = function() return not state.outside end
+    map.HasGamepadCursorInput = function() return state.gamepad end
+    map.IsCanvasMouseFocusOrPinFocus = map.IsCanvasMouseFocus
+    map.GetNormalizedCursorPosition = function() return state.x or .5, state.y or .5 end
+    map.GetNormalizedGamepadCursorPosition = function() return .3, .7 end
+    env.C_Map.GetMapInfoAtPosition = function() return state.hover end
+    env.C_Map.GetMapLevels = function() return state.low, state.high end
+    env.C_Map.GetMapRectOnMap = function() return 0,0,0,0 end
+    local provider = env.CreateFromMixins(env.MapCanvasDataProviderMixin)
+    provider.Label = label
+    map:AddDataProvider(provider)
+    local text = label.children[3]
+    local function hover(mapID, zoneID, zoneName, title)
+        map.mapID = mapID
+        state.hover = zoneID and {mapID=zoneID, name=zoneName} or nil
+        area.name = title
+        label:Fire("OnUpdate")
+        return text:IsShown() and text:GetText()
+    end
+    return hover, state, env, addon, label
+end
+
+test("zone hover uses the map's localized name, zone recommendations and character difficulty", function()
+    local hover, state, env, _, label = hoverClient()
+    env.LEVEL = "Stufe"
+    equal(hover(1415, 1436, "Westfall", "Westfall"), "Stufe 9–18")
+    equal(label.Name:GetText(), "Westfall")
+    equal(hover(1415, 1433, "Rotkammgebirge", "Rotkammgebirge"), "Stufe 15–25")
+    state.level = 10
+    equal(hover(1433, 1433, "Rotkammgebirge", "Seenhain"), "Rotkammgebirge (15–25)")
+    equal(state.difficultyFor, 15)
+    state.level = 60
+    equal(hover(1433, 1433, "Rotkammgebirge", "Seenhain"), "Rotkammgebirge (15–25)")
+    equal(state.difficultyFor, 23)
+    state.low, state.high = 60, 60
+    equal(hover(1414, 2482, "Hyjal", "Hyjal"), "Stufe 60")
+    check(not hover(1414, 2482, "Hyjal", "Hyjal|cffffffff (60)|r"), "respects a native range")
+end)
+
+test("Azeroth resolves the zone from the continent terrain and respects map edges", function()
+    local hover, state, env, addon = hoverClient()
+    for _, sample in ipairs({{1415, 1436, "Westfall", "9–18"}, {1414, 1413, "The Barrens", "10–25"}}) do
+        local continent, zone, name, levels = unpack(sample)
+        local l,r,t,b = unpack(addon.overviewBounds[947][continent])
+        state.x, state.y = l + .4*(r-l), t + .6*(b-t)
+        env.C_Map.GetMapInfoAtPosition = function(id, x, y)
+            if id == 947 then return {mapID=continent, name="Continent"} end
+            equal(id, continent)
+            check(math.abs(x-.4) < .00001 and math.abs(y-.6) < .00001, "cursor is in continent coordinates")
+            return {mapID=zone, name=name}
+        end
+        equal(hover(947, nil, nil, "Continent"), name .. " (" .. levels .. ")")
+    end
+    state.x, state.y = .99, .99
+    check(not hover(947, nil, nil, "Continent"), "outside continent bounds")
+    env.C_Map.GetMapInfoAtPosition = function(id)
+        if id == 947 then return {mapID=1415, name="Eastern Kingdoms"} end
+        return {mapID=1415, name="Eastern Kingdoms"}
+    end
+    state.x, state.y = .69,.5
+    check(not hover(947, nil, nil, "Eastern Kingdoms"), "no zone over ocean")
+    state.x = .7
+    env.C_Map.GetMapRectOnMap = function() return .4,.8,.3,.7 end
+    env.C_Map.GetMapInfoAtPosition = function(id, x, y)
+        if id == 947 then return {mapID=1415, name="Eastern Kingdoms"} end
+        check(math.abs(x-.75) < .00001 and math.abs(y-.5) < .00001, "prefer live rectangle")
+        return {mapID=2548, name="Riverglades"}
+    end
+    equal(hover(947, nil, nil, "Eastern Kingdoms"), "Riverglades (36–44)")
+end)
+
+test("unexplored zone maps use the continent terrain under the cursor", function()
+    local hover, state, env, addon = hoverClient()
+    local zone = {mapID=1428, parentMapID=1415, name="Burning Steppes"}
+    local land = zone
+    local left,right,top,bottom = unpack(addon.overviewBounds[1415][zone.mapID])
+    env.C_Map.GetMapInfo = function(id)
+        if id == zone.mapID then return zone end
+        if id == 2521 then return {mapID=2521, name="Zephras Isle"} end
+    end
+    env.C_Map.GetMapInfoAtPosition = function(id, x, y)
+        if id == zone.mapID or id == 2521 then return nil end
+        equal(id, 1415)
+        check(math.abs(x - (left + state.x*(right-left))) < .00001, "project longitude to the continent")
+        check(math.abs(y - (top + state.y*(bottom-top))) < .00001, "project latitude to the continent")
+        return land
+    end
+    state.x, state.y = .5, .6
+    equal(hover(1428, nil, nil, nil), "Burning Steppes (50–59)")
+    state.x, land = .6, {mapID=1427, name="Searing Gorge"}
+    equal(hover(1428, nil, nil, nil), "Searing Gorge (43–48)")
+    state.x, land = .7, {mapID=1453, name="Stormwind City"}
+    check(not hover(1428, nil, nil, nil), "city has no questing range")
+    state.x, land = .8, nil
+    check(not hover(1428, nil, nil, nil), "no zone over open water")
+    equal(hover(2521, nil, nil, nil), "Zephras Isle (1–12)")
+end)
+
+test("zone hover clears on pins, city maps, water, and dungeon floors without stealing the map label", function()
+    local hover, state, _, addon, label = hoverClient()
+    equal(hover(1414, 2652, "Shen'dralas", "Shen'dralas"), "Level 38–45")
+    state.priority = {name="Dungeon"}
+    check(not hover(1414, 2652, "Shen'dralas", "Shen'dralas"))
+    state.priority = nil
+    state.outside = true
+    check(not hover(1414, 2652, "Shen'dralas", "Shen'dralas"))
+    state.outside = nil
+    equal(hover(1414, 2652, "Shen'dralas", "Shen'dralas"), "Level 38–45")
+    label.labelInfoByType[3].description = "Native detail"
+    check(not hover(1414, 2652, "Shen'dralas", "Shen'dralas"))
+    label.labelInfoByType[3].description = nil
+    addon.DungeonMap.dungeon = {}
+    check(not hover(1414, 2652, "Shen'dralas", "Shen'dralas"))
+    addon.DungeonMap.dungeon = nil
+    check(not hover(1415, 1453, "Stormwind City", "Stormwind City"))
+    check(not hover(1453, 1453, "Stormwind City", "Trade District"))
+    check(not hover(1436, 1436, "Westfall", nil), "unidentified terrain")
+    equal(hover(947, 2521, "Zephras Isle", "Zephras Isle"), "Level 1–12")
+    state.gamepad = true
+    equal(hover(1414, 2482, "Mount Hyjal", "Mount Hyjal"), "Level 55–60")
 end)
 
 print(("%d passed, %d failed"):format(passed, failed))

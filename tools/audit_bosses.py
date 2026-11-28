@@ -29,8 +29,14 @@ ATT_MAP = {63:36, 64:33, 226:389, 227:48, 228:230, 229:229, 230:429, 231:90,
            232:349, 233:129, 234:47, 236:329, 237:109, 238:34, 239:70, 240:43, 241:209, 246:289, 316:189}
 ROUTE_ALIASES = {261316:"Infurnus", 259281:"Handler Ashka", 258968:"Overseer Mugg",
                  250660:"The Butcher", 246016:"Mana Elemental", 9476:"The Vault"}
-# Display these as single encounters. Their reference lists are encounter-level evidence.
-GROUPS = {260243:3479, 263886:3511, 253214:3499, 260213:3478, 8440:457}
+# Display these as single or shared encounters whose ATT reference lists are encounter-level evidence.
+GROUPS = {
+    260243:3479, 263886:3511, 253214:3499, 260213:3478, 8440:457,
+    10813:449,
+    5719:459, 5720:459, 5721:459, 5722:459,
+    5712:-367, 5713:-367, 5714:-367, 5715:-367, 5716:-367, 5717:-367,
+}
+EZ_GROUPS = {260243, 263886, 253214, 260213, 8440}
 REPLACED = {260274:260243, 253218:253214, 8443:8440}
 REVIEW = {
     641: ("omit", "Ordinary Deadmines mob. ATT places its gloves under zone drops. No boss encounter or guide stop."),
@@ -83,6 +89,7 @@ class Boss:
     roster: set = field(default_factory=set)
     encounters: set = field(default_factory=set)
     sources: dict = field(default_factory=lambda: defaultdict(set))
+    eg_drops: dict = field(default_factory=lambda: defaultdict(int))
     note: str = ""
 
 
@@ -218,7 +225,7 @@ def audit(args):
         b.roster.add("EzWoW")
         for item in ints(loot):
             b.sources[item].add("EzWoW")
-        if npc in GROUPS:
+        if npc in EZ_GROUPS:
             for item in ints(group_loot):
                 b.sources[item].add("EzWoW-group")
     for a in att:
@@ -254,7 +261,9 @@ def audit(args):
             if b and start >= resets.get(b.npc, ""):
                 for item, v in record.get("items", {}).items():
                     if v.get("drops", 0) and v.get("quantity", 0):
-                        b.sources[int(item)].add("EG-corpse")
+                        iid = int(item)
+                        b.sources[iid].add("EG-corpse")
+                        b.eg_drops[iid] += v["drops"]
         encounters = encounter_tables[build]
         for key, record in data.get("rolls", {}).items():
             match = re.fullmatch(r"encounter:(\d+)\|threshold:\d+", key)
@@ -307,9 +316,13 @@ def audit(args):
         for item in dict.fromkeys([*b.old, *sorted(b.sources)]):
             evidence = b.sources[item]
             direct, guides = evidence & DIRECT, evidence & GUIDES
-            relevant = item in b.old or guides or evidence & GROUP_GUIDES or classes.get(item) == 9
-            if not relevant and len(direct) >= 2:
-                relevant = classes.get(item) in (2, 4) and quality.get(item, 2) >= 2
+            guide_backed = bool(guides or evidence & GROUP_GUIDES)
+            is_equip = classes.get(item) in (2, 4)
+            q = quality.get(item, 2)
+            legacy = item in b.old and not (is_equip and q <= 2)
+            relevant = legacy or guide_backed or classes.get(item) == 9
+            if not relevant and (len(direct) >= 2 or b.eg_drops[item] >= 2):
+                relevant = is_equip and q >= 3
             group = "withheld"
             if keep and ids.get(item) and relevant:
                 if direct:
@@ -318,7 +331,7 @@ def audit(args):
                     group = "encounter"
                 elif guides or evidence & GROUP_GUIDES:
                     group = "guide"
-            if not direct and not relevant and "EG-roll" not in evidence:
+            if not direct and not relevant and item not in b.old and "EG-roll" not in evidence:
                 continue
             loot_rows.append((b.slug, b.npc, item, ids.get(item, ""), group, join(evidence)))
         roster_rows.append((b.slug, b.npc, b.name, b.decision, join(b.roster), join(b.encounters),

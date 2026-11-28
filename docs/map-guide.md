@@ -2,9 +2,11 @@
 
 Press **M** to open the world map. The map’s tracking menu controls quest objectives, low-level quests, and additional trainers.
 
+Hover over a zone on Azeroth or either continent to see its recommended level range under the map’s area name. On a zone map, the range also appears over named places and unexplored land. Zephras Isle shows its range on its own map. The color uses Blizzard’s quest difficulty scale for your character.
+
 ## Dungeon entrances and directions
 
-Click a dungeon entrance to browse its floors. Right-click for minimap directions to a specific wing or door. All entrances are available on the world map and their continent map. You can also open the Stockade from Elwynn Forest, Ragefire Chasm from Durotar, and the Hall of Thanes from Dun Morogh. Hover over a shared pin to see the dungeons it covers, then click to choose one.
+Click a dungeon entrance to browse its floors. Right-click for minimap directions to a specific wing or door. All entrances are available on the world map and their continent map. You can also open the Stockade from Elwynn Forest, Ragefire Chasm from Durotar, and the Hall of Thanes from Dun Morogh. Hover over a shared pin to see the dungeons it covers, then click to choose one. If a dungeon has multiple doors at the same pin, the menu lists their local coordinates. Zoom in to separate nearby entrances.
 
 To pick a dungeon for your level, open **Dungeons by level** in the map's tracking menu, type `/aeternum dungeons`, or choose **Aeternum** in the minimap's addon compartment. Every dungeon and wing is listed from the lowest level range to the highest. Each range uses the game's quest difficulty colors for your character: red or orange is above your level, yellow is your range, green is easy, and gray is trivial. Entrance tooltips color their level range the same way. Choose a dungeon to open its floors.
 
@@ -24,7 +26,7 @@ Item tooltips anywhere in the game, such as your bags, chat links, and the aucti
 
 Both boss menus and loot search use your class and trained weapon and armor proficiencies. Higher-level gear stays visible if you already use that equipment type. Recipes appear when you have the profession, rank, and specialization to learn them. Learning a recipe removes it from the list. Other recorded drops, encounter rolls, and guide-listed drops have separate submenus when they contain a match.
 
-The atlas covers 34 dungeons and wings, 71 floors, and 302 boss and encounter entries. There are 277 map pins before grouping encounters that share a location. Hover a pin to see whether its position is a guide estimate. Dalaran’s Underbelly uses a labeled route sketch. Of 1,404 audited items, 1,396 have verified Forever requirements for character loot lists. [Boss and loot audit](boss-audit/README.md)
+The atlas covers 34 dungeons and wings, 71 floors, and 302 boss and encounter entries. There are 277 map pins before grouping encounters that share a location. Hover a pin to see whether its position is a guide estimate. Dalaran’s Underbelly uses a labeled route sketch. Of 1,428 audited items, 1,420 have verified Forever requirements for character loot lists. [Boss and loot audit](boss-audit/README.md)
 
 ## Trainers
 

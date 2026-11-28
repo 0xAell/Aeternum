@@ -31,6 +31,8 @@ Click any entrance on the Azeroth, continent, or zone map to browse all 34 dunge
 - Verified boss drops appear directly in the main menu, while other recorded corpse drops, encounter rolls, and guide-listed drops stay separated in submenus so you can see what has live player evidence.
 
 ### Entrances and minimap directions
+Hover over a zone to see its recommended levels, on the Azeroth, continent, and zone maps, including unexplored terrain.
+
 All 41 outdoor entrances appear on world, continent, and zone maps, including multi-door dungeons like Dire Maul, Uldaman, and Blackrock Mountain.
 
 - Right-click any entrance (or click a trainer or quest pin) for a minimap bearing to the door.
@@ -98,7 +100,7 @@ For the full walkthrough of map filters, floor tracking, and tooltip indicators,
 | Area | Coverage | Audit & details |
 | --- | --- | --- |
 | **Dungeons & floors** | 34 dungeons & wings · 71 floors · 41 outdoor entrances (10 with approach waypoints) | [Player Guide](docs/map-guide.md) |
-| **Bosses & loot** | 302 boss & encounter entries · 277 floor pins · 1,404 audited items (1,396 with verified requirements) | [Boss & Loot Audit](docs/boss-audit/README.md) |
+| **Bosses & loot** | 302 boss & encounter entries · 277 floor pins · 1,428 audited items (1,420 with verified requirements) | [Boss & Loot Audit](docs/boss-audit/README.md) |
 | **Trainers** | 561 trainers (562 map locations, 8 weapon masters) · 522 offline catalogues · 1,743 spells & recipes | [Trainer Coverage](docs/trainer-data/README.md) |
 | **Quests** | 5,323 quests · 11,100 start & turn-in pins · 5,207 objective sites across 2,097 quests | [Data Sources](DATA_SOURCES.md) |
 
@@ -113,5 +115,7 @@ To contribute code or rebuild the bundled datasets locally, see **[CONTRIBUTING.
 <div align="center">
 
 [Data Sources & Credits](DATA_SOURCES.md) · [Contributing](CONTRIBUTING.md) · [GPL-3.0 License](LICENSE)
+
+<sub>README by Neon 4</sub>
 
 </div>
