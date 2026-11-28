@@ -1,9 +1,10 @@
 local _, addon = ...
 local Atlas = {}
 addon.Atlas = Atlas
+local zoom = addon.MapZoom
 local WORLD = 947
 local ASPECT = 1002 / 668
-local MAX_ZOOM = 22
+local MAX_ZOOM = 40
 local continents = {1414, 1415}
 local capitals = {[1453]=true, [1454]=true, [1455]=true, [1456]=true, [1457]=true, [1458]=true}
 
@@ -169,6 +170,11 @@ local function draw(frame)
     local left, top = camera.x - width / 2, camera.y - height / 2
     local region = camera.zoom >= 2 and regionAt(frame, camera.x, camera.y) or frame.byID[WORLD]
     frame.art:Draw(left, top, width, height, camera.zoom, region.id)
+    if addon.settings.atlasTerrain then
+        frame.terrain:Draw(left, top, width, height, camera.zoom, region.id)
+    else
+        frame.terrain:Clear()
+    end
     frame.markers:Draw(left, top, width, height, camera.zoom)
     drawPlayer(frame)
     if frame.region ~= region.id then
@@ -179,57 +185,56 @@ local function draw(frame)
     end
 end
 
-local function moveZoom(frame, zoom)
+local function moveZoom(frame, nextZoom)
     local camera = frame.camera
     local beforeWidth, beforeHeight = viewSize(frame)
     if not beforeWidth then return end
-    camera.zoom = zoom
+    camera.zoom = nextZoom
     -- In the new view, preserve the same world point below the mouse.
     local afterWidth, afterHeight = viewSize(frame)
     camera.x = camera.x + (beforeWidth - afterWidth) * (frame.anchorX - .5)
     camera.y = camera.y + (beforeHeight - afterHeight) * (frame.anchorY - .5)
-    draw(frame)
+end
+
+local function anchorZoom(frame, x, y)
+    frame.anchorX = clamp(x / frame:GetWidth(), 0, 1)
+    frame.anchorY = clamp(y / frame:GetHeight(), 0, 1)
 end
 
 local function stopMotion(frame)
-    frame.targetZoom, frame.dragX, frame.dragY = nil, nil, nil
+    wipe(frame.zoomMotion)
+    frame.dragX, frame.dragY = nil, nil
     frame:SetScript("OnUpdate", nil)
 end
 
 local function update(frame, elapsed)
+    local moved
     if frame.dragX then
         local x, y = cursor(frame)
         local width, height = viewSize(frame)
         if width then
             local camera = frame.camera
-            camera.x = camera.x - (x - frame.dragX) * width / frame:GetWidth()
-            camera.y = camera.y - (y - frame.dragY) * height / frame:GetHeight()
+            local dx, dy = x - frame.dragX, y - frame.dragY
+            camera.x = camera.x - dx * width / frame:GetWidth()
+            camera.y = camera.y - dy * height / frame:GetHeight()
+            anchorZoom(frame, x, y)
             frame.dragX, frame.dragY = x, y
-            draw(frame)
-        end
-    elseif frame.targetZoom then
-        local zoom = frame.camera.zoom
-        local remainder = frame.targetZoom - zoom
-        local step = remainder * (1 - math.exp(-19 * elapsed))
-        if math.abs(remainder) <= .006 then
-            moveZoom(frame, frame.targetZoom)
-            stopMotion(frame)
-        else
-            moveZoom(frame, zoom + step)
+            moved = dx ~= 0 or dy ~= 0
         end
     end
+    local nextZoom = zoom.Advance(frame.zoomMotion, frame.camera.zoom, elapsed)
+    if nextZoom then moveZoom(frame, nextZoom) end
+    if moved or nextZoom then draw(frame) end
+    if not frame.dragX and not frame.zoomMotion.target then frame:SetScript("OnUpdate", nil) end
 end
 
 local function wheel(frame, delta)
     local w, h = frame:GetSize()
     if w <= 0 or h <= 0 then return end
-    local zoom = frame.camera.zoom
-    local target = clamp((frame.targetZoom or zoom) * 1.25 ^ delta, 1, MAX_ZOOM)
-    if target == zoom and not frame.dragX then stopMotion(frame); return end
-    local x, y = cursor(frame)
-    frame.anchorX, frame.anchorY = clamp(x / w, 0, 1), clamp(y / h, 0, 1)
-    frame.targetZoom = target
-    if not frame.dragX then frame:SetScript("OnUpdate", update) end
+    if zoom.Queue(frame.zoomMotion, frame.camera.zoom, delta, MAX_ZOOM) then
+        anchorZoom(frame, cursor(frame))
+        frame:SetScript("OnUpdate", update)
+    end
 end
 
 local function centerOn(frame, record, x, y)
@@ -256,7 +261,9 @@ local function createOverlay(map)
     frame:RegisterForDrag("LeftButton")
     frame.maps, frame.byID, frame.extent = geography()
     frame.camera = {zoom=1, x=.5, y=.5}
+    frame.zoomMotion = {}
     frame.art = addon.AtlasArt.New(frame, frame.maps)
+    frame.terrain = addon.AtlasTerrain.New(frame, frame.byID, frame.art.frame)
     frame.markers = addon.AtlasPins.New(frame, frame.maps, frame.byID)
     local positionUpdates = CreateFrame("Frame", nil, frame)
     positionUpdates:SetFrameLevel(frame:GetFrameLevel() + 1)
@@ -286,13 +293,12 @@ local function createOverlay(map)
 
     frame:SetScript("OnMouseWheel", wheel)
     frame:SetScript("OnDragStart", function()
-        stopMotion(frame)
         frame.dragX, frame.dragY = cursor(frame)
         frame:SetScript("OnUpdate", update)
     end)
     frame:SetScript("OnDragStop", function()
         frame.dragX, frame.dragY = nil, nil
-        if not frame.targetZoom then stopMotion(frame) end
+        if not frame.zoomMotion.target then frame:SetScript("OnUpdate", nil) end
     end)
     frame:SetScript("OnMouseUp", function(_, button)
         if button == "RightButton" then Atlas:Close()
@@ -301,6 +307,7 @@ local function createOverlay(map)
     frame:SetScript("OnSizeChanged", function() if frame:IsShown() then draw(frame) end end)
     frame:SetScript("OnHide", function()
         stopMotion(frame)
+        frame.terrain:Clear()
         frame.art:Clear()
         frame.markers:Clear()
     end)

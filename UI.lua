@@ -541,6 +541,11 @@ function UI:Attach(map)
             menu:CreateDivider()
             if addon.Atlas.active then
                 menu:CreateButton("Return to world map", function() addon.Atlas:Close() end)
+                menu:CreateCheckbox("Terrain at close zoom", function() return addon.settings.atlasTerrain end,
+                    function()
+                        addon.settings.atlasTerrain = not addon.settings.atlasTerrain
+                        addon.Atlas:Refresh()
+                    end)
             elseif addon.Atlas:Available() then
                 local atlas = menu:CreateButton("Dungeon atlas", function() addon.Atlas:Open() end)
                 atlas:SetTooltip(function(tooltip)

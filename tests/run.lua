@@ -467,7 +467,7 @@ local function openAtlas(addon)
     return frame
 end
 
-local function updateAtlas(frame)
+local function settleMap(frame)
     for _ = 1, 120 do frame:Fire("OnUpdate", 1 / 60) end
 end
 
@@ -505,13 +505,13 @@ test("the atlas zooms toward the pointer and pans without moving the native map"
     local anchor = state.cursorX / frame:GetWidth() - .5
     local worldX = startX + anchor / startZoom
     frame:Fire("OnMouseWheel", 3)
-    updateAtlas(frame)
+    settleMap(frame)
     check(camera.zoom > startZoom, "scroll zooms the atlas")
     check(math.abs(camera.x + anchor / camera.zoom - worldX) < .0001, "the world point stays under the pointer")
     local zoomedX = camera.x
     frame:Fire("OnDragStart")
     state.cursorX = 450
-    updateAtlas(frame)
+    settleMap(frame)
     frame:Fire("OnDragStop")
     check(camera.x > zoomedX, "dragging the artwork left pans the camera east")
     frame:Fire("OnMouseUp", "MiddleButton")
@@ -524,6 +524,29 @@ test("the atlas zooms toward the pointer and pans without moving the native map"
     frame:Fire("OnMouseUp", "RightButton")
     check(not frame:IsShown() and env.WorldMapFrame:IsShown(), "return to the original map")
     check(not atlasTexture(frame, 103), "closed atlas releases map tiles")
+end)
+
+test("atlas zoom reverses immediately and keeps moving while the map is dragged", function()
+    local addon, _, state = loadAtlas(947)
+    local frame = openAtlas(addon)
+    local camera = frame.camera
+    frame.left, frame.top = 0, 540
+    state.cursorX, state.cursorY = 400, 270
+    frame:Fire("OnMouseWheel", 4)
+    frame:Fire("OnUpdate", .025)
+    local zoom = camera.zoom
+    check(zoom > 1 and zoom < 1.22 ^ 4, "wheel animation progresses across frames")
+    frame:Fire("OnMouseWheel", -.5)
+    frame:Fire("OnUpdate", .02)
+    check(camera.zoom < zoom, "reverse wheel input changes direction mid-animation")
+    local x = camera.x
+    frame:Fire("OnDragStart")
+    state.cursorX = 370
+    frame:Fire("OnUpdate", .015)
+    check(camera.x > x and camera.zoom < zoom, "drag and zoom both move the camera")
+    frame:Fire("OnDragStop")
+    settleMap(frame)
+    check(not frame:GetScript("OnUpdate"), "motion stops once it settles")
 end)
 
 test("atlas entrances use the existing directions and dungeon floor viewers", function()
@@ -564,6 +587,31 @@ test("the atlas refreshes a newly explored landmark while keeping its base artwo
     equal(landmark.texCoord[2], 60 / 64, "client overlay's padded width")
     equal(landmark.texCoord[4], 70 / 128, "client overlay's padded height")
     check(not atlasTexture(frame, 105), "mouseover-only art stays hidden")
+end)
+
+test("close atlas zoom blends aligned client terrain and clears it when disabled", function()
+    local addon, _, state = loadAtlas(1436)
+    addon.atlasTerrain = {[1415] = {
+        left=0, top=0, stepX=.02, stepY=.02, tiles={},
+    }}
+    local frame = openAtlas(addon)
+    local zone = frame.byID[1436]
+    local continent = frame.byID[1415]
+    local grid = addon.atlasTerrain[1415]
+    local col = math.floor((zone.left + zone.width / 2 - continent.left) / (continent.width * grid.stepX))
+    local row = math.floor((zone.top + zone.height / 2 - continent.top) / (continent.height * grid.stepY))
+    grid.tiles[row * 64 + col] = 750104
+    frame.left, frame.top = 0, 540
+    state.cursorX, state.cursorY = 400, 270
+    frame:Fire("OnMouseWheel", 99)
+    settleMap(frame)
+    equal(frame.camera.zoom, 40, "close zoom can reach terrain detail")
+    local tile = assert(atlasTexture(frame, 750104), "correct terrain tile loads on zoom")
+    check(tile.alpha > 0 and tile.alpha < 1, "terrain blends with the illustrated map")
+    check(atlasTexture(frame, 103), "the native illustrated layer remains present")
+    Wow.trackingMenu():Find("Terrain at close zoom"):Click()
+    check(not atlasTexture(frame, 750104), "turning terrain off releases the tile")
+    check(atlasTexture(frame, 103), "turning terrain off keeps the illustrated layer")
 end)
 
 test("native map changes and combat dismiss the atlas without altering Escape", function()
@@ -853,7 +901,9 @@ test("floor zoom follows the cursor and dragging stays within its viewport", fun
     state.cursorX, state.cursorY, frame.top = 650, 340, 540
     local before = (650 - frame.x) / frame.art.scale
     frame:Fire("OnMouseWheel", 2)
-    check(frame.zoom > 1, "wheel zoom")
+    frame:Fire("OnUpdate", .016)
+    check(frame.zoom > 1 and frame.zoom < 1.22 ^ 2, "wheel zoom animates")
+    settleMap(frame)
     check(math.abs((650 - frame.x) / frame.art.scale - before) < .01, "point under cursor stays put")
     frame:Fire("OnDragStart")
     state.cursorX = 590
@@ -862,10 +912,13 @@ test("floor zoom follows the cursor and dragging stays within its viewport", fun
     frame:Fire("OnDragStop")
     check(not frame:GetScript("OnUpdate"), "idle map has no drag update")
     frame:Fire("OnMouseWheel", 99)
+    settleMap(frame)
     equal(frame.zoom, 4, "upper bound")
     frame:Fire("OnMouseWheel", -99)
+    settleMap(frame)
     equal(frame.zoom, 1, "lower bound")
     frame:Fire("OnMouseWheel", 4)
+    settleMap(frame)
     local artX = (frame:GetWidth() / 2 - frame.x) / frame.art.scale
     local artY = (frame:GetHeight() / 2 - frame.y) / frame.art.scale
     local oldZoom = frame.zoom
@@ -877,6 +930,44 @@ test("floor zoom follows the cursor and dragging stays within its viewport", fun
     frame:Fire("OnMouseUp", "MiddleButton")
     equal(frame.zoom, 1, "middle click fits the current floor")
     check(frame:IsShown(), "fitting the floor keeps it open")
+end)
+
+test("floor terrain uses the same viewport and boss pins as the painted map", function()
+    local addon = openDeadmines()
+    local frame = addon.DungeonMap.frame
+    frame:Fire("OnMouseWheel", 2)
+    settleMap(frame)
+    local oldZoom, x, y = frame.zoom, frame.x, frame.y
+    local skull = frame.pins[1]
+    local mark = skull.points[1]
+    frame.dropdown:OpenMenu():Find("Terrain detail"):Click()
+    check(frame.usingTerrain and frame.tiles[1].texture ~= 449591, "client terrain view")
+    equal(skull.points[1], mark, "the tile swap never repositions the boss")
+    equal(frame.zoom, oldZoom, "zoom preserved")
+    equal(frame.x, x, "horizontal pan preserved")
+    equal(frame.y, y, "vertical pan preserved")
+    frame.dropdown:OpenMenu():Find("Terrain detail"):Click()
+    equal(frame.tiles[1].texture, 449591, "painted floor restored")
+end)
+
+test("sharper floor art needs matching bounds and falls back when a tile is missing", function()
+    local addon, _, state = openDeadmines()
+    local dungeon = dungeonNamed(addon, "deadmines")
+    local floor = addon.floorData[dungeon.id].floors[1]
+    local frame = addon.DungeonMap.frame
+    local sharp = {}
+    for i = 1, 12 do sharp[i] = 600000 + i end
+    state.mapArtLayers = {[291] = {
+        {layerWidth=1002, layerHeight=668, tileWidth=256, tileHeight=256},
+        {layerWidth=2004, layerHeight=1336, tileWidth=512, tileHeight=512},
+    }}
+    state.mapArtTextures = {[291] = {floor.tiles, sharp}}
+    addon.DungeonMap:SetFloor(1)
+    equal(frame.tiles[1].texture, sharp[1], "matching sharper client tiles")
+    equal(frame.tiles[4]:GetWidth(), 234, "detail layer keeps the calibrated width at the map edge")
+    state.missingTextures = {[sharp[4]]=true}
+    addon.DungeonMap:SetFloor(1)
+    equal(frame.tiles[1].texture, floor.tiles[1], "whole floor falls back after a missing detail tile")
 end)
 
 test("all dungeon floor references and boss stops resolve to their own dungeon", function()
@@ -1711,6 +1802,7 @@ test("the indoor player arrow uses the current floor and hides when the client r
     check(math.abs(arrow.points[1][4] / 1002 - .5) < .001, "east-west placement")
     check(math.abs(-arrow.points[1][5] / 668 - .5) < .001, "north-south placement")
     frame:Fire("OnMouseWheel", 2)
+    frame:Fire("OnUpdate", .016)
     check(math.abs(arrow:GetWidth() * frame.art.scale - 22) < .01, "screen size held while zooming")
     frame.dropdown:OpenMenu():Find("Deadmines"):Click()
     check(not arrow:IsShown() and not frame.positionUpdates:IsShown(), "viewing another floor")

@@ -42,7 +42,7 @@ Hover over a zone to see its recommended levels, on the Azeroth, continent, and 
 
 All 41 outdoor entrances appear on world, continent, and zone maps, including multi-door dungeons like Dire Maul, Uldaman, and Blackrock Mountain.
 
-- Open **Dungeon atlas** in the map tracking menu to scroll from Azeroth down to individual zones and drag across zone boundaries. It uses the map art that ships with WoW. Open a dungeon from the atlas and return to the same zoom and position when you go back.
+- Open **Dungeon atlas** in the map tracking menu to zoom smoothly from Azeroth toward your pointer and drag across zone boundaries. Close zoom blends in WoW’s terrain art for Kalimdor and the Eastern Kingdoms. Open a dungeon and return to the same zoom and position when you go back.
 - Right-click any entrance (or click a trainer or quest pin) for a minimap bearing to the door.
 - Ten trickier entrances (The Deadmines, Ragefire Chasm, all four Scarlet Monastery wings, Alcaz Prison, Blackmaw Hold, Krol'dok Stronghold, and Shaper's Terrace) include mapped approach waypoints.
 - Directions survive `/reload`, pause automatically on another continent or inside an unrelated instance, and clear once you arrive.
