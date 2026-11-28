@@ -219,7 +219,7 @@ function Tactics:SpellTooltip(tooltip, spellID, name)
 end
 
 local PET_SPELL = {[19505]=true, [19244]=true, [6358]=true}
-local function learnedSpell(spellID)
+function Tactics:KnownSpell(spellID)
     if not (C_SpellBook and C_SpellBook.IsSpellKnown) then return end
     local banks = Enum and Enum.SpellBookSpellBank
     if PET_SPELL[spellID] and not (banks and banks.Pet) then return end
@@ -316,7 +316,7 @@ local TANK_ACTION = {[355]=true, [1161]=true, [6795]=true, [99]=true}
 
 local function pushTip(tips, seen, spellID, text)
     if #tips >= 4 or seen[spellID] or TANK_ACTION[spellID] and seen.role and seen.role ~= ROLES.TANK then return end
-    local rank = learnedSpell(spellID)
+    local rank = Tactics:KnownSpell(spellID)
     if not rank then return end
     seen[spellID] = true
     -- When the encounter data identifies the aura, show what to remove on this boss.
@@ -368,7 +368,7 @@ local function buildClassTips(classFile, entry, has, tips, seen)
     elseif classFile == "PALADIN" then
         if has.magic or has.poison or has.disease then
             local types = {}
-            local cleanse = learnedSpell(4987)
+            local cleanse = Tactics:KnownSpell(4987)
             if cleanse and has.magic then types[#types + 1] = "{magic}" end
             if has.poison then types[#types + 1] = "{poison}" end
             if has.disease then types[#types + 1] = "{disease}" end
@@ -404,7 +404,7 @@ local function buildClassTips(classFile, entry, has, tips, seen)
             pushTip(tips, seen, 527, "Offensive Dispel Magic strips enemy {magicBuff}" .. purge .. ".")
         end
         if has.disease then
-            local useCure = not learnedSpell(552)
+            local useCure = not Tactics:KnownSpell(552)
             local spellID = useCure and 528 or 552
             local verb = useCure and "Cure Disease" or "Abolish Disease"
             pushTip(tips, seen, spellID, "Use " .. verb .. " to clear {disease} debuffs.")
@@ -480,7 +480,7 @@ local function buildClassTips(classFile, entry, has, tips, seen)
 
     elseif classFile == "DRUID" then
         if has.poison then
-            local useCure = not learnedSpell(2893)
+            local useCure = not Tactics:KnownSpell(2893)
             local spellID = useCure and 8946 or 2893
             local verb = useCure and "Cure Poison" or "Abolish Poison"
             pushTip(tips, seen, spellID, "Keep " .. verb .. " rolling to clear {poison}.")
@@ -580,6 +580,35 @@ local function roleLine(tooltip, role, entry, classInfo)
     local class = classInfo and ("|cff" .. classInfo.hex .. classInfo.name .. "|r · ") or ""
     local label = role[3] .. " " .. class .. "|cff" .. role[4] .. role[1] .. ":|r "
     tooltip:AddLine(label .. Tactics:FormatText(entry[role[2]]), 1, 1, 1, true)
+end
+
+function Tactics:AddBrief(tooltip, boss, addSpell, iconSize)
+    local priority = addon.partyCallouts[boss.id]
+    if priority then
+        local class = self:PlayerClass()
+        local level = UnitLevel("player")
+        for _, option in ipairs(priority.options or {}) do
+            if option.class == class and option.spell and addon.IsReadableNumber(level) and level >= option.level then
+                local rank = self:KnownSpell(option.spell)
+                if rank then
+                    addSpell(self:SpellIcon(option.spell, iconSize) .. " " .. option.text,
+                        rank, self:SpellName(option.spell))
+                    return
+                end
+            end
+        end
+        tooltip:AddLine(priority.text, 1, .9, .65, true)
+        return
+    end
+    local entry = self:ForBoss(boss.id)
+    if not entry then return end
+    local tips = self:ClassTips(boss.id)
+    if tips[1] then
+        local tip = tips[1]
+        addSpell(self:SpellIcon(tip.baseID, iconSize) .. " " .. tip.text, tip.spellID, tip.name)
+    else
+        roleLine(tooltip, playerRole() or ROLES.DAMAGER, entry)
+    end
 end
 
 function Tactics:AddGuide(tooltip, boss, full, addSpell, iconSize)

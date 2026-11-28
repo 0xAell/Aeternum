@@ -33,6 +33,7 @@ local defaults = {
     dialogSecondary = "",
     dialogPopups = true,
     dialogScroll = false,
+    partyCallouts = true,
     questMode = "available",
     lowLevelQuests = false,
     otherTrainers = false,
@@ -394,7 +395,9 @@ function addon.ResetSettings()
     AeternumDB = {}
     if settings then
         for key, value in pairs(settings) do
-            if type(key) == "string" and key:match("^dialog") then AeternumDB[key] = value end
+            if key == "partyCallouts" or (type(key) == "string" and key:match("^dialog")) then
+                AeternumDB[key] = value
+            end
         end
     end
     addon.LoadSettings()

@@ -2286,6 +2286,7 @@ test("grouped boss pins keep encounter labels even when only a later member carr
     local frame = addon.DungeonMap.frame
     local sneed = findEntry(frame.pins, function(p) return p:IsShown() and #p.members > 1 end)
     check(sneed and sneed.label == "Sneed's Shredder", "Deadmines Sneed group keeps encounter label")
+    state.shift = true
     sneed:Fire("OnEnter")
     equal(addon.BossHover.panel.title:GetText(), "Sneed's Shredder", "hover title uses encounter label")
     check(findEntry(hoverTexts(addon), function(text) return text == "Sneed" end), "second phase is visible")
@@ -2301,12 +2302,70 @@ test("grouped boss pins keep encounter labels even when only a later member carr
     equal(rend.label, "Warchief Rend Blackhand", "UBRS Rend group keeps encounter label")
 end)
 
+test("a compact boss hover puts a known counter first and expands in place with Shift", function()
+    local addon, env, state = load({class="MAGE", level=40, knownSpells={[2139]=true}})
+    env.WorldMapFrame:Show()
+    addon.DungeonMap:Open(dungeonNamed(addon, "drowned-city"))
+    local pin = assert(findEntry(addon.DungeonMap.frame.pins, function(p)
+        return p:IsShown() and p.boss and p.boss.id == 260042
+    end))
+    pin.left, pin.right, pin.top = 300, 320, 600
+    pin:Fire("OnEnter")
+    local panel = addon.BossHover.panel
+    local left, width, briefHeight = panel.left, panel:GetWidth(), panel:GetHeight()
+    equal(panel.more:GetText(), "Hold Shift for details")
+    local action = panel.rows[1]
+    equal(action.spell, 2139, "known counter is a hoverable spell")
+    check(action.text:GetText():find("Break Abyssal Bubbles first", 1, true))
+    check(not findEntry(hoverTexts(addon), function(line) return line == "Recorded Forever casts" end))
+    local function lootCount()
+        local count = 0
+        for _, row in ipairs(panel.rows) do
+            if row:IsShown() and row.item then count = count + 1 end
+        end
+        return count
+    end
+    check(lootCount() <= 3, "brief loot preview is bounded")
+    state.cursorX, state.cursorY = panel.left + 10, panel.top - 10
+    state.shift = true
+    panel:Fire("OnUpdate", .016)
+    check(panel.expanded and panel:IsShown())
+    equal(panel.left, left, "details stay on the same side as the brief")
+    check(panel:GetWidth() > width and panel:GetHeight() > briefHeight, "details use the larger layout")
+    check(findEntry(hoverTexts(addon), function(line) return line == "Recorded Forever casts" end))
+    local volley = assert(findEntry(panel.rows, function(row) return row:IsShown() and row.spell == 1282860 end))
+    volley:Fire("OnEnter")
+    check(env.GameTooltip:IsOwned(volley), "recorded casts still have tooltips")
+    state.shift = false
+    panel:Fire("OnUpdate", .016)
+    equal(panel:GetWidth(), width)
+    equal(panel.scroll:GetVerticalScroll(), 0, "collapsing resets the scroll position")
+    check(not env.GameTooltip:IsShown(), "collapsing clears the expanded tooltip")
+    equal(panel.rows[1].spell, 2139)
+end)
+
+test("the brief selects the priority phase on a shared skull and caps the total loot preview", function()
+    local addon, _, state = openDeadmines({level=30})
+    local shared = assert(findEntry(addon.DungeonMap.frame.pins, function(p) return p:IsShown() and #p.members > 1 end))
+    shared.members[1], shared.members[2] = shared.members[2], shared.members[1]
+    shared:Fire("OnEnter")
+    local lines = hoverTexts(addon)
+    equal(lines[1], "Phase 1 of 2 · the Shredder")
+    check(lines[2]:find("Terrify", 1, true), "the important second member supplies the action")
+    local items = 0
+    for _, row in ipairs(addon.BossHover.panel.rows) do
+        if row:IsShown() and row.item then items = items + 1 end
+    end
+    check(items <= 3 and not state.menu, "a shared skull does not open another menu or a long preview")
+end)
+
 test("boss guide stays open for scrolling and loot, then closes on leave or floor changes", function()
     local addon, env, state = openDeadmines()
     local map = addon.DungeonMap
     env.UIParent:SetSize(740, 360)
     local shared = assert(findEntry(map.frame.pins, function(p) return p:IsShown() and #p.members > 1 end))
     shared.left, shared.right, shared.top = 356, 376, 30
+    state.shift = true
     shared:Fire("OnEnter")
     local panel = addon.BossHover.panel
     check(panel:IsVisible() and panel.more:IsShown() and not state.menu)
@@ -2348,6 +2407,7 @@ test("boss guide gives friendly abilities and individual enemy spells their own 
         return pin:IsShown() and #pin.members > 1
     end))
     shared.left, shared.right, shared.top = 356, 376, 30
+    state.shift = true
     shared:Fire("OnEnter")
     local panel = addon.BossHover.panel
     local function spellRow(id)
@@ -2650,6 +2710,7 @@ test("shaman, priest, paladin, mage, hunter, and racial mechanics show icons and
         return p:IsShown() and p.boss and p.boss.id == 255702
     end)
     check(blazeroarPin, "Blazeroar skull pin shown")
+    state.shift = true
     blazeroarPin:Fire("OnEnter")
     local lines = hoverTexts(addon)
     check(findEntry(lines, function(l) return l:find("|cff3399ffMagic|r", 1, true) end), "hover dispels")
@@ -3430,6 +3491,316 @@ test("custom dialog keys can track and remove a hovered named button", function(
     check(state.press("SPACE"))
     slash(env, "dialog remove OtherDialogButton")
     check(not state.press("SPACE"))
+end)
+
+local function partyClient(state, player, ...)
+    state.units = {player=player}
+    for index, member in ipairs({...}) do state.units["party" .. index] = member end
+    state.instanceID, state.inInstance = state.instanceID or 2970, state.inInstance ~= false
+    state.instanceName = state.instanceName or "The Drowned City"
+    state.level = player.level
+    state.network, state.partyChat, state.now = {}, {}, 0
+    local addon, env = load(state, function(mock)
+        mock.LE_PARTY_CATEGORY_INSTANCE = 2
+        mock.IsInGroup = function(category)
+            return state.units.party1 ~= nil and (not category or state.queued == true)
+        end
+        mock.IsInRaid = function() return state.raid == true end
+        mock.GetInstanceInfo = function()
+            return state.instanceName, state.instanceType or "party", 1, nil, nil, nil, nil, state.instanceID
+        end
+        mock.GetNormalizedRealmName = function() return "Forever" end
+        mock.UnitExists = function(unit) return state.units[unit] ~= nil end
+        mock.UnitIsConnected = function(unit) return state.units[unit] and not state.units[unit].offline or false end
+        mock.UnitFullName = function(unit)
+            local member = state.units[unit]
+            if member then
+                local first, last = member.name:match("^([^-]+)%-(.+)$")
+                return first or member.name, last
+            end
+        end
+        mock.UnitGroupRolesAssigned = function(unit) return (state.units[unit or "player"] or {}).role or "NONE" end
+        mock.UnitIsGroupLeader = function(unit) return (state.units[unit] or {}).leader == true end
+        mock.UnitClass = function(unit)
+            local class = (state.units[unit] or {}).class or "WARRIOR"
+            return class, class
+        end
+        mock.UnitLevel = function(unit) return (state.units[unit] or {}).level or 1 end
+        mock.UnitGUID = function(unit)
+            local npc = state.units[unit] or {}
+            return npc.guid or (npc.id and ("Creature-0-33-2970-99-%d-000000001A"):format(npc.id))
+        end
+        mock.UnitCanAttack = function(_, unit) return (state.units[unit] or {}).id ~= nil end
+        mock.UnitAffectingCombat = function(unit) return (state.units[unit] or {}).combat == true end
+        mock.UnitIsTrivial = function(unit) return (state.units[unit] or {}).trivial == true end
+        mock.UnitIsInInteractRange = function(unit) return (state.units[unit] or {}).close == true end
+        mock.C_ChatInfo = {
+            RegisterAddonMessagePrefix = function(prefix) state.prefix = prefix; return 0 end,
+            InChatMessagingLockdown = function() return state.chatLocked == true end,
+            SendAddonMessage = function(prefix, message, channel)
+                if state.addonLocked then return 11 end
+                local sender = player.name:gsub("%-", " ") .. "-Forever"
+                state.network[#state.network + 1] = {prefix, message, channel, sender}
+                return 0
+            end,
+            SendChatMessage = function(message, channel)
+                state.chatAttempts = (state.chatAttempts or 0) + 1
+                check(not state.chatLocked, "protected party chat was called")
+                state.partyChat[#state.partyChat + 1] = {message, channel}
+            end,
+        }
+    end)
+    Wow.flushTimers()
+    state.now = 3
+    return addon, env
+end
+
+local mage = {name="Ari-Fire", class="MAGE", level=38}
+local tank = {name="Zara-Shield", class="WARRIOR", level=40, role="TANK"}
+local leader = {name="Aya-Light", class="PRIEST", level=39, leader=true}
+
+test("one curated pull reminder uses the party's counters and stays quiet after a wipe", function()
+    local state = {}
+    local addon = partyClient(state, tank, mage)
+    check(addon.settings.partyCallouts, "enabled for existing profiles")
+    equal(state.network[1][2], "H:1", "discovers party peers before pulling")
+    Wow.fire("ENCOUNTER_START", 3476)
+    equal(#state.partyChat, 1)
+    equal(state.partyChat[1][2], "PARTY")
+    check(state.partyChat[1][1]:find("Mage, Counterspell Waterbolt Volley", 1, true))
+    check(state.partyChat[1][1]:find("Break Abyssal Bubbles", 1, true))
+    Wow.fire("ENCOUNTER_END", 3476, "Captain Dreadrise", 1, 2, 0)
+    state.now = 45
+    Wow.fire("ENCOUNTER_START", 3476)
+    equal(#state.partyChat, 1, "wipe stays quiet")
+    state.inInstance = false
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    state.inInstance = true
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    Wow.flushTimers()
+    state.now = 50
+    Wow.fire("ENCOUNTER_START", 3476)
+    equal(#state.partyChat, 2, "a new visit gets a new callout")
+end)
+
+test("one assigned tank sends for five clients when addon messages lock during the pull", function()
+    local members = {
+        tank, leader, mage, {name="Ari-Shadow", class="ROGUE", level=40}, {name="Kai-Arrow", class="HUNTER", level=39},
+    }
+    local clients = {}
+    for index, member in ipairs(members) do
+        local others, state = {}, {knownSpells=member == mage and {[118]=true} or {}}
+        for _, other in ipairs(members) do
+            if other ~= member then others[#others + 1] = other end
+        end
+        local _, env = partyClient(state, member, unpack(others))
+        clients[index] = {state=state, env=env, hello=state.network[1], spells=state.network[2]}
+    end
+    for index, client in ipairs(clients) do
+        Wow.state, Wow.env = client.state, client.env
+        for _, peer in ipairs(clients) do
+            if peer ~= client then
+                Wow.fire("CHAT_MSG_ADDON", unpack(peer.hello))
+                Wow.fire("CHAT_MSG_ADDON", unpack(peer.spells))
+            end
+        end
+        Wow.flushTimers()
+        client.state.addonLocked = true
+        Wow.fire("ENCOUNTER_START", 3475)
+        equal(#client.state.partyChat, index == 1 and 1 or 0, "only the assigned tank posts")
+    end
+    local tankState = clients[1].state
+    check(tankState.partyChat[1][1]:find("sheep one Brinescale Priestess", 1, true))
+    Wow.state, Wow.env = tankState, clients[1].env
+    tankState.addonLocked = false
+    Wow.fire("PLAYER_REGEN_ENABLED")
+    equal(tankState.network[#tankState.network][2], "D:258924", "completion synchronizes after combat")
+end)
+
+test("only current enabled addon peers affect the election", function()
+    local state = {}
+    partyClient(state, leader, tank)
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "H:1", "PARTY", "Zara-Shield-Forever")
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "S:0", "PARTY", "Zara-Shield")
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "H:1", "GUILD", "Zara-Shield")
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "H:1", "PARTY", "Outsider")
+    Wow.fire("ENCOUNTER_START", 3475)
+    equal(#state.partyChat, 1)
+    check(state.partyChat[1][1]:find("Control or kill both Brinescale Priestesses", 1, true))
+end)
+
+test("a replacement sender learns which callouts the group already heard", function()
+    local state = {}
+    partyClient(state, tank, leader)
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "S:1:258924", "PARTY", leader.name)
+    Wow.fire("ENCOUNTER_START", 3475)
+    equal(#state.partyChat, 0, "a new sender does not repeat a previous tip")
+    Wow.fire("ENCOUNTER_START", 3476)
+    equal(#state.partyChat, 1, "old callout history does not rate-limit a different boss")
+end)
+
+test("pre-pull tips require a ready check and a stable nearby boss target", function()
+    local state = {}
+    partyClient(state, tank, mage)
+    state.units.target = {id=270884, close=true}
+    Wow.fire("READY_CHECK", tank.name, 30)
+    Wow.flushTimers()
+    equal(#state.partyChat, 0, "staging copy stays quiet")
+    state.units.target = {id=260042, close=false}
+    Wow.fire("READY_CHECK", tank.name, 30)
+    Wow.flushTimers()
+    equal(#state.partyChat, 0, "distant target stays quiet")
+    state.units.target.close = true
+    Wow.fire("PLAYER_TARGET_CHANGED")
+    Wow.fire("PLAYER_REGEN_ENABLED")
+    Wow.flushTimers()
+    equal(#state.partyChat, 0, "passive targeting and leaving combat stay quiet")
+    Wow.fire("READY_CHECK", "Other-Player", 30)
+    Wow.flushTimers()
+    equal(#state.partyChat, 0, "a ready check outside the dungeon party stays quiet")
+    state.units.target.combat = true
+    Wow.fire("READY_CHECK", tank.name, 30)
+    Wow.flushTimers()
+    equal(#state.partyChat, 0, "an already engaged target cannot trigger a pre-pull note")
+    state.units.target.combat = false
+    Wow.fire("READY_CHECK", tank.name, 30)
+    state.units.target.guid = "Creature-0-33-2970-99-260042-000000001B"
+    Wow.flushTimers()
+    equal(#state.partyChat, 0, "switching to a different copy of the same NPC cancels the tip")
+    Wow.fire("READY_CHECK", tank.name, 30)
+    Wow.flushTimers()
+    equal(#state.partyChat, 1, "nearby target can prompt before the pull")
+    Wow.fire("ENCOUNTER_START", 3476)
+    equal(#state.partyChat, 1, "pull does not repeat the pre-pull reminder")
+end)
+
+test("a combat target fallback needs a known engaged creature and shares phase deduplication", function()
+    local state = {inCombat=true, queued=true}
+    partyClient(state, tank, mage)
+    state.units.player.combat = true
+    state.units.playertarget = {id=260330, combat=true}
+    Wow.fire("UNIT_TARGET", "player")
+    equal(#state.partyChat, 0)
+    state.units.playertarget.id = 260243
+    Wow.fire("UNIT_TARGET", "player")
+    equal(#state.partyChat, 1)
+    equal(state.partyChat[1][2], "INSTANCE_CHAT")
+    state.now = 25
+    state.units.playertarget.id = 260274
+    Wow.fire("UNIT_TARGET", "player")
+    Wow.fire("ENCOUNTER_START", 3479)
+    equal(#state.partyChat, 1, "both phases use one reminder")
+    state.units.player.combat = nil
+end)
+
+test("raid, overleveled, uncurated, and chat-restricted cases stay silent", function()
+    local cases = {
+        {state={raid=true}, player=tank, member=mage, encounter=3476},
+        {state={instanceType="raid"}, player=tank, member=mage, encounter=3476},
+        {state={inInstance=false}, player=tank, member=mage, encounter=3476},
+        {state={}, player=tank, encounter=3476},
+        {state={}, player=tank, member=mage, encounter=3474},
+        {state={}, player={name="Zara-Shield", level=60}, member={name="Ari-Fire", level=60}, encounter=3476},
+    }
+    for _, case in ipairs(cases) do
+        partyClient(case.state, case.player, case.member)
+        Wow.fire("ENCOUNTER_START", case.encounter)
+        equal(#case.state.partyChat, 0)
+    end
+    local state = {}
+    partyClient(state, tank, mage)
+    state.chatLocked = true
+    Wow.fire("ENCOUNTER_START", 3476)
+    state.chatLocked = false
+    Wow.fire("PLAYER_REGEN_ENABLED")
+    equal(#state.partyChat, 0, "restricted chat gets no delayed pull announcement")
+    equal(state.chatAttempts, nil, "restricted chat receives no send attempt")
+end)
+
+test("callout opt-out survives a map reset and cancels a scheduled pre-pull tip", function()
+    local state = {}
+    local addon, env = partyClient(state, tank, mage)
+    state.units.target = {id=260042, close=true}
+    Wow.fire("READY_CHECK", tank.name, 30)
+    slash(env, "callouts off")
+    Wow.flushTimers()
+    Wow.fire("ENCOUNTER_START", 3476)
+    equal(#state.partyChat, 0)
+    slash(env, "reset")
+    equal(addon.settings.partyCallouts, false)
+    slash(env, "callouts on")
+    Wow.flushTimers()
+    state.now = 10
+    Wow.fire("ENCOUNTER_START", 3476)
+    equal(#state.partyChat, 1)
+end)
+
+test("a class variant requires the right level and leaves untrained sender abilities out", function()
+    local state = {}
+    partyClient(state, mage, {name="New-Rogue", class="ROGUE", level=11})
+    Wow.fire("ENCOUNTER_START", 3476)
+    check(state.partyChat[1][1]:find("Interrupt Waterbolt Volley.", 1, true))
+    check(not state.partyChat[1][1]:find("Counterspell", 1, true), "the sender has not trained Counterspell")
+end)
+
+test("confirmed party counters have priority over class and level guesses", function()
+    local state = {}
+    partyClient(state, tank, {name="Ari-Shadow", class="ROGUE", level=40}, mage)
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "H:1", "PARTY", mage.name)
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "C:2139", "PARTY", mage.name)
+    Wow.fire("ENCOUNTER_START", 3476)
+    check(state.partyChat[1][1]:find("Mage, Counterspell", 1, true))
+end)
+
+test("a known missing party spell uses the generic tip and unrelated packets cannot clear it", function()
+    local state = {}
+    partyClient(state, tank, mage)
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "H:1", "PARTY", mage.name)
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "C:", "PARTY", mage.name)
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "C:2139", "GUILD", mage.name)
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "C:8042", "PARTY", mage.name)
+    Wow.fire("ENCOUNTER_START", 3476)
+    check(state.partyChat[1][1]:find("Interrupt Waterbolt Volley.", 1, true))
+end)
+
+test("spell capability packets only send relevant learned spells and update when training changes", function()
+    local state = {knownSpells={[118]=true, [475]=true}}
+    local _, env = partyClient(state, mage, tank)
+    equal(state.network[2][2], "C:118", "only current dungeon options are shared")
+    state.knownSpells[2139] = true
+    Wow.fire("SPELLS_CHANGED")
+    equal(state.network[3][2], "C:118,2139")
+    Wow.fire("SPELLS_CHANGED")
+    equal(#state.network, 3, "unchanged spell lists stay quiet")
+    slash(env, "callouts off")
+    Wow.flushTimers()
+    equal(state.network[4][2], "H:0")
+    equal(#state.network, 4, "opt-out omits spell capabilities")
+end)
+
+test("an audited encounter ID can identify a boss without a fixed floor encounter pin", function()
+    local state = {}
+    partyClient(state, tank, mage)
+    Wow.fire("ENCOUNTER_START", 3478)
+    equal(#state.partyChat, 1)
+    check(state.partyChat[1][1]:find("Kill Deathless Guardians first", 1, true))
+end)
+
+test("party callout data maps to catalogued bosses and fits one chat line", function()
+    local addon = load()
+    local entries, ids = 0, {}
+    for _, dungeon in ipairs(addon.Data.dungeons) do
+        for _, boss in ipairs(dungeon.bosses) do ids[boss.id] = boss.name end
+    end
+    for id, tip in pairs(addon.partyCallouts) do
+        entries = entries + 1
+        local name = assert(ids[id], "callout refers to an unknown boss")
+        check(#name + #tip.text + 14 <= 255, name .. " generic message fits")
+        for _, option in ipairs(tip.options or {}) do
+            check(#name + #option.text + 14 <= 255, name .. " class message fits")
+        end
+    end
+    equal(entries, 40)
 end)
 
 print(("%d passed, %d failed"):format(passed, failed))

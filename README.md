@@ -24,7 +24,7 @@ Aeternum automatically detects your character’s **class, race, and learned pro
 
 [![The Hall of Thanes dungeon map in WoW Forever showing Durgen Dirgehammer's tactics, detected Shaman and Dwarf Stoneform counters, role TLDRs, Bleed effects, recorded casts, and usable loot](docs/screenshots/forever-boss-guide.webp)](docs/screenshots/forever-boss-guide.webp)
 
-*Hover any boss skull, including WoW Forever dungeons like The Hall of Thanes, for detected class and racial counters, role tactics, recorded casts, and usable loot.*
+*Hold Shift while hovering a boss skull for the full guide shown here, including class and racial counters, role tactics, recorded casts, and usable loot.*
 
 ## Features
 
@@ -35,8 +35,8 @@ Click any entrance on the Azeroth, continent, or zone map to browse all 34 dunge
 
 *Multi-phase encounters share one skull: hover to see both phases of Sneed's fight, class advice, and spell tooltips.*
 
-- Hover a skull to open the encounter guide. It shows class counters like Tremor Totem for Sneed's Shredder, quick tactics for tanks, healers, and DPS, and color-coded effects. When the records identify them, the guide also shows the boss's creature type, rank, and adds. Recorded Forever casts and reference spells have separate labels. [Boss mechanics and sources](docs/boss-audit/mechanics.md)
-- Tactics and usable loot appear side by side, with every encounter listed when bosses share a skull. Move into the guide to scroll, hover an item for its stats, or hover a class ability or boss cast for its spell tooltip. Loot uses your class, proficiencies, and professions, and recipes you already know drop off the list.
+- Hover a skull for the priority action or your own class or role tip, plus a short usable-loot preview. Hold **Shift** while hovering to read every phase, all role tactics, color-coded effects, adds, and the recorded and reference spell lists. [Boss mechanics and sources](docs/boss-audit/mechanics.md)
+- Move into the guide to scroll or hover an item or spell for its tooltip. The full guide shows all usable drops. Loot uses your class, proficiencies, and professions and hides recipes you already know.
 - Click a skull for the boss menu, with **Shift-click** to link an item in chat and **Ctrl-click** to preview it in the dressing room. Find bosses whose positions are unknown under **Boss loot** in the floor menu or by searching for their name.
 - The loot list labels verified boss drops, other recorded drops, encounter rolls, and guide-listed items. The game’s item tooltips name drop sources for verified drops and encounter rolls.
 - Check which **Dungeon keys** are in your bags from the floor menu. Defeated bosses dim as you clear the run.
@@ -44,6 +44,19 @@ Click any entrance on the Azeroth, continent, or zone map to browse all 34 dunge
 [![Blackfathom Deeps boss menu for Twilight Lord Kelris showing Tactics, usable loot, Equipped stat comparison for Rod of the Sleepwalker, and drop source tooltip](docs/screenshots/boss-loot-comparison.webp)](docs/screenshots/boss-loot-comparison.webp)
 
 *Click a boss skull for its tactics menu, usable loot, live Equipped comparisons, and drop-source tooltips.*
+
+### Party boss callouts
+
+In five-player dungeons, Aeternum can share one short reminder for a high-impact mechanic. It checks the party's
+classes and levels for useful counters, such as Polymorph on Var'Taka's priestess or Tremor Totem for Terrify.
+It prefers abilities confirmed by participating Aeternum clients.
+When several party members run Aeternum, the assigned tank gets first priority, followed by the party leader
+and then another enabled client.
+
+A reminder can appear during a ready check with a nearby boss selected or when the encounter starts.
+It stays in party chat and appears once per encounter per visit. The feature is on by default. Use
+`/aeternum callouts off` to disable it or `/aeternum callouts on` to turn it back on.
+[Mechanics and coverage](docs/boss-audit/mechanics.md#party-boss-callouts)
 
 ### Entrances and minimap directions
 Hover over a zone to see its recommended levels, on the Azeroth, continent, and zone maps, including unexplored terrain.
@@ -110,8 +123,9 @@ Install directly from the **[CurseForge project page](https://www.curseforge.com
 | --- | --- |
 | **Left-click** a dungeon entrance | Open its floor map and boss pins |
 | **Right-click** a dungeon entrance | Start or stop minimap directions to a wing or door |
-| **Hover** a boss skull | Read tactics, spells, adds, and usable loot for every encounter on that pin |
-| **Scroll** inside the boss guide | Read longer encounter and loot lists |
+| **Hover** a boss skull | See the priority action or a personal tip and a short loot preview |
+| **Hold Shift** while hovering | Read every phase, role, spell, and usable drop |
+| **Scroll** inside the guide | Read longer encounter and loot lists |
 | **Left-click** a boss skull | Open the boss menu for item links, previews, and encounter selection |
 | **Left-click** a trainer or quest pin | Browse lessons and prices, track a quest, or start directions |
 | **Scroll / drag** in the atlas or on a dungeon floor | Zoom toward the pointer and pan |
@@ -128,6 +142,7 @@ Install directly from the **[CurseForge project page](https://www.curseforge.com
 | `/aeternum <search>` | Search dungeons, bosses, or usable drops in any word order (e.g. `/aeternum herod scarlet`) |
 | `/aeternum dungeons [name]` | List every dungeon by level, or jump straight to a matching boss or item (e.g. `/aeternum dungeons Cruel Barb`) |
 | `/aeternum stop` | Stop active minimap directions |
+| `/aeternum callouts on\|off` | Enable or disable high-priority boss tips in dungeon party chat |
 | `/aeternum dialog on\|off` | Enable or disable keyboard shortcuts for NPCs and quests |
 | `/aeternum dialog key CTRL-SPACE` | Change the advance key from Space |
 | `/aeternum dialog second F` | Assign a second advance key. Use `second none` to clear it |

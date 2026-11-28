@@ -22,9 +22,9 @@ Inside a dungeon, press **M** to see the floor. The map follows recognized rooms
 
 Click the floor name to change floors, check which dungeon keys are in your bags, or find an outdoor entrance. On supported floors, **Terrain detail** switches to the in-game minimap artwork at the same position and zoom. Under **Entrances**, **Show on zone map** marks the door when you open its zone. If you’re viewing a different zone, the addon names the destination in chat.
 
-Hover a boss skull to open the encounter guide. A shared skull lists every encounter at that spot in the same guide. Move your pointer onto the guide to scroll through longer fights or hover an item for its native tooltip.
+Hover a boss skull for its priority action or a personal tip and a short usable-loot preview. For shared skulls, the preview highlights one important encounter. Hold **Shift** while hovering to see all phases and loot. Move your pointer onto the guide to scroll or hover an item or spell for its tooltip.
 
-Each encounter shows quick tactics for tanks, healers, and DPS and relevant abilities from your character’s spellbook. The guide includes the boss’s creature type, rank, and named adds when those details are documented. Magic, Curse, Disease, and Poison use Blizzard’s aura colors. **Recorded Forever casts** shows abilities seen in that dungeon, and **Reference spells** lists additional abilities from encounter guides or databases. [Mechanics coverage by boss](boss-audit/mechanics.md)
+The full guide shows tank, healer, and DPS tactics and relevant abilities from your character’s spellbook. The guide includes the boss’s creature type, rank, and named adds when documented. Magic, Curse, Disease, and Poison use Blizzard’s aura colors. **Recorded Forever casts** shows abilities seen in that dungeon, and **Reference spells** lists additional abilities from encounter guides or databases. [Mechanics coverage by boss](boss-audit/mechanics.md)
 
 Click a skull to open the boss menu. From there, Shift-click an item to link it or Ctrl-click to preview it. If you’re looking for a boss whose position is unknown, open **Boss loot** from the floor dropdown or type `/aeternum <boss name>`.
 

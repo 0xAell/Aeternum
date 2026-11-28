@@ -3,7 +3,7 @@ local Hover = {}
 addon.BossHover = Hover
 
 local PADDING, GAP, SCROLLBAR = 14, 14, 24
-local MAX_WIDTH, MAX_HEIGHT = 740, 660
+local BRIEF_WIDTH, MAX_WIDTH, MAX_HEIGHT = 420, 740, 660
 local TEXT_SCALE = 1.25
 -- The client scales embedded icons along with their font string.
 local ICON_SIZE = 18
@@ -18,6 +18,7 @@ end
 local function trackPointer(panel, elapsed)
     local pin = Hover.pin
     if not pin or not pin:IsVisible() then Hover:Hide(); return end
+    if IsShiftKeyDown() ~= panel.expanded then Hover:Draw(pin) end
     local x, y = GetCursorPosition()
     local scale = UIParent:GetEffectiveScale()
     x, y = x / scale, y / scale
@@ -57,7 +58,6 @@ local function ensurePanel()
     panel.title:SetWordWrap(true)
     panel.more = createText(panel, "GameFontDisableSmall")
     panel.more:SetPoint("BOTTOMLEFT", PADDING, 10)
-    panel.more:SetText("Scroll for more")
     panel.scroll = CreateFrame("ScrollFrame", nil, panel, "UIPanelScrollFrameTemplate")
     panel.scroll:EnableMouseWheel(true)
     panel.scroll:SetScript("OnMouseWheel", scrollBy)
@@ -163,7 +163,29 @@ local function drawRows(panel, rows, x, y, width, count, requested)
     return y, count
 end
 
-local function screenSpace(pin)
+local function briefRows(pin, title)
+    local rows = textRows()
+    local lead = pin.members[1]
+    for _, boss in ipairs(pin.members) do
+        if addon.partyCallouts[boss.id] then lead = boss; break end
+    end
+    if pin.complete then rows:AddLine("Encounter complete", .55, .8, .55) end
+    if #pin.members > 1 then
+        local details = addon.BossDetails:ForBoss(lead.id)
+        local context = details and details.phase or ("%d bosses at this pin"):format(#pin.members)
+        rows:AddLine(lead.name == title and context or lead.name .. " · " .. context, .76, .76, .76)
+    end
+    addon.Tactics:AddBrief(rows, lead, function(label, id, name)
+        rows[#rows + 1] = {text=label, spell=id, spellName=name}
+    end, ICON_SIZE)
+    rows:AddLine(" ")
+    addon.UI:AddBossLootPreview(rows, pin.members, addon.LootFilter(), function(id)
+        rows[#rows + 1] = {item=id}
+    end)
+    return rows
+end
+
+local function screenSpace(pin, maximum)
     local w, h, uiScale = UIParent:GetWidth(), UIParent:GetHeight(), UIParent:GetEffectiveScale()
     local scale = pin:GetEffectiveScale() / uiScale
     local x, y = GetCursorPosition()
@@ -172,14 +194,19 @@ local function screenSpace(pin)
         (right and right * scale or x / uiScale), (top and top * scale or y / uiScale)
     local toRight = w - right >= MAX_WIDTH + 12 or (left < MAX_WIDTH + 12 and w - right >= left)
     local room = toRight and w - right or left
-    local width = math.min(MAX_WIDTH, math.max(180, room - 14))
+    local width = math.min(maximum, math.max(180, room - 14))
     x = toRight and right + 5 or left - width - 5
     return math.max(7, math.min(w - width - 7, x)), top, width, h
 end
 
 function Hover:Draw(pin, offset)
     local panel = ensurePanel()
-    local x, top, width, screenHeight = screenSpace(pin)
+    local expanded = IsShiftKeyDown()
+    if panel.expanded ~= expanded then
+        panel.expanded, offset = expanded, nil
+        for _, row in ipairs(panel.rows) do tipLeave(row) end
+    end
+    local x, top, width, screenHeight = screenSpace(pin, expanded and MAX_WIDTH or BRIEF_WIDTH)
     panel.title:SetWidth(width - PADDING * 2)
     local main = pin.members[1].name
     local title = #pin.members > 1 and (pin.label or "Bosses at this location") or main
@@ -191,19 +218,24 @@ function Hover:Draw(pin, offset)
     local leftWidth = dual and math.floor((contentWidth - GAP) * .62) or contentWidth
     local rightWidth = dual and contentWidth - GAP - leftWidth or contentWidth
     local rightX = dual and leftWidth + GAP or 0
-    local body, count, usable = 0, 0, addon.LootFilter()
-    for i, boss in ipairs(pin.members) do
-        if i > 1 then body = body + GAP end
-        if title ~= boss.name then
-            count = count + 1
-            body = body + setRow(panel, count, 0, body, contentWidth, {text=boss.name, r=1, g=.82, b=0})
+    local body, count = 0, 0
+    if expanded then
+        local usable = addon.LootFilter()
+        for i, boss in ipairs(pin.members) do
+            if i > 1 then body = body + GAP end
+            if title ~= boss.name then
+                count = count + 1
+                body = body + setRow(panel, count, 0, body, contentWidth, {text=boss.name, r=1, g=.82, b=0})
+            end
+            local left, right = detailsRows(pin, boss, usable)
+            local leftBottom, rightBottom
+            leftBottom, count = drawRows(panel, left, 0, body, leftWidth, count, self.requested)
+            rightBottom, count = drawRows(panel, right, rightX, dual and body or leftBottom + GAP,
+                rightWidth, count, self.requested)
+            body = math.max(leftBottom, rightBottom)
         end
-        local left, right = detailsRows(pin, boss, usable)
-        local leftBottom, rightBottom
-        leftBottom, count = drawRows(panel, left, 0, body, leftWidth, count, self.requested)
-        rightBottom, count = drawRows(panel, right, rightX, dual and body or leftBottom + GAP,
-            rightWidth, count, self.requested)
-        body = math.max(leftBottom, rightBottom)
+    else
+        body, count = drawRows(panel, briefRows(pin, title), 0, 0, contentWidth, 0, self.requested)
     end
     for i = count + 1, #panel.rows do
         local row = panel.rows[i]
@@ -214,9 +246,11 @@ function Hover:Draw(pin, offset)
 
     local header = math.max(42, math.ceil(panel.title:GetStringHeight()) + 23)
     local maximum = math.min(MAX_HEIGHT, math.floor(screenHeight * .74))
-    local more = header + body + 13 > maximum
-    local footer = more and 34 or 13
-    panel.more:SetShown(more)
+    local scrolls = header + body + (expanded and 13 or 34) > maximum
+    local showHint = not expanded or scrolls
+    local footer = showHint and 34 or 13
+    panel.more:SetText(expanded and "Scroll for more" or "Hold Shift for details")
+    panel.more:SetShown(showHint)
     panel.scroll:ClearAllPoints()
     panel.scroll:SetPoint("TOPLEFT", panel, "TOPLEFT", PADDING, -header)
     panel.scroll:SetPoint("BOTTOMRIGHT", panel, "BOTTOMRIGHT", -SCROLLBAR, footer)

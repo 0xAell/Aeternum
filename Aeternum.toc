@@ -2,7 +2,7 @@
 ## Title: Aeternum
 ## Notes: Dungeon maps, boss guides, trainers, quests, minimap directions, and dialog shortcuts for WoW Forever.
 ## Author: Ael
-## Version: 0.8.1
+## Version: 0.8.2
 ## X-WoW-Flavor: Forever
 ## IconAtlas: Dungeon
 ## Category: Map & Minimap
@@ -41,4 +41,6 @@ Atlas.lua
 WorldMap.lua
 WorldMap.xml
 DialogKeys.lua
+PartyCalloutData.lua
+PartyCallouts.lua
 Main.lua

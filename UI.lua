@@ -88,6 +88,26 @@ function UI:AddBossLoot(tooltip, boss, usable, addItem)
     end
 end
 
+function UI:AddBossLootPreview(tooltip, bosses, usable, addItem)
+    local seen, count, documented = {}, 0, false
+    tooltip:AddLine("Usable loot", 1, .82, 0)
+    for _, boss in ipairs(bosses) do
+        documented = documented or #boss.loot > 0
+        eachDrop(boss, usable, function(id)
+            if seen[id] then return end
+            seen[id] = true
+            count = count + 1
+            if count <= 3 then addItem(id) end
+        end)
+    end
+    if count > 3 then
+        tooltip:AddLine(("+%d more usable drops"):format(count - 3), .75, .75, .75, true)
+    elseif count == 0 then
+        tooltip:AddLine(documented and "No usable drops found for your character" or "No documented drops",
+            .75, .75, .75, true)
+    end
+end
+
 function UI:AddBossDetails(tooltip, boss)
     local details = addon.BossDetails:ForBoss(boss.id)
     local kind = boss.event and (boss.event .. " event") or "Boss"
