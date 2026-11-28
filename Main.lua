@@ -65,6 +65,37 @@ for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "PLAYER_ENTERING_WORLD",
     pcall(frame.RegisterEvent, frame, event)
 end
 
+-- Opens the world map, then runs andThen. OpenWorldMap without a map ID only calls ShowUIPanel,
+-- which shows the map from Blizzard's secure delegate. ToggleWorldMap would go on to rebuild the
+-- map's zoom state from this add-on code and taint it for the session.
+local function withMap(andThen)
+    if not addon.settings then addon.LoadSettings() end
+    if not addon.AttachMap() and C_AddOns and C_AddOns.LoadAddOn then C_AddOns.LoadAddOn("Blizzard_WorldMap") end
+    if not addon.AttachMap() then return end
+    if not WorldMapFrame:IsShown() then
+        if InCombatLockdown() then DEFAULT_CHAT_FRAME:AddMessage("Open the map after combat."); return end
+        OpenWorldMap()
+    end
+    if andThen and WorldMapFrame:IsShown() then andThen() end
+end
+
+-- The minimap's addon compartment, Blizzard's own launcher, opens the dungeon list.
+function Aeternum_OnAddonCompartmentClick()
+    withMap(function() addon.UI:Search("") end)
+end
+
+function Aeternum_OnAddonCompartmentEnter(_, button)
+    GameTooltip:SetOwner(button, "ANCHOR_LEFT")
+    GameTooltip:SetText("Aeternum")
+    GameTooltip:AddLine("Browse dungeons by level", 1, 1, 1)
+    GameTooltip:AddLine("Type /aeternum <name> to find a dungeon, boss or drop", .75, .75, .75, true)
+    GameTooltip:Show()
+end
+
+function Aeternum_OnAddonCompartmentLeave(_, button)
+    if GameTooltip:IsOwned(button) then GameTooltip:Hide() end
+end
+
 SLASH_AETERNUM1 = "/aeternum"
 SlashCmdList.AETERNUM = function(message)
     local text = addon.Trim(message)
@@ -82,7 +113,8 @@ SlashCmdList.AETERNUM = function(message)
         DEFAULT_CHAT_FRAME:AddMessage("Aeternum map filters reset.")
         return
     end
-    local help = "Use /aeternum to open the map, /aeternum <name> to search, or /aeternum stop to end directions."
+    local help = "Use /aeternum to open the map, /aeternum dungeons to browse by level, /aeternum <name> to search, "
+        .. "or /aeternum stop to end directions."
     if command == "help" or command == "?" then
         DEFAULT_CHAT_FRAME:AddMessage(help)
         return
@@ -93,15 +125,5 @@ SlashCmdList.AETERNUM = function(message)
         if #results == 0 then DEFAULT_CHAT_FRAME:AddMessage(help); return end
         command, query = "dungeons", text
     end
-    if not addon.settings then addon.LoadSettings() end
-    if not addon.AttachMap() and C_AddOns and C_AddOns.LoadAddOn then C_AddOns.LoadAddOn("Blizzard_WorldMap") end
-    if not addon.AttachMap() then return end
-    if not WorldMapFrame:IsShown() then
-        if InCombatLockdown() then DEFAULT_CHAT_FRAME:AddMessage("Open the map after combat."); return end
-        -- OpenWorldMap without a map ID only calls ShowUIPanel, which shows the map from
-        -- Blizzard's secure delegate. ToggleWorldMap would go on to rebuild the map's zoom
-        -- state from this add-on code and taint it for the session.
-        OpenWorldMap()
-    end
-    if command == "dungeons" then addon.UI:Search(query, results) end
+    withMap(command == "dungeons" and function() addon.UI:Search(query, results) end or nil)
 end

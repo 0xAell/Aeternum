@@ -6,6 +6,8 @@ Press **M** to open the world map. The map’s tracking menu controls quest obje
 
 Click a dungeon entrance to browse its floors. Right-click for minimap directions to a specific wing or door. All entrances are available on the world map and their continent map. You can also open the Stockade from Elwynn Forest, Ragefire Chasm from Durotar, and the Hall of Thanes from Dun Morogh. Hover over a shared pin to see the dungeons it covers, then click to choose one.
 
+To pick a dungeon for your level, open **Dungeons by level** in the map's tracking menu, type `/aeternum dungeons`, or choose **Aeternum** in the minimap's addon compartment. Every dungeon and wing is listed from the lowest level range to the highest. Each range uses the game's quest difficulty colors for your character: red or orange is above your level, yellow is your range, green is easy, and gray is trivial. Entrance tooltips color their level range the same way. Choose a dungeon to open its floors.
+
 Ten of the 41 marked entrances have a recorded approach waypoint, covering the Deadmines, Ragefire Chasm, the four Scarlet Monastery wings, Alcaz Prison, Blackmaw Hold, Krol’dok Stronghold, and Shaper’s Terrace. Other doors show a direct bearing. Dire Maul East and West each have more than one selectable portal.
 
 Directions survive a UI reload on the same character. They pause on another continent or inside an unrelated instance and end when you reach the destination. Choose **Stop directions** on the map to cancel.
@@ -44,7 +46,7 @@ The database covers 5,323 quests, 11,100 start and turn-in records, and 5,207 re
 | --- | --- |
 | `/aeternum` | Open the world map. |
 | `/aeternum <search words>` | Search by dungeon, boss, or drop. Words can appear in any order, as in `/aeternum Herod Scarlet`. |
-| `/aeternum dungeons [name]` | Find a dungeon, boss, or drop on the map. For example, `/aeternum dungeons Cruel Barb` finds Edwin VanCleef for a character who can use the sword. |
+| `/aeternum dungeons [name]` | Without a name, list every dungeon by level. With one, find a dungeon, boss, or drop on the map. For example, `/aeternum dungeons Cruel Barb` finds Edwin VanCleef for a character who can use the sword. |
 | `/aeternum help` | Show the available map commands. |
 | `/aeternum stop` | End minimap directions. |
 | `/aeternum reset` | Reset map filters. |

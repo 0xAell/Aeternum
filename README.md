@@ -23,7 +23,7 @@ Press **M** and everything you need is already on the map. Aeternum adds dungeon
 ## Features
 
 ### Dungeon floors and boss loot
-Click any entrance on the Azeroth, continent, or zone map to browse all 34 dungeons and wings across 71 floors. Inside an instance, pressing **M** opens your current floor automatically and shows your position wherever the client reports coordinates.
+Click any entrance on the Azeroth, continent, or zone map to browse all 34 dungeons and wings across 71 floors. Not sure where to go next? **Dungeons by level** lists every dungeon from the lowest level range to the highest, colored for your character the way the game colors quests. Inside an instance, pressing **M** opens your current floor automatically and shows your position wherever the client reports coordinates.
 
 - Click a boss skull (or open **Boss loot** in the floor menu for unplaced bosses) to see gear your class and trained proficiencies can use, plus recipes you have the profession, rank, and specialization to learn. Already-learned recipes drop off the list.
 - Hover items for standard WoW tooltips, **Shift-click** to link in chat, **Ctrl-click** to preview in the dressing room, and check which **Dungeon keys** are already in your bags. Defeated bosses dim as you clear the run.
@@ -76,7 +76,8 @@ Install directly from the **[CurseForge project page](https://www.curseforge.com
 | **Left-click** a trainer or quest pin | Browse lessons and prices, track a quest, or start directions |
 | **Scroll / drag** on a dungeon floor | Zoom in and pan around the floor |
 | **Back** button or **Right-click** empty floor | Return to the outdoor zone map (**Escape** closes the map) |
-| **Map tracking menu** (magnifying glass) | Toggle entrances, trainers, low-level quests, or all quest locations |
+| **Map tracking menu** (magnifying glass) | Open **Dungeons by level**, or toggle entrances, trainers, low-level quests, or all quest locations |
+| **Addon compartment** (minimap) → **Aeternum** | Open the map with **Dungeons by level** |
 
 ### Slash commands
 
@@ -84,7 +85,7 @@ Install directly from the **[CurseForge project page](https://www.curseforge.com
 | --- | --- |
 | `/aeternum` | Open the world map |
 | `/aeternum <search>` | Search dungeons, bosses, or usable drops in any word order (e.g. `/aeternum herod scarlet`) |
-| `/aeternum dungeons [name]` | Browse dungeons or jump straight to a matching boss or item (e.g. `/aeternum dungeons Cruel Barb`) |
+| `/aeternum dungeons [name]` | List every dungeon by level, or jump straight to a matching boss or item (e.g. `/aeternum dungeons Cruel Barb`) |
 | `/aeternum stop` | Stop active minimap directions |
 | `/aeternum reset` | Reset Aeternum's map filters to defaults |
 | `/aeternum help` | Show available commands in chat |

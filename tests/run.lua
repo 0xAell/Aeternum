@@ -1983,5 +1983,74 @@ test("a focused location keeps its tooltip shut when the map redraws", function(
     check(env.WorldMapFrame:GetMapID() == 1436 and not env.WorldMapFrame.panX, "map left where it was")
 end)
 
+test("dungeon level ranges take the character's difficulty colour", function()
+    for _, case in ipairs({{12, "ff1a1a"}, {20, "ffd100"}, {40, "808080"}}) do
+        local _, env = load({mapID=1436, level=case[1]})
+        env.WorldMapFrame:Show()
+        locate(env, function(e) return e.title == "The Deadmines" end):OnMouseEnter()
+        check(findEntry(env.GameTooltip.lines, function(line)
+            return line == "Moonbrook entrance approach · |cff" .. case[2] .. "Levels 17–26|r"
+        end), "level " .. case[1] .. " colours the range " .. case[2])
+    end
+end)
+
+test("/aeternum dungeons lists every dungeon by level and opens the chosen floors", function()
+    local addon, env, state = load({level=20})
+    slash(env, "dungeons")
+    check(env.WorldMapFrame:IsShown(), "map open")
+    local menu = state.menu
+    equal(menu.children[1].label, "Dungeons by level")
+    equal(#menu.children - 1, #addon.Data.dungeons, "every dungeon and wing")
+    local last = 0
+    for _, entry in ipairs(addon.DungeonsByLevel()) do
+        check(entry.source.levelMin >= last, "ordered by level")
+        last = entry.source.levelMin
+    end
+    equal(menu.children[2].label:match("^(.-)  "), addon.DungeonsByLevel()[1].title, "lowest range first")
+    local row = findEntry(menu.children, function(r) return r.label:find("^The Deadmines  ") end)
+    equal(row.label, "The Deadmines  |cffffd10017–26|r")
+    row.tooltip(env.GameTooltip)
+    check(findEntry(env.GameTooltip.lines, function(line) return line == "5 players · 9 bosses" end),
+        "group size and bosses")
+    row:Click()
+    Wow.flushTimers()
+    equal(addon.DungeonMap.dungeon.id, "deadmines", "floor view opened")
+end)
+
+test("the map's tracking menu offers the dungeon list", function()
+    local addon, env = load({level=30})
+    env.WorldMapFrame:Show()
+    local index = Wow.trackingMenu():Find("Dungeons by level")
+    equal(#index.children, #addon.Data.dungeons)
+    index.children[1]:Click()
+    Wow.flushTimers()
+    equal(addon.DungeonMap.dungeon, addon.DungeonsByLevel()[1].source, "lowest dungeon's floors")
+end)
+
+test("the addon compartment entry opens the dungeon list through the secure map path", function()
+    local _, env, state = load()
+    local named = 0
+    for line in io.lines(ADDON .. ".toc") do
+        local field, value = line:match("^## (AddonCompartmentFunc%w*): (%S+)")
+        if field then
+            equal(type(env[value]), "function", field .. " names a function the addon defines")
+            named = named + 1
+        end
+    end
+    equal(named, 3, "click, enter and leave handlers")
+    env.Aeternum_OnAddonCompartmentEnter(ADDON, env.UIParent)
+    equal(env.GameTooltip.lines[1], "Aeternum")
+    env.Aeternum_OnAddonCompartmentLeave(ADDON, env.UIParent)
+    check(not env.GameTooltip.shown, "tooltip hidden on leave")
+    state.inCombat = true
+    env.Aeternum_OnAddonCompartmentClick(ADDON, "LeftButton")
+    check(not env.WorldMapFrame:IsShown(), "no map in combat")
+    equal(state.messages[#state.messages], "Open the map after combat.")
+    state.inCombat = false
+    env.Aeternum_OnAddonCompartmentClick(ADDON, "LeftButton")
+    check(env.WorldMapFrame:IsShown(), "map open")
+    equal(state.menu.children[1].label, "Dungeons by level")
+end)
+
 print(("%d passed, %d failed"):format(passed, failed))
 os.exit(failed == 0 and 0 or 1)

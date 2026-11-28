@@ -610,6 +610,17 @@ function Wow.new(state)
     env.UnitRace = function() return "Human", "Human", state.raceID or 1 end
     env.UnitClass = function() return "Warrior", state.class or "WARRIOR", 1 end
     env.UnitQuestTrivialLevelRange = function() return 5 end
+    -- As QuestDifficultyColors and DifficultyUtil.GetRelativeDifficultyColor in the client.
+    env.QuestDifficultyColors = {impossible = {r = 1, g = .1, b = .1}, verydifficult = {r = 1, g = .5, b = .25},
+        difficult = {r = 1, g = .82, b = 0}, standard = {r = .25, g = .75, b = .25}, trivial = {r = .5, g = .5, b = .5}}
+    env.GetRelativeDifficultyColor = function(unitLevel, challengeLevel)
+        local diff, colors = challengeLevel - unitLevel, env.QuestDifficultyColors
+        if diff >= 5 then return colors.impossible end
+        if diff >= 3 then return colors.verydifficult end
+        if diff >= -4 then return colors.difficult end
+        if -diff <= env.UnitQuestTrivialLevelRange("player") then return colors.standard end
+        return colors.trivial
+    end
     env.IsModifiedClick = function() return state.modified or false end
     env.HandleModifiedItemClick = function(link)
         state.modifiedClick = link
