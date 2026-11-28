@@ -341,6 +341,7 @@ end
 -- block Blizzard's own pins in combat. A location on the open map is marked at once.
 -- Otherwise the chat says where it is, and it is marked when the player opens that map.
 function UI:ShowLocation(entry)
+    addon.Atlas:Close()
     addon.DungeonMap:Close()
     if self.map:GetMapID() == entry.mapID then
         self.waitingLocation = nil
@@ -538,6 +539,15 @@ function UI:Attach(map)
     if Menu and Menu.ModifyMenu then
         Menu.ModifyMenu("MENU_WORLD_MAP_TRACKING", function(_, menu)
             menu:CreateDivider()
+            if addon.Atlas.active then
+                menu:CreateButton("Return to world map", function() addon.Atlas:Close() end)
+            elseif addon.Atlas:Available() then
+                local atlas = menu:CreateButton("Dungeon atlas", function() addon.Atlas:Open() end)
+                atlas:SetTooltip(function(tooltip)
+                    tooltip:SetText("Browse dungeon entrances across Azeroth")
+                    tooltip:AddLine("Scroll to zoom. Drag to pan. Middle-click to find yourself.", 1, 1, 1, true)
+                end)
+            end
             local function category(parent, id, name)
                 parent:CreateCheckbox(name, function() return addon.CategoryEnabled(id) end, function()
                     addon.settings.filters[id] = not addon.CategoryEnabled(id)

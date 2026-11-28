@@ -140,6 +140,7 @@ local function showTooltip(pin)
     end
     GameTooltip:Show()
 end
+addon.ShowMapPinTooltip = showTooltip
 
 function pins:OnMouseEnter()
     if self.entry and self.entry.category == "dungeon" then
@@ -281,6 +282,7 @@ methods.OnCanvasSizeChanged = methods.OnCanvasScaleChanged
 
 function methods:OnMapChanged()
     highlighted = nil
+    addon.Atlas:Close()
     addon.DungeonMap:Close()
     self:RefreshAllData()
     local waiting = addon.UI.waitingLocation
@@ -292,11 +294,13 @@ end
 function methods:OnHide()
     highlighted = nil
     addon.UI.waitingLocation = nil
+    addon.Atlas:Close()
     self:RemoveAllData()
 end
 
 function addon.RefreshMap()
     if provider then provider:RefreshAllData() end
+    addon.Atlas:Refresh()
 end
 
 local function refreshPin(pin)
@@ -309,6 +313,7 @@ function addon.UpdateRoutePins()
     for _, template in ipairs({POINT, ENTRANCE}) do
         for pin in provider:GetMap():EnumeratePinsByTemplate(template) do refreshPin(pin) end
     end
+    addon.Atlas:Refresh()
 end
 
 function addon.RefreshQuestStates()
@@ -376,6 +381,7 @@ function addon.AttachMap()
         return false
     end
     Mixin(AeternumMapPinMixin, MapCanvasPinMixin, pins)
+    addon.Atlas:Attach(WorldMapFrame)
     addon.UI:Attach(WorldMapFrame)
     addon.AttachZoneLevels(WorldMapFrame)
     provider = CreateFromMixins(MapCanvasDataProviderMixin, methods)

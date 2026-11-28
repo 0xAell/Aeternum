@@ -477,6 +477,7 @@ Wow.knownEvents = {
     BOSS_KILL = true, ENCOUNTER_START = true, ENCOUNTER_END = true, TRAINER_SERVICE_INFO_NAME_UPDATE = true,
     QUEST_WATCH_LIST_CHANGED = true, SUPER_TRACKING_CHANGED = true, QUEST_POI_UPDATE = true, CVAR_UPDATE = true,
     ITEM_DATA_LOAD_RESULT = true, SPELLS_CHANGED = true, PLAYER_ROLES_ASSIGNED = true,
+    PLAYER_REGEN_DISABLED = true, GAME_PAD_ACTIVE_CHANGED = true, MAP_EXPLORATION_UPDATED = true,
 }
 
 local templates = { UIPanelButtonTemplate = true, PanelTopTabButtonTemplate = true, MinimalScrollBar = true,
@@ -566,6 +567,8 @@ function Wow.new(state)
     end}
     env.GetMoneyString = function(copper) return copper .. " copper" end
     env.GetCursorPosition = function() return state.cursorX or 150, state.cursorY or 150 end
+    env.InputUtil = {IsGamepadUIEnabled = function() return state.gamepad or false end}
+    env.LEVEL = "Level"
     env.GetInstanceInfo = function() return state.instanceName, "party", nil, nil, nil, nil, nil, state.instanceID end
     env.GetSubZoneText = function() return state.subzone end
     env.GetLocale = function() return state.locale or "enUS" end
@@ -754,15 +757,43 @@ function Wow.new(state)
         IsComplete = function(questID) return state.complete[questID] or false end,
     }
     env.C_Map = {
-        GetMapInfo = function(mapID) return {name=mapFor(mapID).name, mapType=env.Enum.UIMapType.Zone} end,
+        GetMapInfo = function(mapID)
+            return (state.mapInfo or {})[mapID] or {name=mapFor(mapID).name, mapType=env.Enum.UIMapType.Zone}
+        end,
+        GetMapChildrenInfo = function(mapID) return (state.mapChildren or {})[mapID] or {} end,
+        GetMapInfoAtPosition = function(mapID, x, y)
+            for _, child in ipairs((state.mapChildren or {})[mapID] or {}) do
+                local rect = ((state.mapRects or {})[mapID] or {})[child.mapID]
+                if rect and x >= rect[1] and x <= rect[2] and y >= rect[3] and y <= rect[4] then
+                    return child
+                end
+            end
+        end,
+        GetMapRectOnMap = function(mapID, parent)
+            local rect = ((state.mapRects or {})[parent] or {})[mapID]
+            if rect then return unpack(rect) end
+        end,
+        GetMapLevels = function(mapID)
+            local levels = (state.mapLevels or {})[mapID]
+            if levels then return unpack(levels) end
+        end,
+        GetMapArtLayers = function(mapID) return (state.mapArtLayers or {})[mapID] or {} end,
+        GetMapArtLayerTextures = function(mapID, layer)
+            return ((state.mapArtTextures or {})[mapID] or {})[layer] or {}
+        end,
         GetBestMapForUnit = function() return state.playerMap end,
         GetPlayerMapPosition = function()
-            if state.playerX then return { x = state.playerX, y = state.playerY } end
+            if state.playerX then
+                return {x=state.playerX, y=state.playerY, GetXY=function(point) return point.x, point.y end}
+            end
         end,
         GetWorldPosFromMapPos = function(mapID, vector)
             local continent, worldX, worldY = Wow.worldPosition(mapID, vector.x, vector.y)
             return continent, { x = worldX, y = worldY }
         end,
+    }
+    env.C_MapExplorationInfo = {
+        GetExploredMapTextures = function(mapID) return (state.mapExploration or {})[mapID] end,
     }
 
     env.MapCanvasDataProviderMixin = {

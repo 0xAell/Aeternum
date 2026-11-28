@@ -30,11 +30,15 @@ local function syncStrata(frame)
     end
 end
 
+local function fitScale(w, h)
+    return math.min(w / WIDTH, h / HEIGHT)
+end
+
 local function place(frame)
     syncStrata(frame)
     local w, h = frame:GetSize()
     if w <= 0 or h <= 0 then return end
-    local scale = math.min(w / WIDTH, h / HEIGHT) * frame.zoom
+    local scale = fitScale(w, h) * frame.zoom
     local aw, ah = WIDTH * scale, HEIGHT * scale
     frame.x = aw <= w and (w - aw) / 2 or clamp(frame.x, w - aw, 0)
     frame.y = ah <= h and (h - ah) / 2 or clamp(frame.y, h - ah, 0)
@@ -44,6 +48,30 @@ local function place(frame)
     for _, pin in ipairs(frame.pins) do pin:SetSize(20 / scale, 20 / scale) end
     frame.playerArrow:SetSize(22 / scale, 22 / scale)
     addon.BossHover:Refresh()
+end
+
+local function fitFloor(frame)
+    frame.zoom, frame.x, frame.y = 1, 0, 0
+    place(frame)
+end
+
+local function anchorDrag(frame)
+    local x, y = cursor(frame)
+    frame.dragX, frame.dragY = x - frame.x, y - frame.y
+end
+
+local function resize(frame)
+    local w, h = frame:GetSize()
+    if w <= 0 or h <= 0 then return end
+    local previousW, previousH = frame.viewWidth, frame.viewHeight
+    if previousW > 0 and previousH > 0 then
+        local ratio = fitScale(w, h) / fitScale(previousW, previousH)
+        frame.x = w / 2 - (previousW / 2 - frame.x) * ratio
+        frame.y = h / 2 - (previousH / 2 - frame.y) * ratio
+    end
+    frame.viewWidth, frame.viewHeight = w, h
+    place(frame)
+    if frame:GetScript("OnUpdate") then anchorDrag(frame) end
 end
 
 local function zoom(frame, delta)
@@ -244,7 +272,12 @@ local function bossPin(frame, index)
     pin:SetScript("OnEnter", function(self)
         if self.members and #self.members > 0 then addon.BossHover:Show(self) end
     end)
-    pin:SetScript("OnClick", function(self)
+    pin:RegisterForClicks("LeftButtonUp", "MiddleButtonUp")
+    pin:SetScript("OnClick", function(self, button)
+        if button == "MiddleButton" then
+            fitFloor(frame)
+            return
+        end
         addon.BossHover:Hide()
         if not self.members then return end
         if #self.members == 1 then addon.UI:Boss(self, self.boss)
@@ -399,10 +432,10 @@ function DungeonMap:EnsureFrame()
     frame.dropdown:SetFrameLevel(frame.back:GetFrameLevel())
     frame.dropdown:SetPoint("LEFT", frame.back, "RIGHT", 3, 0)
     frame.dropdown:SetupMenu(floorMenu)
+    frame.viewWidth, frame.viewHeight = frame:GetSize()
     frame:SetScript("OnMouseWheel", zoom)
     frame:SetScript("OnDragStart", function()
-        local x, y = cursor(frame)
-        frame.dragX, frame.dragY = x - frame.x, y - frame.y
+        anchorDrag(frame)
         frame:SetScript("OnUpdate", function()
             local cx, cy = cursor(frame)
             frame.x, frame.y = cx - frame.dragX, cy - frame.dragY
@@ -410,8 +443,11 @@ function DungeonMap:EnsureFrame()
         end)
     end)
     frame:SetScript("OnDragStop", function() frame:SetScript("OnUpdate", nil) end)
-    frame:SetScript("OnMouseUp", function(_, button) if button == "RightButton" then self:Close() end end)
-    frame:SetScript("OnSizeChanged", place)
+    frame:SetScript("OnMouseUp", function(_, button)
+        if button == "RightButton" then self:Close()
+        elseif button == "MiddleButton" then fitFloor(frame) end
+    end)
+    frame:SetScript("OnSizeChanged", resize)
     frame:SetScript("OnHide", function()
         frame:SetScript("OnUpdate", nil)
         clearFloor(frame)
@@ -425,6 +461,7 @@ end
 function DungeonMap:Open(dungeon, bossIndex, preferredFloor, entrance)
     local info = dungeon and addon.floorData[dungeon.id]
     if not info or not info.floors or #info.floors == 0 then return end
+    addon.Atlas:Suspend()
     local frame = self:EnsureFrame()
     syncStrata(frame)
     self.dungeon, self.followInstance, self.entrance = dungeon, nil, entrance
@@ -435,12 +472,14 @@ function DungeonMap:Open(dungeon, bossIndex, preferredFloor, entrance)
 end
 
 function DungeonMap:Close()
+    local wasOpen = self.dungeon ~= nil
     self.dungeon, self.followInstance, self.entrance = nil, nil, nil
     if self.frame then
         self.frame:SetScript("OnUpdate", nil)
         clearFloor(self.frame)
         self.frame:Hide()
     end
+    if wasOpen then addon.Atlas:Resume() end
 end
 
 function DungeonMap:IsInside(key)

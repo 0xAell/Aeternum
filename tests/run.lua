@@ -437,6 +437,163 @@ test("the map's zoom levels and wheel mode stay as Blizzard wrote them", functio
     end
 end)
 
+local function loadAtlas(viewedMap)
+    local layer = {{layerWidth=256, layerHeight=256, tileWidth=256, tileHeight=256, minScale=1, maxScale=2}}
+    local continent = {mapID=1415, parentMapID=947, name="Eastern Kingdoms", mapType=2}
+    local westfall = {mapID=1436, parentMapID=1415, name="Westfall", mapType=3}
+    local addon, env, state = load({
+        mapID=viewedMap, playerMap=1436, playerX=.4, playerY=.5,
+        mapInfo={
+            [947]={mapID=947, parentMapID=0, name="Azeroth", mapType=1}, [1415]=continent, [1436]=westfall,
+        },
+        mapChildren={[947]={continent, westfall}, [1415]={westfall}},
+        mapRects={
+            [947]={[1415]={.37, 1.16, .08, .87}, [1436]={.66, .74, .64, .72}},
+            [1415]={[1436]={.367, .468, .709, .81}},
+        },
+        mapLevels={[1436]={9,18}},
+        mapArtLayers={[947]=layer, [1415]=layer, [1436]=layer},
+        mapArtTextures={[947]={{101}}, [1415]={{102}}, [1436]={{103}}},
+    })
+    env.WorldMapFrame:Show()
+    return addon, env, state
+end
+
+local function openAtlas(addon)
+    Wow.trackingMenu():Find("Dungeon atlas"):Click()
+    Wow.flushTimers()
+    local frame = assert(addon.Atlas.frame, "tracking menu opens the atlas")
+    check(frame:IsShown(), "atlas is visible")
+    return frame
+end
+
+local function updateAtlas(frame)
+    for _ = 1, 120 do frame:Fire("OnUpdate", 1 / 60) end
+end
+
+local function atlasTexture(frame, file)
+    return findEntry(frame.art.frame.children, function(texture)
+        return texture.texture == file and texture:IsShown()
+    end)
+end
+
+test("the atlas zooms toward the pointer and pans without moving the native map", function()
+    local addon, env, state = loadAtlas(947)
+    check(not addon.Atlas.frame, "the native map opens normally")
+    local frame = openAtlas(addon)
+    local camera = frame.camera
+    local startX, startZoom = camera.x, camera.zoom
+    check(atlasTexture(frame, 101), "world artwork at overview zoom")
+    check(not atlasTexture(frame, 103), "zone detail stays unloaded at overview zoom")
+    check(frame.playerArrow:IsShown(), "player position appears above the world art")
+    local entrances = {}
+    for _, pin in ipairs(frame.pins) do
+        if pin:IsShown() then
+            for _, entry in ipairs(pin.entries) do
+                check(not entrances[entry.point], "each entrance has one map position")
+                entrances[entry.point] = true
+            end
+        end
+    end
+    for _, dungeon in ipairs(addon.Data.dungeons) do
+        for _, entry in ipairs(addon.DungeonEntrances(dungeon)) do
+            check(entrances[entry.point], dungeon.name .. " has an atlas pin")
+        end
+    end
+    frame.left, frame.top = 0, 540
+    state.cursorX, state.cursorY = 560, 270
+    local anchor = state.cursorX / frame:GetWidth() - .5
+    local worldX = startX + anchor / startZoom
+    frame:Fire("OnMouseWheel", 3)
+    updateAtlas(frame)
+    check(camera.zoom > startZoom, "scroll zooms the atlas")
+    check(math.abs(camera.x + anchor / camera.zoom - worldX) < .0001, "the world point stays under the pointer")
+    local zoomedX = camera.x
+    frame:Fire("OnDragStart")
+    state.cursorX = 450
+    updateAtlas(frame)
+    frame:Fire("OnDragStop")
+    check(camera.x > zoomedX, "dragging the artwork left pans the camera east")
+    frame:Fire("OnMouseUp", "MiddleButton")
+    local zone = frame.byID[1436]
+    check(math.abs(camera.x - (zone.left + (zone.right - zone.left) * state.playerX)) < .0001,
+        "middle click centers on the player")
+    check(atlasTexture(frame, 103), "Westfall artwork comes in at zone zoom")
+    equal(frame.location:GetText(), "Westfall · Level 9–18", "the atlas identifies the zone and its level range")
+    equal(env.WorldMapFrame:GetMapID(), 947, "native map ID is untouched")
+    frame:Fire("OnMouseUp", "RightButton")
+    check(not frame:IsShown() and env.WorldMapFrame:IsShown(), "return to the original map")
+    check(not atlasTexture(frame, 103), "closed atlas releases map tiles")
+end)
+
+test("atlas entrances use the existing directions and dungeon floor viewers", function()
+    local addon, _, state = loadAtlas(1436)
+    local frame = openAtlas(addon)
+    local camera = frame.camera
+    local beforeX, beforeY, beforeZoom = camera.x, camera.y, camera.zoom
+    local pin = findEntry(frame.pins, function(candidate)
+        if not candidate:IsShown() then return false end
+        local entries = candidate.entries or { candidate.entry }
+        return findEntry(entries, function(entry) return entry.source.id == "deadmines" end)
+    end)
+    check(pin, "Westfall displays the Deadmines entrance")
+    pin:Click("RightButton")
+    state.menu:Find("Show path to The Deadmines"):Click()
+    equal(addon.Navigation:GetTarget(), "The Deadmines entrance", "atlas uses the original entrance")
+    pin:Click("LeftButton")
+    equal(addon.DungeonMap.dungeon.id, "deadmines", "atlas opens the existing floor view")
+    addon.DungeonMap:Close()
+    check(frame:IsShown(), "returning from floors restores the atlas")
+    equal(camera.x, beforeX, "atlas horizontal position retained")
+    equal(camera.y, beforeY, "atlas vertical position retained")
+    equal(camera.zoom, beforeZoom, "atlas zoom retained")
+end)
+
+test("the atlas refreshes a newly explored landmark while keeping its base artwork", function()
+    local addon, _, state = loadAtlas(1436)
+    local frame = openAtlas(addon)
+    local base = assert(atlasTexture(frame, 103), "zone parchment")
+    check(not atlasTexture(frame, 104), "the landmark is unexplored")
+    state.mapExploration = {[1436] = {
+        {offsetX=100, offsetY=100, textureWidth=60, textureHeight=70, fileDataIDs={104}},
+        {offsetX=100, offsetY=100, textureWidth=60, textureHeight=70, fileDataIDs={105}, isShownByMouseOver=true},
+    }}
+    Wow.fire("MAP_EXPLORATION_UPDATED")
+    equal(atlasTexture(frame, 103), base, "discovery keeps the underlying tile")
+    local landmark = assert(atlasTexture(frame, 104), "newly explored map art")
+    equal(landmark.texCoord[2], 60 / 64, "client overlay's padded width")
+    equal(landmark.texCoord[4], 70 / 128, "client overlay's padded height")
+    check(not atlasTexture(frame, 105), "mouseover-only art stays hidden")
+end)
+
+test("native map changes and combat dismiss the atlas without altering Escape", function()
+    local addon, env, state = loadAtlas(947)
+    local frame = openAtlas(addon)
+    local map = env.WorldMapFrame
+    map:SetMapID(1436)
+    check(not frame:IsShown(), "changing Blizzard's map closes the atlas")
+    check(locate(env, function(entry) return entry.source.id == "deadmines" end), "native pins remain clickable")
+    openAtlas(addon)
+    state.inCombat = true
+    Wow.fire("PLAYER_REGEN_DISABLED")
+    check(not frame:IsShown(), "combat restores native controls")
+    addon.Atlas:Open()
+    check(not frame:IsShown(), "atlas cannot take input in combat")
+    state.inCombat = false
+    openAtlas(addon)
+    state.gamepad = true
+    Wow.fire("GAME_PAD_ACTIVE_CHANGED")
+    check(not frame:IsShown(), "switching to a controller restores native controls")
+    addon.Atlas:Open()
+    check(not frame:IsShown(), "the controller retains Blizzard navigation")
+    state.gamepad = false
+    openAtlas(addon)
+    Wow.pressEscape()
+    check(not map:IsShown() and not frame:IsVisible(), "Escape closes the native map and its atlas")
+    map:Show()
+    check(not frame:IsShown(), "atlas cannot reappear after the map is closed")
+end)
+
 test("dungeon right-click offers directions and does not zoom the map", function()
     local addon, env, state = load({mapID=1436, playerMap=1436, playerX=.2, playerY=.2, inCombat=true})
     env.WorldMapFrame:Show()
@@ -708,6 +865,18 @@ test("floor zoom follows the cursor and dragging stays within its viewport", fun
     equal(frame.zoom, 4, "upper bound")
     frame:Fire("OnMouseWheel", -99)
     equal(frame.zoom, 1, "lower bound")
+    frame:Fire("OnMouseWheel", 4)
+    local artX = (frame:GetWidth() / 2 - frame.x) / frame.art.scale
+    local artY = (frame:GetHeight() / 2 - frame.y) / frame.art.scale
+    local oldZoom = frame.zoom
+    frame:SetSize(915, 540)
+    frame:Fire("OnSizeChanged")
+    equal(frame.zoom, oldZoom, "resize preserves the zoom")
+    check(math.abs((frame:GetWidth() / 2 - frame.x) / frame.art.scale - artX) < .01, "resize preserves floor X")
+    check(math.abs((frame:GetHeight() / 2 - frame.y) / frame.art.scale - artY) < .01, "resize preserves floor Y")
+    frame:Fire("OnMouseUp", "MiddleButton")
+    equal(frame.zoom, 1, "middle click fits the current floor")
+    check(frame:IsShown(), "fitting the floor keeps it open")
 end)
 
 test("all dungeon floor references and boss stops resolve to their own dungeon", function()

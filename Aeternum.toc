@@ -31,6 +31,9 @@ BossHover.lua
 DungeonMap.lua
 UI.lua
 ZoneLevels.lua
+AtlasArt.lua
+AtlasPins.lua
+Atlas.lua
 WorldMap.lua
 WorldMap.xml
 Main.lua
