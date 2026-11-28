@@ -1,10 +1,12 @@
 # Bundled data
 
-Aeternum ships three generated Lua files. The game reads them locally. The import tools and their pinned sources are only needed to regenerate the files.
+Aeternum ships its generated Lua data with the addon. The game reads it locally. The import tools and their pinned sources are needed to regenerate the files.
 
 ## Dungeon, quest and trainer records
 
 `Data.lua` projects the English NorgannonDB snapshot compiled by Maro on 2026-11-22 for Forever 1.60.1, interface 16001. It supplies the original non-raid roster, entrance coordinates, trainers, quests and available trainer lessons. The boss and loot records in the release use the reviewed tables described below. [Pinned database](https://github.com/zmarotrix/NorgannonDB/tree/d3d144a8b2d32ae7fb6a0390141f35b3aa55d216)
+
+`OverviewData.lua` projects the outdoor entrance zones onto Azeroth, Kalimdor, and Eastern Kingdoms using Forever build 1.60.1.71139. The `UiMap` table identifies each zone’s continent. `UiMapAssignment` maps the zone’s world rectangle onto the matching continent rectangle on each overview. The addon uses these bounds when the client supplies no usable projection and keeps the original zone coordinates for directions. [UiMap export](https://wago.tools/db2/UiMap/csv?build=1.60.1.71139) · [UiMapAssignment export](https://wago.tools/db2/UiMapAssignment/csv?build=1.60.1.71139)
 
 - NorgannonDB combines Questie/QuestieDB and CMaNGOS Classic-DB data under GPL-3.0 with data from pfQuest by Eric Mauser (Shagu) under MIT. NorgannonDB Collector contributors provide in-game observations. [Upstream notices](licenses/NorgannonDB-NOTICE.md) · [pfQuest MIT license](licenses/pfQuest-MIT.txt)
 - Dungeon, boss and loot records include research by **Exehn, author of DungeonJournal (ForeverDungeonJournal 1.7.4)**. NorgannonDB documents permission received on 2026-10-19 on condition of credit. [Upstream notice](licenses/NorgannonDB-NOTICE.md)
@@ -52,6 +54,8 @@ python3 tools/import_classic_training.py /path/to/ClassicDB_1_12_1_z2815.sql.gz 
 python3 tools/import_loot_requirements.py build LootData.lua
 python3 tools/forever_trainers.py build ForeverTraining.lua
 ```
+
+To rebuild the overview projections, save the two build 71139 exports and run `python3 tools/import_overview_bounds.py /path/to/UiMap.csv /path/to/UiMapAssignment.csv OverviewData.lua`. The importer checks both exports’ hashes and uses the entrance zones in `Data.lua`.
 
 To refresh the numeric item snapshot, save the four linked build 71139 CSVs in a directory as `Item.csv`, `ItemSparse.csv`, `ItemXItemEffect.csv` and `ItemEffect.csv`. The extractor checks their hashes and reads the same build’s version 9 game-data cache. Review the snapshot diff before rebuilding because available hotfixes vary by client. [DB2 definitions](https://github.com/wowdev/WoWDBDefs/tree/master/definitions) · [Hotfix record format](https://github.com/fitzforge/polestar/blob/c0e768df4df867532f6334c1ed5464a8bc544021/rust/crates/forge-gamedata/src/hotfix.rs)
 

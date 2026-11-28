@@ -1012,6 +1012,71 @@ test("world and continent entrance pins keep tight hitboxes and route to their o
     check(pin.tracked:IsShown() and pin.tracked:GetWidth() < pin.icon:GetWidth(), "compact route badge fits the pin")
 end)
 
+test("all dungeon entrances are selectable on unzoomed overviews even without client rectangles", function()
+    local addon, env, state = load({mapID=947, playerMap=1420, playerX=.63, playerY=.62})
+    local types = env.Enum.UIMapType
+    local mapInfo = env.C_Map.GetMapInfo
+    env.C_Map.GetMapInfo = function(id)
+        if id == 947 then return {name="Azeroth", mapType=types.World} end
+        if id == 1414 or id == 1415 then return {mapType=types.Continent, parentMapID=947} end
+        if id == 1420 then return {name="Tirisfal Glades", mapType=types.Zone, parentMapID=1415} end
+        return mapInfo(id)
+    end
+    env.C_Map.GetMapRectOnMap = function(id)
+        if id == 1420 then return 0, 0, 0, 0 end
+    end
+    local kalimdorZones = {
+        [1413]=true, [1440]=true, [1443]=true, [1444]=true, [1445]=true,
+        [1446]=true, [1447]=true, [1449]=true, [1454]=true,
+    }
+    local original = {}
+    for _, dungeon in ipairs(addon.Data.dungeons) do
+        for _, door in ipairs(dungeon.entrances) do original[door] = dungeon end
+    end
+    local map = env.WorldMapFrame
+    map:Show()
+    for _, mapID in ipairs({947, 1414, 1415}) do
+        map:SetMapID(mapID)
+        local seen = {}
+        for pin in map:EnumeratePinsByTemplate("AeternumEntrancePinTemplate") do
+            equal(pin:GetWidth(), 7.5, "overview target matches the entrance artwork")
+            pin:OnMouseEnter()
+            for _, entry in ipairs(pin.entries) do
+                equal(entry.source, original[entry.point], "the original door is used for navigation")
+                equal(entry.mapID, mapID)
+                check(entry.x > 0 and entry.x < 1 and entry.y > 0 and entry.y < 1, "pin on map")
+                check(not seen[entry.point], "each entrance appears once")
+                seen[entry.point] = true
+                check(findEntry(env.GameTooltip.lines, function(line) return line == entry.title end), entry.title)
+            end
+            pin:OnMouseLeave()
+            map:ClickPin(pin, "LeftButton")
+            if #pin.entries == 1 then
+                equal(addon.DungeonMap.dungeon, pin.entries[1].source, "pin opens the dungeon")
+                addon.DungeonMap:Close()
+            else
+                for _, entry in ipairs(pin.entries) do state.menu:Find(entry.title) end
+            end
+        end
+        for door, dungeon in pairs(original) do
+            local continent = kalimdorZones[door.mapID] and 1414 or 1415
+            equal(seen[door] == true, mapID == 947 or mapID == continent, dungeon.name .. " on map " .. mapID)
+        end
+    end
+
+    local function lordaeron(entry) return entry.source.id == "ruins-of-lordaeron" end
+    local _, eastern = locate(env, lordaeron)
+    check(math.abs(eastern.x - .44976) < .00001 and math.abs(eastern.y - .24117) < .00001, "Tirisfal on the continent")
+    map:SetMapID(947)
+    local pin, world = locate(env, lordaeron)
+    check(math.abs(world.x - .72575) < .00001 and math.abs(world.y - .27145) < .00001, "Tirisfal on Azeroth")
+    map:ClickPin(pin, "RightButton")
+    state.menu:Find("Show path to Ruins of Lordaeron"):Click()
+    equal(env.AeternumRouteDB.mapID, 1420, "route still leads to the outdoor entrance")
+    equal(env.AeternumRouteDB.x, world.point.x)
+    equal(env.AeternumRouteDB.y, world.point.y)
+end)
+
 test("focusing a second map location restores the first pin's style and size", function()
     local addon, env = load({mapID=1453})
     env.WorldMapFrame:Show()

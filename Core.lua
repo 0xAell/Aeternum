@@ -212,29 +212,37 @@ local function isAncestor(zone, target)
     return false
 end
 
-local function continentEntrances(entries, mapID)
+local function projectEntrance(door, left, right, top, bottom)
+    if addon.IsReadableNumber(left) and addon.IsReadableNumber(right)
+        and addon.IsReadableNumber(top) and addon.IsReadableNumber(bottom)
+        and right > left and bottom > top then
+        local x, y = left + door.x * (right - left), top + door.y * (bottom - top)
+        if x >= 0 and x <= 1 and y >= 0 and y <= 1 then return x, y end
+    end
+end
+
+local function overviewEntrances(entries, mapID)
+    local bounds = addon.overviewBounds[mapID]
     local types = Enum and Enum.UIMapType
-    local info = types and C_Map.GetMapInfo(mapID)
-    if not info or not C_Map.GetMapRectOnMap or (info.mapType ~= types.Continent and info.mapType ~= types.World) then
-        return
+    if not bounds then
+        local info = types and C_Map.GetMapInfo(mapID)
+        if not info or (info.mapType ~= types.Continent and info.mapType ~= types.World) then return end
     end
     for _, dungeon in ipairs(data.dungeons) do
         local levels = addon.DungeonLevel(dungeon)
         for _, door in ipairs(dungeon.entrances) do
-            if isAncestor(door.mapID, mapID) then
-                local left, right, top, bottom = C_Map.GetMapRectOnMap(door.mapID, mapID)
-                if addon.IsReadableNumber(left) and addon.IsReadableNumber(right)
-                    and addon.IsReadableNumber(top) and addon.IsReadableNumber(bottom)
-                    and right > left and bottom > top then
-                    local subtitle = addon.ZoneName(door.mapID)
-                    if levels then subtitle = subtitle .. " · " .. levels end
-                    local entry = record("dungeon", dungeon.name, subtitle, door, dungeon)
-                    entry.mapID = mapID
-                    entry.x, entry.y = left + door.x * (right - left), top + door.y * (bottom - top)
-                    if entry.x >= 0 and entry.x <= 1 and entry.y >= 0 and entry.y <= 1 then
-                        entries[#entries + 1] = entry
-                    end
-                end
+            local x, y
+            if C_Map.GetMapRectOnMap and door.mapID ~= mapID and isAncestor(door.mapID, mapID) then
+                x, y = projectEntrance(door, C_Map.GetMapRectOnMap(door.mapID, mapID))
+            end
+            local fallback = bounds and bounds[door.mapID]
+            if not x and fallback then x, y = projectEntrance(door, unpack(fallback)) end
+            if x then
+                local subtitle = addon.ZoneName(door.mapID)
+                if levels then subtitle = subtitle .. " · " .. levels end
+                local entry = record("dungeon", dungeon.name, subtitle, door, dungeon)
+                entry.mapID, entry.x, entry.y = mapID, x, y
+                entries[#entries + 1] = entry
             end
         end
     end
@@ -247,7 +255,7 @@ function addon.MapRecords(mapID)
         return entries
     end
     entries = {}
-    continentEntrances(entries, mapID)
+    overviewEntrances(entries, mapID)
     for _, entry in ipairs(staticByMap[mapID] or {}) do
         entries[#entries + 1] = entry
     end
