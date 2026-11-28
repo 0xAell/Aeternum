@@ -702,7 +702,7 @@ gnomeregan	7800	6716	Schematic: EZ-Thro Dynamite	guide	ATT
 gnomeregan	7800	7437	Twilight Cuffs	withheld	Everloot
 gnomeregan	7800	9299	Thermaplugg's Safe Combination	withheld	EG-corpse,Everloot
 gnomeregan	7800	9833	Scaled Leather Leggings	withheld	Scout
-gnomeregan	7800	9855	Archer's Belt	other	Everloot,Scout
+gnomeregan	7800	9855	Archer's Belt	withheld	Everloot,Scout
 gnomeregan	7800	9862	Archer's Trousers	withheld	Everloot
 gnomeregan	7800	9863	Archer's Shoulderpads	withheld	EG-corpse,EG-roll
 hall-of-thanes	261306	270227	Ephemeral Choker	featured	ATT,EG-roll,EzWoW,Norgannon,Scout
@@ -1689,19 +1689,20 @@ stratholme	10811	16692	Devout Gloves	guide	ATT,EzWoW,Norgannon
 stratholme	10811	22897	Tome of Conjure Food VII	guide	ATT,EzWoW,Norgannon
 stratholme	10811	12811	Righteous Orb	guide	EzWoW
 stratholme	10811	14679	Of Love and Family	guide	ATT
-stratholme	10813	12103	Star of Mystaria	withheld	Norgannon
-stratholme	10813	13348	Demonshear	withheld	Norgannon
-stratholme	10813	13358	Wyrmtongue Shoulders	withheld	Norgannon
-stratholme	10813	13359	Crown of Tyranny	withheld	Norgannon
-stratholme	10813	13360	Gift of the Elven Magi	withheld	Norgannon
-stratholme	10813	13369	Fire Striders	withheld	Norgannon
-stratholme	10813	16725	Lightforge Boots	withheld	Norgannon
-stratholme	10813	18717	Hammer of the Grand Crusader	withheld	Norgannon
-stratholme	10813	18718	Grand Crusader's Helm	withheld	Norgannon
-stratholme	10813	18720	Shroud of the Nathrezim	withheld	Norgannon
-stratholme	10813	14512	Pattern: Truefaith Vestments	withheld	Norgannon
-stratholme	10813	13520	Recipe: Flask of Distilled Wisdom	withheld	Norgannon
-stratholme	10813	13353	Book of the Dead	withheld	Norgannon
+stratholme	10813	12103	Star of Mystaria	guide	ATT-group,Norgannon
+stratholme	10813	13348	Demonshear	guide	ATT-group,Norgannon
+stratholme	10813	13358	Wyrmtongue Shoulders	guide	ATT-group,Norgannon
+stratholme	10813	13359	Crown of Tyranny	guide	ATT-group,Norgannon
+stratholme	10813	13360	Gift of the Elven Magi	guide	ATT-group,Norgannon
+stratholme	10813	13369	Fire Striders	guide	ATT-group,Norgannon
+stratholme	10813	16725	Lightforge Boots	guide	ATT-group,Norgannon
+stratholme	10813	18717	Hammer of the Grand Crusader	guide	ATT-group,Norgannon
+stratholme	10813	18718	Grand Crusader's Helm	guide	ATT-group,Norgannon
+stratholme	10813	18720	Shroud of the Nathrezim	guide	ATT-group,Norgannon
+stratholme	10813	14512	Pattern: Truefaith Vestments	guide	ATT-group,Norgannon
+stratholme	10813	13520	Recipe: Flask of Distilled Wisdom	guide	ATT-group,Norgannon
+stratholme	10813	13353	Book of the Dead	guide	ATT-group,Norgannon
+stratholme	10813	13250	Head of Balnazzar	guide	ATT-group
 stratholme	11120	13351	Crimson Hammersmith's Apron	guide	ATT,Norgannon
 stratholme	11120	18781	Bottom Half of Advanced Armorsmithing: Volume II	guide	ATT,EzWoW,Norgannon
 stratholme	11120	2073	Dwarven Hatchet	withheld	Norgannon
@@ -1810,28 +1811,71 @@ stratholme	14684	23124	Staff of Balzaphon	withheld	Norgannon
 stratholme	14684	23125	Chains of the Lich	withheld	Norgannon
 stratholme	14684	23126	Waistband of Balzaphon	withheld	Norgannon
 sunken-temple	5713	10239	Heavy Lamellar Vambraces	withheld	EG-corpse
+sunken-temple	5713	10783	Atal'ai Spaulders	guide	ATT-group
+sunken-temple	5713	10784	Atal'ai Breastplate	guide	ATT-group
+sunken-temple	5713	10785	Atal'ai Leggings	guide	ATT-group
+sunken-temple	5713	10786	Atal'ai Boots	guide	ATT-group
+sunken-temple	5713	10787	Atal'ai Gloves	guide	ATT-group
+sunken-temple	5713	10788	Atal'ai Girdle	guide	ATT-group
 sunken-temple	5715	10073	Righteous Helmet	withheld	Norgannon
+sunken-temple	5715	10783	Atal'ai Spaulders	guide	ATT-group
+sunken-temple	5715	10784	Atal'ai Breastplate	guide	ATT-group
+sunken-temple	5715	10785	Atal'ai Leggings	guide	ATT-group
+sunken-temple	5715	10786	Atal'ai Boots	guide	ATT-group
+sunken-temple	5715	10787	Atal'ai Gloves	guide	ATT-group
+sunken-temple	5715	10788	Atal'ai Girdle	guide	ATT-group
 sunken-temple	5714	6181	Fetish of Hakkar	withheld	EG-corpse
 sunken-temple	5714	8152	Flask of Big Mojo	withheld	EG-corpse
-sunken-temple	5714	10787	Atal'ai Gloves	withheld	EG-corpse
+sunken-temple	5714	10783	Atal'ai Spaulders	guide	ATT-group
+sunken-temple	5714	10784	Atal'ai Breastplate	guide	ATT-group
+sunken-temple	5714	10785	Atal'ai Leggings	guide	ATT-group
+sunken-temple	5714	10786	Atal'ai Boots	guide	ATT-group
+sunken-temple	5714	10787	Atal'ai Gloves	featured	ATT-group,EG-corpse
+sunken-temple	5714	10788	Atal'ai Girdle	guide	ATT-group
 sunken-temple	5714	13825	Primed Musket	withheld	EG-corpse
 sunken-temple	5714	281018	Scroll: RARE SERVICHI RADAR	withheld	EG-corpse
 sunken-temple	5717	4338	Mageweave Cloth	withheld	EG-corpse
+sunken-temple	5717	10783	Atal'ai Spaulders	guide	ATT-group
+sunken-temple	5717	10784	Atal'ai Breastplate	guide	ATT-group
+sunken-temple	5717	10785	Atal'ai Leggings	guide	ATT-group
+sunken-temple	5717	10786	Atal'ai Boots	guide	ATT-group
+sunken-temple	5717	10787	Atal'ai Gloves	guide	ATT-group
+sunken-temple	5717	10788	Atal'ai Girdle	guide	ATT-group
 sunken-temple	5712	4338	Mageweave Cloth	withheld	EG-corpse
-sunken-temple	5712	10784	Atal'ai Breastplate	withheld	EG-corpse
+sunken-temple	5712	10783	Atal'ai Spaulders	guide	ATT-group
+sunken-temple	5712	10784	Atal'ai Breastplate	featured	ATT-group,EG-corpse
+sunken-temple	5712	10785	Atal'ai Leggings	guide	ATT-group
+sunken-temple	5712	10786	Atal'ai Boots	guide	ATT-group
+sunken-temple	5712	10787	Atal'ai Gloves	guide	ATT-group
+sunken-temple	5712	10788	Atal'ai Girdle	guide	ATT-group
 sunken-temple	5712	13822	Spiked Dagger	withheld	EG-corpse
-sunken-temple	5716	10785	Atal'ai Leggings	withheld	EG-corpse
+sunken-temple	5716	10783	Atal'ai Spaulders	guide	ATT-group
+sunken-temple	5716	10784	Atal'ai Breastplate	guide	ATT-group
+sunken-temple	5716	10785	Atal'ai Leggings	featured	ATT-group,EG-corpse
+sunken-temple	5716	10786	Atal'ai Boots	guide	ATT-group
+sunken-temple	5716	10787	Atal'ai Gloves	guide	ATT-group
+sunken-temple	5716	10788	Atal'ai Girdle	guide	ATT-group
 sunken-temple	8580	10798	Atal'alarion's Tusk Ring	guide	ATT,EzWoW,Norgannon
 sunken-temple	8580	10799	Headspike	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
 sunken-temple	8580	10800	Darkwater Bracers	guide	ATT,EzWoW,Norgannon
 sunken-temple	8580	6181	Fetish of Hakkar	withheld	EG-corpse
 sunken-temple	8580	22444	Putrid Vine	guide	ATT
-sunken-temple	5721	12465	Nightfall Drape	withheld	Norgannon
-sunken-temple	5721	12466	Dawnspire Cord	withheld	Norgannon
-sunken-temple	5721	12243	Smoldering Claw	withheld	Norgannon
-sunken-temple	5720	12465	Nightfall Drape	withheld	Norgannon
-sunken-temple	5720	12466	Dawnspire Cord	withheld	Norgannon
-sunken-temple	5720	12243	Smoldering Claw	withheld	Norgannon
+sunken-temple	5721	12465	Nightfall Drape	guide	ATT-group,Norgannon
+sunken-temple	5721	12466	Dawnspire Cord	guide	ATT-group,Norgannon
+sunken-temple	5721	12243	Smoldering Claw	guide	ATT-group,Norgannon
+sunken-temple	5721	10795	Drakeclaw Band	guide	ATT-group
+sunken-temple	5721	10796	Drakestone	guide	ATT-group
+sunken-temple	5721	10797	Firebreather	guide	ATT-group
+sunken-temple	5721	12463	Drakefang Butcher	guide	ATT-group
+sunken-temple	5721	12464	Bloodfire Talons	guide	ATT-group
+sunken-temple	5720	12465	Nightfall Drape	guide	ATT-group,Norgannon
+sunken-temple	5720	12466	Dawnspire Cord	guide	ATT-group,Norgannon
+sunken-temple	5720	12243	Smoldering Claw	guide	ATT-group,Norgannon
+sunken-temple	5720	10795	Drakeclaw Band	guide	ATT-group
+sunken-temple	5720	10796	Drakestone	guide	ATT-group
+sunken-temple	5720	10797	Firebreather	guide	ATT-group
+sunken-temple	5720	12463	Drakefang Butcher	guide	ATT-group
+sunken-temple	5720	12464	Bloodfire Talons	guide	ATT-group
 sunken-temple	5711	10803	Blade of the Wretched	guide	ATT,Norgannon
 sunken-temple	5711	10804	Fist of the Damned	guide	ATT,Norgannon
 sunken-temple	5711	10805	Eater of the Dead	featured	ATT,EG-corpse,Norgannon
@@ -1846,15 +1890,24 @@ sunken-temple	5710	4599	Cured Ham Steak	withheld	EG-corpse
 sunken-temple	5710	6181	Fetish of Hakkar	withheld	EG-corpse
 sunken-temple	5710	10805	Eater of the Dead	withheld	EG-roll
 sunken-temple	5719	20025	Blood of Morphaz	withheld	Norgannon
-sunken-temple	5719	12465	Nightfall Drape	withheld	Norgannon
-sunken-temple	5719	12466	Dawnspire Cord	withheld	Norgannon
-sunken-temple	5719	12243	Smoldering Claw	withheld	Norgannon
-sunken-temple	5719	10796	Drakestone	withheld	EG-roll
+sunken-temple	5719	12465	Nightfall Drape	guide	ATT-group,Norgannon
+sunken-temple	5719	12466	Dawnspire Cord	guide	ATT-group,Norgannon
+sunken-temple	5719	12243	Smoldering Claw	guide	ATT-group,Norgannon
+sunken-temple	5719	10795	Drakeclaw Band	guide	ATT-group
+sunken-temple	5719	10796	Drakestone	encounter	ATT-group,EG-roll
+sunken-temple	5719	10797	Firebreather	guide	ATT-group
+sunken-temple	5719	12463	Drakefang Butcher	guide	ATT-group
+sunken-temple	5719	12464	Bloodfire Talons	guide	ATT-group
 sunken-temple	5719	20085	Arcane Shard	withheld	EG-corpse
 sunken-temple	5719	252918	Pattern: Stalker's Mail Gauntlets	encounter	EG-roll
-sunken-temple	5722	12465	Nightfall Drape	withheld	Norgannon
-sunken-temple	5722	12466	Dawnspire Cord	withheld	Norgannon
-sunken-temple	5722	12243	Smoldering Claw	withheld	Norgannon
+sunken-temple	5722	12465	Nightfall Drape	guide	ATT-group,Norgannon
+sunken-temple	5722	12466	Dawnspire Cord	guide	ATT-group,Norgannon
+sunken-temple	5722	12243	Smoldering Claw	guide	ATT-group,Norgannon
+sunken-temple	5722	10795	Drakeclaw Band	guide	ATT-group
+sunken-temple	5722	10796	Drakestone	guide	ATT-group
+sunken-temple	5722	10797	Firebreather	guide	ATT-group
+sunken-temple	5722	12463	Drakefang Butcher	guide	ATT-group
+sunken-temple	5722	12464	Bloodfire Talons	guide	ATT-group
 sunken-temple	5709	10454	Essence of Eranikus	featured	ATT,EG-corpse,EzWoW,Norgannon
 sunken-temple	5709	10828	Dire Nail	featured	ATT,EG-corpse,EG-roll,EzWoW,Norgannon
 sunken-temple	5709	10829	Dragon's Eye	guide	ATT,EzWoW,Norgannon
@@ -2098,7 +2151,7 @@ wailing-caverns	3669	15893	Prospector's Buckler	withheld	Everloot
 wailing-caverns	3670	9740	Gem of Pythas	featured	ATT,EG-corpse,Norgannon
 wailing-caverns	3670	6472	Stinging Viper	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
 wailing-caverns	3670	6473	Armor of the Fang	featured	ATT,EG-corpse,EG-roll,Everloot,EzWoW,Norgannon
-wailing-caverns	3670	15506	Grunt's AnkleWraps	other	Everloot,Norgannon
+wailing-caverns	3670	15506	Grunt's AnkleWraps	withheld	Everloot,Norgannon
 wailing-caverns	3670	12978	Stormbringer Belt	withheld	Norgannon
 wailing-caverns	3670	273089	Slither Cord	featured	ATT,Everloot,EzWoW,Norgannon
 wailing-caverns	3670	1801	Rawhide Shoulderpads	withheld	Everloot
@@ -2157,8 +2210,8 @@ wailing-caverns	3654	6563	Shimmering Bracers	withheld	Everloot
 wailing-caverns	3654	6564	Shimmering Cloak	withheld	Everloot
 wailing-caverns	3654	6570	Shimmering Sash	withheld	Everloot
 wailing-caverns	3654	6574	Defender Bracers	withheld	Everloot
-wailing-caverns	3654	6576	Defender Girdle	other	EG-corpse,EG-roll,Everloot
-wailing-caverns	3654	6581	Scouting Belt	other	EG-corpse,EG-roll,Everloot
+wailing-caverns	3654	6576	Defender Girdle	withheld	EG-corpse,EG-roll,Everloot
+wailing-caverns	3654	6581	Scouting Belt	withheld	EG-corpse,EG-roll,Everloot
 wailing-caverns	3654	10407	Raider's Shoulderpads	withheld	Everloot
 wailing-caverns	5912	5243	Firebelcher	guide	ATT,EzWoW,Norgannon
 wailing-caverns	5912	6632	Feyscale Cloak	featured	ATT,Everloot,EzWoW,Norgannon
@@ -2264,7 +2317,7 @@ zulfarrak	7267	274654	Sandfury Guillotine	withheld	Scout
 zulfarrak	7267	274655	Peacekeeper Wand	withheld	EG-roll
 zulfarrak	7797	1520	Troll Sweat	withheld	EG-corpse
 zulfarrak	7797	3965	Thick Leather Gloves	withheld	EG-corpse
-zulfarrak	7797	9479	Embrace of the Lycan	withheld	EG-corpse
+zulfarrak	7797	9479	Embrace of the Lycan	other	EG-corpse
 zulfarrak	7797	9523	Troll Temper	featured	EG-corpse,EzWoW
 zulfarrak	7797	213547	Scroll: THAW WORDS	withheld	EG-corpse
 zulfarrak	7797	274654	Sandfury Guillotine	guide	ATT
@@ -2282,7 +2335,7 @@ drowned-city	263886	271718	Linken's Boots of Iron	guide	EzWoW-group
 drowned-city	263886	274611	Robe of the Drowned	featured	ATT-group,EG-corpse,EG-roll,EzWoW-group,Scout
 drowned-city	263886	274612	Waterlogged Burial Shroud	featured	ATT-group,EG-corpse,EG-roll,Everloot,EzWoW-group
 drowned-city	263886	274615	Heart of the Primeval	featured	EG-corpse,EG-roll,Everloot,EzWoW-group
-drowned-city	260243	271718	Linken's Boots of Iron	withheld	EG-corpse,EG-roll
+drowned-city	260243	271718	Linken's Boots of Iron	other	EG-corpse,EG-roll
 drowned-city	260243	274608	Maw of Min'loth	featured	ATT-group,EG-corpse,EG-roll,Everloot,EzWoW-group
 drowned-city	260243	274609	Serpentbane Crown	featured	ATT-group,EzWoW-group,Scout
 drowned-city	260243	274610	Ritual-Binder's Gloves	guide	ATT-group,EzWoW-group

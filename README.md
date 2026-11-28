@@ -98,7 +98,7 @@ For the full walkthrough of map filters, floor tracking, and tooltip indicators,
 | Area | Coverage | Audit & details |
 | --- | --- | --- |
 | **Dungeons & floors** | 34 dungeons & wings · 71 floors · 41 outdoor entrances (10 with approach waypoints) | [Player Guide](docs/map-guide.md) |
-| **Bosses & loot** | 302 boss & encounter entries · 277 floor pins · 1,404 audited items (1,396 with verified requirements) | [Boss & Loot Audit](docs/boss-audit/README.md) |
+| **Bosses & loot** | 302 boss & encounter entries · 277 floor pins · 1,428 audited items (1,420 with verified requirements) | [Boss & Loot Audit](docs/boss-audit/README.md) |
 | **Trainers** | 561 trainers (562 map locations, 8 weapon masters) · 522 offline catalogues · 1,743 spells & recipes | [Trainer Coverage](docs/trainer-data/README.md) |
 | **Quests** | 5,323 quests · 11,100 start & turn-in pins · 5,207 objective sites across 2,097 quests | [Data Sources](DATA_SOURCES.md) |
 

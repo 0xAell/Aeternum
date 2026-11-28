@@ -22,7 +22,7 @@ Click a boss skull to see its drops. If bosses share a spot, choose one. The flo
 
 Both boss menus and loot search use your class and trained weapon and armor proficiencies. Higher-level gear stays visible if you already use that equipment type. Recipes appear when you have the profession, rank, and specialization to learn them. Learning a recipe removes it from the list. Other recorded drops, encounter rolls, and guide-listed drops have separate submenus when they contain a match.
 
-The atlas covers 34 dungeons and wings, 71 floors, and 302 boss and encounter entries. There are 277 map pins before grouping encounters that share a location. Hover a pin to see whether its position is a guide estimate. Dalaran’s Underbelly uses a labeled route sketch. Of 1,404 audited items, 1,396 have verified Forever requirements for character loot lists. [Boss and loot audit](boss-audit/README.md)
+The atlas covers 34 dungeons and wings, 71 floors, and 302 boss and encounter entries. There are 277 map pins before grouping encounters that share a location. Hover a pin to see whether its position is a guide estimate. Dalaran’s Underbelly uses a labeled route sketch. Of 1,428 audited items, 1,420 have verified Forever requirements for character loot lists. [Boss and loot audit](boss-audit/README.md)
 
 ## Trainers
 
