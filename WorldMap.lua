@@ -78,7 +78,18 @@ local function showTooltip(pin)
     GameTooltip:SetText(entry.title)
     local _, _, text = addon.Presentation(entry)
     GameTooltip:AddLine(text)
-    if #pin.entries > 1 then GameTooltip:AddLine(("%d map entries · Click to choose"):format(#pin.entries)) end
+    if #pin.entries > 1 then
+        if entry.category == "dungeon" then
+            local listed = {[entry.title] = true}
+            for _, other in ipairs(pin.entries) do
+                if other.category == "dungeon" and not listed[other.title] then
+                    GameTooltip:AddLine(other.title, 1, 1, 1, true)
+                    listed[other.title] = true
+                end
+            end
+        end
+        GameTooltip:AddLine(("%d map entries · Click to choose"):format(#pin.entries))
+    end
     if pin.tracked:IsShown() then GameTooltip:AddLine(addon.Navigation:GetStatus(), .7, .85, 1, true) end
     if entry.category == "dungeon" then
         if entry.point.hint then GameTooltip:AddLine(entry.point.hint, .9, .9, .9, true) end
