@@ -1,6 +1,7 @@
 local _, addon = ...
 local POINT, ENTRANCE = "AeternumMapPinTemplate", "AeternumEntrancePinTemplate"
 local POINT_SIZE, ENTRANCE_SIZE, ENTRANCE_TARGET = 17, 30, 40
+local OVERVIEW_SCALE, CLOSE_ZONE_WIDTH = .25, .6
 local CELL_SIZE = 20
 local provider, focus, marked, highlighted, highlightedQuestState
 local pins = {}
@@ -8,11 +9,16 @@ AeternumMapPinMixin = {}
 
 local function sizePin(pin, focused)
     local entrance = pin.entry.category == "dungeon"
+    local compact = entrance and pin.compactEntrances
     local growth = focused and 6 or 0
-    local iconSize = (entrance and ENTRANCE_SIZE or POINT_SIZE) + growth
-    local targetSize = (entrance and ENTRANCE_TARGET or POINT_SIZE) + growth
+    local iconSize = ((entrance and ENTRANCE_SIZE or POINT_SIZE) + growth) * (compact and OVERVIEW_SCALE or 1)
+    local targetSize = entrance and not compact and (ENTRANCE_TARGET + growth) or iconSize
     pin.icon:SetSize(iconSize, iconSize)
     pin:SetSize(targetSize, targetSize)
+    local badgeSize = compact and 5 or 10
+    pin.tracked:SetSize(badgeSize, badgeSize)
+    pin.tracked:SetPoint("BOTTOMRIGHT", pin.icon, "BOTTOMRIGHT", compact and 0 or 3, compact and 0 or -2)
+    if pin.hoverGlow and not entrance then pin.hoverGlow:Hide() end
 end
 
 function pins:OnLoad()
@@ -22,8 +28,6 @@ function pins:OnLoad()
     self.icon:SetPoint("CENTER")
     self.tracked = self:CreateTexture(nil, "OVERLAY")
     self.tracked:SetAtlas("waypoint-mappin-minimap-tracked")
-    self.tracked:SetSize(10, 10)
-    self.tracked:SetPoint("BOTTOMRIGHT", self.icon, "BOTTOMRIGHT", 3, -2)
 end
 
 function pins:UpdateStyle()
@@ -51,30 +55,31 @@ function pins:UpdateStyle()
     self.tracked:SetShown(tracked)
 end
 
-function pins:OnAcquired(entries)
+function pins:OnAcquired(entries, compactEntrances)
     self.entries, self.entry = entries, entries[1]
+    self.compactEntrances = compactEntrances ~= false
     self:UpdateStyle()
     sizePin(self, false)
     self:SetPosition(self.entry.x, self.entry.y)
 end
 
 function pins:OnReleased()
-    if GameTooltip:IsOwned(self) then GameTooltip:Hide() end
+    self:OnMouseLeave()
     if self == focus then focus = nil end
     if self == marked then marked = nil end
     self.entries, self.entry = nil, nil
     MapCanvasPinMixin.OnReleased(self)
 end
 
-function pins:OnMouseEnter()
-    local entry = self.entry
+local function showTooltip(pin)
+    local entry = pin.entry
     if not entry then return end
-    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    GameTooltip:SetOwner(pin, "ANCHOR_RIGHT")
     GameTooltip:SetText(entry.title)
     local _, _, text = addon.Presentation(entry)
     GameTooltip:AddLine(text)
-    if #self.entries > 1 then GameTooltip:AddLine(("%d map entries · Click to choose"):format(#self.entries)) end
-    if self.tracked:IsShown() then GameTooltip:AddLine(addon.Navigation:GetStatus(), .7, .85, 1, true) end
+    if #pin.entries > 1 then GameTooltip:AddLine(("%d map entries · Click to choose"):format(#pin.entries)) end
+    if pin.tracked:IsShown() then GameTooltip:AddLine(addon.Navigation:GetStatus(), .7, .85, 1, true) end
     if entry.category == "dungeon" then
         if entry.point.hint then GameTooltip:AddLine(entry.point.hint, .9, .9, .9, true) end
         if #entry.source.keys > 0 then
@@ -95,7 +100,22 @@ function pins:OnMouseEnter()
     GameTooltip:Show()
 end
 
+function pins:OnMouseEnter()
+    if self.entry and self.entry.category == "dungeon" then
+        if not self.hoverGlow then
+            local glow = self:CreateTexture(nil, "BACKGROUND")
+            glow:SetAtlas("UI-QuestPoi-OuterGlow")
+            glow:SetPoint("TOPLEFT", self.icon, "TOPLEFT", -4, 4)
+            glow:SetPoint("BOTTOMRIGHT", self.icon, "BOTTOMRIGHT", 4, -4)
+            self.hoverGlow = glow
+        end
+        self.hoverGlow:Show()
+    end
+    showTooltip(self)
+end
+
 function pins:OnMouseLeave()
+    if self.hoverGlow then self.hoverGlow:Hide() end
     if GameTooltip:IsOwned(self) then GameTooltip:Hide() end
 end
 
@@ -127,27 +147,34 @@ local function viewWidth(scroll)
     if not (scroll.CalculateViewRect and scroll.GetCanvasScale) then return 1 end
     local scale = scroll:GetCanvasScale()
     if not addon.IsReadableNumber(scale) or scale <= 0 then return 1 end
-    return scroll:CalculateViewRect(scale):GetWidth()
+    local width = scroll:CalculateViewRect(scale):GetWidth()
+    return addon.IsReadableNumber(width) and width > 0 and width or 1
 end
 
-local function gridSize(map)
-    local width, height = map.ScrollContainer:GetSize()
+local function layoutSize(map)
+    local mapID, scroll = map:GetMapID(), map.ScrollContainer
+    local width, height = scroll:GetSize()
     width = addon.IsReadableNumber(width) and width or 0
     height = addon.IsReadableNumber(height) and height or 0
-    local range = map:GetMapID() and map.ScrollContainer.zoomLevels and viewWidth(map.ScrollContainer)
-    local scale = addon.IsReadableNumber(range) and range > 0 and math.max(1, math.floor(2 / range + .5) / 2) or 1
-    return math.max(1, math.floor(width * scale / CELL_SIZE)), math.max(1, math.floor(height * scale / CELL_SIZE))
+    local range = mapID and viewWidth(scroll) or 1
+    local scale = math.max(1, math.floor(2 / range + .5) / 2)
+    local types = Enum and Enum.UIMapType
+    local info = mapID and types and types.Zone and C_Map.GetMapInfo(mapID)
+    local compact = not (info and info.mapType == types.Zone and range <= CLOSE_ZONE_WIDTH)
+    local columns = math.max(1, math.floor(width * scale / CELL_SIZE))
+    local rows = math.max(1, math.floor(height * scale / CELL_SIZE))
+    return columns, rows, compact
 end
 
 function methods:Layout(entries)
     local map = self:GetMap()
     self:RemoveAllData()
     self.drawn = entries
-    self.columns, self.rows = gridSize(map)
+    self.columns, self.rows, self.compactEntrances = layoutSize(map)
     local positions, groups = {}, {}
     local cells, entrances = {}, {}
-    -- Compare entrance artwork in grid cells at the current zoom.
-    local entranceSpan = ENTRANCE_SIZE / CELL_SIZE
+    -- Group entrances whose click targets overlap at the current zoom.
+    local entranceSpan = (self.compactEntrances and ENTRANCE_SIZE * OVERVIEW_SCALE or ENTRANCE_TARGET) / CELL_SIZE
     for _, entry in ipairs(entries) do
         local position = ("%.4f:%.4f"):format(entry.x, entry.y)
         local group = positions[position]
@@ -179,7 +206,7 @@ function methods:Layout(entries)
     end
     for _, group in ipairs(groups) do
         local template = group[1].category == "dungeon" and ENTRANCE or POINT
-        map:AcquirePin(template, group)
+        map:AcquirePin(template, group, self.compactEntrances)
     end
     if highlighted then addon.FocusLocation(highlighted, true) end
 end
@@ -197,8 +224,10 @@ function methods:OnCanvasScaleChanged()
         self.layoutPending = nil
         local map = self:GetMap()
         if not map:IsShown() or not self.drawn then return end
-        local cols, rows = gridSize(map)
-        if cols ~= self.columns or rows ~= self.rows then self:Layout(self.drawn) end
+        local cols, rows, compact = layoutSize(map)
+        if cols ~= self.columns or rows ~= self.rows or compact ~= self.compactEntrances then
+            self:Layout(self.drawn)
+        end
     end)
 end
 methods.OnCanvasSizeChanged = methods.OnCanvasScaleChanged
@@ -225,7 +254,7 @@ end
 
 local function refreshPin(pin)
     pin:UpdateStyle()
-    if GameTooltip and GameTooltip:IsOwned(pin) then pin:OnMouseEnter() end
+    if GameTooltip and GameTooltip:IsOwned(pin) then showTooltip(pin) end
 end
 
 function addon.UpdateRoutePins()
@@ -279,15 +308,15 @@ function addon.FocusLocation(entry, quiet)
                     pin:SetPosition(entry.x, entry.y)
                     pin:UpdateStyle()
                     sizePin(pin, true)
-                    if not quiet then pin:OnMouseEnter() end
+                    if not quiet then showTooltip(pin) end
                     return
                 end
             end
         end
     end
-    focus = map:AcquirePin(template, {entry})
+    focus = map:AcquirePin(template, {entry}, provider.compactEntrances)
     sizePin(focus, true)
-    if not quiet then focus:OnMouseEnter() end
+    if not quiet then showTooltip(focus) end
 end
 
 -- The map's zoom levels and wheel mode stay Blizzard's. Values the add-on writes into
