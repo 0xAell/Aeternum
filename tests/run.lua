@@ -2002,9 +2002,8 @@ test("boss guide stays open for scrolling and loot, then closes on leave or floo
     item.left = point[4] + 14
     item.right = item.left + 200
     item:Fire("OnEnter")
-    local tip = env.GameTooltip.points[1]
-    equal(tip[1], "TOPRIGHT", "no room on the right, so the item tooltip opens left of the panel")
-    equal(item.left + tip[4], point[4] - 4, "item tooltip ends beside the panel, not over it")
+    equal(env.GameTooltip.anchor, "ANCHOR_LEFT", "the item tooltip opens toward the side with more room")
+    equal(item.left + env.GameTooltip.offsetX, point[4] - 5, "item tooltip ends beside the panel")
     check(env.GameTooltip:IsOwned(item), "loot detail on hover")
     equal(env.GameTooltip.lines[1], "item:" .. id)
     item:Click()
@@ -2017,6 +2016,68 @@ test("boss guide stays open for scrolling and loot, then closes on leave or floo
     shared:Fire("OnEnter")
     map:SetFloor(2)
     check(not panel:IsShown(), "recycled pins cannot retain their guides")
+end)
+
+test("boss guide gives friendly abilities and individual enemy spells their own hover targets", function()
+    local addon, env, state = openDeadmines({class="SHAMAN", level=60, allClassSpells=true,
+        nativeSpellDetails={[8143]="Native Tremor Totem details", [5141]="Instant"},
+        unavailableSpells={[7399]=true}})
+    env.UIParent:SetSize(740, 360)
+    local shared = assert(findEntry(addon.DungeonMap.frame.pins, function(pin)
+        return pin:IsShown() and #pin.members > 1
+    end))
+    shared.left, shared.right, shared.top = 356, 376, 30
+    shared:Fire("OnEnter")
+    local panel = addon.BossHover.panel
+    local function spellRow(id)
+        return assert(findEntry(panel.rows, function(row) return row:IsShown() and row.spell == id end))
+    end
+    local tremor = spellRow(8143)
+    check(tremor.text:GetText():find("|T136108:18:18", 1, true), "larger friendly spell icon")
+    tremor:Fire("OnEnter")
+    check(env.GameTooltip:IsOwned(tremor))
+    equal(env.GameTooltip.anchor, "ANCHOR_LEFT", "right-side guide opens spell detail toward more room")
+    equal(env.GameTooltip.lines[1], "spell:8143")
+    equal(env.GameTooltip.lines[2], "Native Tremor Totem details")
+    tremor:Fire("OnMouseWheel", -1)
+    equal(panel.scroll:GetVerticalScroll(), 46, "wheel scrolls even while pointing at a spell")
+
+    local eject, terrify, disarm = spellRow(5141), spellRow(7399), spellRow(6713)
+    check(eject ~= terrify and disarm ~= terrify, "different casts and phases have separate rows")
+    check(terrify.text:GetText():find("|cff3399ffMagic|r", 1, true))
+    eject:Fire("OnEnter")
+    equal(env.GameTooltip.lines[1], "spell:5141")
+    equal(env.GameTooltip.lines[2], "Instant")
+    equal(env.GameTooltip.lines[3], addon.castSpells[5141].description,
+        "casts with only a native cast time still show the audited description")
+    terrify:Click()
+    equal(state.itemRef, nil, "hover spell rows do not open an item or spell link")
+
+    local effect = addon.castSpells[7399]
+    effect.description = "Verified offline Terrify details"
+    addon.Tactics:SpellTooltip(env.GameTooltip, 7399)
+    check(env.GameTooltip.lines[1]:find("Terrify", 1, true), "failed native lookup replaces stale tooltip lines")
+    terrify:Fire("OnEnter")
+    check(env.GameTooltip:IsOwned(terrify))
+    check(env.GameTooltip.lines[1]:find("Terrify", 1, true))
+    equal(env.GameTooltip.lines[2], effect.description)
+    check(env.GameTooltip.lines[3]:find("|cff3399ffMagic|r", 1, true))
+    env.C_Spell.GetSpellDescription = function() return "Client spell description" end
+    terrify:Fire("OnEnter")
+    equal(env.GameTooltip.lines[2], "Client spell description")
+
+    tremor:Fire("OnEnter")
+    state.class = "MAGE"
+    addon.BossHover:Refresh()
+    Wow.flushTimers()
+    check(not env.GameTooltip:IsShown(), "redraw clears a tooltip for a recycled row")
+    shared.left, shared.right = 635, 655
+    addon.BossHover:Refresh()
+    Wow.flushTimers()
+    spellRow(7399):Fire("OnEnter")
+    equal(env.GameTooltip.anchor, "ANCHOR_RIGHT", "left-side guide opens spell detail toward more room")
+    addon.DungeonMap:SetFloor(2)
+    check(not env.GameTooltip:IsShown(), "floor changes clear the row's tooltip")
 end)
 
 test("maximizing the map updates dungeon floor strata and manual boss jump pauses auto-follow", function()

@@ -3,7 +3,8 @@ local Hover = {}
 addon.BossHover = Hover
 
 local PADDING, GAP, SCROLLBAR = 14, 14, 24
-local MAX_WIDTH, MAX_HEIGHT = 650, 590
+local MAX_WIDTH, MAX_HEIGHT = 680, 620
+local ICON_SIZE = 18
 
 local function trackPointer(panel, elapsed)
     local pin = Hover.pin
@@ -11,7 +12,7 @@ local function trackPointer(panel, elapsed)
     local x, y = GetCursorPosition()
     local scale = UIParent:GetEffectiveScale()
     x, y = x / scale, y / scale
-    -- Bounds also cover mouse-enabled scroll and loot rows within the guide.
+    -- Bounds also cover the scroll area and its spell and item rows.
     if pin:IsMouseOver() or (x >= panel.left and x <= panel.left + panel:GetWidth()
         and y <= panel.top and y >= panel.top - panel:GetHeight()) then
         panel.outsideTime = 0
@@ -68,6 +69,9 @@ end
 
 local function detailsRows(pin, boss, usable)
     local left, right = textRows(), textRows()
+    local function addSpell(label, id, name)
+        left[#left + 1] = {text=label, spell=id, spellName=name}
+    end
     addon.UI:AddBossDetails(left, boss)
     if boss == pin.members[1] then
         if pin.complete then left:AddLine("Encounter complete", .55, .8, .55) end
@@ -77,28 +81,28 @@ local function detailsRows(pin, boss, usable)
             left:AddLine("Approximate location", .75, .75, .75)
         end
     end
-    addon.Tactics:AddGuide(left, boss, true)
-    addon.Tactics:AddCasts(left, boss)
+    addon.Tactics:AddGuide(left, boss, true, addSpell, ICON_SIZE)
+    addon.Tactics:AddCasts(left, boss, addSpell, ICON_SIZE)
     addon.UI:AddBossLoot(right, boss, usable, function(id) right[#right + 1] = {item=id} end)
     return left, right
 end
 
 local function tipEnter(row)
-    if not row.item then return end
-    -- Both frames share the TOOLTIP strata, so place the item tooltip beside the panel
-    -- rather than over it, on whichever side has room.
+    if not row.item and not row.spell then return end
+    -- Position both item and spell tooltips beside the guide so its rows stay readable.
     local panel = Hover.panel
-    GameTooltip:SetOwner(row, "ANCHOR_NONE")
-    GameTooltip:ClearAllPoints()
-    local right, rowLeft, rowRight = panel.left + panel:GetWidth(), row:GetLeft(), row:GetRight()
-    if rowLeft and rowRight and UIParent:GetWidth() - right >= 320 then
-        GameTooltip:SetPoint("TOPLEFT", row, "TOPRIGHT", right - rowRight + 4, 0)
-    elseif rowLeft then
-        GameTooltip:SetPoint("TOPRIGHT", row, "TOPLEFT", panel.left - rowLeft - 4, 0)
+    local rightEdge = panel.left + panel:GetWidth()
+    local roomOnRight = UIParent:GetWidth() - rightEdge
+    if roomOnRight >= panel.left then
+        GameTooltip:SetOwner(row, "ANCHOR_RIGHT", rightEdge - (row:GetRight() or rightEdge) + 5)
     else
-        GameTooltip:SetPoint("TOPLEFT", panel, "TOPRIGHT", 4, 0)
+        GameTooltip:SetOwner(row, "ANCHOR_LEFT", panel.left - (row:GetLeft() or panel.left) - 5)
     end
-    GameTooltip:SetItemByID(row.item)
+    if row.item then
+        GameTooltip:SetItemByID(row.item)
+    else
+        addon.Tactics:SpellTooltip(GameTooltip, row.spell, row.spellName)
+    end
     GameTooltip:Show()
 end
 
@@ -114,19 +118,23 @@ local function setRow(panel, index, x, y, width, data)
         row:SetScript("OnEnter", tipEnter)
         row:SetScript("OnLeave", tipLeave)
         row:SetScript("OnClick", function(self) if self.item then addon.UI:OpenItem(self.item) end end)
-        row.text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
+        row:SetScript("OnMouseWheel", function(_, delta) scrollBy(panel.scroll, delta) end)
+        row.text = row:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
         row.text:SetPoint("TOPLEFT", 0, -1)
         row.text:SetJustifyH("LEFT")
         row.text:SetWordWrap(true)
         panel.rows[index] = row
     end
-    if row.item ~= data.item and GameTooltip:IsOwned(row) then GameTooltip:Hide() end
-    row.item = data.item
-    row:EnableMouse(data.item ~= nil)
+    if row.item ~= data.item or row.spell ~= data.spell then tipLeave(row) end
+    row.item, row.spell, row.spellName = data.item, data.spell, data.spellName
+    local interactive = row.item ~= nil or row.spell ~= nil
+    row:EnableMouse(interactive)
+    row:EnableMouseWheel(interactive)
     row.text:SetWidth(width)
-    row.text:SetText(data.item and addon.UI.ItemLabel(data.item) or data.text)
+    row.text:SetText(data.item and addon.UI.ItemLabel(data.item, false, ICON_SIZE) or data.text)
     row.text:SetTextColor(data.r or 1, data.g or 1, data.b or 1)
-    local height = data.text == " " and 5 or math.max(14, math.ceil(row.text:GetStringHeight()) + 3)
+    local minimum = interactive and 21 or 16
+    local height = data.text == " " and 5 or math.max(minimum, math.ceil(row.text:GetStringHeight()) + 3)
     row:ClearAllPoints()
     row:SetPoint("TOPLEFT", panel.content, "TOPLEFT", x, -y)
     row:SetSize(width, height)
@@ -190,9 +198,9 @@ function Hover:Draw(pin, offset)
     end
     for i = count + 1, #panel.rows do
         local row = panel.rows[i]
-        if GameTooltip:IsOwned(row) then GameTooltip:Hide() end
+        tipLeave(row)
         row:Hide()
-        row.item = nil
+        row.item, row.spell, row.spellName = nil, nil, nil
     end
 
     local header = math.max(42, math.ceil(panel.title:GetStringHeight()) + 23)
@@ -227,7 +235,7 @@ function Hover:Hide()
     if not self.pin then return end
     self.pin, self.requested, self.pending = nil, nil, nil
     for _, row in ipairs(self.panel.rows) do
-        if GameTooltip:IsOwned(row) then GameTooltip:Hide() end
+        tipLeave(row)
     end
     self.panel:Hide()
     self.panel:ClearAllPoints()
