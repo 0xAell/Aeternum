@@ -266,7 +266,7 @@ local function tagSet(entry, bossID)
     local cast = addon.bossCasts[bossID]
     local function record(spells)
         for _, id in ipairs(spells or {}) do
-            local spell = addon.castSpells[id]
+            local spell = addon.castSpells[id] or {}
             for i = 3, 4 do
                 local key = spell[i]
                 if key then
@@ -642,7 +642,7 @@ end
 local function castLabel(id, iconSize)
     local spell = addon.castSpells[id]
     local label = Tactics:SpellIcon(id, iconSize) .. " " .. Tactics:SpellName(id)
-    return spell[3] and (label .. " · " .. formatTag(spell[3])) or label
+    return spell and spell[3] and (label .. " · " .. formatTag(spell[3])) or label
 end
 
 function Tactics:AddCasts(tooltip, boss, addSpell, iconSize)

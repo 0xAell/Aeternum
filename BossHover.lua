@@ -75,9 +75,9 @@ local function detailsRows(pin, boss, usable)
     addon.UI:AddBossDetails(left, boss)
     if boss == pin.members[1] then
         if pin.complete then left:AddLine("Encounter complete", .55, .8, .55) end
-        if pin.stop.pull then
+        if pin.stop and pin.stop.pull then
             left:AddLine("Recorded pull location", .75, .75, .75)
-        elseif pin.stop.approximate then
+        elseif pin.stop and pin.stop.approximate then
             left:AddLine("Approximate location", .75, .75, .75)
         end
     end
@@ -89,18 +89,18 @@ end
 
 local function tipEnter(row)
     if not row.item and not row.spell then return end
+    -- Position both item and spell tooltips beside the guide so its rows stay readable.
+    local panel = Hover.panel
+    local rightEdge = panel.left + panel:GetWidth()
+    local roomOnRight = UIParent:GetWidth() - rightEdge
+    if roomOnRight >= panel.left then
+        GameTooltip:SetOwner(row, "ANCHOR_RIGHT", rightEdge - (row:GetRight() or rightEdge) + 5)
+    else
+        GameTooltip:SetOwner(row, "ANCHOR_LEFT", panel.left - (row:GetLeft() or panel.left) - 5)
+    end
     if row.item then
-        GameTooltip:SetOwner(row, "ANCHOR_RIGHT")
         GameTooltip:SetItemByID(row.item)
     else
-        local panel = Hover.panel
-        local rightEdge = panel.left + panel:GetWidth()
-        local roomOnRight = UIParent:GetWidth() - rightEdge
-        if roomOnRight >= panel.left then
-            GameTooltip:SetOwner(row, "ANCHOR_RIGHT", rightEdge - (row:GetRight() or rightEdge) + 5)
-        else
-            GameTooltip:SetOwner(row, "ANCHOR_LEFT", panel.left - (row:GetLeft() or panel.left) - 5)
-        end
         addon.Tactics:SpellTooltip(GameTooltip, row.spell, row.spellName)
     end
     GameTooltip:Show()

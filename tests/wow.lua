@@ -291,7 +291,9 @@ function ScrollFrame:GetVerticalScrollRange()
 end
 
 local Tooltip = newClass(Frame)
-function Tooltip:SetOwner(owner, anchor) self.owner, self.anchor, self.lines = owner, anchor, {} end
+function Tooltip:SetOwner(owner, anchor, offsetX)
+    self.owner, self.anchor, self.offsetX, self.lines = owner, anchor, offsetX, {}
+end
 function Tooltip:IsOwned(owner) return self.shown and self.owner == owner end
 function Tooltip:ClearLines() self.lines = {} end
 function Tooltip:NumLines() return #(self.lines or {}) end

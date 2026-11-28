@@ -104,6 +104,18 @@ local function questPin(addon, mapID, questID, role)
     end)
 end
 
+test("every boss cast has a spell record", function()
+    local addon = load()
+    for bossID, cast in pairs(addon.bossCasts) do
+        for _, list in pairs(cast) do
+            for _, id in ipairs(type(list) == "table" and list or {}) do
+                check(addon.castSpells[id] and type(addon.castSpells[id][2]) == "number",
+                    ("boss %s cast %s"):format(bossID, tostring(id)))
+            end
+        end
+    end
+end)
+
 test("bundled data is consistent", function()
     local addon = load()
     local data = addon.Data
@@ -1987,7 +1999,11 @@ test("boss guide stays open for scrolling and loot, then closes on leave or floo
     equal(panel.scroll:GetVerticalScroll(), 92)
     local item = assert(findEntry(panel.rows, function(row) return row:IsShown() and row.item end))
     local id = item.item
+    item.left = point[4] + 14
+    item.right = item.left + 200
     item:Fire("OnEnter")
+    equal(env.GameTooltip.anchor, "ANCHOR_LEFT", "the item tooltip opens toward the side with more room")
+    equal(item.left + env.GameTooltip.offsetX, point[4] - 5, "item tooltip ends beside the panel")
     check(env.GameTooltip:IsOwned(item), "loot detail on hover")
     equal(env.GameTooltip.lines[1], "item:" .. id)
     item:Click()
