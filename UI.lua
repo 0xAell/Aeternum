@@ -26,13 +26,16 @@ local function colorChannel(value)
     return math.floor(math.max(0, math.min(1, value or 0)) * 255 + .5)
 end
 
-local function itemLabel(id, bags)
+local function itemLabel(id, bags, iconSize)
     local name = addon.ItemName(id)
     local color = addon.ItemQualityColor(id)
     local text = color and ("|cff%02x%02x%02x%s|r"):format(
         colorChannel(color[1]), colorChannel(color[2]), colorChannel(color[3]), name) or name
     local icon = addon.ItemIcon(id)
-    if icon then text = ("|T%d:16:16|t %s"):format(icon, text) end
+    if icon then
+        iconSize = iconSize or 16
+        text = ("|T%d:%d:%d|t %s"):format(icon, iconSize, iconSize, text)
+    end
     local count = bags and C_Item and C_Item.GetItemCount and C_Item.GetItemCount(id, false)
     if addon.IsReadableNumber(count) and count > 0 then text = text .. "  |cff88cc88In bags|r" end
     return text

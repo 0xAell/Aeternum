@@ -5,9 +5,9 @@ addon.Tactics = Tactics
 local TACTICS_ICON = "|T133741:16:16:0:0:64:64:4:60:4:60|t"
 
 local ROLE_ICON = {
-    tank   = "|TInterface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES:14:14:0:0:64:64:0:19:22:41|t",
-    healer = "|TInterface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES:14:14:0:0:64:64:20:39:1:20|t",
-    dps    = "|TInterface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES:14:14:0:0:64:64:20:39:22:41|t",
+    tank   = "|TInterface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES:16:16:0:0:64:64:0:19:22:41|t",
+    healer = "|TInterface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES:16:16:0:0:64:64:20:39:1:20|t",
+    dps    = "|TInterface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES:16:16:0:0:64:64:20:39:22:41|t",
 }
 
 local ROLES = {
@@ -185,12 +185,37 @@ function Tactics:SpellIcon(spellID, size)
     return ("|T%s:%d:%d:0:0:64:64:4:60:4:60|t"):format(tostring(texture), size, size)
 end
 
+local function hasText(value)
+    return not (issecretvalue and issecretvalue(value)) and type(value) == "string" and value ~= ""
+end
+
 function Tactics:SpellName(spellID)
     local live = C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(spellID)
-    if not (issecretvalue and issecretvalue(live)) and type(live) == "string" and live ~= "" then return live end
+    if hasText(live) then return live end
     local info = SPELLS[spellID]
     local record = addon.castSpells[spellID]
     return info and info[2] or record and record[1] or ("Spell " .. tostring(spellID))
+end
+
+function Tactics:SpellTooltip(tooltip, spellID, name)
+    tooltip:ClearLines()
+    tooltip:SetSpellByID(spellID)
+    local lines = tooltip:NumLines()
+
+    local cast = addon.castSpells[spellID]
+    local description = C_Spell and C_Spell.GetSpellDescription and C_Spell.GetSpellDescription(spellID)
+    if hasText(description) then
+        if lines > 1 then return end
+    else
+        -- Native tooltips may have a cast time without describing the spell's effect.
+        description = cast and cast.description
+        if lines > 1 and not description then return end
+    end
+    if lines == 0 then
+        tooltip:SetText(self:SpellIcon(spellID, 18) .. " " .. (name or self:SpellName(spellID)))
+    end
+    if description then tooltip:AddLine(description, 1, .82, 0, true) end
+    if cast and cast[3] then tooltip:AddLine("Effect: " .. formatTag(cast[3]), 1, 1, 1, true) end
 end
 
 local PET_SPELL = {[19505]=true, [19244]=true, [6358]=true}
@@ -557,7 +582,7 @@ local function roleLine(tooltip, role, entry, classInfo)
     tooltip:AddLine(label .. Tactics:FormatText(entry[role[2]]), 1, 1, 1, true)
 end
 
-function Tactics:AddGuide(tooltip, boss, full)
+function Tactics:AddGuide(tooltip, boss, full, addSpell, iconSize)
     local entry = boss and self:ForBoss(boss.id)
     if not entry then return end
     local dispels = self:DispelText(entry, boss.id)
@@ -572,7 +597,11 @@ function Tactics:AddGuide(tooltip, boss, full)
             tooltip:AddLine(" ")
             tooltip:AddLine(("|cff%s%s TLDR:|r"):format(classInfo.hex, classInfo.name))
             for _, tip in ipairs(tips) do
-                tooltip:AddLine(tip.icon .. " " .. tip.text, 1, 1, 1, true)
+                if addSpell then
+                    addSpell(self:SpellIcon(tip.baseID, iconSize) .. " " .. tip.text, tip.spellID, tip.name)
+                else
+                    tooltip:AddLine(tip.icon .. " " .. tip.text, 1, 1, 1, true)
+                end
             end
         end
         tooltip:AddLine(" ")
@@ -610,20 +639,26 @@ function Tactics:AddTooltip(tooltip, boss, full)
     self:AddGuide(tooltip, boss, full)
 end
 
-function Tactics:AddCasts(tooltip, boss)
+local function castLabel(id, iconSize)
+    local spell = addon.castSpells[id]
+    local label = Tactics:SpellIcon(id, iconSize) .. " " .. Tactics:SpellName(id)
+    return spell[3] and (label .. " · " .. formatTag(spell[3])) or label
+end
+
+function Tactics:AddCasts(tooltip, boss, addSpell, iconSize)
     local casts = addon.bossCasts[boss.id]
     if not casts then return end
     for _, group in ipairs({{"live", "Recorded Forever casts"}, {"reference", "Reference spells"}}) do
         local ids = casts[group[1]]
         if ids and #ids > 0 then
             tooltip:AddLine(group[2], 1, .82, 0)
-            local names = {}
-            for _, id in ipairs(ids) do
-                local spell = addon.castSpells[id]
-                local name = self:SpellIcon(id, 13) .. " " .. self:SpellName(id)
-                names[#names + 1] = spell[3] and (name .. " · " .. formatTag(spell[3])) or name
+            if addSpell then
+                for _, id in ipairs(ids) do addSpell(castLabel(id, iconSize), id) end
+            else
+                local names = {}
+                for i, id in ipairs(ids) do names[i] = castLabel(id, 13) end
+                tooltip:AddLine(table.concat(names, "  ·  "), .88, .88, .88, true)
             end
-            tooltip:AddLine(table.concat(names, "  ·  "), .88, .88, .88, true)
         end
     end
 end
@@ -642,11 +677,8 @@ local function castMenu(parent, heading, ids)
     if not ids then return end
     local menu = parent:CreateButton(heading)
     for _, id in ipairs(ids) do
-        local spell = addon.castSpells[id]
-        local label = Tactics:SpellIcon(id, 16) .. " " .. Tactics:SpellName(id)
-        if spell[3] then label = label .. " · " .. formatTag(spell[3]) end
-        local row = menu:CreateButton(label)
-        row:SetTooltip(function(tooltip) tooltip:SetSpellByID(id) end)
+        local row = menu:CreateButton(castLabel(id, 16))
+        row:SetTooltip(function(tooltip) Tactics:SpellTooltip(tooltip, id) end)
     end
 end
 
@@ -669,7 +701,7 @@ function Tactics:AddMenu(menu, boss, linkSpell)
                 if linkSpell then linkSpell("spell", tip.spellID, tip.name) end
             end)
             row:SetTooltip(function(tooltip)
-                tooltip:SetSpellByID(tip.spellID)
+                self:SpellTooltip(tooltip, tip.spellID, tip.name)
                 tooltip:AddLine(" ")
                 tooltip:AddLine(tip.text, 1, .82, 0, true)
             end)

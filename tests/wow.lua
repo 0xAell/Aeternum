@@ -291,8 +291,10 @@ function ScrollFrame:GetVerticalScrollRange()
 end
 
 local Tooltip = newClass(Frame)
-function Tooltip:SetOwner(owner) self.owner, self.lines = owner, {} end
+function Tooltip:SetOwner(owner, anchor) self.owner, self.anchor, self.lines = owner, anchor, {} end
 function Tooltip:IsOwned(owner) return self.shown and self.owner == owner end
+function Tooltip:ClearLines() self.lines = {} end
+function Tooltip:NumLines() return #(self.lines or {}) end
 function Tooltip:SetText(text) self.lines = { text } end
 function Tooltip:AddLine(text) self.lines[#self.lines + 1] = text end
 -- As the client: post-call hooks registered for item tooltips run after the item is set.
@@ -300,7 +302,13 @@ function Tooltip:SetItemByID(itemID)
     self.lines = { "item:" .. itemID }
     for _, hook in ipairs(Wow.state.tooltipPostCalls[0] or {}) do hook(self, {type = 0, id = itemID}) end
 end
-function Tooltip:SetSpellByID(id) self.lines = { "spell:" .. id } end
+function Tooltip:SetSpellByID(id)
+    if (Wow.state.unavailableSpells or {})[id] then return false end
+    self.lines = { "spell:" .. id }
+    local details = (Wow.state.nativeSpellDetails or {})[id]
+    if details then self:AddLine(details) end
+    return true
+end
 function Tooltip:SetHyperlink(link) self.lines = { link } end
 
 local classes = {

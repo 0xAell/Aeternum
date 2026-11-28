@@ -1,0 +1,112 @@
+spell_id	summary
+246	Slows the target's movement and attack speed.
+421	Nature damage jumps between nearby targets, dealing less damage on each jump.
+642	Grants immunity to attacks and spells. The caster deals less damage and gains Forbearance.
+700	Puts one target to sleep. Damage wakes them.
+865	Deals Frost damage and roots nearby targets. Taking damage can break the root.
+1020	Grants immunity to attacks and spells. The caster deals less damage and gains Forbearance.
+1026	Restores health to an ally.
+3391	Gives the caster additional attacks.
+3419	Increases the caster's chance to block attacks.
+3490	Makes the caster attack faster at the cost of lower Physical damage.
+3583	Deals periodic Nature damage to the poisoned target.
+3603	Slows the target's casting speed.
+3604	Slows the target's movement.
+3815	Deals periodic Nature damage to nearby targets.
+5141	Ejects Sneed from the Shredder. Sneed continues the fight on foot.
+5174	Restores Cookie's health.
+5187	Restores health to an ally.
+5188	Restores health to an ally.
+5200	Summons two Defias Blackguards to join VanCleef.
+5208	Deals weapon damage on impact, then Nature damage over time.
+5213	Deals periodic Fire damage and slows the target's movement and attacks.
+5246	Leaves the selected target cowering and causes nearby enemies to flee.
+5532	Hits the target and their nearest ally.
+5568	Deals weapon damage to nearby enemies.
+5588	Stuns the target.
+5589	Stuns the target.
+6254	Nature damage arcs from the first target to nearby targets.
+6264	Increases the caster's chance to parry attacks.
+6304	Damages and stuns the target.
+6306	Splashes nearby targets with periodic Nature damage.
+6432	Stuns targets affected by the stomp.
+6435	Damages and stuns the target.
+6533	Roots the target in place.
+6535	Fills an area with lightning that deals Nature damage on impact and over time.
+6660	Deals Physical damage with a ranged attack.
+6713	Prevents the target from using their weapon temporarily.
+6742	Makes an ally attack faster.
+6778	Restores health to an ally.
+7068	Reduces the healing the target receives.
+7125	Poisons the target with periodic Nature damage and siphons their mana to the caster.
+7139	Deals damage and stuns enemies nearby, increasing the Physical damage they take.
+7154	Restores health to an ally.
+7164	Generates rage from incoming hits and slows rage decay outside combat.
+7165	A balanced stance that generates rage from both incoming and outgoing hits.
+7295	Roots the target and transfers some of their health to the caster.
+7399	Causes one target to flee in fear.
+7481	Increases the caster's Physical damage.
+7483	Increases the caster's Physical damage.
+7484	Increases the caster's Physical damage.
+7487	Calls Bleak Worgs to assist the caster.
+7488	Calls Slavering Worgs to assist the caster.
+7489	Calls Lupine Horrors to assist the caster.
+7588	Deals Shadow damage to the target.
+7621	Charms the target and turns them into a Shadowfang Glutton.
+7803	Deals Nature damage and stuns nearby targets.
+7964	Uses a smoke bomb to stun nearby targets.
+7965	Transforms the caster into a serpent with stronger, slower attacks.
+7967	Puts one target to sleep. Hostile actions wake them.
+8040	Puts one target to sleep. Hostile actions wake them.
+8078	Deals Nature damage around the caster and slows nearby targets' movement and attacks.
+8142	Deals Physical damage, knocking down and rooting nearby targets.
+8147	Deals Nature damage around the caster and slows nearby targets' movement and attacks.
+8148	An aura that deals Nature damage to creatures that strike allies near the caster.
+8150	Deals Nature damage to nearby targets and stuns them.
+8242	Damages and stuns the target with a shield strike.
+8282	A curse that increases the Physical damage the target takes.
+8399	Puts nearby targets to sleep. Damage wakes them.
+8435	Deals Nature damage in a cone in front of the caster.
+8599	Increases the caster's Physical damage and attack speed.
+8990	An aura that deals Holy damage to creatures that strike allies near the caster.
+9080	Deals weapon damage and slows the target's movement.
+9128	Raises the melee attack power of allies near the caster.
+9232	Resurrects Scarlet Commander Mograine.
+9256	Puts nearby targets to sleep. Damage wakes them.
+9481	Deals Holy damage to the target.
+9532	Deals Nature damage to the target.
+11647	Absorbs damage and protects the caster's spells from disruption by Physical attacks.
+11970	Deals Fire damage to nearby targets.
+11976	Deals weapon damage to the target.
+12039	Restores health to an ally.
+12096	Causes one target to flee in fear.
+12097	Reduces the target's armor.
+12167	Deals Nature damage to the target.
+12550	Lightning charges can strike attackers. Each strike consumes one charge.
+12553	Deals immediate Nature damage to the target.
+14518	Deals damage and applies a stacking effect that increases Holy damage taken.
+14873	Deals additional weapon damage to the target.
+15090	Removes harmful Magic from an ally or beneficial Magic from an enemy.
+15587	Deals Shadow damage and generates extra threat.
+15588	Deals Nature damage around the caster and slows nearby targets' movement and attacks.
+18072	Deals weapon damage and knocks the target back.
+18267	A curse that reduces the target's Physical damage.
+19134	Leaves the selected target cowering and makes other targets nearby flee.
+20800	Deals Fire damage on impact and continues to burn the target.
+22187	Absorbs damage and protects the ally's spells from disruption by Physical attacks.
+1271761	Leaves a bleed that lasts until the target heals above its health threshold.
+1287872	Swipes at the target with its tail to deal Physical damage.
+1287876	Charges the target, dealing Physical damage and knocking them back.
+1287886	Deals Physical damage and makes later Punctures hit harder. The effect stacks.
+1290463	Slams the ground and stuns nearby targets with a shockwave.
+1290464	Sends a wave of Physical damage through enemies in its path.
+1291380	Nature damage jumps between nearby targets, dealing less damage each time.
+1294313	Causes nearby targets to flee in fear.
+1310267	Deals periodic Fire damage around the caster.
+1310354	Deals Frost damage around the caster and roots affected targets.
+1310365	Deals Nature damage on impact and over time.
+1310512	Sets one target on fire and makes them panic. The flames also hurt their nearby allies.
+1310513	Deals Nature damage that jumps between nearby targets.
+1310514	Deals Frost damage around the target and slows movement.
+1312869	Drains the target's health over time and heals the caster.
+1312870	Deals Nature damage around the current target.

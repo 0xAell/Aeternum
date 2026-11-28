@@ -30,7 +30,7 @@ Click any entrance on the Azeroth, continent, or zone map to browse all 34 dunge
 *Hover one skull to see both phases of Sneed's encounter, including role tactics, class advice, and usable loot.*
 
 - Hover a skull to open the encounter guide. It shows class counters like Tremor Totem for Sneed's Shredder, quick tactics for tanks, healers, and DPS, and color-coded effects. When the records identify them, the guide also shows the boss's creature type, rank, and adds. Recorded Forever casts and reference spells have separate labels. [Boss mechanics and sources](docs/boss-audit/mechanics.md)
-- Tactics and usable loot appear side by side, with every encounter listed when bosses share a skull. Move into the guide to scroll or hover an item for its stats. Loot uses your class, proficiencies, and professions, and recipes you already know drop off the list.
+- Tactics and usable loot appear side by side, with every encounter listed when bosses share a skull. Move into the guide to scroll, hover an item for its stats, or hover a class ability or boss cast for its spell tooltip. Loot uses your class, proficiencies, and professions, and recipes you already know drop off the list.
 - Click a skull for the boss menu, with **Shift-click** to link an item in chat and **Ctrl-click** to preview it in the dressing room. Find bosses whose positions are unknown under **Boss loot** in the floor menu or by searching for their name.
 - The loot list labels verified boss drops, other recorded drops, encounter rolls, and guide-listed items. The game’s item tooltips name drop sources for verified drops and encounter rolls.
 - Check which **Dungeon keys** are in your bags from the floor menu. Defeated bosses dim as you clear the run.

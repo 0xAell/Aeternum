@@ -20,12 +20,14 @@ Aeternum has tank, healer and damage-dealer guidance for all **302 named boss an
 
 The spell catalogue uses build **1.60.1.71139** for names, icon file IDs, mechanic categories and dispel types. A Magic damage spell alone does not justify a cleanse prompt. Known beneficial Magic auras appear as **Magic buff** for an offensive dispel. A Hunter sees Tranquilizing Shot only for an identified dispellable Enrage. The client provides localized spell names, icons and aura colors in game. Class actions check the learned spell or rank, including the current pet's own spellbook. [Spell names](https://wago.tools/db2/SpellName?build=1.60.1.71139) · [Dispel and mechanic categories](https://wago.tools/db2/SpellCategories?build=1.60.1.71139) · [Spell icons](https://wago.tools/db2/SpellMisc?build=1.60.1.71139)
 
+The addon bundles **111 short English tooltip summaries** for when the client has no spell description. These describe effects documented in the same build's spell or aura text. For Eject Sneed, VanCleef's Allies and Scarlet Resurrection, the client records a summon or resurrection effect, and the encounter audit identifies its target. The summaries omit variable damage, duration and range. The rest of the spell index still provides names, icons and any verified effect tags. [Offline summaries](mechanics-spell-notes.tsv) · [Client spell and aura text](https://wago.tools/db2/Spell/csv?build=1.60.1.71139) · [Client spell effects](https://wago.tools/db2/SpellEffect/csv?build=1.60.1.71139)
+
 ## Reproduce the snapshot
 
-Use the pinned journal's `NaowhForever_DungeonJournal/Data` directory, English CSV exports of the three client tables above and the compressed Classic world database at the linked revision. The generator checks their SHA-256 hashes and uses the checked-in encounter IDs and guide indexes. From the repository root, run the following with Python 3 and LuaJIT available.
+Use the pinned journal's `NaowhForever_DungeonJournal/Data` directory, English CSV exports of `SpellName`, `SpellCategories`, `SpellMisc`, `Spell` and `SpellEffect`, and the compressed Classic world database at the linked revision. The generator checks their SHA-256 hashes and reads the checked-in encounter IDs, guide indexes and spell summaries. From the repository root, run the following with Python 3 and LuaJIT available.
 
 ```sh
-python3 tools/fetch_boss_sources.py /tmp/forever-boss-inputs
+python3 tools/fetch_boss_sources.py /tmp/forever-boss-inputs --db2 "$db2_dir"
 python3 tools/audit_mechanics.py /tmp/forever-boss-inputs "$journal_data" "$db2_dir" "$classic_sql_gz" /tmp/forever-mechanics
 cmp BossCasts.lua /tmp/forever-mechanics/BossCasts.lua
 cmp docs/boss-audit/mechanics.tsv /tmp/forever-mechanics/mechanics.tsv

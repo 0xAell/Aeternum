@@ -9,15 +9,20 @@ import subprocess
 from collections import defaultdict
 from pathlib import Path
 
+from fetch_boss_sources import verify_client_exports
 from import_classic_training import EXPECTED_SHA256, extract
 
 ROOT = Path(__file__).resolve().parents[1]
 HASHES = {
     "Abilities.lua": "1dcca7b0bb2f46c4e1655c541af86f414b9a23b4ed4e492d25eea3f813f0fb78",
     "Tips.lua": "45aaee43a316811ddf0f11cff6a65a1b9d41432aa50bffc80e847df6b28f43e0",
-    "SpellName.csv": "02128e7f52b8741d2bd144f273cad5e29da384636096087f567db8734a939934",
-    "SpellCategories.csv": "3581bb0723f3064f7cc986cd9f55eda45e19f0baf926ed8710b1a6918cd72887",
-    "SpellMisc.csv": "f57f7cd3c95d829ae90fe450b8068545beece192a112693da4ce81ee29034690",
+}
+# These spells have no English tooltip string. Verify their exact summon or
+# resurrection effect against the client before including the encounter summary.
+TEXTLESS_SPELL_NOTES = {
+    5141: (28, 643),  # Eject Sneed summons NPC 643 (Sneed).
+    5200: (28, 636),  # VanCleef's Allies summons NPC 636 (Defias Blackguard).
+    9232: (67, 0),    # Scarlet Resurrection.
 }
 # These guide assignments lack a matching recorded cast. The build's spell descriptions
 # support the instructions for the aura. Keep them in a separate reference list in-game.
@@ -55,6 +60,25 @@ def verify(path, expected):
 def table(path, delimiter=","):
     with path.open(encoding="utf-8-sig", newline="") as stream:
         return list(csv.DictReader(stream, delimiter=delimiter))
+
+
+def spell_notes(doc, db2, spell_ids):
+    text_ids = {int(row["ID"]) for row in table(db2 / "Spell.csv")
+                if row["Description_lang"].strip() or row["AuraDescription_lang"].strip()}
+    with (db2 / "SpellEffect.csv").open(encoding="utf-8-sig", newline="") as stream:
+        valid_effects = {int(row["SpellID"]) for row in csv.DictReader(stream)
+                         if row["DifficultyID"] == "0" and TEXTLESS_SPELL_NOTES.get(int(row["SpellID"])) ==
+                         (int(row["Effect"]), int(row["EffectMiscValue_0"]))}
+    notes = {}
+    for row in table(doc / "mechanics-spell-notes.tsv", "\t"):
+        spell_id, summary = int(row["spell_id"]), row["summary"].strip()
+        if (spell_id not in spell_ids or spell_id in notes or not summary or
+                re.search(r"[$|\x00-\x1f]", summary)):
+            raise ValueError(f"Invalid or duplicate spell tooltip summary: {spell_id}")
+        if spell_id not in text_ids and spell_id not in valid_effects:
+            raise ValueError(f"Spell tooltip summary has no client text or reviewed effect: {spell_id}")
+        notes[spell_id] = summary
+    return notes
 
 
 def classic_spells(database, roster):
@@ -154,7 +178,8 @@ def main():
             raise ValueError(f"Unknown or duplicate NPC in encounter index: {npc}")
         encounters[npc] = (row["encounter_url"], {int(i) for i in row["single_npc_spell_ids"].split(",") if i})
     for name, digest in HASHES.items():
-        verify((args.db2 if name.endswith(".csv") else args.journal) / name, digest)
+        verify(args.journal / name, digest)
+    verify_client_exports(args.db2)
     names = {int(r["ID"]): r["Name_lang"] for r in table(args.db2 / "SpellName.csv")}
     categories = {int(r["SpellID"]): (int(r["DispelType"]), int(r["Mechanic"]))
                   for r in table(args.db2 / "SpellCategories.csv") if r["DifficultyID"] == "0"}
@@ -200,7 +225,9 @@ def main():
                             if spells]
                 lua.append(f"    [{npc}] = {{" + ", ".join(sections) + "},")
                 used.update(observed | reference)
-    lua.extend(["}", "", "-- Spell name, icon, aura type, and crowd-control mechanic.", "addon.castSpells = {"])
+    notes = spell_notes(doc, args.db2, used)
+    lua.extend(["}", "", "-- Spell name, icon, aura type, crowd-control mechanic, and optional tooltip summary.",
+                "addon.castSpells = {"])
     for spell in sorted(used):
         kind, control = aura(spell, categories.get(spell, (0, 0)))
         values = [json.dumps(names[spell], ensure_ascii=False), str(icons.get(spell, 0))]
@@ -208,7 +235,15 @@ def main():
             values.append(json.dumps(kind) if kind else "nil")
         if control:
             values.append(json.dumps(control))
-        lua.append(f"    [{spell}] = {{" + ", ".join(values) + "},")
+        prefix = f"    [{spell}] = {{" + ", ".join(values)
+        if spell in notes:
+            field = "description = " + json.dumps(notes[spell], ensure_ascii=False)
+            if len(prefix) + len(field) + 4 > 120:
+                lua.extend([prefix + ",", "        " + field + ",", "    },"])
+            else:
+                lua.append(prefix + ", " + field + "},")
+        else:
+            lua.append(prefix + "},")
     lua.append("}")
     (args.output / "BossCasts.lua").write_text("\n".join(lua) + "\n", encoding="utf-8")
 
