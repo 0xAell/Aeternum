@@ -22,20 +22,28 @@ Press **M** and everything you need is already on the map. Aeternum adds dungeon
 
 Aeternum automatically detects your character’s **class, race, and learned professions** to tailor boss tips, usable loot, trainer pins, and quest availability.
 
+[![The Hall of Thanes dungeon map in WoW Forever showing Durgen Dirgehammer's tactics, detected Shaman and Dwarf Stoneform counters, role TLDRs, Bleed effects, recorded casts, and usable loot](docs/screenshots/forever-boss-guide.webp)](docs/screenshots/forever-boss-guide.webp)
+
+*Hover any boss skull, including WoW Forever dungeons like The Hall of Thanes, for detected class and racial counters, role tactics, recorded casts, and usable loot.*
+
 ## Features
 
 ### Dungeon floors, boss tactics and loot
 Click any entrance on the Azeroth, continent, or zone map to browse all 34 dungeons and wings across 71 floors. Not sure where to go next? **Dungeons by level** lists every dungeon from the lowest level range to the highest, colored for your character the way the game colors quests. Inside an instance, pressing **M** opens your current floor automatically and shows your position wherever the client reports coordinates. The floor also follows boss fights, which helps where the game gives no room name.
 
-[![The Deadmines map showing tactics and usable loot for Sneed's Shredder and Sneed, including the Shaman's Tremor Totem tip](docs/screenshots/boss-encounter.webp)](docs/screenshots/boss-encounter.webp)
+[![The Deadmines map showing tactics and usable loot for Sneed's Shredder and Sneed, including the Shaman's Tremor Totem tip and Eject Sneed tooltip](docs/screenshots/boss-encounter.webp)](docs/screenshots/boss-encounter.webp)
 
-*Hover one skull to see both phases of Sneed's encounter, including role tactics, class advice, and usable loot.*
+*Multi-phase encounters share one skull: hover to see both phases of Sneed's fight, class advice, and spell tooltips.*
 
 - Hover a skull to open the encounter guide. It shows class counters like Tremor Totem for Sneed's Shredder, quick tactics for tanks, healers, and DPS, and color-coded effects. When the records identify them, the guide also shows the boss's creature type, rank, and adds. Recorded Forever casts and reference spells have separate labels. [Boss mechanics and sources](docs/boss-audit/mechanics.md)
 - Tactics and usable loot appear side by side, with every encounter listed when bosses share a skull. Move into the guide to scroll, hover an item for its stats, or hover a class ability or boss cast for its spell tooltip. Loot uses your class, proficiencies, and professions, and recipes you already know drop off the list.
 - Click a skull for the boss menu, with **Shift-click** to link an item in chat and **Ctrl-click** to preview it in the dressing room. Find bosses whose positions are unknown under **Boss loot** in the floor menu or by searching for their name.
 - The loot list labels verified boss drops, other recorded drops, encounter rolls, and guide-listed items. The game’s item tooltips name drop sources for verified drops and encounter rolls.
 - Check which **Dungeon keys** are in your bags from the floor menu. Defeated bosses dim as you clear the run.
+
+[![Blackfathom Deeps boss menu for Twilight Lord Kelris showing Tactics, usable loot, Equipped stat comparison for Rod of the Sleepwalker, and drop source tooltip](docs/screenshots/boss-loot-comparison.webp)](docs/screenshots/boss-loot-comparison.webp)
+
+*Click a boss skull for its tactics menu, usable loot, live Equipped comparisons, and drop-source tooltips.*
 
 ### Entrances and minimap directions
 Hover over a zone to see its recommended levels, on the Azeroth, continent, and zone maps, including unexplored terrain.
@@ -46,9 +54,10 @@ All 41 outdoor entrances appear on world, continent, and zone maps, including mu
 - Ten trickier entrances (The Deadmines, Ragefire Chasm, all four Scarlet Monastery wings, Alcaz Prison, Blackmaw Hold, Krol'dok Stronghold, and Shaper's Terrace) include mapped approach waypoints.
 - Directions survive `/reload`, pause automatically on another continent or inside an unrelated instance, and clear once you arrive.
 
-[![Westfall map with the Moonbrook dungeon entrance menu open and Show path to The Deadmines visible](docs/screenshots/dungeon-entrance.webp)](docs/screenshots/dungeon-entrance.webp)
-
-*Right-click the Moonbrook entrance to start minimap directions to The Deadmines.*
+| World map dungeon pins | Minimap directions |
+| :---: | :---: |
+| [![Azeroth world map showing dungeon entrances across Kalimdor and Eastern Kingdoms with Wailing Caverns level range tooltip](docs/screenshots/world-entrances.webp)](docs/screenshots/world-entrances.webp) | [![Westfall map with the Moonbrook dungeon entrance menu open and Show path to The Deadmines visible](docs/screenshots/dungeon-entrance.webp)](docs/screenshots/dungeon-entrance.webp) |
+| *Every dungeon portal on the world map with level ranges.* | *Right-click Moonbrook to start minimap directions.* |
 
 ### Offline trainer catalogues
 Trainers filter automatically to your class, faction, learned professions, and eligible weapon skills. Toggle **Other classes and professions** in Blizzard's map tracking menu whenever you want to see everyone.
@@ -56,15 +65,19 @@ Trainers filter automatically to your class, faction, learned professions, and e
 - Click a trainer to check spells, recipes, ranks, requirements, and prices before making the trip, sorted into what you can train now, **Later training**, and **Learned**.
 - 522 of 561 trainers have offline catalogues ready before your first visit, and talking to any trainer updates their lessons and prices for your character.
 
-[![Alma Jainrose's Herbalism catalogue on the Redridge Mountains map showing training ranks and prices](docs/screenshots/trainer-catalogue.webp)](docs/screenshots/trainer-catalogue.webp)
+[![Daryl Riknussun's Cooking catalogue on the Ironforge map showing trainer pins, recipe prices, Later training, Learned, and the native Crab Cake tooltip](docs/screenshots/trainer-catalogue.webp)](docs/screenshots/trainer-catalogue.webp)
 
-*Check Alma Jainrose's Herbalism ranks and prices before you visit.*
+*Check a trainer's recipes, ranks, prices, and full item tooltips on the map before making the trip.*
 
 ### Quests and live objectives
 Exclamation marks show quests you can pick up, and question marks turn gold when you're ready to hand in, factoring in your level, race, class, profession rank, quest chains, and live quest log.
 
 - Open **Dungeon quests** from any floor menu to locate the quest giver before accepting or the turn-in afterward.
 - For your focused (or first watched) quest, Aeternum marks recorded locations for unfinished objectives whenever Blizzard doesn't already place a marker.
+
+[![The Deadmines floor dropdown showing floor switching and the Dungeon quests menu listing quests for the instance](docs/screenshots/dungeon-quests.webp)](docs/screenshots/dungeon-quests.webp)
+
+*Open **Dungeon quests** from any floor menu to check every quest for the instance and locate its giver or turn-in.*
 
 ## Install
 
