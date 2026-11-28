@@ -3123,22 +3123,7 @@ local function dialogClient(settings)
             check(not priority, "dialog override should be non-priority")
             overrides[key] = name
         end
-        local function registry()
-            local callbacks = {}
-            return {
-                RegisterCallback = function(_, event, callback) callbacks[event] = callback end,
-                TriggerEvent = function(_, event)
-                    if callbacks[event] then callbacks[event]() end
-                end,
-            }
-        end
-        client.EventRegistry = registry()
-        client.PopupEventManager = registry()
-        client.GetCurrentKeyBoardFocus = function() return state.editing end
         client.GetMouseFoci = function() return state.mouseFoci or {} end
-        client.StaticPopup_ForEachShownDialog = function(callback)
-            for _, popup in ipairs(state.popups or {}) do callback(popup) end
-        end
         local function panel(name)
             local frame = client.CreateFrame("Frame", name, client.QuestFrame)
             frame:Hide()
@@ -3198,11 +3183,11 @@ local function dialogClient(settings)
     return env, state
 end
 
-test("dialog keys are opt-in and advance only visible enabled quest steps", function()
+test("dialog keys default on and advance only visible enabled quest steps", function()
     local env, state = dialogClient()
-    env.QuestFrameDetailPanel:Show()
+    check(env.AeternumDB.dialogKeys)
     check(not state.press("SPACE"))
-    slash(env, "dialog on")
+    env.QuestFrameDetailPanel:Show()
     check(state.press("SPACE"))
     local accepted, continued, completed = 0, 0, 0
     env.QuestFrameAcceptButton:SetScript("OnClick", function()
@@ -3243,6 +3228,26 @@ test("dialog keys are opt-in and advance only visible enabled quest steps", func
     check(not state.press("SPACE"))
     check(not state.press("2"))
     check(not env.GameTooltip:IsShown())
+end)
+
+test("dialog opt-out survives map reset and login", function()
+    local env, state = dialogClient({ filters = { dungeon = false } })
+    check(env.AeternumDB.dialogKeys)
+    env.GossipFrame:Show()
+    check(state.press("SPACE"))
+    slash(env, "dialog off")
+    check(not state.press("SPACE"))
+    check(not state.press("2"))
+    slash(env, "reset")
+    equal(env.AeternumDB.dialogKeys, false)
+
+    env, state = dialogClient(env.AeternumDB)
+    env.GossipFrame:Show()
+    equal(env.AeternumDB.dialogKeys, false)
+    check(not state.press("SPACE"))
+    check(not state.press("2"))
+    slash(env, "dialog on")
+    check(state.press("SPACE"))
 end)
 
 test("dialog keys follow native gossip order even when rows are virtualized", function()

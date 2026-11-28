@@ -82,7 +82,7 @@ Exclamation marks show quests you can pick up, and question marks turn gold when
 
 ### Keyboard shortcuts for NPCs and quests
 
-Enable **Dialog keys** with `/aeternum dialog on`. **Space** selects the first NPC option, advances normal quest steps, or confirms supported popups. **1–9** and **0** select numbered options or rewards. Space jumps as usual outside eligible dialogs. When a quest offers a choice, select the reward before turning it in. [Inspired by Foxthorn’s DialogKey](https://www.curseforge.com/wow/addons/dialogkey)
+**Dialog keys** are enabled by default. Turn them off with `/aeternum dialog off`. **Space** selects the first NPC option, advances normal quest steps, or confirms supported popups. **1–9** and **0** select numbered options or rewards. Space jumps as usual outside eligible dialogs. When a quest offers a choice, select the reward before turning it in. [Inspired by Foxthorn’s DialogKey](https://www.curseforge.com/wow/addons/dialogkey)
 
 Keys pause while typing, using the gamepad UI, or in combat. Enable only one dialog shortcut addon at a time. Use `/aeternum dialog` to see your settings and available commands.
 

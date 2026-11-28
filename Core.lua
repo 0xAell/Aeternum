@@ -28,7 +28,7 @@ for _, category in ipairs(addon.categories) do
 end
 
 local defaults = {
-    dialogKeys = false,
+    dialogKeys = true,
     dialogPrimary = "SPACE",
     dialogSecondary = "",
     dialogPopups = true,

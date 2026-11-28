@@ -533,6 +533,16 @@ function Wow.CreateFrame(kind, name, parent, template)
     return frame
 end
 
+local function eventRegistry()
+    local callbacks = {}
+    return {
+        RegisterCallback = function(_, event, callback) callbacks[event] = callback end,
+        TriggerEvent = function(_, event)
+            if callbacks[event] then callbacks[event]() end
+        end,
+    }
+end
+
 function Wow.new(state)
     local env = setmetatable({}, { __index = _G })
     Wow.env = env
@@ -543,6 +553,12 @@ function Wow.new(state)
     state.cached = state.cached or {}
 
     env.CreateFrame = Wow.CreateFrame
+    env.EventRegistry = eventRegistry()
+    env.PopupEventManager = eventRegistry()
+    env.GetCurrentKeyBoardFocus = function() return state.editing end
+    env.StaticPopup_ForEachShownDialog = function(callback)
+        for _, popup in ipairs(state.popups or {}) do callback(popup) end
+    end
     env.BaseScrollBoxEvents = { OnScroll = "OnScroll" }
     env.Menu = { ModifyMenu = function(tag, callback) state.menuHooks[tag] = callback end }
     env.MenuUtil = {SetElementText = function(row, label) row.label = label end}
