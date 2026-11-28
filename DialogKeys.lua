@@ -112,6 +112,10 @@ local function getSlot(index)
     button:RegisterForClicks("AnyUp")
     button:SetAttribute("type", "click")
     button:SetAttribute("useOnKeyDown", false)
+    -- A key release can arrive before the secure state driver clears overrides.
+    owner:WrapScript(button, "OnClick", [[
+        if SecureCmdOptionParse("[combat] blocked; ready") == "blocked" then return false end
+    ]])
     local action, reward, scroll
     button:SetScript("PreClick", function(self)
         action, reward, scroll = nil, nil, nil
@@ -171,8 +175,8 @@ local function showNumber(index, row)
 end
 
 local function setBindings(keys, targets)
-    -- Secure state changes clear the owner's overrides immediately on combat
-    -- entry. All normal binding and attribute writes happen out of combat.
+    -- The secure state driver clears overrides in combat. Normal binding and
+    -- attribute writes happen out of combat.
     if not owner then
         if not next(keys) then return end
         owner = CreateFrame("Frame", nil, nil, "SecureHandlerStateTemplate")

@@ -162,6 +162,16 @@ function Frame:SetAttribute(key, value)
     self.attributes[key] = value
 end
 function Frame:GetAttribute(key) return self.attributes and self.attributes[key] end
+function Frame:WrapScript(frame, event, code)
+    assert(event == "OnClick", "unsupported secure script")
+    frame.clickGate = setfenv(assert(loadstring(code)), {
+        SecureCmdOptionParse = function(condition)
+            local combat, otherwise = condition:match("^%[combat%] (%w+); (%w+)$")
+            assert(combat, "unsupported macro condition")
+            return Wow.state.inCombat and combat or otherwise
+        end,
+    })
+end
 function Frame:GetName() return self.name end
 function Frame:SetScript(event, handler) self.scripts[event] = handler end
 function Frame:GetScript(event) return self.scripts[event] end
@@ -225,9 +235,11 @@ function Button:Click(button)
     if self:IsEnabled() then
         button = button or "LeftButton"
         self:Fire("PreClick", button)
-        self:Fire("OnClick", button)
-        local target = self:GetAttribute("clickbutton")
-        if target then target:Click(button) end
+        if not self.clickGate or self.clickGate() ~= false then
+            self:Fire("OnClick", button)
+            local target = self:GetAttribute("clickbutton")
+            if target then target:Click(button) end
+        end
         self:Fire("PostClick", button)
     end
 end

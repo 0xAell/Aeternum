@@ -3317,11 +3317,19 @@ test("dialog overrides suspend during chat and combat and preserve rebinding and
     state.editing = false
     env.EventRegistry:TriggerEvent("ChatFrame.OnEditBoxFocusLost")
     check(state.press("F"))
+    local accepted = 0
+    env.QuestFrameAcceptButton:SetScript("OnClick", function() accepted = accepted + 1 end)
+    state.inCombat = true
+    -- Combat lock can start before the secure state driver removes a binding.
+    check(state.press("F"))
+    equal(accepted, 0)
+
     state.combat(true)
     check(not state.press("F"))
     check(not state.press("CTRL-SPACE"))
     state.combat(false)
     check(state.press("F"))
+    equal(accepted, 1)
     slash(env, "reset")
     equal(env.AeternumDB.dialogPrimary, "CTRL-SPACE")
     slash(env, "dialog off")
