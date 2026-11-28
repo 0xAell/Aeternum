@@ -321,6 +321,7 @@ function MapCanvas:SetMapID(mapID)
     end
 end
 function MapCanvas:AddDataProvider(provider)
+    self.dataProviders[provider] = true
     self.providers[#self.providers + 1] = provider
     provider:OnAdded(self)
 end
@@ -725,6 +726,7 @@ function Wow.new(state)
         SetPosition = function(self, x, y) self.x, self.y = x, y end,
     }
     local map = Wow.region(MapCanvas, env.UIParent)
+    map.dataProviders = {}
     map.providers, map.pools = {}, setmetatable({}, {
         __index = function(pools, template)
             local pool = { active = {}, free = {} }

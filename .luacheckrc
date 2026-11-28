@@ -23,6 +23,7 @@ read_globals = {
     "OpenWorldMap", "UIParent", "UnitClass", "UnitFactionGroup", "UnitIsDeadOrGhost", "UnitLevel",
     "UnitQuestTrivialLevelRange", "UnitRace", "WorldMapFrame", "canaccesstable", "issecretvalue",
     "hooksecurefunc", "strtrim", "wipe",
+    "InputUtil", "LEVEL", "MAP_AREA_LABEL_TYPE", "QuestDifficultyColors", "GetQuestDifficultyColor",
 }
 
 files["tests/**"] = { std = "+luajit", globals = { "setfenv" } }
