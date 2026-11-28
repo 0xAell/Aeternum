@@ -64,10 +64,6 @@ Exclamation marks show quests you can pick up, and question marks turn gold when
 - Open **Dungeon quests** from any floor menu to locate the quest giver before accepting or the turn-in afterward.
 - For your focused (or first watched) quest, Aeternum marks recorded locations for unfinished objectives whenever Blizzard doesn't already place a marker.
 
-[![A highlighted Lieutenant Fangore objective on the Redridge Mountains map with the required item in its tooltip](docs/screenshots/quest-objective.webp)](docs/screenshots/quest-objective.webp)
-
-*Hover an unfinished objective to see what you still need and where to look.*
-
 ## Install
 
 ### CurseForge (recommended)
