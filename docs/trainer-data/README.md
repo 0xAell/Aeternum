@@ -2,6 +2,8 @@
 
 The map has 561 distinct trainer NPCs. In this snapshot, 210 have trainer windows recorded on live Forever builds, 24 more have an undated Zephras trainer window, and 14 more have a usable beta window. Earlier NorgannonDB and Classic references cover another 274. Altogether 522 trainers have a catalogue before the character visits. The other 39 need an in-game observation.
 
+The 0.6.0 live check identified four Alliance Shaman trainers in that group and recorded their map coordinates for follow-up visits. [Trainer names and locations](../qa/0.6.0.md#alliance-shaman-trainers-have-no-lessons-to-preview-before-a-visit)
+
 | Record | Offers | Evidence |
 | --- | ---: | --- |
 | Live Forever | 10,007 | The NPC and spell occur together in a live EG Link build or a dated live Zephras service row. Both collectors saw 771 of these offers. |
