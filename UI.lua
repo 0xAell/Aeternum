@@ -244,20 +244,27 @@ function UI:Trainer(owner, entry)
     end)
 end
 
+local function dungeonNameCounts(entries)
+    local counts = {}
+    for _, entry in ipairs(entries) do
+        if entry.category == "dungeon" then counts[entry.title] = (counts[entry.title] or 0) + 1 end
+    end
+    return counts
+end
+
+local function doorLabel(entry, counts)
+    if (counts[entry.title] or 0) < 2 or entry.category ~= "dungeon" then return entry.title end
+    local point = entry.point
+    local zone = entry.mapID ~= point.mapID and (addon.ZoneName(point.mapID) .. " ") or ""
+    return ("%s · %s%.1f, %.1f"):format(entry.title, zone, point.x * 100, point.y * 100)
+end
+
 function UI:Directions(owner, entries)
     menuAt(owner, "Dungeon entrance", function(menu)
-        local counts = {}
-        for _, entry in ipairs(entries) do
-            if entry.category == "dungeon" then counts[entry.title] = (counts[entry.title] or 0) + 1 end
-        end
+        local counts = dungeonNameCounts(entries)
         for _, entry in ipairs(entries) do
             if entry.category == "dungeon" and not addon.Navigation:IsDestination(entry.point, entry.source.id) then
-                local label
-                if counts[entry.title] > 1 then
-                    local point = entry.point
-                    label = ("Show path to %s · %.1f, %.1f"):format(entry.title, point.x * 100, point.y * 100)
-                end
-                self:Route(menu, entry, label)
+                self:Route(menu, entry, "Show path to " .. doorLabel(entry, counts))
             end
         end
         if addon.Navigation:IsActive() then
@@ -378,8 +385,9 @@ function UI:PickLocation(owner, entries)
         if entry.x ~= first.x or entry.y ~= first.y then title = "Nearby map locations" break end
     end
     menuAt(owner, title, function(menu)
+        local counts = dungeonNameCounts(entries)
         for _, entry in ipairs(entries) do
-            local name = entry.title
+            local name = doorLabel(entry, counts)
             if entry.questID then
                 name = name .. (entry.role == "turnin" and " (turn-in)" or
                     (entry.role == "objective" and " (objective)" or " (start)"))
@@ -390,7 +398,8 @@ function UI:PickLocation(owner, entries)
             row:SetTooltip(function(tooltip)
                 tooltip:SetText(entry.title)
                 tooltip:AddLine(entry.contact or entry.subtitle)
-                tooltip:AddLine(("%.1f, %.1f"):format(entry.x*100, entry.y*100))
+                local point = entry.point
+                tooltip:AddLine(("%.1f, %.1f"):format(point.x*100, point.y*100))
             end)
         end
     end)

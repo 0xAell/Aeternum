@@ -6,6 +6,7 @@ local ZONE_ENTRANCE = {icon=34, target=22}
 local CLOSE_ENTRANCE = {icon=44, target=48}
 local CLOSE_ZONE_WIDTH = .6
 local CELL_SIZE = 20
+local PIN_ZOOM_GROWTH = .2
 local provider, focus, marked, highlighted, highlightedQuestState
 local pins = {}
 AeternumMapPinMixin = {}
@@ -28,11 +29,17 @@ end
 
 function pins:OnLoad()
     self:UseFrameLevelType("PIN_FRAME_LEVEL_AREA_POI")
-    self:SetScalingLimits(1, 1, 1.2)
+    self:SetScalingLimits(1, 1, 1 + PIN_ZOOM_GROWTH)
     self.icon = self:CreateTexture(nil, "ARTWORK")
     self.icon:SetPoint("CENTER")
     self.tracked = self:CreateTexture(nil, "OVERLAY")
     self.tracked:SetAtlas("waypoint-mappin-minimap-tracked")
+end
+
+-- Keep a shared entrance at the position used to group it. A tracked wing can
+-- change the tooltip and badge without moving the button over a neighboring door.
+local function pinAnchor(pin, entry)
+    return pin.entries[1].category == "dungeon" and pin.entries[1] or entry
 end
 
 function pins:UpdateStyle()
@@ -53,7 +60,8 @@ function pins:UpdateStyle()
     end
     if self ~= marked and self.entry ~= best then
         self.entry = best
-        self:SetPosition(best.x, best.y)
+        local anchor = pinAnchor(self, best)
+        self:SetPosition(anchor.x, anchor.y)
     end
     local icon, _, _, dim = addon.Presentation(self.entry)
     addon.SetIcon(self.icon, icon, dim)
@@ -61,11 +69,11 @@ function pins:UpdateStyle()
 end
 
 function pins:OnAcquired(entries, entranceStyle)
-    self.entries, self.entry = entries, entries[1]
+    self.entries, self.entry = entries, nil
     self.entranceStyle = entranceStyle or OVERVIEW_ENTRANCE
     self:UpdateStyle()
     sizePin(self, false)
-    self:SetPosition(self.entry.x, self.entry.y)
+    self:ApplyCurrentScale()
 end
 
 function pins:OnReleased()
@@ -157,22 +165,19 @@ function methods:RemoveAllData()
     self.drawn = nil
 end
 
--- The share of the map in view, from the scroll container's read-only math. GetViewRect
--- would cache its result on Blizzard's scroll container from add-on code.
-local function viewWidth(scroll)
-    if not (scroll.CalculateViewRect and scroll.GetCanvasScale) then return 1 end
-    local scale = scroll:GetCanvasScale()
-    if not addon.IsReadableNumber(scale) or scale <= 0 then return 1 end
-    local width = scroll:CalculateViewRect(scale):GetWidth()
-    return addon.IsReadableNumber(width) and width > 0 and width or 1
-end
-
 local function layoutSize(map)
     local mapID, scroll = map:GetMapID(), map.ScrollContainer
     local width, height = scroll:GetSize()
     width = addon.IsReadableNumber(width) and width or 0
     height = addon.IsReadableNumber(height) and height or 0
-    local range = mapID and viewWidth(scroll) or 1
+    -- Use the actual terrain dimensions. On a letterboxed map the scroll frame
+    -- has a different aspect ratio, and its cached view rect belongs to Blizzard.
+    local canvasWidth, canvasHeight = scroll.Child:GetSize()
+    local canvasScale = scroll:GetCanvasScale()
+    if not addon.IsReadableNumber(canvasScale) or canvasScale <= 0 then canvasScale = 1 end
+    canvasWidth = math.max(1, canvasWidth * canvasScale)
+    canvasHeight = math.max(1, canvasHeight * canvasScale)
+    local range = width > 0 and width / canvasWidth or 1
     local scale = math.max(1, math.floor(2 / range + .5) / 2)
     local types = Enum and Enum.UIMapType
     local info = mapID and types and types.Zone and C_Map.GetMapInfo(mapID)
@@ -182,18 +187,23 @@ local function layoutSize(map)
     end
     local columns = math.max(1, math.floor(width * scale / CELL_SIZE))
     local rows = math.max(1, math.floor(height * scale / CELL_SIZE))
-    return columns, rows, style
+    -- Match MapCanvasPinMixin:ApplyCurrentScale, including the native pin-size setting.
+    local percent = map:HasZoomLevels() and map:GetCanvasZoomPercent() or 0
+    if not addon.IsReadableNumber(percent) then percent = 0 end
+    local pinScale = map:GetGlobalPinScale() * (1 + PIN_ZOOM_GROWTH * math.max(0, math.min(1, percent)))
+    local target = style.target * pinScale
+    local gapX, gapY = target / canvasWidth, target / canvasHeight
+    return columns, rows, style, gapX, gapY
 end
 
 function methods:Layout(entries)
     local map = self:GetMap()
     self:RemoveAllData()
     self.drawn = entries
-    self.columns, self.rows, self.entranceStyle = layoutSize(map)
+    self.columns, self.rows, self.entranceStyle, self.gapX, self.gapY = layoutSize(map)
     local positions, groups = {}, {}
     local cells, entrances = {}, {}
     -- Group entrances whose click targets overlap at the current zoom.
-    local entranceSpan = self.entranceStyle.target / CELL_SIZE
     for _, entry in ipairs(entries) do
         local position = ("%.4f:%.4f"):format(entry.x, entry.y)
         local group = positions[position]
@@ -201,9 +211,9 @@ function methods:Layout(entries)
             local cell
             if entry.category == "dungeon" then
                 for _, other in ipairs(entrances) do
-                    local dx = math.abs(entry.x - other[1].x) * self.columns
-                    local dy = math.abs(entry.y - other[1].y) * self.rows
-                    if dx < entranceSpan and dy < entranceSpan then group = other; break end
+                    local dx = math.abs(entry.x - other[1].x)
+                    local dy = math.abs(entry.y - other[1].y)
+                    if dx < self.gapX and dy < self.gapY then group = other; break end
                 end
             else
                 local kind = entry.category == "quest" and "q" or "t"
@@ -243,8 +253,9 @@ function methods:OnCanvasScaleChanged()
         self.layoutPending = nil
         local map = self:GetMap()
         if not map:IsShown() or not self.drawn then return end
-        local cols, rows, style = layoutSize(map)
-        if cols ~= self.columns or rows ~= self.rows or style ~= self.entranceStyle then
+        local cols, rows, style, gapX, gapY = layoutSize(map)
+        if cols ~= self.columns or rows ~= self.rows or style ~= self.entranceStyle
+            or gapX ~= self.gapX or gapY ~= self.gapY then
             self:Layout(self.drawn)
         end
     end)
@@ -324,7 +335,8 @@ function addon.FocusLocation(entry, quiet)
                 if other == entry then
                     marked = pin
                     pin.entry = entry
-                    pin:SetPosition(entry.x, entry.y)
+                    local anchor = pinAnchor(pin, entry)
+                    pin:SetPosition(anchor.x, anchor.y)
                     pin:UpdateStyle()
                     sizePin(pin, true)
                     if not quiet then showTooltip(pin) end
@@ -348,7 +360,9 @@ function addon.AttachMap()
     end
     Mixin(AeternumMapPinMixin, MapCanvasPinMixin, pins)
     addon.UI:Attach(WorldMapFrame)
+    addon.AttachZoneLevels(WorldMapFrame)
     provider = CreateFromMixins(MapCanvasDataProviderMixin, methods)
     WorldMapFrame:AddDataProvider(provider)
+    hooksecurefunc(WorldMapFrame, "SetGlobalPinScale", function() provider:OnCanvasScaleChanged() end)
     return true
 end
