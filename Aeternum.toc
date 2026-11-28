@@ -2,7 +2,7 @@
 ## Title: Aeternum
 ## Notes: Dungeon maps, boss tactics and loot, trainers, quests, and minimap directions for WoW Forever.
 ## Author: Ael
-## Version: 0.6.2
+## Version: 0.7.0
 ## X-WoW-Flavor: Forever
 ## IconAtlas: Dungeon
 ## Category: Map & Minimap
