@@ -1,72 +1,31 @@
-<img align="right" src="https://raw.githubusercontent.com/0xAell/Aeternum/main/artwork/aeternum-curseforge.png" width="80" height="80" alt="A brass dungeon arch with a winding trail">
+<img align="right" src="https://raw.githubusercontent.com/0xAell/Aeternum/main/artwork/aeternum-curseforge.png" width="80" height="80" alt="Aeternum’s brass dungeon arch">
 
 # Aeternum
 
-Press **M**. Aeternum adds dungeon floors, boss loot, trainers, quests and entrance directions to the World of Warcraft: Forever map. It uses Blizzard’s artwork, menus and tooltips. The data ships with the addon and works offline.
+A dungeon atlas built into the **World of Warcraft: Forever** map. Browse 34 dungeons and wings across 71 floors, check boss loot for your character, and follow your minimap to the entrance.
 
-[CurseForge project](https://www.curseforge.com/wow/addons/aeternum) · [Download the latest GitHub release](https://github.com/0xAell/Aeternum/releases/latest)
-
-## On the map
-
-| Where | What to do |
-| --- | --- |
-| Zone or continent | Click a dungeon entrance to see the floors. Right-click for minimap directions to a specific wing or door. Nearby locations share a pin. Click it to choose one, or scroll in to separate them on maps the game lets you zoom. |
-| Inside a dungeon | Press **M**. The map follows recognized rooms and floor IDs. An arrow shows your position when the client supplies coordinates for that floor. Click the floor name to change floors, check keys in your bags, or find an outdoor entrance. Scroll to zoom and drag to pan. **Back** or right-clicking empty floor space returns to the zone map; **Escape** closes the map. |
-| Boss skull | Click for drops your character can use. Hover an item for its tooltip, Shift-click to link it, or Ctrl-click to preview it. If bosses share a spot, choose one. **Boss loot** also lists bosses whose positions are unknown. |
-| Trainer | Your class, faction, professions and eligible weapon skills determine which trainers appear. Click a trainer to see lessons and prices. **Later training** and **Learned** hold lessons with unmet requirements and skills you already know. Hover a lesson for its requirements and price source. |
-| Quest | Exclamation marks show available starts. Question marks turn gold when you can hand the quest in. Hover for the NPC or object and your live progress. Click to track the quest or get directions. **Dungeon quests** marks the giver before acceptance and the turn-in afterward. If they are in another zone, the chat says where, and the mark appears when you open that zone. **Show on zone map** under **Entrances** works the same way. |
-
-Boss menus and loot search use your class and trained weapon and armor proficiencies. Recipes appear when you have the profession, rank and specialization to learn them. Learning a recipe removes it from the list. Higher-level gear stays visible if you already use that equipment type. Other recorded drops, encounter rolls and guide-listed drops appear in submenus when they contain a match.
-
-The quest you focus in the game can show objective locations for its unfinished steps. Without a focus, Aeternum uses your first watched quest. Blizzard’s own objective marker takes precedence. The map’s existing tracking menu controls quest objectives, low-level quests and additional trainers.
-
-Directions survive a UI reload on the same character. They pause on another continent or inside an unrelated instance and end when you reach the destination. Use **Stop directions** on the map to cancel.
-
-You can look up a trainer before your first visit. Hover a lesson to see its requirements, the source of the record and where the price came from. A discounted quote shows the visitor’s reputation standing when known. **Beta** and **Classic** mark older references. Your own trainer visit confirms the lessons you see and updates prices for that character.
-
-## Coverage
-
-- 34 dungeon and wing entries, 71 floors and 302 boss and encounter entries. Of 1,404 audited items, 1,396 have verified Forever requirements for character loot lists. There are 277 map pins before grouping encounters that share a location. Guide estimates are labeled on hover. Dalaran’s Underbelly uses a labeled route sketch. [Boss and loot audit](https://github.com/0xAell/Aeternum/tree/main/docs/boss-audit)
-- 41 outdoor entrance records across all 34 entries. Ten have a recorded approach waypoint, covering the Deadmines, Ragefire Chasm, the four Scarlet Monastery wings, Alcaz Prison, Blackmaw Hold, Krol’dok Stronghold and Shaper’s Terrace. Other doors show a direct bearing. Dire Maul East and West have multiple selectable portals.
-- 562 trainer locations cover 561 distinct trainers, including eight weapon masters. 522 have lessons you can browse offline. Recorded trainer windows supply 1,743 distinct spells and recipes. The remaining 39 trainers build their catalogues when you visit. [Trainer records and coverage](https://github.com/0xAell/Aeternum/tree/main/docs/trainer-data)
-- Quest data covers 5,323 quests, 11,100 start and turn-in records, and 5,207 representative objective sites for 2,097 quests. Availability uses level, race, class, profession rank, quest chains and progress. Reputation and specialization can also affect offers in game.
+[**Download the latest release**](https://github.com/0xAell/Aeternum/releases/latest) · [CurseForge project](https://www.curseforge.com/wow/addons/aeternum) · [Player guide](https://github.com/0xAell/Aeternum/blob/main/docs/map-guide.md)
 
 ## Install
 
-Download `Aeternum-<version>.zip` from a release or the **Aeternum** CI artifact and extract it into `World of Warcraft/_forever_/Interface/AddOns/`. The resulting path should be `Interface/AddOns/Aeternum/Aeternum.toc`. Reload the interface or start the game. Aeternum requires no other addons.
+1. Under **Assets** on the release page, download `Aeternum-<version>.zip`.
+2. Extract the ZIP into `World of Warcraft/_forever_/Interface/AddOns/`. The installed path should end in `AddOns/Aeternum/Aeternum.toc`.
+3. Start the game or type `/reload` if you’re already playing. Press **M** to open the map.
 
-## Optional commands
+Aeternum runs on its own. The maps, loot tables, trainer records, and quest locations ship with the addon.
 
-| Command | Action |
-| --- | --- |
-| `/aeternum` | Open the world map |
-| `/aeternum <search words>` | Search by dungeon, boss or drop. Words can appear in any order, as in `/aeternum Herod Scarlet`. |
-| `/aeternum dungeons [name]` | Find a dungeon, boss or drop on the map. For example, `/aeternum dungeons Cruel Barb` opens a result for Edwin VanCleef. |
-| `/aeternum help` | Show the available map commands |
-| `/aeternum stop` | End minimap directions |
-| `/aeternum reset` | Reset map filters |
+## Try it in Westfall
 
-## Development
+Click **The Deadmines** entrance near Moonbrook. Open the floor menu and choose **Boss loot → Edwin VanCleef** to see his drops for your character before you step inside. Back on the Westfall map, right-click the same entrance and choose **Show path to The Deadmines** for minimap directions.
 
-Run these from the repository root with LuaJIT or Lua 5.1, luacheck, Python 3, Git, curl and zip.
+## Trainers and quests
 
-```sh
-luacheck .
-luajit tests/run.lua
-tools/check_data.sh
-tools/package.sh
-```
+Click a **trainer** to see lessons, requirements, and prices for your class, professions, or weapon skills. You can browse 522 trainer catalogues before your first visit. Visiting a trainer updates the record for your character.
 
-The headless tests exercise the map, stock menu interactions, trainer observations, quest states and minimap directions.
+Click a **quest marker** to track a quest or get directions to its giver or turn-in. The map also shows recorded locations for unfinished objectives on the quest you’re following.
 
-Code that touches Blizzard's interface must not write Blizzard-owned state. A value an add-on writes into a Blizzard table or frame field taints the Blizzard code that later reads it, and the game then blocks that code's protected calls and blames Aeternum. In particular:
+## Data and contributions
 
-- Do not call `RegisterGameMenuEscHandler` or insert into `UISpecialFrames`. The world map closes the floor view.
-- Do not change the map canvas: zoom levels, wheel mode, scroll container methods or Blizzard pins. Aeternum adds its own data provider and pin templates only.
-- Do not move the map with `SetMapID` or `PanTo`, or call `GetViewRect`, which caches its result on the scroll container. Read the view with `CalculateViewRect` instead.
-- Open the map with `OpenWorldMap()` and no map ID. It only calls `ShowUIPanel`, which Blizzard runs from a secure frame. `ToggleWorldMap` rebuilds the map's zoom state from the caller's code.
-- Hook Blizzard functions with `hooksecurefunc` and scripts with `HookScript` instead of replacing them.
+For a misplaced boss or a missing drop, include the dungeon, floor, and NPC name when reporting it. [Report an issue](https://github.com/0xAell/Aeternum/issues) · [Boss and loot audit](https://github.com/0xAell/Aeternum/tree/main/docs/boss-audit)
 
-The mock client in `tests/wow.lua` records any of these writes made while add-on code is on the call stack, and every test fails if one happens. Luacheck rejects the globals involved. CI also regenerates the bundled databases and builds the installable ZIP. See the [Forever interface source](https://github.com/Gethe/wow-ui-source/tree/d9c22e32cb240afb82bb2ecefbb78ef935333f59) and [data sources and regeneration](DATA_SOURCES.md).
-
-Aeternum is licensed under [GPL-3.0](LICENSE).
+[Data sources and credits](DATA_SOURCES.md) · [Contributing](https://github.com/0xAell/Aeternum/blob/main/CONTRIBUTING.md) · [GPL-3.0 license](LICENSE)
