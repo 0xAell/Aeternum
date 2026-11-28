@@ -75,45 +75,11 @@ local function exploredTiles(id, base)
     return overlays
 end
 
-local function intersects(map, left, top, right, bottom)
-    return map.left < right and map.right > left and map.top < bottom and map.bottom > top
+local function fits(map, left, top, right, bottom)
+    return left >= map.left and top >= map.top and right <= map.right and bottom <= map.bottom
 end
 
-local function focusedZone(maps, x, y, preferred)
-    local id, bestDistance
-    for _, map in ipairs(maps) do
-        if map.kind == "zone" and x >= map.left and x <= map.right and y >= map.top and y <= map.bottom then
-            if map.id == preferred then return preferred end
-            local dx = (x - map.left) / (map.right - map.left) - .5
-            local dy = (y - map.top) / (map.bottom - map.top) - .5
-            local distance = dx * dx + dy * dy
-            if not bestDistance or distance < bestDistance then
-                id, bestDistance = map.id, distance
-            end
-        end
-    end
-    return id
-end
-
-local function layerStyle(map, zoom, x, y, width, height, focus)
-    -- Each map group has slots for its base, two detail layers, and two exploration layers.
-    if map.kind == "world" then return 0, 1 end
-    if map.kind == "continent" then return 5, ease((zoom - 1.1) / 1.4) end
-    local dx = math.max(map.left - x, x - map.right, 0) / width
-    local dy = math.max(map.top - y, y - map.bottom, 0) / height
-    local proximity = ease(1 - 2 * math.sqrt(dx * dx + dy * dy))
-    if map.kind == "city" then return 21, ease((zoom - 10) / 5) * proximity end
-    local detail = ease((zoom - 2.7) / 3.3) * proximity
-    if map.id == focus then
-        local edgeX = math.min(x - map.left, map.right - x) / width
-        local edgeY = math.min(y - map.top, map.bottom - y) / height
-        local emphasis = ease(6 * math.min(edgeX, edgeY))
-        return 15, detail * (.65 + .35 * emphasis)
-    end
-    return 10, detail * .65
-end
-
-function Art.New(parent, maps)
+function Art.New(parent, world)
     local frame = CreateFrame("Frame", nil, parent)
     frame:SetAllPoints(parent)
     frame:SetFrameLevel(parent:GetFrameLevel())
@@ -121,7 +87,7 @@ function Art.New(parent, maps)
     backdrop:SetAllPoints(frame)
     backdrop:SetColorTexture(.21, .25, .22)
     return setmetatable({
-        frame=frame, parent=parent, maps=maps, background=backdrop, data={}, visible={}, pool={}, loading={},
+        frame=frame, parent=parent, world=world, background=backdrop, data={}, pool={}, loading={},
     }, Art)
 end
 
@@ -130,10 +96,6 @@ function Art:HasWorldArt(mapID)
     local atlas = C_Map.GetMapArtBackgroundAtlas and C_Map.GetMapArtBackgroundAtlas(mapID)
     if type(atlas) == "string" and atlas ~= "" then self.background:SetAtlas(atlas) end
     return not not self.data[mapID]
-end
-
-local function drawOrder(tile, order)
-    tile:SetDrawLayer(order < 16 and "BORDER" or "ARTWORK", order % 16 - 8)
 end
 
 local function applyAlpha(self, tile, alpha)
@@ -240,7 +202,7 @@ local function drawTiles(self, data, x, y, width, height, viewportWidth, viewpor
                 if tile then
                     local recovered = not tile:IsShown() and tile:IsObjectLoaded()
                     if recovered then tile:Show() end
-                    if new or layer ~= data.layer then drawOrder(tile, layer) end
+                    if new or layer ~= data.layer then tile:SetDrawLayer("ARTWORK", layer) end
                     if new or recovered or alpha ~= data.alpha then applyAlpha(self, tile, alpha) end
                     tile:SetPoint("TOPLEFT", self.frame, "TOPLEFT", x + (col - 1) * stepX, -y - (row - 1) * stepY)
                     if new or scaleX ~= data.scaleX or scaleY ~= data.scaleY then
@@ -277,56 +239,54 @@ local function detailLayers(id, data, localZoom, density)
     return lower, upper
 end
 
-function Art:Draw(left, top, viewWidth, viewHeight, zoom, focusedMapID)
+function Art:Draw(left, top, viewWidth, viewHeight, focus, useTerrain)
     local viewportWidth, viewportHeight = self.parent:GetSize()
     if viewportWidth <= 0 or viewportHeight <= 0 or viewWidth <= 0 or viewHeight <= 0 then return end
     local right, bottom = left + viewWidth, top + viewHeight
-    local centerX, centerY = left + viewWidth * .5, top + viewHeight * .5
     local scaleX, scaleY = viewportWidth / viewWidth, viewportHeight / viewHeight
-    local focus = zoom > 2.7 and focusedZone(self.maps, centerX, centerY, focusedMapID)
-    local pixelScale = self.parent:GetEffectiveScale()
+    -- Different map projections have different coastlines and landmarks. Only draw one map's art
+    -- at a time, and only select a detailed map when its art covers the viewport.
+    local map = focus
+    if useTerrain then
+        local continent = focus
+        while continent and continent.kind ~= "continent" do continent = continent.parent end
+        if continent and addon.atlasTerrain[continent.id] then map = continent end
+    end
+    while map do
+        if fits(map, left, top, right, bottom) or map == self.world then
+            if self.data[map.id] == nil then self.data[map.id] = loadMap(map.id) end
+            if self.data[map.id] then break end
+        end
+        map = map.parent
+    end
+    if not map then return end
+    if self.current and self.current ~= map then releaseMapTiles(self, self.data[self.current.id]) end
+    self.current = map
 
-    for _, map in ipairs(self.maps) do
-        self.visible[map.id] = nil
-        if intersects(map, left, top, right, bottom) then
-            local layer, alpha = layerStyle(map, zoom, centerX, centerY, viewWidth, viewHeight, focus)
-            if alpha > .01 then
-                if self.data[map.id] == nil then self.data[map.id] = loadMap(map.id) end
-                local data = self.data[map.id]
-                if data then
-                    self.visible[map.id] = true
-                    local x, y = (map.left - left) * scaleX, (map.top - top) * scaleY
-                    local width, height = (map.right - map.left) * scaleX, (map.bottom - map.top) * scaleY
-                    drawTiles(self, data, x, y, width, height, viewportWidth, viewportHeight, layer, alpha)
-                    local localZoom = math.max(width / viewportWidth, height / viewportHeight)
-                    local density = math.max(width / data.width, height / data.height) * pixelScale
-                    local lower, upper = detailLayers(map.id, data, localZoom, density)
-                    if lower then
-                        drawTiles(self, lower.tiles, x, y, width, height, viewportWidth, viewportHeight,
-                            layer + 1, alpha * lower.opacity)
-                    end
-                    if upper then
-                        drawTiles(self, upper.tiles, x, y, width, height, viewportWidth, viewportHeight,
-                            layer + 2, alpha * upper.opacity)
-                    end
-                    for _, detail in ipairs(data.details) do
-                        if detail.tiles and detail ~= lower and detail ~= upper then
-                            releaseTiles(self, detail.tiles)
-                        end
-                    end
-                    if not data.overlays then data.overlays = exploredTiles(map.id, data) end
-                    local sx, sy = width / data.width, height / data.height
-                    for _, overlay in ipairs(data.overlays) do
-                        drawTiles(self, overlay, x + overlay.x * sx, y + overlay.y * sy,
-                            overlay.width * sx, overlay.height * sy,
-                            viewportWidth, viewportHeight, layer + 2 + overlay.layerOffset, alpha)
-                    end
-                end
-            end
+    local data = self.data[map.id]
+    local x, y = (map.left - left) * scaleX, (map.top - top) * scaleY
+    local width, height = map.width * scaleX, map.height * scaleY
+    drawTiles(self, data, x, y, width, height, viewportWidth, viewportHeight, 0, 1)
+    local localZoom = math.max(width / viewportWidth, height / viewportHeight)
+    local density = math.max(width / data.width, height / data.height) * self.parent:GetEffectiveScale()
+    local lower, upper = detailLayers(map.id, data, localZoom, density)
+    if lower then
+        drawTiles(self, lower.tiles, x, y, width, height, viewportWidth, viewportHeight, 1, lower.opacity)
+    end
+    if upper then
+        drawTiles(self, upper.tiles, x, y, width, height, viewportWidth, viewportHeight, 2, upper.opacity)
+    end
+    for _, detail in ipairs(data.details) do
+        if detail.tiles and detail ~= lower and detail ~= upper then
+            releaseTiles(self, detail.tiles)
         end
     end
-    for id, data in pairs(self.data) do
-        if data and not self.visible[id] then releaseMapTiles(self, data) end
+    if not data.overlays then data.overlays = exploredTiles(map.id, data) end
+    local sx, sy = width / data.width, height / data.height
+    for _, overlay in ipairs(data.overlays) do
+        drawTiles(self, overlay, x + overlay.x * sx, y + overlay.y * sy,
+            overlay.width * sx, overlay.height * sy,
+            viewportWidth, viewportHeight, 2 + overlay.layerOffset, 1)
     end
 end
 
@@ -345,5 +305,5 @@ function Art:Clear()
     end
     self.frame:SetScript("OnUpdate", nil)
     wipe(self.data)
-    wipe(self.visible)
+    self.current = nil
 end
