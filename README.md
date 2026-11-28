@@ -23,10 +23,11 @@ Press **M** and everything you need is already on the map. Aeternum adds dungeon
 ## Features
 
 ### Dungeon floors and boss loot
-Click any entrance on the Azeroth, continent, or zone map to browse all 34 dungeons and wings across 71 floors. Not sure where to go next? **Dungeons by level** lists every dungeon from the lowest level range to the highest, colored for your character the way the game colors quests. Inside an instance, pressing **M** opens your current floor automatically and shows your position wherever the client reports coordinates.
+Click any entrance on the Azeroth, continent, or zone map to browse all 34 dungeons and wings across 71 floors. Not sure where to go next? **Dungeons by level** lists every dungeon from the lowest level range to the highest, colored for your character the way the game colors quests. Inside an instance, pressing **M** opens your current floor automatically and shows your position wherever the client reports coordinates. The floor also follows boss fights, which helps where the game gives no room name.
 
 - Click a boss skull (or open **Boss loot** in the floor menu for unplaced bosses) to see gear your class and trained proficiencies can use, plus recipes you have the profession, rank, and specialization to learn. Already-learned recipes drop off the list.
 - Hover items for standard WoW tooltips, **Shift-click** to link in chat, **Ctrl-click** to preview in the dressing room, and check which **Dungeon keys** are already in your bags. Defeated bosses dim as you clear the run.
+- Item tooltips anywhere in the game, from your bags and chat links to the auction house, name the bosses that drop the item. Only verified drops and encounter rolls count.
 - Verified boss drops appear directly in the main menu, while other recorded corpse drops, encounter rolls, and guide-listed drops stay separated in submenus so you can see what has live player evidence.
 
 ### Entrances and minimap directions

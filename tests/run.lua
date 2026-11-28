@@ -2052,5 +2052,53 @@ test("the addon compartment entry opens the dungeon list through the secure map 
     equal(state.menu.children[1].label, "Dungeons by level")
 end)
 
+test("item tooltips name the bosses that drop the item, from verified sources only", function()
+    local addon, env = load()
+    local tip = env.GameTooltip
+    tip:SetItemByID(5191)
+    equal(tip.lines[2], "|cffffd100Drops from|r Edwin VanCleef · The Deadmines", "Cruel Barb")
+    local unverified, shared
+    for _, dungeon in ipairs(addon.Data.dungeons) do
+        for _, boss in ipairs(dungeon.bosses) do
+            local start = boss.lootSections and boss.lootSections.guide
+            if start and not unverified and not addon.ItemSources(boss.loot[start]) then
+                unverified = boss.loot[start]
+            end
+            for _, id in ipairs(boss.loot) do
+                local list = addon.ItemSources(id)
+                if not shared and list and #list > 1 then shared = id end
+            end
+        end
+    end
+    check(unverified, "a guide-only item exists")
+    tip:SetItemByID(unverified)
+    equal(#tip.lines, 1, "no drop line for an item only a guide lists")
+    if shared then
+        tip:SetItemByID(shared)
+        check(tip.lines[3]:find("^|cffffd100      or|r "), "further bosses listed")
+    end
+    env.ItemRefTooltip:SetItemByID(5191)
+    equal(env.ItemRefTooltip.lines[2], "|cffffd100Drops from|r Edwin VanCleef · The Deadmines", "chat links")
+    env.ShoppingTooltip1:SetItemByID(5191)
+    equal(#env.ShoppingTooltip1.lines, 1, "comparison tooltips unchanged")
+end)
+
+test("a boss fight shows the player's floor when rooms and positions are unknown", function()
+    local addon, env = load({inInstance=true, instanceID=36})
+    local floors = addon.DungeonMap
+    env.WorldMapFrame:Show()
+    equal(floors.dungeon.id, "deadmines")
+    equal(floors.index, 1, "no room name or position: first floor")
+    Wow.fire("ENCOUNTER_START", 2747, "Edwin VanCleef", 1, 5)
+    equal(floors.index, 2, "the floor view follows VanCleef's fight to Ironclad Cove")
+    equal(floors.playerFloor, 2)
+    env.WorldMapFrame:Hide()
+    env.WorldMapFrame:Show()
+    equal(floors.index, 2, "reopening the map without a room name keeps the fight's floor")
+    floors.frame.dropdown:OpenMenu():Find("Deadmines"):Click()
+    Wow.fire("ENCOUNTER_START", 2747, "Edwin VanCleef", 1, 5)
+    equal(floors.index, 1, "a floor chosen by hand stays put")
+end)
+
 print(("%d passed, %d failed"):format(passed, failed))
 os.exit(failed == 0 and 0 or 1)

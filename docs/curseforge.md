@@ -2,7 +2,7 @@ Press **M** in **World of Warcraft: Forever** to browse dungeon floors, boss loo
 
 **Dungeons and loot**
 
-Click a dungeon entrance to open its floor map. Click a boss to see equipment your character can use and recipes they have the profession and skill to learn. Aeternum covers 34 dungeons and wings across 71 floors. Hover a boss pin to see when its position is estimated.
+Click a dungeon entrance to open its floor map. Click a boss to see equipment your character can use and recipes they have the profession and skill to learn. Aeternum covers 34 dungeons and wings across 71 floors. Hover a boss pin to see when its position is estimated. Item tooltips everywhere name the bosses that drop the item.
 
 **Dungeons by level**, in the map's tracking menu and the minimap's addon compartment, lists every dungeon from the lowest level range to the highest, colored for your character the way the game colors quests.
 
