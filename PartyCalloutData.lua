@@ -17,7 +17,7 @@ addon.partyCallouts = {
             {class = "PRIEST", level = 18, spell = 527, text = "Clear the room. Priest, dispel Terrify fear."},
         },
     },
-    [646] = {text = "Kill the Blackguards first. They keep attacking through Smite's Stomp."}, -- 6432
+    [646] = {text = "Kill the Blackguards first."}, -- 6432
     [4832] = { -- Sleep (8399) can take the healer out of the fight.
         text = "Interrupt Sleep and dispel it if it lands, especially on the healer.",
         options = {
@@ -51,11 +51,11 @@ addon.partyCallouts = {
     -- Gnomeregan and Scarlet Monastery
     [7800] = {text = "Use the switches at active bomb chutes and kill any Walking Bombs that get through."},
     [6487] = {text = "Run out of range when Arcanist Doan bubbles. Detonation follows."}, -- 9438, 9435
-    [3976] = {text = "Save cooldowns for Whitemane. Interrupt her heals and focus her after the resurrection."},
+    [3976] = {text = "After the resurrection, focus Whitemane and interrupt her heals."},
 
     -- City of Dalaran
     [246003] = { -- Entangle (1240688) and Fel Timbers (1240692).
-        text = "Leave the Fel Timbers clouds and free players rooted inside them.",
+        text = "Step out of Fel Timbers. Free anyone rooted inside.",
         options = {
             {class = "PRIEST", level = 18, spell = 527,
                 text = "Leave the Fel Timbers clouds. Priest, dispel Entangle."},
@@ -91,28 +91,28 @@ addon.partyCallouts = {
     -- The Drowned City. Blizzard hotfixes document the attackable Abyssal Bubble.
     -- https://news.blizzard.com/en-us/article/24315281/wow-forever-hotfixes-november-16-2026
     [258924] = { -- Harpoon (1282615, 1282746); Brinescale Priestess (260096) is a humanoid.
-        text = "Control or kill both Brinescale Priestesses first. Move out of the frontal after Harpoon.",
+        text = "Control or kill both Brinescale Priestesses first. Interrupt their heals.",
         options = {
             {class = "MAGE", level = 8, spell = 118,
-                text = "Mage, sheep one Brinescale Priestess. Kill the other and dodge the frontal after Harpoon."},
+                text = "Mage, sheep one Brinescale Priestess. Interrupt and kill the other."},
         },
     },
     [260042] = { -- Embrine (1282842) and Waterbolt Volley (1282860).
-        text = "Break Abyssal Bubbles right away to free allies. Interrupt Waterbolt Volley.",
+        text = "Break Abyssal Bubbles first. Interrupt Waterbolt Volley.",
         options = {
             {class = "ROGUE", level = 12, spell = 1766,
-                text = "Break Abyssal Bubbles right away. Rogue, Kick Waterbolt Volley."},
+                text = "Break Abyssal Bubbles first. Rogue, Kick Waterbolt Volley."},
             {class = "MAGE", level = 24, spell = 2139,
-                text = "Break Abyssal Bubbles right away. Mage, Counterspell Waterbolt Volley."},
+                text = "Break Abyssal Bubbles first. Mage, Counterspell Waterbolt Volley."},
             {class = "SHAMAN", level = 4, spell = 8042,
-                text = "Break Abyssal Bubbles right away. Shaman, interrupt Waterbolt Volley with Earth Shock."},
+                text = "Break Abyssal Bubbles first. Shaman, Earth Shock Waterbolt Volley."},
         },
     },
     [260202] = {
         -- The client lists this fight as Deathless Guardians (3478).
         -- https://forever.wowcoach.gg/dungeons/the-drowned-city/
         encounter = 3478,
-        text = "Kill Deathless Guardians first, then the other adds. Add kills make Marrow take more damage.",
+        text = "Kill Deathless Guardians first, then the other adds.",
     },
     [260243] = { -- The serpent phase uses Poison Bolt Volley (1283313) and Fear (1313471).
         aliases = {260274},
@@ -165,7 +165,7 @@ addon.partyCallouts = {
     [255391] = {text = "Clear the neighboring rooms before pulling Wrex. If he calls more enemies, switch to them."},
     [255997] = {text = "Control or kill both Enchantresses first and interrupt Frostbolt Volley."}, -- 8398
     [257016] = { -- Grievous Garrote and the two Chaplains are corroborated in the Alcaz field guide.
-        text = "Interrupt the Chaplains' heals. Heal the Grievous Garrote target above 90% to clear it.",
+        text = "Heal the Grievous Garrote target above 90%. Interrupt the Chaplains' heals.",
     },
     [247195] = { -- Intimidating Roar (1242884) is Fear, not a dispellable Magic aura.
         text = "Clear nearby patrols before Intimidating Roar and kill Flesh Maggots as they gather.",
@@ -201,7 +201,7 @@ addon.partyCallouts = {
 
     -- Scholomance, Shadowfang Keep, Lower Blackrock Spire, and Stratholme
     [10504] = { -- Veil of Shadow (17820) cuts healing taken by 75%.
-        text = "Clear Veil of Shadow from the tank quickly if you can. It cuts incoming healing.",
+        text = "Clear Veil of Shadow from the tank first if you can.",
         options = {
             {class = "MAGE", level = 18, spell = 475,
                 text = "Mage, decurse Veil of Shadow quickly, especially off the tank."},
@@ -222,7 +222,7 @@ addon.partyCallouts = {
         },
     },
     [10436] = { -- https://maxdps.com/forever/bosses/baroness-anastari
-        text = "Bring a Possessed ally to half health, then stop hitting them as soon as they are free.",
+        text = "Bring a Possessed ally to half health. Stop when they're free.",
     },
     [5709] = { -- The live Forever review recounts the surviving dragons entering this fight.
         text = "Clear the remaining dragonkin before pulling. Switch to any dragons that join the fight.",

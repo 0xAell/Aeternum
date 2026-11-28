@@ -582,6 +582,35 @@ local function roleLine(tooltip, role, entry, classInfo)
     tooltip:AddLine(label .. Tactics:FormatText(entry[role[2]]), 1, 1, 1, true)
 end
 
+function Tactics:AddBrief(tooltip, boss, addSpell, iconSize)
+    local priority = addon.partyCallouts[boss.id]
+    if priority then
+        local class = self:PlayerClass()
+        local level = UnitLevel("player")
+        for _, option in ipairs(priority.options or {}) do
+            if option.class == class and option.spell and addon.IsReadableNumber(level) and level >= option.level then
+                local rank = self:KnownSpell(option.spell)
+                if rank then
+                    addSpell(self:SpellIcon(option.spell, iconSize) .. " " .. option.text,
+                        rank, self:SpellName(option.spell))
+                    return
+                end
+            end
+        end
+        tooltip:AddLine(priority.text, 1, .9, .65, true)
+        return
+    end
+    local entry = self:ForBoss(boss.id)
+    if not entry then return end
+    local tips = self:ClassTips(boss.id)
+    if tips[1] then
+        local tip = tips[1]
+        addSpell(self:SpellIcon(tip.baseID, iconSize) .. " " .. tip.text, tip.spellID, tip.name)
+    else
+        roleLine(tooltip, playerRole() or ROLES.DAMAGER, entry)
+    end
+end
+
 function Tactics:AddGuide(tooltip, boss, full, addSpell, iconSize)
     local entry = boss and self:ForBoss(boss.id)
     if not entry then return end

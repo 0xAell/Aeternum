@@ -5,10 +5,11 @@ addon.PartyCallouts = Callouts
 local PREFIX = "AeternumPull1"
 local CHAT_PREFIX = "[Aeternum] "
 local DISCOVERY_DELAY, CHAT_COOLDOWN = 2, 12
-local encounters, creatures = {}, {}
-local peers, announced, unsynced = {}, {}, {}
+local encounters, creatures, optionSpells = {}, {}, {}
+local peers, capabilities, announced, unsynced = {}, {}, {}, {}
 local roster, player, channel, instance, leftAlive, pending, lastCallout
 local discoveryQueued, helloNeeded, registered, discoverySent, settledAt, realmSuffix
+local lastCapabilities, retryCapabilities
 local frame = CreateFrame("Frame")
 
 -- Encounter IDs take precedence. Creature IDs provide a fallback for Forever
@@ -23,6 +24,15 @@ for _, dungeon in ipairs(addon.Data.dungeons) do
             byNPC[boss.id] = entry
             for _, id in ipairs(tip.aliases or {}) do byNPC[id] = entry end
             if tip.encounter then byEncounter[tip.encounter] = entry end
+            for _, option in ipairs(tip.options or {}) do
+                if option.spell then
+                    local mapID = layout.instance
+                    optionSpells[mapID] = optionSpells[mapID] or {}
+                    local byClass = optionSpells[mapID]
+                    byClass[option.class] = byClass[option.class] or {}
+                    byClass[option.class][option.spell] = true
+                end
+            end
         end
     end
     if next(byNPC) then
@@ -92,7 +102,9 @@ local function refreshRoster()
     local nextChannel = creatures[instance] and partyChannel()
     if channel ~= nextChannel then
         wipe(peers)
+        wipe(capabilities)
         discoverySent = nil
+        lastCapabilities, retryCapabilities = nil, nil
     end
     channel = nextChannel
     roster, player = {}, nil
@@ -111,7 +123,10 @@ local function refreshRoster()
         for _, member in ipairs(roster) do
             if member.key == key then present = true; break end
         end
-        if not present then peers[key] = nil end
+        if not present then
+            peers[key] = nil
+            capabilities[key] = nil
+        end
     end
 end
 
@@ -135,13 +150,33 @@ local function hasParty()
 end
 
 local function chatRestricted()
-    return C_ChatInfo and C_ChatInfo.InChatMessagingLockdown and C_ChatInfo.InChatMessagingLockdown()
+    local restricted = C_ChatInfo and C_ChatInfo.InChatMessagingLockdown and C_ChatInfo.InChatMessagingLockdown()
+    return not readable(restricted) or restricted
 end
 
 local function sendAddon(message)
     if not hasParty() or chatRestricted() then return end
     local ok, result = pcall(C_ChatInfo.SendAddonMessage, PREFIX, message, channel)
     return ok and readable(result) and (result == 0 or result == true)
+end
+
+local function shareCapabilities(force)
+    if not hasParty() or not addon.settings.partyCallouts then return end
+    if InCombatLockdown() or chatRestricted() then
+        retryCapabilities = true
+        return
+    end
+    local byClass = optionSpells[instance]
+    local ids = {}
+    for id in pairs(byClass and byClass[player.class] or {}) do
+        -- Share the catalogue ID even when the spellbook confirms a higher rank.
+        if addon.Tactics:KnownSpell(id) then ids[#ids + 1] = id end
+    end
+    table.sort(ids)
+    local message = "C:" .. table.concat(ids, ",")
+    if not force and message == lastCapabilities then return end
+    lastCapabilities = message
+    retryCapabilities = not sendAddon(message)
 end
 
 local function discovery(requestReply)
@@ -166,6 +201,7 @@ local function discovery(requestReply)
         if sendAddon(message) then
             if asking then discoverySent = true end
             helloNeeded = nil
+            shareCapabilities(true)
         end
     end)
 end
@@ -184,11 +220,26 @@ local function receive(prefix, message, distribution, sender)
     local kind, payload, history = message:match("^([HS]):([01])([:%d,]*)$")
     if kind then
         peers[member.key] = payload == "1"
+        if not peers[member.key] then capabilities[member.key] = nil end
         for previous in history:gmatch("%d+") do
             local entry = creatures[instance][tonumber(previous)]
             if entry then remember(entry.id, false) end
         end
         if kind == "H" then discovery(false) end
+        return
+    end
+    local spellList = message:match("^C:([%d,]*)$")
+    if spellList and peers[member.key] and member.class then
+        if spellList:sub(1, 1) == "," or spellList:sub(-1) == "," or spellList:find(",,", 1, true) then return end
+        local byClass = optionSpells[instance]
+        local allowed = byClass and byClass[member.class]
+        local known = {}
+        for text in spellList:gmatch("%d+") do
+            local id = tonumber(text)
+            if not allowed or not allowed[id] then return end
+            known[id] = true
+        end
+        capabilities[member.key] = {class=member.class, spells=known}
         return
     end
     local id = tonumber(message:match("^D:(%d+)$"))
@@ -201,15 +252,25 @@ local function higherPriority(member, other)
 end
 
 local function messageFor(entry)
+    local fallback
     for _, option in ipairs(entry.options or {}) do
         for _, member in ipairs(roster) do
-            if member.class == option.class and member.level and member.level >= option.level
-                and (member ~= player or not option.spell or addon.Tactics:KnownSpell(option.spell)) then
-                return option.text
+            if member.class == option.class and member.level and member.level >= option.level then
+                local known
+                local report = capabilities[member.key]
+                if not option.spell then
+                    known = true
+                elseif member == player then
+                    known = addon.Tactics:KnownSpell(option.spell) ~= nil
+                elseif report and report.class == member.class then
+                    known = report.spells[option.spell] == true
+                end
+                if known then return option.text end
+                if known == nil and not fallback then fallback = option.text end
             end
         end
     end
-    return entry.text
+    return fallback or entry.text
 end
 
 local function groupOutlevels(entry)
@@ -249,7 +310,8 @@ local function bossUnit(unit)
     if not ok or not readable(guid) or type(guid) ~= "string" then return end
     local id = tonumber(guid:match("^Creature%-%d+%-%d+%-%d+%-%d+%-(%d+)%-"))
     local lookup = creatures[instance]
-    return id and lookup and lookup[id]
+    local entry = id and lookup and lookup[id]
+    if entry then return entry, guid end
 end
 
 local function combatBoss(unit)
@@ -273,18 +335,19 @@ end
 local function checkNearbyTarget()
     if pending or InCombatLockdown() or not hasParty() or not UnitIsInInteractRange
         or isTrue(UnitAffectingCombat("target")) or not isTrue(UnitIsInInteractRange("target")) then return end
-    local entry = bossUnit("target")
+    local entry, guid = bossUnit("target")
     if not entry or not readyToCall(entry) then return end
-    -- Demand a stable, live boss target in actual interact range. Several map
-    -- pins are approximate and cannot safely stand in for boss-room boundaries.
+    -- A ready check signals pull preparation. Use an actual nearby boss target
+    -- because several map pins only give approximate locations.
     local target = {entry=entry}
     pending = target
     C_Timer.After(.35, function()
         if pending ~= target then return end
         pending = nil
         if not InCombatLockdown() and not isTrue(UnitAffectingCombat("target"))
-            and isTrue(UnitIsInInteractRange("target")) and bossUnit("target") == entry then
-            announce(entry)
+            and isTrue(UnitIsInInteractRange("target")) then
+            local current, currentGUID = bossUnit("target")
+            if current == entry and currentGUID == guid then announce(entry) end
         end
     end)
 end
@@ -296,8 +359,10 @@ local function updateVisit()
     elseif current ~= instance or leftAlive then
         wipe(announced)
         wipe(peers)
+        wipe(capabilities)
         wipe(unsynced)
         discoverySent = nil
+        lastCapabilities, retryCapabilities = nil, nil
         instance, leftAlive, lastCallout = current, nil, nil
     end
     pending = nil
@@ -358,6 +423,8 @@ frame:SetScript("OnEvent", function(_, event, arg, second, third, fourth)
         discovery(true)
     elseif event == "PLAYER_ROLES_ASSIGNED" then
         if not chatRestricted() then refreshRoster() end
+    elseif event == "SPELLS_CHANGED" then
+        if not discoveryQueued and discoverySent then shareCapabilities(false) end
     elseif event == "CHAT_MSG_ADDON" then
         receive(arg, second, third, fourth)
     elseif event:find("^CHAT_MSG_") then
@@ -368,19 +435,22 @@ frame:SetScript("OnEvent", function(_, event, arg, second, third, fourth)
     elseif event == "PLAYER_REGEN_ENABLED" then
         pending = nil
         refreshRoster()
-        if helloNeeded or not discoverySent then discovery(true) end
+        if helloNeeded or not discoverySent then
+            discovery(true)
+        elseif retryCapabilities then
+            shareCapabilities(true)
+        end
         for id in pairs(unsynced) do
             if not sendAddon("D:" .. id) then break end
             unsynced[id] = nil
         end
-        checkNearbyTarget()
     elseif event == "ENCOUNTER_END" then
         pending = nil
     elseif event == "PLAYER_TARGET_CHANGED" then
         pending = nil
-        if InCombatLockdown() then checkCombat() else checkNearbyTarget() end
-    elseif event == "PLAYER_STOPPED_MOVING" then
-        checkNearbyTarget()
+        if InCombatLockdown() then checkCombat() end
+    elseif event == "READY_CHECK" then
+        if senderInRoster(arg) then checkNearbyTarget() end
     elseif event == "UNIT_FLAGS" or event == "UNIT_TARGET" then
         if readable(arg) and type(arg) == "string" and
             (arg == "player" or arg == "target" or arg:match("^party[1-4]$") or arg:match("^boss[1-5]$")) then
@@ -391,11 +461,11 @@ frame:SetScript("OnEvent", function(_, event, arg, second, third, fourth)
     end
 end)
 for _, event in ipairs({
-    "PLAYER_LOGIN", "PLAYER_ENTERING_WORLD", "GROUP_ROSTER_UPDATE", "PLAYER_ROLES_ASSIGNED",
+    "PLAYER_LOGIN", "PLAYER_ENTERING_WORLD", "GROUP_ROSTER_UPDATE", "PLAYER_ROLES_ASSIGNED", "SPELLS_CHANGED",
     "CHAT_MSG_ADDON", "CHAT_MSG_PARTY", "CHAT_MSG_PARTY_LEADER",
     "CHAT_MSG_INSTANCE_CHAT", "CHAT_MSG_INSTANCE_CHAT_LEADER",
     "ENCOUNTER_START", "ENCOUNTER_END", "INSTANCE_ENCOUNTER_ENGAGE_UNIT", "PLAYER_REGEN_DISABLED",
-    "PLAYER_REGEN_ENABLED", "PLAYER_TARGET_CHANGED", "PLAYER_STOPPED_MOVING", "UNIT_FLAGS", "UNIT_TARGET",
+    "PLAYER_REGEN_ENABLED", "PLAYER_TARGET_CHANGED", "READY_CHECK", "UNIT_FLAGS", "UNIT_TARGET",
 }) do
     pcall(frame.RegisterEvent, frame, event)
 end

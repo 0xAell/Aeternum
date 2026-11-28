@@ -2286,6 +2286,7 @@ test("grouped boss pins keep encounter labels even when only a later member carr
     local frame = addon.DungeonMap.frame
     local sneed = findEntry(frame.pins, function(p) return p:IsShown() and #p.members > 1 end)
     check(sneed and sneed.label == "Sneed's Shredder", "Deadmines Sneed group keeps encounter label")
+    state.shift = true
     sneed:Fire("OnEnter")
     equal(addon.BossHover.panel.title:GetText(), "Sneed's Shredder", "hover title uses encounter label")
     check(findEntry(hoverTexts(addon), function(text) return text == "Sneed" end), "second phase is visible")
@@ -2301,12 +2302,70 @@ test("grouped boss pins keep encounter labels even when only a later member carr
     equal(rend.label, "Warchief Rend Blackhand", "UBRS Rend group keeps encounter label")
 end)
 
+test("a compact boss hover puts a known counter first and expands in place with Shift", function()
+    local addon, env, state = load({class="MAGE", level=40, knownSpells={[2139]=true}})
+    env.WorldMapFrame:Show()
+    addon.DungeonMap:Open(dungeonNamed(addon, "drowned-city"))
+    local pin = assert(findEntry(addon.DungeonMap.frame.pins, function(p)
+        return p:IsShown() and p.boss and p.boss.id == 260042
+    end))
+    pin.left, pin.right, pin.top = 300, 320, 600
+    pin:Fire("OnEnter")
+    local panel = addon.BossHover.panel
+    local left, width, briefHeight = panel.left, panel:GetWidth(), panel:GetHeight()
+    equal(panel.more:GetText(), "Hold Shift for details")
+    local action = panel.rows[1]
+    equal(action.spell, 2139, "known counter is a hoverable spell")
+    check(action.text:GetText():find("Break Abyssal Bubbles first", 1, true))
+    check(not findEntry(hoverTexts(addon), function(line) return line == "Recorded Forever casts" end))
+    local function lootCount()
+        local count = 0
+        for _, row in ipairs(panel.rows) do
+            if row:IsShown() and row.item then count = count + 1 end
+        end
+        return count
+    end
+    check(lootCount() <= 3, "brief loot preview is bounded")
+    state.cursorX, state.cursorY = panel.left + 10, panel.top - 10
+    state.shift = true
+    panel:Fire("OnUpdate", .016)
+    check(panel.expanded and panel:IsShown())
+    equal(panel.left, left, "details stay on the same side as the brief")
+    check(panel:GetWidth() > width and panel:GetHeight() > briefHeight, "details use the larger layout")
+    check(findEntry(hoverTexts(addon), function(line) return line == "Recorded Forever casts" end))
+    local volley = assert(findEntry(panel.rows, function(row) return row:IsShown() and row.spell == 1282860 end))
+    volley:Fire("OnEnter")
+    check(env.GameTooltip:IsOwned(volley), "recorded casts still have tooltips")
+    state.shift = false
+    panel:Fire("OnUpdate", .016)
+    equal(panel:GetWidth(), width)
+    equal(panel.scroll:GetVerticalScroll(), 0, "collapsing resets the scroll position")
+    check(not env.GameTooltip:IsShown(), "collapsing clears the expanded tooltip")
+    equal(panel.rows[1].spell, 2139)
+end)
+
+test("the brief selects the priority phase on a shared skull and caps the total loot preview", function()
+    local addon, _, state = openDeadmines({level=30})
+    local shared = assert(findEntry(addon.DungeonMap.frame.pins, function(p) return p:IsShown() and #p.members > 1 end))
+    shared.members[1], shared.members[2] = shared.members[2], shared.members[1]
+    shared:Fire("OnEnter")
+    local lines = hoverTexts(addon)
+    equal(lines[1], "Phase 1 of 2 · the Shredder")
+    check(lines[2]:find("Terrify", 1, true), "the important second member supplies the action")
+    local items = 0
+    for _, row in ipairs(addon.BossHover.panel.rows) do
+        if row:IsShown() and row.item then items = items + 1 end
+    end
+    check(items <= 3 and not state.menu, "a shared skull does not open another menu or a long preview")
+end)
+
 test("boss guide stays open for scrolling and loot, then closes on leave or floor changes", function()
     local addon, env, state = openDeadmines()
     local map = addon.DungeonMap
     env.UIParent:SetSize(740, 360)
     local shared = assert(findEntry(map.frame.pins, function(p) return p:IsShown() and #p.members > 1 end))
     shared.left, shared.right, shared.top = 356, 376, 30
+    state.shift = true
     shared:Fire("OnEnter")
     local panel = addon.BossHover.panel
     check(panel:IsVisible() and panel.more:IsShown() and not state.menu)
@@ -2348,6 +2407,7 @@ test("boss guide gives friendly abilities and individual enemy spells their own 
         return pin:IsShown() and #pin.members > 1
     end))
     shared.left, shared.right, shared.top = 356, 376, 30
+    state.shift = true
     shared:Fire("OnEnter")
     local panel = addon.BossHover.panel
     local function spellRow(id)
@@ -2650,6 +2710,7 @@ test("shaman, priest, paladin, mage, hunter, and racial mechanics show icons and
         return p:IsShown() and p.boss and p.boss.id == 255702
     end)
     check(blazeroarPin, "Blazeroar skull pin shown")
+    state.shift = true
     blazeroarPin:Fire("OnEnter")
     local lines = hoverTexts(addon)
     check(findEntry(lines, function(l) return l:find("|cff3399ffMagic|r", 1, true) end), "hover dispels")
@@ -3528,17 +3589,20 @@ test("one assigned tank sends for five clients when addon messages lock during t
     }
     local clients = {}
     for index, member in ipairs(members) do
-        local others, state = {}, {}
+        local others, state = {}, {knownSpells=member == mage and {[118]=true} or {}}
         for _, other in ipairs(members) do
             if other ~= member then others[#others + 1] = other end
         end
         local _, env = partyClient(state, member, unpack(others))
-        clients[index] = {state=state, env=env, hello=state.network[1]}
+        clients[index] = {state=state, env=env, hello=state.network[1], spells=state.network[2]}
     end
     for index, client in ipairs(clients) do
         Wow.state, Wow.env = client.state, client.env
         for _, peer in ipairs(clients) do
-            if peer ~= client then Wow.fire("CHAT_MSG_ADDON", unpack(peer.hello)) end
+            if peer ~= client then
+                Wow.fire("CHAT_MSG_ADDON", unpack(peer.hello))
+                Wow.fire("CHAT_MSG_ADDON", unpack(peer.spells))
+            end
         end
         Wow.flushTimers()
         client.state.addonLocked = true
@@ -3575,24 +3639,35 @@ test("a replacement sender learns which callouts the group already heard", funct
     equal(#state.partyChat, 1, "old callout history does not rate-limit a different boss")
 end)
 
-test("nearby selected bosses can prompt before combat and uncertain targets stay quiet", function()
+test("pre-pull tips require a ready check and a stable nearby boss target", function()
     local state = {}
     partyClient(state, tank, mage)
     state.units.target = {id=270884, close=true}
-    Wow.fire("PLAYER_TARGET_CHANGED")
+    Wow.fire("READY_CHECK", tank.name, 30)
     Wow.flushTimers()
     equal(#state.partyChat, 0, "staging copy stays quiet")
     state.units.target = {id=260042, close=false}
-    Wow.fire("PLAYER_TARGET_CHANGED")
+    Wow.fire("READY_CHECK", tank.name, 30)
     Wow.flushTimers()
     equal(#state.partyChat, 0, "distant target stays quiet")
     state.units.target.close = true
+    Wow.fire("PLAYER_TARGET_CHANGED")
+    Wow.fire("PLAYER_REGEN_ENABLED")
+    Wow.flushTimers()
+    equal(#state.partyChat, 0, "passive targeting and leaving combat stay quiet")
+    Wow.fire("READY_CHECK", "Other-Player", 30)
+    Wow.flushTimers()
+    equal(#state.partyChat, 0, "a ready check outside the dungeon party stays quiet")
     state.units.target.combat = true
-    Wow.fire("PLAYER_STOPPED_MOVING")
+    Wow.fire("READY_CHECK", tank.name, 30)
     Wow.flushTimers()
     equal(#state.partyChat, 0, "an already engaged target cannot trigger a pre-pull note")
     state.units.target.combat = false
-    Wow.fire("PLAYER_STOPPED_MOVING")
+    Wow.fire("READY_CHECK", tank.name, 30)
+    state.units.target.guid = "Creature-0-33-2970-99-260042-000000001B"
+    Wow.flushTimers()
+    equal(#state.partyChat, 0, "switching to a different copy of the same NPC cancels the tip")
+    Wow.fire("READY_CHECK", tank.name, 30)
     Wow.flushTimers()
     equal(#state.partyChat, 1, "nearby target can prompt before the pull")
     Wow.fire("ENCOUNTER_START", 3476)
@@ -3646,7 +3721,7 @@ test("callout opt-out survives a map reset and cancels a scheduled pre-pull tip"
     local state = {}
     local addon, env = partyClient(state, tank, mage)
     state.units.target = {id=260042, close=true}
-    Wow.fire("PLAYER_TARGET_CHANGED")
+    Wow.fire("READY_CHECK", tank.name, 30)
     slash(env, "callouts off")
     Wow.flushTimers()
     Wow.fire("ENCOUNTER_START", 3476)
@@ -3666,6 +3741,41 @@ test("a class variant requires the right level and leaves untrained sender abili
     Wow.fire("ENCOUNTER_START", 3476)
     check(state.partyChat[1][1]:find("Interrupt Waterbolt Volley.", 1, true))
     check(not state.partyChat[1][1]:find("Counterspell", 1, true), "the sender has not trained Counterspell")
+end)
+
+test("confirmed party counters have priority over class and level guesses", function()
+    local state = {}
+    partyClient(state, tank, {name="Ari-Shadow", class="ROGUE", level=40}, mage)
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "H:1", "PARTY", mage.name)
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "C:2139", "PARTY", mage.name)
+    Wow.fire("ENCOUNTER_START", 3476)
+    check(state.partyChat[1][1]:find("Mage, Counterspell", 1, true))
+end)
+
+test("a known missing party spell uses the generic tip and unrelated packets cannot clear it", function()
+    local state = {}
+    partyClient(state, tank, mage)
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "H:1", "PARTY", mage.name)
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "C:", "PARTY", mage.name)
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "C:2139", "GUILD", mage.name)
+    Wow.fire("CHAT_MSG_ADDON", state.prefix, "C:8042", "PARTY", mage.name)
+    Wow.fire("ENCOUNTER_START", 3476)
+    check(state.partyChat[1][1]:find("Interrupt Waterbolt Volley.", 1, true))
+end)
+
+test("spell capability packets only send relevant learned spells and update when training changes", function()
+    local state = {knownSpells={[118]=true, [475]=true}}
+    local _, env = partyClient(state, mage, tank)
+    equal(state.network[2][2], "C:118", "only current dungeon options are shared")
+    state.knownSpells[2139] = true
+    Wow.fire("SPELLS_CHANGED")
+    equal(state.network[3][2], "C:118,2139")
+    Wow.fire("SPELLS_CHANGED")
+    equal(#state.network, 3, "unchanged spell lists stay quiet")
+    slash(env, "callouts off")
+    Wow.flushTimers()
+    equal(state.network[4][2], "H:0")
+    equal(#state.network, 4, "opt-out omits spell capabilities")
 end)
 
 test("an audited encounter ID can identify a boss without a fixed floor encounter pin", function()

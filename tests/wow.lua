@@ -516,7 +516,7 @@ Wow.knownEvents = {
     QUEST_PROGRESS = true, QUEST_COMPLETE = true, QUEST_FINISHED = true,
     GROUP_ROSTER_UPDATE = true, CHAT_MSG_ADDON = true, CHAT_MSG_PARTY = true, CHAT_MSG_PARTY_LEADER = true,
     CHAT_MSG_INSTANCE_CHAT = true, CHAT_MSG_INSTANCE_CHAT_LEADER = true, INSTANCE_ENCOUNTER_ENGAGE_UNIT = true,
-    PLAYER_TARGET_CHANGED = true, PLAYER_STOPPED_MOVING = true, UNIT_FLAGS = true, UNIT_TARGET = true,
+    PLAYER_TARGET_CHANGED = true, READY_CHECK = true, UNIT_FLAGS = true, UNIT_TARGET = true,
 }
 
 local templates = { UIPanelButtonTemplate = true, PanelTopTabButtonTemplate = true, MinimalScrollBar = true,
@@ -750,6 +750,7 @@ function Wow.new(state)
         return colors.trivial
     end
     env.IsModifiedClick = function() return state.modified or false end
+    env.IsShiftKeyDown = function() return state.shift or false end
     env.HandleModifiedItemClick = function(link)
         state.modifiedClick = link
         return true
