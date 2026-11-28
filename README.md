@@ -25,6 +25,10 @@ Press **M** and everything you need is already on the map. Aeternum adds dungeon
 ### Dungeon floors, boss tactics and loot
 Click any entrance on the Azeroth, continent, or zone map to browse all 34 dungeons and wings across 71 floors. Not sure where to go next? **Dungeons by level** lists every dungeon from the lowest level range to the highest, colored for your character the way the game colors quests. Inside an instance, pressing **M** opens your current floor automatically and shows your position wherever the client reports coordinates. The floor also follows boss fights, which helps where the game gives no room name.
 
+[![The Deadmines map showing tactics and usable loot for Sneed's Shredder and Sneed, including the Shaman's Tremor Totem tip](docs/screenshots/boss-encounter.webp)](docs/screenshots/boss-encounter.webp)
+
+*Hover one skull to see both phases of Sneed's encounter, including role tactics, class advice, and usable loot.*
+
 - Hover a skull to open the encounter guide. It shows class counters like Tremor Totem for Sneed's Shredder, quick tactics for tanks, healers, and DPS, and color-coded effects. When the records identify them, the guide also shows the boss's creature type, rank, and adds. Recorded Forever casts and reference spells have separate labels. [Boss mechanics and sources](docs/boss-audit/mechanics.md)
 - Tactics and usable loot appear side by side, with every encounter listed when bosses share a skull. Move into the guide to scroll or hover an item for its stats. Loot uses your class, proficiencies, and professions, and recipes you already know drop off the list.
 - Click a skull for the boss menu, with **Shift-click** to link an item in chat and **Ctrl-click** to preview it in the dressing room. Find bosses whose positions are unknown under **Boss loot** in the floor menu or by searching for their name.
@@ -40,17 +44,29 @@ All 41 outdoor entrances appear on world, continent, and zone maps, including mu
 - Ten trickier entrances (The Deadmines, Ragefire Chasm, all four Scarlet Monastery wings, Alcaz Prison, Blackmaw Hold, Krol'dok Stronghold, and Shaper's Terrace) include mapped approach waypoints.
 - Directions survive `/reload`, pause automatically on another continent or inside an unrelated instance, and clear once you arrive.
 
+[![Westfall map with the Moonbrook dungeon entrance menu open and Show path to The Deadmines visible](docs/screenshots/dungeon-entrance.webp)](docs/screenshots/dungeon-entrance.webp)
+
+*Right-click the Moonbrook entrance to start minimap directions to The Deadmines.*
+
 ### Offline trainer catalogues
 Trainers filter automatically to your class, faction, learned professions, and eligible weapon skills. Toggle **Other classes and professions** in Blizzard's map tracking menu whenever you want to see everyone.
 
 - Click a trainer to check spells, recipes, ranks, requirements, and prices before making the trip, sorted into what you can train now, **Later training**, and **Learned**.
 - 522 of 561 trainers have offline catalogues ready before your first visit, and talking to any trainer updates their lessons and prices for your character.
 
+[![Alma Jainrose's Herbalism catalogue on the Redridge Mountains map showing training ranks and prices](docs/screenshots/trainer-catalogue.webp)](docs/screenshots/trainer-catalogue.webp)
+
+*Check Alma Jainrose's Herbalism ranks and prices before you visit.*
+
 ### Quests and live objectives
 Exclamation marks show quests you can pick up, and question marks turn gold when you're ready to hand in, factoring in your level, race, class, profession rank, quest chains, and live quest log.
 
 - Open **Dungeon quests** from any floor menu to locate the quest giver before accepting or the turn-in afterward.
 - For your focused (or first watched) quest, Aeternum marks recorded locations for unfinished objectives whenever Blizzard doesn't already place a marker.
+
+[![A highlighted Lieutenant Fangore objective on the Redridge Mountains map with the required item in its tooltip](docs/screenshots/quest-objective.webp)](docs/screenshots/quest-objective.webp)
+
+*Hover an unfinished objective to see what you still need and where to look.*
 
 ## Install
 
