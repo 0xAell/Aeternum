@@ -123,11 +123,11 @@ For the full walkthrough of map filters, floor tracking, and tooltip indicators,
 
 ## AI Disclosure
 
-AI tools helped brainstorm features and explore design ideas and visual references. They also helped generate and revise Lua code, draft placeholder copy and documentation, and edit promotional materials. OpenAI ImageGen generated the arch logo. The gameplay screenshots and footage were captured in WoW Forever.
+AI tools helped brainstorm features and explore design ideas and visual references. They also helped generate and revise Lua code, draft placeholder copy, encounter notes, and documentation, and edit promotional materials. OpenAI ImageGen generated the arch logo used as the project icon. The gameplay screenshots and footage were captured in WoW Forever.
 
 ## What Aeternum Adds to WoW Forever
 
-Aeternum brings a WoW Forever dungeon guide into Blizzard’s world map. Hovering a boss skull opens a guide that combines role tactics, class and racial counters, and loot filtered for your character. Hover a spell in the guide to read its tooltip. The same map offers minimap directions to entrances, dungeon quests, and trainer catalogues with lessons, recipes, and prices. The addon uses Blizzard’s map controls and tooltips, and the game data ships with the addon for offline use.
+Aeternum brings a WoW Forever dungeon guide into Blizzard’s world map. Hovering a boss skull opens a guide that combines role tactics, class and racial counters, and loot filtered for your character. For example, the Witherfang guide explains how a Dwarf Shaman can use Stoneform to clear Leech Poison. Hover either spell to read its tooltip. The same map offers minimap directions to entrances, dungeon quests, and trainer catalogues with lessons, recipes, and prices. The addon uses Blizzard’s map controls and tooltips, and the game data ships with the addon for offline use.
 
 ## Feedback & Contributing
 
