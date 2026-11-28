@@ -149,7 +149,7 @@ The first three counts are loot entries shown in game. The fourth counts old lin
 | "Pyromancer" Braxton (260468) | add | 0 | 0 | 2 | 0 | The Drowned City, guide only |
 | Deathless Marrow (260202) | add | 3 | 0 | 0 | 0 | unplaced |
 | Primeval Elemental (263886) | add | 3 | 0 | 1 | 0 | Ataal'Byzal, 17.1 yd across 1 pull positions |
-| Min'loth the Serpent (260243) | add | 2 | 0 | 1 | 0 | The Drowned City, 16.5 yd across 3 pull positions |
+| Min'loth the Serpent (260243) | add | 3 | 0 | 1 | 0 | The Drowned City, 16.5 yd across 3 pull positions |
 | Zin'aka (263742) | candidate | 0 | 0 | 0 | 0 | candidate |
 | Deathless Guardians (260213) | add | 0 | 0 | 0 | 0 | The Drowned City, 1.2 yd across 1 pull positions |
 
@@ -171,7 +171,7 @@ The first three counts are loot entries shown in game. The fourth counts old lin
 | Electrocutioner 6000 (6235) | keep | 4 | 0 | 1 | 1 | The Dormitory, 7.3 yd across 2 pull positions |
 | Crowd Pummeler 9-60 (6229) | keep | 1 | 0 | 3 | 3 | Launch Bay, 10.3 yd across 1 pull positions |
 | Dark Iron Ambassador (6228) | keep | 0 | 0 | 4 | 0 | Tinkers' Court, guide only |
-| Mekgineer Thermaplugg (7800) | keep | 5 | 0 | 16 | 3 | Tinkers' Court, 2.4 yd across 2 pull positions |
+| Mekgineer Thermaplugg (7800) | keep | 4 | 0 | 16 | 3 | Tinkers' Court, 2.4 yd across 2 pull positions |
 
 ## hall-of-thanes
 
@@ -382,7 +382,7 @@ The first three counts are loot entries shown in game. The fourth counts old lin
 | Malor the Zealous (11032) | keep | 0 | 0 | 3 | 0 | Crusader's Square, guide only |
 | Cannon Master Willey (10997) | keep | 0 | 0 | 12 | 1 | Crusader's Square, guide only |
 | Archivist Galford (10811) | keep | 0 | 0 | 8 | 0 | Crusader's Square, guide only |
-| Balnazzar (10813) | keep | 0 | 0 | 0 | 13 | Crusader's Square, guide only |
+| Balnazzar (10813) | keep | 0 | 0 | 14 | 0 | Crusader's Square, guide only |
 | Crimson Hammersmith (11120) | keep | 0 | 0 | 6 | 4 | Crusader's Square, guide only |
 | Postmaster Malown (11143) | keep | 0 | 0 | 6 | 1 | Crusader's Square, guide only |
 | Stonespine (10809) | keep | 0 | 0 | 3 | 0 | The Gauntlet, guide only |
@@ -400,19 +400,19 @@ The first three counts are loot entries shown in game. The fourth counts old lin
 
 | Boss (NPC ID) | Roster | Corpse | Roll | Guide | Old links withheld | Map check |
 | --- | --- | ---: | ---: | ---: | ---: | --- |
-| Gasher (5713) | keep | 0 | 0 | 0 | 0 | unplaced |
-| Hukku (5715) | keep | 0 | 0 | 0 | 1 | unplaced |
-| Loro (5714) | keep | 0 | 0 | 0 | 0 | unplaced |
-| Mijan (5717) | keep | 0 | 0 | 0 | 0 | unplaced |
-| Zolo (5712) | keep | 0 | 0 | 0 | 0 | unplaced |
-| Zul'Lor (5716) | keep | 0 | 0 | 0 | 0 | unplaced |
+| Gasher (5713) | keep | 0 | 0 | 6 | 0 | unplaced |
+| Hukku (5715) | keep | 0 | 0 | 6 | 1 | unplaced |
+| Loro (5714) | keep | 1 | 0 | 5 | 0 | unplaced |
+| Mijan (5717) | keep | 0 | 0 | 6 | 0 | unplaced |
+| Zolo (5712) | keep | 1 | 0 | 5 | 0 | unplaced |
+| Zul'Lor (5716) | keep | 1 | 0 | 5 | 0 | unplaced |
 | Atal'alarion (8580) | keep | 1 | 0 | 3 | 0 | Sunken Temple, 24.8 yd across 1 pull positions |
-| Dreamscythe (5721) | keep | 0 | 0 | 0 | 3 | Sunken Temple, guide only |
-| Weaver (5720) | keep | 0 | 0 | 0 | 3 | Sunken Temple, 146.0 yd across 1 pull positions |
+| Dreamscythe (5721) | keep | 0 | 0 | 8 | 0 | Sunken Temple, guide only |
+| Weaver (5720) | keep | 0 | 0 | 8 | 0 | Sunken Temple, 146.0 yd across 1 pull positions |
 | Ogom the Wretched (5711) | keep | 1 | 0 | 2 | 0 | unplaced |
 | Jammal'an the Prophet (5710) | keep | 2 | 0 | 3 | 1 | Sunken Temple, 40.1 yd across 1 pull positions |
-| Morphaz (5719) | keep | 0 | 1 | 0 | 4 | Sunken Temple, 12.9 yd across 1 pull positions |
-| Hazzas (5722) | keep | 0 | 0 | 0 | 3 | Sunken Temple, guide only |
+| Morphaz (5719) | keep | 0 | 2 | 7 | 1 | Sunken Temple, 12.9 yd across 1 pull positions |
+| Hazzas (5722) | keep | 0 | 0 | 8 | 0 | Sunken Temple, guide only |
 | Shade of Eranikus (5709) | keep | 3 | 0 | 5 | 2 | Sunken Temple, 6.8 yd across 1 pull positions |
 | Spawn of Hakkar (5708) | keep | 1 | 0 | 1 | 0 | unplaced |
 | Avatar of Hakkar (8443) | alias | 0 | 0 | 0 | 0 | alias |
@@ -455,11 +455,11 @@ The first three counts are loot entries shown in game. The fourth counts old lin
 | Lady Anacondra (3671) | keep | 7 | 0 | 0 | 2 | Wailing Caverns, 108.8 yd across 4 pull positions |
 | Kresh (3653) | keep | 6 | 0 | 0 | 1 | Wailing Caverns, 117.8 yd across 4 pull positions |
 | Lord Cobrahn (3669) | keep | 4 | 0 | 0 | 0 | Wailing Caverns, 11.7 yd across 1 pull positions |
-| Lord Pythas (3670) | keep | 6 | 0 | 0 | 1 | Wailing Caverns, 3.3 yd across 1 pull positions |
+| Lord Pythas (3670) | keep | 5 | 0 | 0 | 2 | Wailing Caverns, 3.3 yd across 1 pull positions |
 | Skum (3674) | keep | 4 | 0 | 0 | 2 | Wailing Caverns, 9.8 yd across 2 pull positions |
 | Lord Serpentis (3673) | keep | 7 | 0 | 1 | 3 | Wailing Caverns, 9.4 yd across 2 pull positions |
 | Verdan the Everliving (5775) | keep | 4 | 0 | 0 | 3 | Wailing Caverns, 8.9 yd across 3 pull positions |
-| Mutanus the Devourer (3654) | keep | 6 | 0 | 0 | 3 | Wailing Caverns, 18.6 yd across 3 pull positions |
+| Mutanus the Devourer (3654) | keep | 4 | 0 | 0 | 3 | Wailing Caverns, 18.6 yd across 3 pull positions |
 | Deviate Faerie Dragon (5912) | keep | 1 | 0 | 1 | 1 | Wailing Caverns, guide only |
 
 ## zulfarrak
@@ -477,5 +477,5 @@ The first three counts are loot entries shown in game. The fourth counts old lin
 | Hydromancer Velratha (7795) | keep | 5 | 0 | 0 | 3 | Zul'Farrak, 24.5 yd across 2 pull positions |
 | Gahz'rilla (7273) | keep | 6 | 0 | 0 | 2 | Zul'Farrak, 32.7 yd across 1 pull positions |
 | Chief Ukorz Sandscalp (7267) | keep | 3 | 0 | 2 | 2 | Zul'Farrak, 22.8 yd across 2 pull positions |
-| Ruuzlu (7797) | keep | 2 | 0 | 1 | 0 | unplaced |
+| Ruuzlu (7797) | keep | 3 | 0 | 1 | 0 | unplaced |
 | Sergeant Bly (7604) | add | 4 | 0 | 0 | 0 | Zul'Farrak, guide only |

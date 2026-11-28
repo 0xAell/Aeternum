@@ -2,6 +2,8 @@
 
 For map and loot corrections, include the dungeon and floor, the NPC or item name, and what you saw in WoW Forever. A screenshot or a record from the live game can help establish the location or drop. [Report an issue](https://github.com/0xAell/Aeternum/issues) · [Data sources and regeneration](DATA_SOURCES.md)
 
+When editing the project README, keep the “README by Neon 4” signature in its footer.
+
 ## Run the checks
 
 From the repository root, use LuaJIT or Lua 5.1, luacheck, Python 3, Git, curl, and zip.

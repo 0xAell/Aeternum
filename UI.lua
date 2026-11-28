@@ -251,20 +251,27 @@ function UI:Trainer(owner, entry)
     end)
 end
 
+local function dungeonNameCounts(entries)
+    local counts = {}
+    for _, entry in ipairs(entries) do
+        if entry.category == "dungeon" then counts[entry.title] = (counts[entry.title] or 0) + 1 end
+    end
+    return counts
+end
+
+local function doorLabel(entry, counts)
+    if (counts[entry.title] or 0) < 2 or entry.category ~= "dungeon" then return entry.title end
+    local point = entry.point
+    local zone = entry.mapID ~= point.mapID and (addon.ZoneName(point.mapID) .. " ") or ""
+    return ("%s · %s%.1f, %.1f"):format(entry.title, zone, point.x * 100, point.y * 100)
+end
+
 function UI:Directions(owner, entries)
     menuAt(owner, "Dungeon entrance", function(menu)
-        local counts = {}
-        for _, entry in ipairs(entries) do
-            if entry.category == "dungeon" then counts[entry.title] = (counts[entry.title] or 0) + 1 end
-        end
+        local counts = dungeonNameCounts(entries)
         for _, entry in ipairs(entries) do
             if entry.category == "dungeon" and not addon.Navigation:IsDestination(entry.point, entry.source.id) then
-                local label
-                if counts[entry.title] > 1 then
-                    local point = entry.point
-                    label = ("Show path to %s · %.1f, %.1f"):format(entry.title, point.x * 100, point.y * 100)
-                end
-                self:Route(menu, entry, label)
+                self:Route(menu, entry, "Show path to " .. doorLabel(entry, counts))
             end
         end
         if addon.Navigation:IsActive() then
@@ -385,8 +392,9 @@ function UI:PickLocation(owner, entries)
         if entry.x ~= first.x or entry.y ~= first.y then title = "Nearby map locations" break end
     end
     menuAt(owner, title, function(menu)
+        local counts = dungeonNameCounts(entries)
         for _, entry in ipairs(entries) do
-            local name = entry.title
+            local name = doorLabel(entry, counts)
             if entry.questID then
                 name = name .. (entry.role == "turnin" and " (turn-in)" or
                     (entry.role == "objective" and " (objective)" or " (start)"))
@@ -397,18 +405,51 @@ function UI:PickLocation(owner, entries)
             row:SetTooltip(function(tooltip)
                 tooltip:SetText(entry.title)
                 tooltip:AddLine(entry.contact or entry.subtitle)
-                tooltip:AddLine(("%.1f, %.1f"):format(entry.x*100, entry.y*100))
+                local point = entry.point
+                tooltip:AddLine(("%.1f, %.1f"):format(point.x*100, point.y*100))
             end)
         end
     end)
 end
 
+local function dungeonLabel(entry)
+    local levels = addon.ColoredDungeonLevel(entry.source, true)
+    return levels and ("%s  %s"):format(entry.title, levels) or entry.title
+end
+
+-- Every dungeon and wing by level, each range in the character's difficulty colour.
+-- Choosing one opens its floors.
+function UI:FillDungeonIndex(menu)
+    for _, entry in ipairs(addon.DungeonsByLevel()) do
+        local row = menu:CreateButton(dungeonLabel(entry), function()
+            C_Timer.After(0, function() if self.map:IsShown() then self:Pick(self.map, entry) end end)
+        end)
+        row:SetTooltip(function(tooltip)
+            local dungeon = entry.source
+            tooltip:SetText(dungeon.name)
+            tooltip:AddLine(addon.ColoredDungeonLevel(dungeon) or "Dungeon")
+            if dungeon.size then
+                local bosses = #dungeon.bosses == 1 and "1 boss" or ("%d bosses"):format(#dungeon.bosses)
+                tooltip:AddLine(("%d players · %s"):format(dungeon.size, bosses), 1, 1, 1)
+            end
+            tooltip:AddLine("Click for floor map and boss loot", 1, .82, 0)
+        end)
+    end
+end
+
 function UI:Search(query, results)
+    if not results and addon.Trim(query) == "" then
+        menuAt(self.map, "Dungeons by level", function(menu)
+            menu:SetScrollMode(460)
+            self:FillDungeonIndex(menu)
+        end)
+        return
+    end
     local entries = results or addon.Entries(self.map:GetMapID(), true, query)
     local openMenu = menuAt(self.map, "Dungeons", function(menu)
         if #entries == 0 then menu:CreateTitle("No matching dungeons, bosses or items") end
         for _, entry in ipairs(entries) do
-            local label = entry.bossIndex and (entry.title .. " · " .. entry.subtitle) or entry.title
+            local label = entry.bossIndex and (entry.title .. " · " .. entry.subtitle) or dungeonLabel(entry)
             menu:CreateButton(label, function()
                 C_Timer.After(0, function() if self.map:IsShown() then self:Pick(self.map, entry) end end)
             end)
@@ -442,6 +483,9 @@ function UI:Attach(map)
                     addon.RefreshMap()
                 end)
             end
+            local index = menu:CreateButton("Dungeons by level")
+            index:SetScrollMode(460)
+            self:FillDungeonIndex(index)
             category(menu, "dungeon", addon.categoryByID.dungeon.label)
             local trainers = menu:CreateButton("Trainers")
             for _, id in ipairs({"class", "profession", "weapon"}) do

@@ -136,6 +136,34 @@ function DungeonMap:NewVisit()
     if id and id == self.killInstance and not self.leftAlive then return end
     wipe(killed)
     self.killInstance, self.leftAlive, self.chosenWing = id, nil, nil
+    self.fightWing, self.fightFloor = nil, nil
+end
+
+-- A boss fight names its encounter even where the client gives neither a position nor a room
+-- name inside an instance, so it shows which wing and floor the player is on. A floor view that
+-- follows the player moves there; one the player chose by hand stays put.
+function DungeonMap:EncounterStarted(encounter)
+    if not addon.IsReadableNumber(encounter) or not self.playerInstance then return end
+    for _, wing in ipairs(byInstance[self.playerInstance] or {}) do
+        for index, floor in ipairs(addon.floorData[wing.id].floors) do
+            for _, point in ipairs(floor.bosses) do
+                for _, id in ipairs(point.encounters or {}) do
+                    if id == encounter then
+                        self.fightWing, self.fightFloor, self.chosenWing = wing, index, wing
+                        self.playerDungeon, self.playerFloor = wing, index
+                        self:UpdatePlayer()
+                        local map = addon.UI.map
+                        local moved = self.dungeon ~= wing or self.index ~= index
+                        if map and map:IsShown() and self.followInstance and moved then
+                            self:Open(wing, nil, index)
+                            self.followInstance = true
+                        end
+                        return
+                    end
+                end
+            end
+        end
+    end
 end
 
 local function tile(frame, index, file, x, y, w, h, level, ...)
@@ -468,7 +496,13 @@ function DungeonMap:OpenInstance(onlyFollowing)
     if matches ~= 1 then
         local previous = self.chosenWing
         if previous and addon.floorData[previous.id].instance ~= id then previous = nil end
+        -- Without a unique room or floor map, the last boss fight in this instance tells the floor.
+        local fought = self.fightWing
+        if fought and (addon.floorData[fought.id].instance ~= id or (namedWing and namedWing ~= fought)) then
+            fought = nil
+        end
         if mapMatches == 1 then choice, index = mapWing, mapFloor
+        elseif fought then choice, index = fought, self.fightFloor
         else choice, index = namedWing or (#wings == 1 and wings[1]) or previous, nil end
     end
     if choice then

@@ -33,13 +33,34 @@ local defaults = {
     otherTrainers = false,
 }
 
-function addon.DungeonLevel(dungeon)
+function addon.DungeonLevel(dungeon, short)
     local low, high = dungeon.levelMin, dungeon.levelMax
     if low and high and low ~= high then
-        return ("Levels %d–%d"):format(low, high)
+        return (short and "%d–%d" or "Levels %d–%d"):format(low, high)
     elseif low or high then
-        return ("Level %d"):format(low or high)
+        return (short and "%d" or "Level %d"):format(low or high)
     end
+end
+
+function addon.ColorText(text, r, g, b)
+    if not r then return text end
+    local function byte(v) return math.floor(math.max(0, math.min(1, v)) * 255 + .5) end
+    return ("|cff%02x%02x%02x%s|r"):format(byte(r), byte(g), byte(b), text)
+end
+
+-- A level range in the game's quest difficulty colours, seen from the character's level:
+-- red or orange above it, yellow inside the range, green below it, grey once trivial.
+function addon.LevelColor(low, high)
+    low, high = low or high, high or low
+    local level = UnitLevel("player")
+    if not low or not addon.IsReadableNumber(level) or not GetRelativeDifficultyColor then return end
+    local color = GetRelativeDifficultyColor(level, math.max(low, math.min(high, level)))
+    if type(color) == "table" and color.r then return color.r, color.g, color.b end
+end
+
+function addon.ColoredDungeonLevel(dungeon, short)
+    local text = addon.DungeonLevel(dungeon, short)
+    return text and addon.ColorText(text, addon.LevelColor(dungeon.levelMin, dungeon.levelMax))
 end
 
 -- Quests ---------------------------------------------------------------------
@@ -164,6 +185,23 @@ for _, dungeon in ipairs(data.dungeons) do
     end
 end
 table.sort(dungeonRecords, ordered)
+
+local byLevel
+-- Every dungeon and wing from the lowest level range to the highest.
+function addon.DungeonsByLevel()
+    if not byLevel then
+        byLevel = {}
+        for _, entry in ipairs(dungeonRecords) do byLevel[#byLevel + 1] = entry end
+        table.sort(byLevel, function(a, b)
+            local x, y = a.source.levelMin or math.huge, b.source.levelMin or math.huge
+            if x ~= y then return x < y end
+            x, y = a.source.levelMax or math.huge, b.source.levelMax or math.huge
+            if x ~= y then return x < y end
+            return a.title < b.title
+        end)
+    end
+    return byLevel
+end
 
 function addon.DungeonEntrances(dungeon, selectedPoint, viewedMap)
     local list = dungeon and entrancesByDungeon[dungeon.id]
@@ -470,6 +508,14 @@ end
 -- Choose the Blizzard icon and tooltip for a map pin.
 function addon.Presentation(entry)
     local category = addon.categoryByID[entry.category]
+    if entry.category == "dungeon" then
+        -- The level range at the end of the line takes the character's difficulty colour.
+        local levels, text = addon.DungeonLevel(entry.source), entry.subtitle
+        if levels and text:sub(-#levels) == levels then
+            text = text:sub(1, -#levels - 1) .. addon.ColoredDungeonLevel(entry.source)
+        end
+        return category.icon, nil, text
+    end
     if entry.category ~= "quest" then
         return category.icon, nil, entry.subtitle
     end

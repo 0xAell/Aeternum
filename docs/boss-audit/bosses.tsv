@@ -170,7 +170,7 @@ scholomance	10901	Lorekeeper Polkelt	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,S
 scholomance	10507	The Ravenian	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2812		
 scholomance	10505	Instructor Malicia	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2803		
 scholomance	11261	Doctor Theolen Krastinov	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2802		
-scholomance	10502	Lady Illucia Barov	keep	EG-encounter,EzWoW,FDR,Norgannon,Scout	2806		
+scholomance	10502	Lady Illucia Barov	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2806		
 scholomance	10504	Lord Alexei Barov	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2807		
 scholomance	1853	Darkmaster Gandling	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2801		
 scholomance	14695	Lord Blackwood	keep	Norgannon			Scourge Invasion event boss. Availability in live Forever is unverified.
@@ -229,12 +229,12 @@ stratholme	10435	Magistrate Barthilas	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,
 stratholme	10439	Ramstein the Gorger	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	483		
 stratholme	10440	Baron Rivendare	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	484		
 stratholme	14684	Balzaphon	keep	Norgannon			Scourge Invasion event boss. Availability in live Forever is unverified.
-sunken-temple	5713	Gasher	keep	EzWoW,Norgannon,Scout			
-sunken-temple	5715	Hukku	keep	EzWoW,Norgannon			
-sunken-temple	5714	Loro	keep	EzWoW,Norgannon			
-sunken-temple	5717	Mijan	keep	EzWoW,Norgannon			
-sunken-temple	5712	Zolo	keep	EzWoW,Norgannon			
-sunken-temple	5716	Zul'Lor	keep	EzWoW,Norgannon			
+sunken-temple	5713	Gasher	keep	ATT,EzWoW,Norgannon,Scout			
+sunken-temple	5715	Hukku	keep	ATT,EzWoW,Norgannon			
+sunken-temple	5714	Loro	keep	ATT,EzWoW,Norgannon			
+sunken-temple	5717	Mijan	keep	ATT,EzWoW,Norgannon			
+sunken-temple	5712	Zolo	keep	ATT,EzWoW,Norgannon			
+sunken-temple	5716	Zul'Lor	keep	ATT,EzWoW,Norgannon			
 sunken-temple	8580	Atal'alarion	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	2814,2952,3582		
 sunken-temple	5721	Dreamscythe	keep	ATT,EzWoW,FDR,Norgannon,Scout	486,3588		
 sunken-temple	5720	Weaver	keep	ATT,EG-encounter,EzWoW,FDR,Norgannon,Scout	487,3587		

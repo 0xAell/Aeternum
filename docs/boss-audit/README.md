@@ -4,12 +4,12 @@ On November 27, 2026, we checked every one of Aeternum 0.5.2’s **287 roster en
 
 | What appears in Aeternum | Boss–item links | Evidence |
 | --- | ---: | --- |
-| Boss drops shown immediately | 507 | A player recorded the item on this NPC and a dungeon reference lists it for the boss or its encounter. |
-| Other recorded drops | 86 | A player recorded the item on the NPC. These include shared recipes. |
-| Encounter rolls | 28 | The game associated a group loot roll with a matching completed encounter. The individual corpse remains unverified. |
-| Guide-listed drops | 989 | A Forever guide lists the item. The audit found no accepted direct or matching encounter record. |
+| Boss drops shown immediately | 510 | A player recorded the item on this NPC and a dungeon reference lists it for the boss or its encounter. |
+| Other recorded drops | 84 | A player recorded the item on the NPC. These include shared recipes and repeated live rare equipment drops. |
+| Encounter rolls | 29 | The game associated a group loot roll with a matching completed encounter. The individual corpse remains unverified. |
+| Guide-listed drops | 1,067 | A Forever guide lists the item. The audit found no accepted direct or matching encounter record. |
 
-178 of the 302 entries have at least one displayed item recorded on the NPC. Of the 593 displayed corpse links, 52 appear in at least three separately published player-recording datasets. Different recorders can observe the same kill. We withheld 346 of the original links. Some may be possible random drops. The audit treats missing evidence as uncertainty and publishes no drop rates.
+181 of the 302 entries have at least one displayed item recorded on the NPC. Of the 594 displayed corpse links, 52 appear in at least three separately published player-recording datasets. Different recorders can observe the same kill. We withheld 322 of the original links, including generic uncommon BoE world drops with no guide support. The audit treats missing evidence as uncertainty and publishes no drop rates.
 
 ## The Deadmines
 
