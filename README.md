@@ -121,6 +121,10 @@ For the full walkthrough of map filters, floor tracking, and tooltip indicators,
 | **Trainers** | 561 trainers (562 map locations, 8 weapon masters) · 522 offline catalogues · 1,743 spells & recipes | [Trainer Coverage](docs/trainer-data/README.md) |
 | **Quests** | 5,323 quests · 11,100 start & turn-in pins · 5,207 objective sites across 2,097 quests | [Data Sources](DATA_SOURCES.md) |
 
+## AI Disclosure
+
+Aeternum uses AI assistance for coding, documentation, and promotional editing. The arch logo was generated with OpenAI ImageGen. Gameplay screenshots and footage were captured in WoW Forever.
+
 ## Feedback & Contributing
 
 Spotted a misplaced boss pin, a missing drop, or an outdated trainer price? **[Open an issue](https://github.com/0xAell/Aeternum/issues)** with the dungeon, floor, and NPC or item name. An in-game screenshot always helps.
