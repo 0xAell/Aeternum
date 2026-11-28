@@ -45,6 +45,18 @@ Click any entrance on the Azeroth, continent, or zone map to browse all 34 dunge
 
 *Click a boss skull for its tactics menu, usable loot, live Equipped comparisons, and drop-source tooltips.*
 
+### Party boss callouts
+
+In five-player dungeons, Aeternum can share one short reminder for a high-impact mechanic. It checks the party's
+classes and levels for useful counters, such as Polymorph on Var'Taka's priestess or Tremor Totem for Terrify.
+When several party members run Aeternum, the assigned tank gets first priority, followed by the party leader
+and then another enabled client.
+
+A reminder can appear when the elected player targets a nearby, identified boss or when the encounter starts.
+It stays in party chat and appears once per encounter per visit. The feature is on by default. Use
+`/aeternum callouts off` to disable it or `/aeternum callouts on` to turn it back on.
+[Mechanics and coverage](docs/boss-audit/mechanics.md#party-boss-callouts)
+
 ### Entrances and minimap directions
 Hover over a zone to see its recommended levels, on the Azeroth, continent, and zone maps, including unexplored terrain.
 
@@ -128,6 +140,7 @@ Install directly from the **[CurseForge project page](https://www.curseforge.com
 | `/aeternum <search>` | Search dungeons, bosses, or usable drops in any word order (e.g. `/aeternum herod scarlet`) |
 | `/aeternum dungeons [name]` | List every dungeon by level, or jump straight to a matching boss or item (e.g. `/aeternum dungeons Cruel Barb`) |
 | `/aeternum stop` | Stop active minimap directions |
+| `/aeternum callouts on\|off` | Enable or disable high-priority boss tips in dungeon party chat |
 | `/aeternum dialog on\|off` | Enable or disable keyboard shortcuts for NPCs and quests |
 | `/aeternum dialog key CTRL-SPACE` | Change the advance key from Space |
 | `/aeternum dialog second F` | Assign a second advance key. Use `second none` to clear it |

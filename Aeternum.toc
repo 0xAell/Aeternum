@@ -41,4 +41,6 @@ Atlas.lua
 WorldMap.lua
 WorldMap.xml
 DialogKeys.lua
+PartyCalloutData.lua
+PartyCallouts.lua
 Main.lua

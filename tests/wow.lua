@@ -514,6 +514,9 @@ Wow.knownEvents = {
     PLAYER_REGEN_DISABLED = true, GAME_PAD_ACTIVE_CHANGED = true, MAP_EXPLORATION_UPDATED = true,
     PLAYER_REGEN_ENABLED = true, GOSSIP_SHOW = true, GOSSIP_CLOSED = true, QUEST_DETAIL = true, QUEST_GREETING = true,
     QUEST_PROGRESS = true, QUEST_COMPLETE = true, QUEST_FINISHED = true,
+    GROUP_ROSTER_UPDATE = true, CHAT_MSG_ADDON = true, CHAT_MSG_PARTY = true, CHAT_MSG_PARTY_LEADER = true,
+    CHAT_MSG_INSTANCE_CHAT = true, CHAT_MSG_INSTANCE_CHAT_LEADER = true, INSTANCE_ENCOUNTER_ENGAGE_UNIT = true,
+    PLAYER_TARGET_CHANGED = true, PLAYER_STOPPED_MOVING = true, UNIT_FLAGS = true, UNIT_TARGET = true,
 }
 
 local templates = { UIPanelButtonTemplate = true, PanelTopTabButtonTemplate = true, MinimalScrollBar = true,
@@ -620,6 +623,7 @@ function Wow.new(state)
     end}
     env.GetMoneyString = function(copper) return copper .. " copper" end
     env.GetCursorPosition = function() return state.cursorX or 150, state.cursorY or 150 end
+    env.GetTime = function() return state.now or 0 end
     env.InputUtil = {IsGamepadUIEnabled = function() return state.gamepad or false end}
     env.LEVEL = "Level"
     env.GetInstanceInfo = function() return state.instanceName, "party", nil, nil, nil, nil, nil, state.instanceID end

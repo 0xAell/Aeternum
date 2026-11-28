@@ -32,3 +32,19 @@ python3 tools/audit_mechanics.py /tmp/forever-boss-inputs "$journal_data" "$db2_
 cmp BossCasts.lua /tmp/forever-mechanics/BossCasts.lua
 cmp docs/boss-audit/mechanics.tsv /tmp/forever-mechanics/mechanics.tsv
 ```
+
+## Party boss callouts
+
+`PartyCalloutData.lua` selects 40 encounters across 21 dungeon wings. It focuses on mechanics that can disable
+or kill a player, cause another pack to join, undo the group's progress, or keep the boss immune. Each entry
+has a short fallback that works with any party composition. Class variants use known spells for the sender
+and class and level as an indication of what other party members can learn. Routine rotations and weak
+mechanics stay in the map guide.
+
+For example, the Captain Dreadrise callout prioritizes freeing players from Abyssal Bubbles and interrupting
+Waterbolt Volley. Var'Taka's callout prioritizes the two healing Brinescale Priestesses and warns players to
+leave the frontal after Harpoon. The Mage variant calls for Polymorph on one priestess.
+[Dreadrise combat logs](https://maxdps.com/forever/bosses/captain-dreadrise) ·
+[Priestess creature data](https://db.icy-veins.com/wow-forever/npcs/260096) ·
+[Drowned City field guide](https://www.method.gg/wow-forever/dungeons/the-drowned-city) ·
+[Forever client hotfixes](https://worldofwarcraft.blizzard.com/en-us/news/24315281)

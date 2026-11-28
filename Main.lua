@@ -124,6 +124,11 @@ SlashCmdList.AETERNUM = function(message)
         addon.DialogKeyCommand(query)
         return
     end
+    if command == "callouts" then
+        if not addon.settings then addon.LoadSettings() end
+        addon.PartyCallouts:Command(query)
+        return
+    end
     if command == "stop" then
         local active = addon.Navigation:IsActive()
         addon.Navigation:Stop()
@@ -137,7 +142,7 @@ SlashCmdList.AETERNUM = function(message)
         return
     end
     local help = "Use /aeternum to open the map, /aeternum dungeons to browse by level, /aeternum <name> to search, "
-        .. "/aeternum stop to end directions, or /aeternum dialog for dialog keys."
+        .. "/aeternum stop to end directions, /aeternum dialog for dialog keys, or /aeternum callouts for party tips."
     if command == "help" or command == "?" then
         DEFAULT_CHAT_FRAME:AddMessage(help)
         return
