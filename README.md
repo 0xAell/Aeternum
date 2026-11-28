@@ -4,7 +4,7 @@
 
 # Aeternum
 
-**Dungeon maps, usable boss loot, trainers, quests, and minimap directions built straight into the World of Warcraft: Forever map.**
+**Dungeon maps, boss tactics for your character, usable loot, trainers, quests, and minimap directions on the World of Warcraft: Forever map.**
 
 [![Latest Release](https://img.shields.io/github/v/release/0xAell/Aeternum?style=flat-square&color=b8860b&label=release)](https://github.com/0xAell/Aeternum/releases/latest)
 [![CurseForge](https://img.shields.io/badge/CurseForge-Aeternum-f16436?style=flat-square&logo=curseforge&logoColor=white)](https://www.curseforge.com/wow/addons/aeternum)
