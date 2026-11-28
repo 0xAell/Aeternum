@@ -65,6 +65,10 @@ function UI:Boss(owner, boss)
     local usable = addon.LootFilter()
     local openMenu = menuAt(owner, boss.name, function(menu)
         if boss.event then menu:CreateTitle(boss.event .. " event") end
+        if boss.id and addon.Tactics and addon.Tactics:ForBoss(boss.id) then
+            addon.Tactics:AddMenu(menu, boss, showLink)
+            menu:CreateDivider()
+        end
         local starts = {}
         for _, section in ipairs(lootSections) do
             local start = boss.lootSections and boss.lootSections[section[1]]
@@ -125,11 +129,14 @@ function UI:BossGroup(owner, members, label)
     local dungeon = addon.DungeonMap.dungeon
     menuAt(owner, label or "Bosses", function(menu)
         for _, boss in ipairs(members) do
-            menu:CreateButton(boss.name, function()
+            local row = menu:CreateButton(boss.name, function()
                 C_Timer.After(0, function()
                     if addon.DungeonMap.dungeon == dungeon then self:Boss(addon.DungeonMap.frame, boss) end
                 end)
             end)
+            if boss.id and addon.Tactics and addon.Tactics:ForBoss(boss.id) then
+                row:SetTooltip(function(tooltip) addon.Tactics:AddTooltip(tooltip, boss, true) end)
+            end
         end
     end)
 end

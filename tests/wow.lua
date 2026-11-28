@@ -625,11 +625,12 @@ function Wow.new(state)
         return state.playerNorth, state.playerWest, 0, state.positionInstance or state.instanceID
     end
     env.C_SpellBook = {IsSpellKnown=function(id) return (state.knownSpells or {})[id] or false end}
+    env.C_Spell = {GetSpellTexture=function(id) return state.spellTextures and state.spellTextures[id] or nil end}
     env.C_RaidLocks = {IsEncounterComplete=function(_, id) return (state.lockedEncounters or {})[id] or false end}
     env.UnitFactionGroup = function() return state.faction or "Alliance" end
     env.UnitLevel = function() return state.level or 1 end
-    env.UnitRace = function() return "Human", "Human", state.raceID or 1 end
-    env.UnitClass = function() return "Warrior", state.class or "WARRIOR", 1 end
+    env.UnitRace = function() return state.race or "Human", state.race or "Human", state.raceID or 1 end
+    env.UnitClass = function() return state.className or "Warrior", state.class or "WARRIOR", 1 end
     env.UnitQuestTrivialLevelRange = function() return 5 end
     -- As QuestDifficultyColors and DifficultyUtil.GetRelativeDifficultyColor in the client.
     env.QuestDifficultyColors = {impossible = {r = 1, g = .1, b = .1}, verydifficult = {r = 1, g = .5, b = .25},

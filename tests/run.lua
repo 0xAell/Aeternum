@@ -1882,10 +1882,14 @@ test("all shipped floors open and every boss menu shows its eligible recorded dr
             list:Find(boss.name):Click()
             Wow.flushTimers()
             equal(state.menu.children[1].label, boss.name)
+            local tactics = menuRow(state.menu, "Tactics")
+            check(tactics and #tactics.children > 0, "tactics submenu for " .. boss.name)
             local ids = {}
             for _, row in ipairs(state.menu.children) do
-                if row.action and #row.children == 0 then ids[#ids+1] = row end
-                for _, child in ipairs(row.children) do ids[#ids+1] = child end
+                if row ~= tactics then
+                    if row.action and #row.children == 0 then ids[#ids+1] = row end
+                    for _, child in ipairs(row.children) do ids[#ids+1] = child end
+                end
             end
             local count = 0
             for _, id in ipairs(boss.loot) do
@@ -2094,6 +2098,126 @@ test("a focused location keeps its tooltip shut when the map redraws", function(
     Wow.flushTimers()
     check(not env.GameTooltip.shown, "redraw reopened the tooltip")
     check(env.WorldMapFrame:GetMapID() == 1436 and not env.WorldMapFrame.panX, "map left where it was")
+end)
+
+test("all 302 bosses provide role TLDRs, color-coded dispels, and tips across all nine classes", function()
+    local classes = {"WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID"}
+    local addon, _, state = load({class="SHAMAN", level=60})
+    local seen = {}
+    for _, dungeon in ipairs(addon.Data.dungeons) do
+        for _, boss in ipairs(dungeon.bosses) do
+            seen[boss.id] = true
+            local entry = addon.Tactics:ForBoss(boss.id)
+            check(entry, "missing tactics for " .. boss.name .. " (" .. boss.id .. ")")
+            check(entry.t ~= "" and entry.h ~= "" and entry.d ~= "", "empty role TLDR for " .. boss.name)
+            for _, field in ipairs({entry.t, entry.h, entry.d}) do
+                local formatted = addon.Tactics:FormatText(field)
+                check(not formatted:find("{", 1, true), "unformatted token in " .. boss.name)
+            end
+        end
+    end
+    for id in pairs(addon.tacticsData) do
+        check(seen[id], "stale tactics record for NPC " .. id)
+    end
+    for _, cls in ipairs(classes) do
+        state.class = cls
+        for _, dungeon in ipairs(addon.Data.dungeons) do
+            for _, boss in ipairs(dungeon.bosses) do
+                local tips, token, info = addon.Tactics:ClassTips(boss.id)
+                equal(token, cls)
+                check(info and #tips >= 1 and #tips <= 4, cls .. " tips for " .. boss.name)
+                for _, tip in ipairs(tips) do
+                    check(tip.icon:find("|T", 1, true), "missing icon for spell " .. tip.spellID)
+                    check(not tip.text:find("{", 1, true), "unformatted token in " .. cls .. " " .. boss.name)
+                end
+            end
+        end
+    end
+end)
+
+test("shaman, priest, paladin, mage, hunter, and racial mechanics show icons and dispel colors", function()
+    local addon, env, state = load({class="SHAMAN", level=60})
+    -- Blazeroar (255702): Fear + Enrage + Magic + Interrupt -> Tremor Totem icon (136108)
+    local tips = addon.Tactics:ClassTips(255702)
+    equal(tips[1].spellID, 8143, "Tremor Totem prioritized for Blazeroar Fear")
+    check(tips[1].icon:find("|T136108:", 1, true), "Tremor Totem Forever icon ID")
+    check(tips[1].text:find("Fear", 1, true))
+    local dispelBar = addon.Tactics:DispelText(addon.Tactics:ForBoss(255702))
+    check(dispelBar:find("|cff3399ffMagic|r", 1, true) and dispelBar:find("|cffff5555Enrage|r", 1, true))
+
+    -- Live C_Spell.GetSpellTexture takes precedence when present.
+    state.spellTextures = {[8143] = 999123}
+    check(addon.Tactics:SpellIcon(8143):find("|T999123:", 1, true), "live C_Spell texture preferred")
+    state.spellTextures = nil
+
+    -- Dwarf Priest gets Fear Ward on fear bosses + Stoneform on poison/disease/bleed bosses.
+    state.class, state.race, state.raceID = "PRIEST", "Dwarf", 3
+    local priestTips = addon.Tactics:ClassTips(255702)
+    equal(priestTips[1].spellID, 6346, "Dwarf Priest sees Fear Ward on Fear boss")
+    check(priestTips[1].icon:find("|T135902:", 1, true), "Fear Ward icon ID")
+    local stoneformBoss = addon.Tactics:ClassTips(10429) -- Warchief Rend / check poison/bleed boss (256236 Questioner)
+    check(stoneformBoss and #stoneformBoss >= 1)
+    local questionerTips = addon.Tactics:ClassTips(256236)
+    check(findEntry(questionerTips, function(t) return t.spellID == 20594 end), "Dwarf sees Stoneform on Bleed boss")
+
+    -- Undead gets Will of the Forsaken on Fear/Sleep/Charm bosses.
+    state.class, state.race, state.raceID = "MAGE", "Scourge", 5
+    local undeadTips = addon.Tactics:ClassTips(255702)
+    check(findEntry(undeadTips, function(t) return t.spellID == 7744 end), "Undead sees WotF on Fear boss")
+
+    -- Paladin chooses Purify below level 42 on poison/disease-only bosses, Cleanse at 60 or for Magic.
+    state.class, state.race, state.raceID, state.level = "PALADIN", "Human", 1, 20
+    local akumai = addon.Tactics:ClassTips(4829) -- Aku'mai (BFD): Poison + Enrage, no Magic
+    check(akumai and findEntry(akumai, function(t) return t.spellID == 1152 end), "low-level Paladin uses Purify")
+    state.level = 60
+    local akumai60 = addon.Tactics:ClassTips(4829)
+    check(findEntry(akumai60, function(t) return t.spellID == 4987 end), "level 60 Paladin uses Cleanse")
+
+    -- Mage decurse shows purple Curse tag and Remove Lesser Curse icon; Hunter shows Drakkisath kite override.
+    state.class, state.level = "MAGE", 60
+    local lynTips = addon.Tactics:ClassTips(247032)
+    local decurse = findEntry(lynTips, function(t) return t.spellID == 475 end)
+    check(decurse and decurse.icon:find("|T136082:", 1, true) and decurse.text:find("|cffb566ffCurse|r", 1, true))
+    state.class = "HUNTER"
+    local drakkTips = addon.Tactics:ClassTips(10363)
+    check(findEntry(drakkTips, function(t) return t.spellID == 20736 and t.text:find("Kite", 1, true) end))
+    check(findEntry(drakkTips, function(t) return t.spellID == 5384 and t.text:find("Feign Death", 1, true) end))
+
+    -- Boss skull hover and Tactics submenu tooltips work cleanly without taint.
+    state.class, state.level = "SHAMAN", 60
+    env.WorldMapFrame:Show()
+    local alcaz = dungeonNamed(addon, "alcaz-prison")
+    local blazeroarIndex
+    for i, b in ipairs(alcaz.bosses) do if b.id == 255702 then blazeroarIndex = i end end
+    addon.DungeonMap:Open(alcaz, blazeroarIndex)
+    local blazeroarPin = findEntry(addon.DungeonMap.frame.pins, function(p)
+        return p:IsShown() and p.boss and p.boss.id == 255702
+    end)
+    check(blazeroarPin, "Blazeroar skull pin shown")
+    blazeroarPin:Fire("OnEnter")
+    local lines = env.GameTooltip.lines
+    check(findEntry(lines, function(l) return l:find("|cff3399ffMagic|r", 1, true) end), "hover dispels")
+    check(findEntry(lines, function(l) return l:find("|T136108:", 1, true) end), "hover Tremor icon")
+    check(findEntry(lines, function(l) return l == "Click for tactics & loot" end))
+
+    blazeroarPin:Click()
+    local tactics = assert(menuRow(state.menu, "Tactics"))
+    check(tactics.label:find("|cff3399ffMagic|r", 1, true), "Tactics row previews dispel colors")
+    tactics.tooltip(env.GameTooltip)
+    check(findEntry(env.GameTooltip.lines, function(l) return l:find("UI-LFG-ICON-PORTRAITROLES", 1, true) end))
+    check(findEntry(env.GameTooltip.lines, function(l) return l:find("Tank:", 1, true) end))
+    check(findEntry(env.GameTooltip.lines, function(l) return l:find("Healer:", 1, true) end))
+    check(findEntry(env.GameTooltip.lines, function(l) return l:find("DPS:", 1, true) end))
+    local tremorRow = assert(menuRow(tactics, "Tremor Totem"))
+    tremorRow.tooltip(env.GameTooltip)
+    equal(env.GameTooltip.lines[1], "spell:8143", "submenu ability row opens Blizzard spell tooltip")
+    tremorRow:Click()
+    equal(state.itemRef[1], "spell:8143", "clicking ability links the spell")
+
+    -- Boss loot dropdown rows also preview full tactics on hover.
+    local ddBoss = addon.DungeonMap.frame.dropdown:OpenMenu():Find("Boss loot"):Find("Blazeroar")
+    ddBoss.tooltip(env.GameTooltip)
+    check(findEntry(env.GameTooltip.lines, function(l) return l:find("Blazeroar — Tactics", 1, true) end))
 end)
 
 test("dungeon level ranges take the character's difficulty colour", function()
