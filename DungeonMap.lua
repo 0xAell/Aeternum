@@ -1,6 +1,7 @@
 local _, addon = ...
 local DungeonMap = {}
 addon.DungeonMap = DungeonMap
+local mapZoom = addon.MapZoom
 local WIDTH, HEIGHT = 1002, 668
 local missingLegacyArt = {ruRU=true, esMX=true, itIT=true}
 local byInstance = {}
@@ -30,11 +31,15 @@ local function syncStrata(frame)
     end
 end
 
+local function fitScale(w, h)
+    return math.min(w / WIDTH, h / HEIGHT)
+end
+
 local function place(frame)
     syncStrata(frame)
     local w, h = frame:GetSize()
     if w <= 0 or h <= 0 then return end
-    local scale = math.min(w / WIDTH, h / HEIGHT) * frame.zoom
+    local scale = fitScale(w, h) * frame.zoom
     local aw, ah = WIDTH * scale, HEIGHT * scale
     frame.x = aw <= w and (w - aw) / 2 or clamp(frame.x, w - aw, 0)
     frame.y = ah <= h and (h - ah) / 2 or clamp(frame.y, h - ah, 0)
@@ -46,19 +51,87 @@ local function place(frame)
     addon.BossHover:Refresh()
 end
 
-local function zoom(frame, delta)
-    local old = frame.zoom
-    frame.zoom = clamp(old * 1.35 ^ delta, 1, 4)
-    if frame.zoom == old then return end
-    local x, y = cursor(frame)
-    frame.x, frame.y = x - (x - frame.x) * frame.zoom / old, y - (y - frame.y) * frame.zoom / old
+local function stopMotion(frame)
+    wipe(frame.zoomMotion)
+    frame.dragX, frame.dragY = nil, nil
+    frame:SetScript("OnUpdate", nil)
+end
+
+local function fitFloor(frame)
+    stopMotion(frame)
+    frame.zoom, frame.x, frame.y = 1, 0, 0
     place(frame)
+end
+
+local function showHoveredBoss(frame)
+    if frame.dragX or frame.zoomMotion.target then return end
+    for _, pin in ipairs(frame.pins) do
+        if pin.members and pin:IsVisible() and pin:IsMouseOver() then
+            addon.BossHover:Show(pin)
+            return
+        end
+    end
+end
+
+local function resize(frame)
+    local w, h = frame:GetSize()
+    if w <= 0 or h <= 0 then return end
+    local previousW, previousH = frame.viewWidth, frame.viewHeight
+    if previousW > 0 and previousH > 0 then
+        local ratio = fitScale(w, h) / fitScale(previousW, previousH)
+        frame.x = w / 2 - (previousW / 2 - frame.x) * ratio
+        frame.y = h / 2 - (previousH / 2 - frame.y) * ratio
+    end
+    frame.viewWidth, frame.viewHeight = w, h
+    place(frame)
+    if frame.dragX then frame.dragX, frame.dragY = cursor(frame) end
+    if frame.zoomMotion.target then
+        -- Keep the animation anchored to the same relative point in the window.
+        frame.anchorX, frame.anchorY = clamp(frame.anchorX * w / math.max(1, previousW), 0, w),
+            clamp(frame.anchorY * h / math.max(1, previousH), 0, h)
+    end
+end
+
+local function updateMotion(frame, elapsed)
+    local moved
+    if frame.dragX then
+        local x, y = cursor(frame)
+        local dx, dy = x - frame.dragX, y - frame.dragY
+        frame.x, frame.y = frame.x + dx, frame.y + dy
+        frame.dragX, frame.dragY = x, y
+        frame.anchorX, frame.anchorY = x, y
+        moved = dx ~= 0 or dy ~= 0
+    end
+    local nextZoom = mapZoom.Advance(frame.zoomMotion, frame.zoom, elapsed)
+    if nextZoom then
+        local x, y = frame.anchorX, frame.anchorY
+        local ratio = nextZoom / frame.zoom
+        frame.x, frame.y = x - (x - frame.x) * ratio, y - (y - frame.y) * ratio
+        frame.zoom = nextZoom
+    end
+    if moved or nextZoom then place(frame) end
+    if not frame.dragX and not frame.zoomMotion.target then
+        frame:SetScript("OnUpdate", nil)
+        showHoveredBoss(frame)
+    end
+end
+
+local function wheel(frame, delta)
+    if mapZoom.Queue(frame.zoomMotion, frame.zoom, delta, 4) then
+        addon.BossHover:Hide()
+        frame.anchorX, frame.anchorY = cursor(frame)
+        frame:SetScript("OnUpdate", updateMotion)
+    end
+end
+
+local function clearArt(frame)
+    for _, texture in ipairs(frame.tiles) do texture:Hide(); texture:SetTexture(nil) end
+    for _, line in ipairs(frame.lines) do line:Hide() end
 end
 
 local function clearFloor(frame)
     addon.BossHover:Hide()
-    for _, texture in ipairs(frame.tiles) do texture:Hide(); texture:SetTexture(nil) end
-    for _, line in ipairs(frame.lines) do line:Hide() end
+    clearArt(frame)
     for _, pin in ipairs(frame.pins) do
         if GameTooltip:IsOwned(pin) then GameTooltip:Hide() end
         pin:Hide()
@@ -176,7 +249,7 @@ local function tile(frame, index, file, x, y, w, h, level, ...)
         frame.tiles[index] = texture
     end
     texture:SetDrawLayer("ARTWORK", clamp(level, -8, 7))
-    local loaded = texture:SetTexture(file)
+    local loaded = texture:SetTexture(file, nil, nil, "TRILINEAR")
     texture:SetTexCoord(...)
     texture:SetSize(w, h)
     texture:SetPoint("TOPLEFT", frame.art, "TOPLEFT", x, -y)
@@ -188,30 +261,40 @@ local function mosaicTile(frame, i, part)
     return tile(frame, i, part[1], part[2], part[3], part[4], part[5], part[14], unpack(part, 6, 13))
 end
 
+local function drawTerrain(frame, pieces)
+    local index = 0
+    for record in pieces:gmatch("[^;]+") do
+        local part = {}
+        for value in record:gmatch("[^,]+") do part[#part + 1] = tonumber(value) end
+        index = index + 1
+        if not mosaicTile(frame, index, part) then return false end
+    end
+    return true
+end
+
+local function drawPainted(frame, tiles)
+    for i, file in ipairs(tiles) do
+        local x, y = (i - 1) % 4 * 256, math.floor((i - 1) / 4) * 256
+        local w, h = math.min(256, WIDTH - x), math.min(256, HEIGHT - y)
+        if not tile(frame, i, file, x, y, w, h, 0, 0, w / 256, 0, h / 256) then return false end
+    end
+    return true
+end
+
 local function drawFloor(frame, floor)
-    local useFallback = floor.fallback and missingLegacyArt[GetLocale()]
+    local triedTerrain = floor.fallback and frame.preferTerrain
+    if triedTerrain then
+        if drawTerrain(frame, floor.fallback) then return true, true end
+        clearArt(frame)
+    end
     if floor.tiles then
-        if not useFallback then
-            for i, file in ipairs(floor.tiles) do
-                local x, y = (i - 1) % 4 * 256, math.floor((i - 1) / 4) * 256
-                local w, h = math.min(256, WIDTH - x), math.min(256, HEIGHT - y)
-                if not tile(frame, i, file, x, y, w, h, 0, 0, w / 256, 0, h / 256) then
-                    if not floor.fallback then return false end
-                    useFallback = true
-                    break
-                end
-            end
+        if addon.DungeonArt:Draw(frame, floor, tile) then return true end
+        if not (floor.fallback and missingLegacyArt[GetLocale()]) then
+            if drawPainted(frame, floor.tiles) then return true end
+            clearArt(frame)
         end
-        if useFallback then
-            for _, texture in ipairs(frame.tiles) do texture:Hide(); texture:SetTexture(nil) end
-            local index = 0
-            for record in floor.fallback:gmatch("[^;]+") do
-                local part = {}
-                for value in record:gmatch("[^,]+") do part[#part + 1] = tonumber(value) end
-                index = index + 1
-                if not mosaicTile(frame, index, part) then return false end
-            end
-        end
+        if floor.fallback and not triedTerrain then return drawTerrain(frame, floor.fallback), true end
+        return false
     elseif floor.pieces then
         for i, part in ipairs(floor.pieces) do
             if not mosaicTile(frame, i, part) then return false end
@@ -234,6 +317,13 @@ local function drawFloor(frame, floor)
     return true
 end
 
+local function renderFloorArt(frame, floor)
+    local drawn, terrain = drawFloor(frame, floor)
+    if not drawn then clearArt(frame) end
+    frame.usingTerrain = drawn and terrain or false
+    frame.artNotice:SetShown(not drawn)
+end
+
 local function bossPin(frame, index)
     local pin = frame.pins[index]
     if pin then return pin end
@@ -242,16 +332,23 @@ local function bossPin(frame, index)
     pin:SetNormalTexture(137025) -- Blizzard's target-frame skull
     pin:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
     pin:SetScript("OnEnter", function(self)
-        if self.members and #self.members > 0 then addon.BossHover:Show(self) end
+        if self.members and #self.members > 0 and not frame.dragX and not frame.zoomMotion.target then
+            addon.BossHover:Show(self)
+        end
     end)
-    pin:SetScript("OnClick", function(self)
+    pin:RegisterForClicks("LeftButtonUp", "MiddleButtonUp")
+    pin:SetScript("OnClick", function(self, button)
+        if button == "MiddleButton" then
+            fitFloor(frame)
+            return
+        end
         addon.BossHover:Hide()
         if not self.members then return end
         if #self.members == 1 then addon.UI:Boss(self, self.boss)
         else addon.UI:BossGroup(self, self.members, self.label) end
     end)
     pin:EnableMouseWheel(true)
-    pin:SetScript("OnMouseWheel", function(_, delta) zoom(frame, delta) end)
+    pin:SetScript("OnMouseWheel", function(_, delta) wheel(frame, delta) end)
     return pin
 end
 
@@ -259,13 +356,10 @@ function DungeonMap:SetFloor(index)
     local frame, dungeon = self.frame, self.dungeon
     local floor = addon.floorData[dungeon.id].floors[index]
     self.index = index
+    stopMotion(frame)
     frame.zoom, frame.x, frame.y = 1, 0, 0
     clearFloor(frame)
-    local drawn = drawFloor(frame, floor)
-    if not drawn then
-        for _, texture in ipairs(frame.tiles) do texture:Hide() end
-    end
-    frame.artNotice:SetShown(not drawn)
+    renderFloorArt(frame, floor)
     local name = dungeon.name
     if floor.name ~= name then name = name .. " · " .. floor.name end
     if floor.paths then name = name .. " (route sketch)" end
@@ -326,6 +420,17 @@ local function floorMenu(_, menu)
             wings:CreateRadio(wing.name, function() return wing == dungeon end, function() DungeonMap:Open(wing) end)
         end
     end
+    local displayedFloor = DungeonMap.index
+    local floor = addon.floorData[dungeon.id].floors[displayedFloor]
+    local frame = DungeonMap.frame
+    if floor.fallback and not missingLegacyArt[GetLocale()] then
+        menu:CreateCheckbox("Terrain detail", function() return frame.usingTerrain end, function()
+            if DungeonMap.dungeon ~= dungeon or DungeonMap.index ~= displayedFloor then return end
+            frame.preferTerrain = not frame.usingTerrain
+            clearArt(frame)
+            renderFloorArt(frame, floor)
+        end)
+    end
     menu:CreateDivider()
     local bosses = menu:CreateButton("Boss loot")
     bosses:SetScrollMode(300)
@@ -382,6 +487,7 @@ function DungeonMap:EnsureFrame()
         if elapsedPosition >= .2 then elapsedPosition = 0; playerPosition() end
     end)
     frame.tiles, frame.lines, frame.pins = {}, {}, {}
+    frame.zoomMotion = {}
     frame.zoom, frame.x, frame.y = 1, 0, 0
     frame.back = CreateFrame("Button", nil, frame)
     frame.back:SetSize(28, 28)
@@ -399,21 +505,27 @@ function DungeonMap:EnsureFrame()
     frame.dropdown:SetFrameLevel(frame.back:GetFrameLevel())
     frame.dropdown:SetPoint("LEFT", frame.back, "RIGHT", 3, 0)
     frame.dropdown:SetupMenu(floorMenu)
-    frame:SetScript("OnMouseWheel", zoom)
+    frame.viewWidth, frame.viewHeight = frame:GetSize()
+    frame:SetScript("OnMouseWheel", wheel)
     frame:SetScript("OnDragStart", function()
-        local x, y = cursor(frame)
-        frame.dragX, frame.dragY = x - frame.x, y - frame.y
-        frame:SetScript("OnUpdate", function()
-            local cx, cy = cursor(frame)
-            frame.x, frame.y = cx - frame.dragX, cy - frame.dragY
-            place(frame)
-        end)
+        addon.BossHover:Hide()
+        frame.dragX, frame.dragY = cursor(frame)
+        frame:SetScript("OnUpdate", updateMotion)
     end)
-    frame:SetScript("OnDragStop", function() frame:SetScript("OnUpdate", nil) end)
-    frame:SetScript("OnMouseUp", function(_, button) if button == "RightButton" then self:Close() end end)
-    frame:SetScript("OnSizeChanged", place)
+    frame:SetScript("OnDragStop", function()
+        frame.dragX, frame.dragY = nil, nil
+        if not frame.zoomMotion.target then
+            frame:SetScript("OnUpdate", nil)
+            showHoveredBoss(frame)
+        end
+    end)
+    frame:SetScript("OnMouseUp", function(_, button)
+        if button == "RightButton" then self:Close()
+        elseif button == "MiddleButton" then fitFloor(frame) end
+    end)
+    frame:SetScript("OnSizeChanged", resize)
     frame:SetScript("OnHide", function()
-        frame:SetScript("OnUpdate", nil)
+        stopMotion(frame)
         clearFloor(frame)
     end)
     -- Do not call RegisterGameMenuEscHandler: sorting Blizzard's internal handler table
@@ -425,6 +537,7 @@ end
 function DungeonMap:Open(dungeon, bossIndex, preferredFloor, entrance)
     local info = dungeon and addon.floorData[dungeon.id]
     if not info or not info.floors or #info.floors == 0 then return end
+    addon.Atlas:Suspend()
     local frame = self:EnsureFrame()
     syncStrata(frame)
     self.dungeon, self.followInstance, self.entrance = dungeon, nil, entrance
@@ -435,12 +548,14 @@ function DungeonMap:Open(dungeon, bossIndex, preferredFloor, entrance)
 end
 
 function DungeonMap:Close()
+    local wasOpen = self.dungeon ~= nil
     self.dungeon, self.followInstance, self.entrance = nil, nil, nil
     if self.frame then
-        self.frame:SetScript("OnUpdate", nil)
+        stopMotion(self.frame)
         clearFloor(self.frame)
         self.frame:Hide()
     end
+    if wasOpen then addon.Atlas:Resume() end
 end
 
 function DungeonMap:IsInside(key)

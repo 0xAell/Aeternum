@@ -10,15 +10,17 @@ Click a dungeon entrance to browse its floors. Right-click for minimap direction
 
 To pick a dungeon for your level, open **Dungeons by level** in the map's tracking menu, type `/aeternum dungeons`, or choose **Aeternum** in the minimap's addon compartment. Every dungeon and wing is listed from the lowest level range to the highest. Each range uses the game's quest difficulty colors for your character: red or orange is above your level, yellow is your range, green is easy, and gray is trivial. Entrance tooltips color their level range the same way. Choose a dungeon to open its floors.
 
+Choose **Dungeon atlas** in the same tracking menu to browse dungeon entrances on a continuous map. Scroll to ease toward the pointer, drag across zone boundaries even while zooming, or middle-click to center on your character. At close zoom, the game's terrain art adds detail in Kalimdor and the Eastern Kingdoms. Toggle **Terrain at close zoom** in the tracking menu to switch between the illustrated and terrain views. Close a dungeon floor to return to the atlas at the same position. Right-click open space to return to the world map. The atlas is available with mouse input outside combat. Its continuous zoom was inspired by [OpenMap](https://github.com/openmap-world/openmap).
+
 Ten of the 41 marked entrances have a recorded approach waypoint, covering the Deadmines, Ragefire Chasm, the four Scarlet Monastery wings, Alcaz Prison, Blackmaw Hold, Krol’dok Stronghold, and Shaper’s Terrace. Other doors show a direct bearing. Dire Maul East and West each have more than one selectable portal.
 
 Directions survive a UI reload on the same character. They pause on another continent or inside an unrelated instance and end when you reach the destination. Choose **Stop directions** on the map to cancel.
 
 ## Dungeon floors and encounters
 
-Inside a dungeon, press **M** to see the floor. The map follows recognized rooms and floor IDs, and moves to a boss's floor when the fight starts. That helps where the game gives no room name or position. After a fight, the map opens on that boss's floor until a room name says otherwise. A floor you choose yourself stays put. A player arrow appears when the client supplies coordinates for that floor. Scroll to zoom and drag to pan. Choose **Back** or right-click empty floor space to return to the zone map. **Escape** closes the map.
+Inside a dungeon, press **M** to see the floor. The map follows recognized rooms and floor IDs, and moves to a boss's floor when the fight starts. That helps where the game gives no room name or position. After a fight, the map opens on that boss's floor until a room name says otherwise. A floor you choose yourself stays put. A player arrow appears when the client supplies coordinates for that floor. Scroll to zoom, drag to pan, or middle-click to fit the whole floor. Choose **Back** or right-click empty floor space to return to the outdoor map. **Escape** closes the map.
 
-Click the floor name to change floors, check which dungeon keys are in your bags, or find an outdoor entrance. Under **Entrances**, **Show on zone map** marks the door when you open its zone. If you’re viewing a different zone, the addon names the destination in chat.
+Click the floor name to change floors, check which dungeon keys are in your bags, or find an outdoor entrance. On supported floors, **Terrain detail** switches to the in-game minimap artwork at the same position and zoom. Under **Entrances**, **Show on zone map** marks the door when you open its zone. If you’re viewing a different zone, the addon names the destination in chat.
 
 Hover a boss skull to open the encounter guide. A shared skull lists every encounter at that spot in the same guide. Move your pointer onto the guide to scroll through longer fights or hover an item for its native tooltip.
 

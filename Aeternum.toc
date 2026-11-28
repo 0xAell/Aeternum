@@ -27,10 +27,17 @@ Trainers.lua
 Loot.lua
 Tactics.lua
 Navigation.lua
+MapZoom.lua
 BossHover.lua
+DungeonArt.lua
 DungeonMap.lua
 UI.lua
 ZoneLevels.lua
+AtlasArt.lua
+AtlasTerrainData.lua
+AtlasTerrain.lua
+AtlasPins.lua
+Atlas.lua
 WorldMap.lua
 WorldMap.xml
 Main.lua

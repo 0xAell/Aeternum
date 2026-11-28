@@ -31,6 +31,7 @@ local defaults = {
     questMode = "available",
     lowLevelQuests = false,
     otherTrainers = false,
+    atlasTerrain = true,
 }
 
 function addon.DungeonLevel(dungeon, short)

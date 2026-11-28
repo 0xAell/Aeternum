@@ -17,7 +17,7 @@ read_globals = {
     "GetTrainerServiceInfo", "GetTrainerServiceCost", "GetNumTrainerServices", "GetTrainerServiceSkillReq", "UnitGUID",
     "C_Trainer", "C_SpellBook", "C_RaidLocks", "C_SuperTrack", "UnitPosition", "TRAINING_POINTS_ABBREV",
     "GetCursorPosition", "GetInstanceInfo", "GetSubZoneText", "GetLocale", "GetMoneyString",
-    "C_AddOns", "C_CVar", "C_Item", "C_Map", "C_Minimap", "C_QuestLog", "C_Timer",
+    "C_AddOns", "C_CVar", "C_Item", "C_Map", "C_MapExplorationInfo", "C_Minimap", "C_QuestLog", "C_Timer",
     "CreateFrame", "CreateFromMixins", "CreateVector2D", "DEFAULT_CHAT_FRAME", "GameTooltip",
     "GetPlayerFacing", "HandleModifiedItemClick", "InCombatLockdown", "IsInInstance", "IsModifiedClick",
     "MapCanvasDataProviderMixin", "MapCanvasPinMixin", "Minimap", "Mixin", "SetItemRef",

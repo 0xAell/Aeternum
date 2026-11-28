@@ -25,12 +25,19 @@ frame:SetScript("OnEvent", function(_, event, arg, second, _, _, success)
         addon.Quests:Invalidate()
         if event == "PLAYER_ENTERING_WORLD" then addon.DungeonMap:NewVisit() end
         if addon.AttachMap() then
+            addon.Atlas:Close()
             addon.DungeonMap:Close()
             addon.RefreshMap()
         end
         addon.DungeonMap:OpenInstance()
         addon.Navigation:Restore()
         if addon.Navigation:IsActive() then addon.Navigation:Update() end
+    elseif event == "PLAYER_REGEN_DISABLED" then
+        addon.Atlas:Close()
+    elseif event == "GAME_PAD_ACTIVE_CHANGED" then
+        if InputUtil.IsGamepadUIEnabled() then addon.Atlas:Close() end
+    elseif event == "MAP_EXPLORATION_UPDATED" then
+        addon.Atlas:ExplorationChanged()
     elseif event == "ENCOUNTER_START" then
         addon.DungeonMap:EncounterStarted(arg)
     elseif event == "BOSS_KILL" or event == "ENCOUNTER_END" then
@@ -71,7 +78,8 @@ for _, event in ipairs({"ADDON_LOADED", "PLAYER_LOGIN", "PLAYER_ENTERING_WORLD",
     "QUEST_TURNED_IN", "QUEST_REMOVED", "PLAYER_LEVEL_UP", "ZONE_CHANGED_INDOORS", "ZONE_CHANGED",
     "BOSS_KILL", "ENCOUNTER_START", "ENCOUNTER_END", "TRAINER_SERVICE_INFO_NAME_UPDATE", "QUEST_WATCH_LIST_CHANGED",
     "SUPER_TRACKING_CHANGED", "QUEST_POI_UPDATE", "CVAR_UPDATE", "ITEM_DATA_LOAD_RESULT",
-    "GET_ITEM_INFO_RECEIVED", "PLAYER_ROLES_ASSIGNED"}) do
+    "GET_ITEM_INFO_RECEIVED", "PLAYER_ROLES_ASSIGNED", "PLAYER_REGEN_DISABLED", "GAME_PAD_ACTIVE_CHANGED",
+    "MAP_EXPLORATION_UPDATED"}) do
     pcall(frame.RegisterEvent, frame, event)
 end
 

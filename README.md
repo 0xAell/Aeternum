@@ -50,6 +50,7 @@ Hover over a zone to see its recommended levels, on the Azeroth, continent, and 
 
 All 41 outdoor entrances appear on world, continent, and zone maps, including multi-door dungeons like Dire Maul, Uldaman, and Blackrock Mountain.
 
+- Open **Dungeon atlas** in the map tracking menu to zoom smoothly from Azeroth toward your pointer and drag across zone boundaries. Close zoom blends in WoW’s terrain art for Kalimdor and the Eastern Kingdoms. Open a dungeon and return to the same zoom and position when you go back.
 - Right-click any entrance (or click a trainer or quest pin) for a minimap bearing to the door.
 - Ten trickier entrances (The Deadmines, Ragefire Chasm, all four Scarlet Monastery wings, Alcaz Prison, Blackmaw Hold, Krol'dok Stronghold, and Shaper's Terrace) include mapped approach waypoints.
 - Directions survive `/reload`, pause automatically on another continent or inside an unrelated instance, and clear once you arrive.
@@ -107,9 +108,10 @@ Install directly from the **[CurseForge project page](https://www.curseforge.com
 | **Scroll** inside the boss guide | Read longer encounter and loot lists |
 | **Left-click** a boss skull | Open the boss menu for item links, previews, and encounter selection |
 | **Left-click** a trainer or quest pin | Browse lessons and prices, track a quest, or start directions |
-| **Scroll / drag** on a dungeon floor | Zoom in and pan around the floor |
-| **Back** button or **Right-click** empty floor | Return to the outdoor zone map (**Escape** closes the map) |
-| **Map tracking menu** (magnifying glass) | Open **Dungeons by level**, or toggle entrances, trainers, low-level quests, or all quest locations |
+| **Scroll / drag** in the atlas or on a dungeon floor | Zoom toward the pointer and pan |
+| **Middle-click** in the atlas or on a dungeon floor | Find your character in the atlas or fit the current floor |
+| **Right-click** empty map space | Go back from a dungeon floor or return from the atlas to the world map (**Escape** closes the map) |
+| **Map tracking menu** (magnifying glass) | Open **Dungeon atlas** or **Dungeons by level**, or change pin filters |
 | **Addon compartment** (minimap) → **Aeternum** | Open the map with **Dungeons by level** |
 
 ### Slash commands

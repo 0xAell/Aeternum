@@ -86,12 +86,24 @@ local function zoneUnderCursor(mapID, x, y, areaName)
     if info and zones[info.mapID] then return info end
 end
 
-local function applyRange(text, info, includeName, playerLevel)
-    local low, high = C_Map.GetMapLevels(info.mapID)
+local function rangeFor(mapID)
+    local low, high = C_Map.GetMapLevels(mapID)
     if not (addon.IsReadableNumber(low) and addon.IsReadableNumber(high) and low > 0 and high >= low) then
-        low, high = unpack(zones[info.mapID])
+        local fallback = zones[mapID]
+        if not fallback then return end
+        low, high = unpack(fallback)
     end
     local range = low == high and tostring(low) or ("%d–%d"):format(low, high)
+    return range, low, high
+end
+
+function addon.MapLevelRange(mapID)
+    local range = rangeFor(mapID)
+    if range then return ("%s %s"):format(LEVEL, range) end
+end
+
+local function applyRange(text, info, includeName, playerLevel)
+    local range, low, high = rangeFor(info.mapID)
     if includeName then
         text:SetText(("%s (%s)"):format(info.name, range))
     else
