@@ -10,6 +10,13 @@ local ROLE_ICON = {
     dps    = "|TInterface\\LFGFrame\\UI-LFG-ICON-PORTRAITROLES:14:14:0:0:64:64:20:39:22:41|t",
 }
 
+local ROLES = {
+    TANK = {"Tank", "t", ROLE_ICON.tank, "66b3ff"},
+    HEALER = {"Healer", "h", ROLE_ICON.healer, "55ee66"},
+    DAMAGER = {"DPS", "d", ROLE_ICON.dps, "ff6655"},
+}
+local ROLE_ORDER = {"TANK", "HEALER", "DAMAGER"}
+
 -- Dispel and threat tags colored to match Blizzard's DebuffTypeColor conventions.
 local DISPEL = {
     magic     = { label = "Magic",      hex = "3399ff" },
@@ -116,6 +123,7 @@ local SPELLS = {
     -- Hunter
     [19801] = { 136020, "Tranquilizing Shot" },
     [1499]  = { 135834, "Freezing Trap" },
+    [5116]  = { 135860, "Concussive Shot" },
     [5384]  = { 132293, "Feign Death" },
     [19503] = { 132153, "Scatter Shot" },
     [20736] = { 135736, "Distracting Shot" },
@@ -141,6 +149,10 @@ local SPELLS = {
 local function formatTag(key)
     local info = DISPEL[key]
     if not info then return "{" .. key .. "}" end
+    if key ~= "enrage" and AuraUtil and AuraUtil.GetAuraBorderColor then
+        local color = AuraUtil.GetAuraBorderColor(key == "magicBuff" and "Magic" or info.label)
+        if color and color.WrapTextInColorCode then return color:WrapTextInColorCode(info.label) end
+    end
     return ("|cff%s%s|r"):format(info.hex, info.label)
 end
 
@@ -153,24 +165,17 @@ function Tactics:ForBoss(bossID)
     return addon.tacticsData and bossID and addon.tacticsData[bossID] or nil
 end
 
-function Tactics:DispelText(entry)
-    if not entry or not entry.dispels or #entry.dispels == 0 then return nil end
-    local parts = {}
-    for _, key in ipairs(entry.dispels) do
-        if DISPEL[key] then parts[#parts + 1] = formatTag(key) end
-    end
-    return #parts > 0 and table.concat(parts, " · ") or nil
-end
-
 local function spellTexture(spellID)
     if C_Spell and C_Spell.GetSpellTexture then
         local texture = C_Spell.GetSpellTexture(spellID)
-        if addon.IsReadableNumber(texture) or (type(texture) == "string" and texture ~= "") then
+        if not (issecretvalue and issecretvalue(texture)) and (addon.IsReadableNumber(texture) and texture > 0
+            or type(texture) == "string" and texture ~= "") then
             return texture
         end
     end
-    local info = SPELLS[spellID]
-    return info and info[1] or nil
+    if SPELLS[spellID] then return SPELLS[spellID][1] end
+    local record = addon.castSpells[spellID]
+    return record and record[2] > 0 and record[2] or nil
 end
 
 function Tactics:SpellIcon(spellID, size)
@@ -181,15 +186,29 @@ function Tactics:SpellIcon(spellID, size)
 end
 
 function Tactics:SpellName(spellID)
+    local live = C_Spell and C_Spell.GetSpellName and C_Spell.GetSpellName(spellID)
+    if not (issecretvalue and issecretvalue(live)) and type(live) == "string" and live ~= "" then return live end
     local info = SPELLS[spellID]
-    return info and info[2] or ("Spell " .. tostring(spellID))
+    local record = addon.castSpells[spellID]
+    return info and info[2] or record and record[1] or ("Spell " .. tostring(spellID))
 end
 
-local function spellKnown(spellID)
-    if not (C_SpellBook and C_SpellBook.IsSpellKnown) then return false end
-    local known = C_SpellBook.IsSpellKnown(spellID)
-    if issecretvalue and issecretvalue(known) then return false end
-    return known == true
+local PET_SPELL = {[19505]=true, [19244]=true, [6358]=true}
+local function learnedSpell(spellID)
+    if not (C_SpellBook and C_SpellBook.IsSpellKnown) then return end
+    local banks = Enum and Enum.SpellBookSpellBank
+    if PET_SPELL[spellID] and not (banks and banks.Pet) then return end
+    local bank = banks and (PET_SPELL[spellID] and banks.Pet or banks.Player)
+    local function known(id)
+        local result = C_SpellBook.IsSpellKnown(id, bank)
+        return not (issecretvalue and issecretvalue(result)) and result == true
+    end
+    if known(spellID) then return spellID end
+    -- A spellbook may retain only a higher rank or the active override.
+    if C_Spell and C_Spell.GetSpellIDForSpellIdentifier then
+        local ranked = C_Spell.GetSpellIDForSpellIdentifier(Tactics:SpellName(spellID))
+        if addon.IsReadableNumber(ranked) and ranked ~= spellID and known(ranked) then return ranked end
+    end
 end
 
 local function playerContext()
@@ -206,13 +225,8 @@ local function playerContext()
         if not (issecretvalue and issecretvalue(token)) and type(token) == "string" then raceFile = token end
         if addon.IsReadableNumber(id) then raceID = id end
     end
-    local level = 60
-    if UnitLevel then
-        local raw = UnitLevel("player")
-        if addon.IsReadableNumber(raw) and raw > 0 then level = raw end
-    end
     return classFile, CLASS_INFO[classFile], raceFile == "Dwarf" or raceID == 3,
-        raceFile == "Scourge" or raceID == 5, level
+        raceFile == "Scourge" or raceID == 5
 end
 
 function Tactics:PlayerClass()
@@ -220,11 +234,35 @@ function Tactics:PlayerClass()
     return classFile, info
 end
 
-local function tagSet(entry)
-    local has = {}
+local function tagSet(entry, bossID)
+    local has = {names={}}
     for _, tag in ipairs(entry.tags or {}) do has[tag] = true end
     for _, key in ipairs(entry.dispels or {}) do has[key] = true end
+    local cast = addon.bossCasts[bossID]
+    local function record(spells)
+        for _, id in ipairs(spells or {}) do
+            local spell = addon.castSpells[id]
+            for i = 3, 4 do
+                local key = spell[i]
+                if key then
+                    has[key] = true
+                    if not has.names[key] then has.names[key] = id end
+                end
+            end
+        end
+    end
+    if cast then record(cast.live); record(cast.reference) end
     return has
+end
+
+function Tactics:DispelText(entry, bossID)
+    if not entry then return end
+    local has = tagSet(entry, bossID)
+    local parts = {}
+    for _, key in ipairs({"magic", "magicBuff", "curse", "disease", "poison", "bleed", "enrage"}) do
+        if has[key] then parts[#parts + 1] = formatTag(key) end
+    end
+    return #parts > 0 and table.concat(parts, " · ") or nil
 end
 
 local function joinWords(words, sep)
@@ -236,36 +274,58 @@ end
 
 local function ccTypes(has)
     local list = {}
-    if has.fear then list[#list + 1] = "Fear" end
-    if has.sleep then list[#list + 1] = "Sleep" end
-    if has.charm then list[#list + 1] = "Charm" end
+    for _, key in ipairs({"fear", "sleep", "charm"}) do
+        if has[key] then
+            list[#list + 1] = has.names[key] and Tactics:SpellName(has.names[key]) or key
+        end
+    end
     return joinWords(list, "/")
 end
 
+local function playerRole()
+    local role = UnitGroupRolesAssigned and UnitGroupRolesAssigned("player")
+    if not (issecretvalue and issecretvalue(role)) then return ROLES[role] end
+end
+
+local TANK_ACTION = {[355]=true, [1161]=true, [6795]=true, [99]=true}
+
 local function pushTip(tips, seen, spellID, text)
-    if #tips >= 4 or seen[spellID] then return end
+    if #tips >= 4 or seen[spellID] or TANK_ACTION[spellID] and seen.role and seen.role ~= ROLES.TANK then return end
+    local rank = learnedSpell(spellID)
+    if not rank then return end
     seen[spellID] = true
+    -- When the encounter data identifies the aura, show what to remove on this boss.
+    local named = text:gsub("{(%a+)}", function(key)
+        local id = seen.targets[key]
+        local label = formatTag(key)
+        if not id then return label end
+        local name = Tactics:SpellName(id)
+        return name == DISPEL[key].label and label or (label .. " (" .. name .. ")")
+    end)
     tips[#tips + 1] = {
-        spellID = spellID,
+        spellID = rank,
+        baseID = spellID,
         name = Tactics:SpellName(spellID),
         icon = Tactics:SpellIcon(spellID, 14),
-        text = Tactics:FormatText(text),
+        text = named,
     }
 end
 
-local function buildClassTips(classFile, entry, has, isDwarf, level, tips, seen)
+local function buildClassTips(classFile, entry, has, tips, seen)
     local kick = entry.kick or "priority casts"
-    local purge = entry.purge and (" (" .. entry.purge .. ")") or ""
+    local purge = not has.names.magicBuff and entry.purge and (" (" .. entry.purge .. ")") or ""
 
     if classFile == "SHAMAN" then
         if has.fear or has.sleep or has.charm then
-            pushTip(tips, seen, 8143, "Drop Tremor Totem to break " .. ccTypes(has) .. ".")
+            pushTip(tips, seen, 8143, "Place Tremor Totem before " .. ccTypes(has) .. ". Keep your party in range.")
         end
         if has.poison then
             pushTip(tips, seen, 8166, "Drop Poison Cleansing Totem to clear {poison}.")
+            if not seen[8166] then pushTip(tips, seen, 526, "Clear {poison} from the affected ally.") end
         end
         if has.disease then
             pushTip(tips, seen, 8170, "Drop Disease Cleansing Totem to clear {disease}.")
+            if not seen[8170] then pushTip(tips, seen, 2870, "Clear {disease} from the affected ally.") end
         end
         if has.magicBuff then
             pushTip(tips, seen, 370, "Purge enemy {magicBuff}" .. purge .. ".")
@@ -276,36 +336,29 @@ local function buildClassTips(classFile, entry, has, isDwarf, level, tips, seen)
         if has.fire then pushTip(tips, seen, 8184, "Drop Fire Resistance Totem to soften Fire damage.") end
         if has.frost then pushTip(tips, seen, 8181, "Drop Frost Resistance Totem to soften Frost damage.") end
         if has.nature then pushTip(tips, seen, 10595, "Drop Nature Resistance Totem for party Nature damage.") end
-        if has.caster or has.magic then
-            pushTip(tips, seen, 8177, "Drop Grounding Totem to soak single-target spells.")
-        end
-        if #tips == 0 then
-            if has.adds or has.root or has.snare then
-                pushTip(tips, seen, 2484, "Use Earthbind Totem to slow adds or runners.")
-            else
-                pushTip(tips, seen, 8177, "Keep totems positioned safely; drop Stoneclaw/Grounding if needed.")
-            end
+        if has.adds then
+            pushTip(tips, seen, 2484, "Keep loose adds in Earthbind Totem's slow while the tank collects them.")
         end
 
     elseif classFile == "PALADIN" then
         if has.magic or has.poison or has.disease then
             local types = {}
-            if has.magic then types[#types + 1] = "{magic}" end
+            local cleanse = learnedSpell(4987)
+            if cleanse and has.magic then types[#types + 1] = "{magic}" end
             if has.poison then types[#types + 1] = "{poison}" end
             if has.disease then types[#types + 1] = "{disease}" end
-            local usePurify = not has.magic and level < 42 and not spellKnown(4987)
-            local spellID = usePurify and 1152 or 4987
-            local verb = usePurify and "Purify " or "Cleanse "
-            pushTip(tips, seen, spellID, verb .. joinWords(types, " and ") .. " debuffs promptly.")
+            if #types > 0 then
+                pushTip(tips, seen, cleanse and 4987 or 1152, "Remove " .. joinWords(types, " and ") .. " from allies.")
+            end
         end
         if has.bleed or has.physicalBurst then
-            pushTip(tips, seen, 1022, "Blessing of Protection clears {bleed} or saves a focused ally.")
+            pushTip(tips, seen, 1022, "Use Blessing of Protection on a non-tank ally threatened by physical damage.")
         end
         if has.root or has.snare then
             pushTip(tips, seen, 1044, "Blessing of Freedom frees rooted or snared party members.")
         end
-        if has.interrupt then
-            pushTip(tips, seen, 853, "Stun " .. kick .. " (or priority adds) with Hammer of Justice.")
+        if has.interrupt and has.adds then
+            pushTip(tips, seen, 853, "Use Hammer of Justice on a stunnable caster add.")
         end
         if has.undead and has.adds then
             pushTip(tips, seen, 2878, "Turn Undead can temporarily control an extra undead add.")
@@ -313,13 +366,10 @@ local function buildClassTips(classFile, entry, has, isDwarf, level, tips, seen)
         if has.fire then pushTip(tips, seen, 19891, "Run Fire Resistance Aura to reduce party Fire damage.") end
         if has.frost then pushTip(tips, seen, 19888, "Run Frost Resistance Aura to reduce party Frost damage.") end
         if has.shadow then pushTip(tips, seen, 19876, "Run Shadow Resistance Aura to reduce party Shadow damage.") end
-        if #tips == 0 then
-            pushTip(tips, seen, 6940, "Use Blessing of Sacrifice on tank spikes; save Divine Shield for emergencies.")
-        end
 
     elseif classFile == "PRIEST" then
-        if has.fear and isDwarf then
-            pushTip(tips, seen, 6346, "Keep Fear Ward on the tank before Fear casts.")
+        if has.fear then
+            pushTip(tips, seen, 6346, "Protect the party's designated fear-break target before " .. ccTypes(has) .. ".")
         end
         if has.magic and has.magicBuff then
             pushTip(tips, seen, 527, "Dispel {magic} on party and strip enemy {magicBuff}" .. purge .. ".")
@@ -329,7 +379,7 @@ local function buildClassTips(classFile, entry, has, isDwarf, level, tips, seen)
             pushTip(tips, seen, 527, "Offensive Dispel Magic strips enemy {magicBuff}" .. purge .. ".")
         end
         if has.disease then
-            local useCure = level < 32 and not spellKnown(552)
+            local useCure = not learnedSpell(552)
             local spellID = useCure and 528 or 552
             local verb = useCure and "Cure Disease" or "Abolish Disease"
             pushTip(tips, seen, spellID, "Use " .. verb .. " to clear {disease} debuffs.")
@@ -344,10 +394,7 @@ local function buildClassTips(classFile, entry, has, isDwarf, level, tips, seen)
             pushTip(tips, seen, 15487, "Shadow Priests can Silence " .. kick .. ".")
         end
         if has.aoe then
-            pushTip(tips, seen, 596, "Pre-shield fragile targets and use Prayer of Healing after AoE.")
-        end
-        if #tips == 0 then
-            pushTip(tips, seen, 586, "Use Fade on add spawns or threat resets; shield focused targets.")
+            pushTip(tips, seen, 596, "Use Prayer of Healing after the party takes area damage.")
         end
 
     elseif classFile == "MAGE" then
@@ -355,7 +402,7 @@ local function buildClassTips(classFile, entry, has, isDwarf, level, tips, seen)
             pushTip(tips, seen, 475, "Decurse {curse} immediately with Remove Lesser Curse.")
         end
         if has.interrupt then
-            pushTip(tips, seen, 2139, "Counterspell " .. kick .. " on cooldown.")
+            pushTip(tips, seen, 2139, "Save Counterspell for " .. kick .. ".")
         end
         if has.adds and (has.humanoid or has.beast) then
             pushTip(tips, seen, 118, "Polymorph an extra humanoid/beast add to simplify the pull.")
@@ -363,23 +410,20 @@ local function buildClassTips(classFile, entry, has, isDwarf, level, tips, seen)
         if has.frost then pushTip(tips, seen, 6143, "Keep Frost Ward up to absorb incoming Frost bursts.") end
         if has.fire then pushTip(tips, seen, 543, "Keep Fire Ward up to absorb incoming Fire bursts.") end
         if has.root or has.snare or has.knockback then
-            pushTip(tips, seen, 1953, "Blink out of roots, snares, or dangerous ground effects.")
+            pushTip(tips, seen, 1953, "Use Blink to get clear if movement effects leave you in danger.")
         end
         if has.adds then
             pushTip(tips, seen, 122, "Frost Nova loose melee adds away from the healer.")
         end
-        if #tips == 0 then
-            pushTip(tips, seen, 11958, "Save Ice Block to drop aggro, clear debuffs, or survive bursts.")
-        end
 
     elseif classFile == "ROGUE" then
         if has.interrupt then
-            pushTip(tips, seen, 1766, "Kick " .. kick .. " reliably on cooldown.")
+            pushTip(tips, seen, 1766, "Save Kick for " .. kick .. ".")
         end
         if has.adds and has.humanoid then
-            pushTip(tips, seen, 6770, "Sap an extra humanoid add pre-pull; Blind loose adds if needed.")
-        elseif has.adds or has.caster then
-            pushTip(tips, seen, 408, "Use Kidney Shot / Gouge to lock down priority adds or casts.")
+            pushTip(tips, seen, 6770, "Sap a susceptible humanoid before the pull and leave it out of cleave range.")
+        elseif has.adds then
+            pushTip(tips, seen, 408, "Stun a loose add with Kidney Shot if it is susceptible.")
         end
         if has.threatDrop or has.cleave or has.physicalBurst then
             pushTip(tips, seen, 1966, "Stay behind the boss and Feint to avoid pulling aggro.")
@@ -387,36 +431,31 @@ local function buildClassTips(classFile, entry, has, isDwarf, level, tips, seen)
         if has.root or has.snare then
             pushTip(tips, seen, 1856, "Vanish can break roots/snares or drop aggro in emergencies.")
         end
-        if #tips == 0 then
-            pushTip(tips, seen, 5277, "Stay behind the boss; pop Evasion or Vanish if you pull threat.")
-        end
 
     elseif classFile == "WARRIOR" then
         if has.fear then
             pushTip(tips, seen, 18499, "Pop Berserker Rage before or during Fear to stay on the boss.")
         end
         if has.interrupt then
-            pushTip(tips, seen, 6552, "Interrupt " .. kick .. " with Pummel or Shield Bash.")
+            pushTip(tips, seen, 6552, "Interrupt " .. kick .. " with Pummel.")
+            if not seen[6552] then pushTip(tips, seen, 72, "Equip a shield to interrupt " .. kick .. ".") end
         end
         if has.disarmable then
             pushTip(tips, seen, 676, "Disarm the boss to slash heavy weapon and cleave damage.")
         end
         if has.physicalBurst or has.enrage then
-            pushTip(tips, seen, 871, "Save Shield Wall for heavy physical bursts or {enrage}.")
+            pushTip(tips, seen, 871, "Save Shield Wall for the hardest incoming hits.")
         end
         if has.adds then
             pushTip(tips, seen, 1161, "Pick up adds quickly; use Challenging Shout if mobs scatter.")
         end
-        if has.threatDrop or has.knockback then
-            pushTip(tips, seen, 355, "Hold Taunt / Mocking Blow ready after threat drops or knockbacks.")
-        end
-        if #tips == 0 then
-            pushTip(tips, seen, 1160, "Keep Demoralizing Shout up; face boss away if tanking, behind if DPS.")
+        if has.threatDrop then
+            pushTip(tips, seen, 355, "Save Taunt to regain the boss after a threat loss.")
         end
 
     elseif classFile == "DRUID" then
         if has.poison then
-            local useCure = level < 26 and not spellKnown(2893)
+            local useCure = not learnedSpell(2893)
             local spellID = useCure and 8946 or 2893
             local verb = useCure and "Cure Poison" or "Abolish Poison"
             pushTip(tips, seen, spellID, "Keep " .. verb .. " rolling to clear {poison}.")
@@ -425,45 +464,36 @@ local function buildClassTips(classFile, entry, has, isDwarf, level, tips, seen)
             pushTip(tips, seen, 2782, "Decurse {curse} promptly with Remove Curse.")
         end
         if has.interrupt then
-            pushTip(tips, seen, 16979, "Interrupt " .. kick .. " with Feral Charge or Bash.")
+            pushTip(tips, seen, 16979, "Use Feral Charge in Bear Form to interrupt " .. kick .. ".")
         end
         if has.adds and (has.beast or has.dragonkin) then
             pushTip(tips, seen, 2637, "Hibernate an extra beast or dragonkin add.")
         end
         if has.aoe then
-            pushTip(tips, seen, 740, "Save Barkskin + Tranquility for heavy group AoE phases.")
+            pushTip(tips, seen, 740, "Channel Tranquility from a safe spot during heavy party damage.")
         end
         if has.physicalBurst or has.cleave or has.enrage then
-            pushTip(tips, seen, 99, "Keep Demoralizing Roar up as bear; use Barkskin on spikes.")
+            pushTip(tips, seen, 99, "Keep Demoralizing Roar up while tanking the boss in Bear Form.")
         end
         if has.threatDrop then
             pushTip(tips, seen, 6795, "Bear tanks hold Growl ready after threat drops.")
         end
-        if #tips == 0 then
-            pushTip(tips, seen, 22812, "Use Barkskin for incoming bursts; Bash priority adds if loose.")
-        end
 
     elseif classFile == "HUNTER" then
-        if has.enrage then
-            pushTip(tips, seen, 19801, "Strip {enrage} with Tranquilizing Shot (once learned at 60).")
+        if has.names.enrage then
+            pushTip(tips, seen, 19801, "Remove " .. Tactics:SpellName(has.names.enrage) .. " with Tranquilizing Shot.")
         end
         if has.stealth then
             pushTip(tips, seen, 1543, "Drop Flare to reveal stealthed ambushes early.")
         end
         if has.adds then
-            pushTip(tips, seen, 1499, "Freezing Trap an add on pull; Distracting Shot loose mobs off healer.")
+            pushTip(tips, seen, 1499, "Place Freezing Trap in the path of an add that your party wants to control.")
         end
         if has.nature then
             pushTip(tips, seen, 20043, "Swap to Aspect of the Wild to cut party Nature damage.")
         end
-        if has.interrupt then
-            pushTip(tips, seen, 19503, "Disrupt " .. kick .. " with Scatter Shot or Intimidation.")
-        end
-        if has.caster then
-            pushTip(tips, seen, 3034, "Apply Viper Sting on long caster fights to drain boss mana.")
-        end
-        if #tips == 0 then
-            pushTip(tips, seen, 5384, "Feign Death to shed threat safely; keep pet out of cleaves and AoE.")
+        if has.interrupt and has.adds then
+            pushTip(tips, seen, 19503, "Use Scatter Shot to stop a susceptible caster add.")
         end
 
     elseif classFile == "WARLOCK" then
@@ -480,9 +510,6 @@ local function buildClassTips(classFile, entry, has, isDwarf, level, tips, seen)
         if has.adds and (has.demon or has.elemental) then
             pushTip(tips, seen, 710, "Banish an extra demon or elemental add.")
         end
-        if has.caster then
-            pushTip(tips, seen, 1714, "Apply Curse of Tongues to slow boss spellcasts.")
-        end
         if has.shadow then
             pushTip(tips, seen, 6229, "Keep Shadow Ward up to absorb incoming Shadow bursts.")
         end
@@ -492,18 +519,15 @@ local function buildClassTips(classFile, entry, has, isDwarf, level, tips, seen)
         if has.physicalBurst or has.cleave or has.enrage then
             pushTip(tips, seen, 702, "Curse of Weakness helps soften heavy physical hits.")
         end
-        if #tips == 0 then
-            pushTip(tips, seen, 20707, "Keep Soulstone on the healer and watch threat on burst pulls.")
-        end
     end
 end
 
 function Tactics:ClassTips(bossID)
     local entry = self:ForBoss(bossID)
-    local classFile, classInfo, isDwarf, isUndead, level = playerContext()
+    local classFile, classInfo, isDwarf, isUndead = playerContext()
     if not entry or not classFile then return {}, classFile, classInfo end
-    local has = tagSet(entry)
-    local tips, seen = {}, {}
+    local has = tagSet(entry, bossID)
+    local tips, seen = {}, {targets=has.names, role=playerRole()}
 
     if entry.c and entry.c[classFile] then
         for _, override in ipairs(entry.c[classFile]) do
@@ -511,7 +535,7 @@ function Tactics:ClassTips(bossID)
         end
     end
 
-    buildClassTips(classFile, entry, has, isDwarf, level, tips, seen)
+    buildClassTips(classFile, entry, has, tips, seen)
 
     -- High-impact racial counters when applicable and room permits.
     if isDwarf and (has.poison or has.disease or has.bleed) then
@@ -527,16 +551,23 @@ function Tactics:ClassTips(bossID)
     return tips, classFile, classInfo
 end
 
+local function roleLine(tooltip, role, entry, classInfo)
+    local class = classInfo and ("|cff" .. classInfo.hex .. classInfo.name .. "|r · ") or ""
+    local label = role[3] .. " " .. class .. "|cff" .. role[4] .. role[1] .. ":|r "
+    tooltip:AddLine(label .. Tactics:FormatText(entry[role[2]]), 1, 1, 1, true)
+end
+
 function Tactics:AddTooltip(tooltip, boss, full)
     local entry = boss and self:ForBoss(boss.id)
     if not entry then return end
-    local dispels = self:DispelText(entry)
+    local dispels = self:DispelText(entry, boss.id)
     local tips, _, classInfo = self:ClassTips(boss.id)
+    local assigned = playerRole()
 
     if full then
         tooltip:SetText(boss.name .. " — Tactics")
         if dispels then
-            tooltip:AddLine("Dispels: " .. dispels, 1, 1, 1, true)
+            tooltip:AddLine("Effects: " .. dispels, 1, 1, 1, true)
         end
         if classInfo and #tips > 0 then
             tooltip:AddLine(" ")
@@ -546,18 +577,28 @@ function Tactics:AddTooltip(tooltip, boss, full)
             end
         end
         tooltip:AddLine(" ")
-        tooltip:AddLine(ROLE_ICON.tank .. " |cff66b3ffTank:|r " .. self:FormatText(entry.t), 1, 1, 1, true)
-        tooltip:AddLine(ROLE_ICON.healer .. " |cff55ee66Healer:|r " .. self:FormatText(entry.h), 1, 1, 1, true)
-        tooltip:AddLine(ROLE_ICON.dps .. " |cffff6655DPS:|r " .. self:FormatText(entry.d), 1, 1, 1, true)
+        if assigned then roleLine(tooltip, assigned, entry, classInfo) end
+        for _, token in ipairs(ROLE_ORDER) do
+            if ROLES[token] ~= assigned then roleLine(tooltip, ROLES[token], entry) end
+        end
+        local casts = addon.bossCasts[boss.id]
+        if not (casts and casts.live) then
+            tooltip:AddLine("Guide-based tactics · awaiting a recorded Forever cast", .65, .65, .65, true)
+        end
         return
     end
 
     -- Compact boss skull hover preview on the dungeon map.
     if dispels then
-        tooltip:AddLine("Dispels: " .. dispels, 1, 1, 1, true)
+        tooltip:AddLine("Effects: " .. dispels, 1, 1, 1, true)
+    end
+    if assigned then
+        roleLine(tooltip, assigned, entry, classInfo)
+    elseif #tips == 0 then
+        for _, token in ipairs(ROLE_ORDER) do roleLine(tooltip, ROLES[token], entry) end
     end
     if classInfo and #tips > 0 then
-        tooltip:AddLine(("|cff%s%s:|r"):format(classInfo.hex, classInfo.name))
+        if not assigned then tooltip:AddLine(("|cff%s%s:|r"):format(classInfo.hex, classInfo.name)) end
         local limit = math.min(#tips, 2)
         for i = 1, limit do
             tooltip:AddLine(tips[i].icon .. " " .. tips[i].text, .95, .95, .95, true)
@@ -565,20 +606,32 @@ function Tactics:AddTooltip(tooltip, boss, full)
     end
 end
 
-local function roleRow(menu, boss, icon, colorHex, roleLabel, text, dispels)
-    local row = menu:CreateButton(("%s |cff%s%s TLDR|r"):format(icon, colorHex, roleLabel))
+local function roleRow(menu, boss, role, entry, dispels)
+    local row = menu:CreateButton(("%s |cff%s%s TLDR|r"):format(role[3], role[4], role[1]))
     row:SetTooltip(function(tooltip)
-        tooltip:SetText(boss.name .. " — " .. roleLabel)
-        if dispels then tooltip:AddLine("Dispels: " .. dispels, 1, 1, 1, true) end
-        tooltip:AddLine(text, 1, 1, 1, true)
+        tooltip:SetText(boss.name .. " — " .. role[1])
+        if dispels then tooltip:AddLine("Effects: " .. dispels, 1, 1, 1, true) end
+        tooltip:AddLine(Tactics:FormatText(entry[role[2]]), 1, 1, 1, true)
     end)
     return row
+end
+
+local function castMenu(parent, heading, ids)
+    if not ids then return end
+    local menu = parent:CreateButton(heading)
+    for _, id in ipairs(ids) do
+        local spell = addon.castSpells[id]
+        local label = Tactics:SpellIcon(id, 16) .. " " .. Tactics:SpellName(id)
+        if spell[3] then label = label .. " · " .. formatTag(spell[3]) end
+        local row = menu:CreateButton(label)
+        row:SetTooltip(function(tooltip) tooltip:SetSpellByID(id) end)
+    end
 end
 
 function Tactics:AddMenu(menu, boss, linkSpell)
     local entry = boss and self:ForBoss(boss.id)
     if not entry then return nil end
-    local dispels = self:DispelText(entry)
+    local dispels = self:DispelText(entry, boss.id)
     local label = TACTICS_ICON .. " Tactics" .. (dispels and (" · " .. dispels) or "")
     local sub = menu:CreateButton(label)
     sub:SetTooltip(function(tooltip)
@@ -586,14 +639,14 @@ function Tactics:AddMenu(menu, boss, linkSpell)
     end)
 
     if dispels then
-        sub:CreateTitle("Dispels: " .. dispels)
+        sub:CreateTitle("Effects: " .. dispels)
     end
 
     local tips, _, classInfo = self:ClassTips(boss.id)
     if classInfo and #tips > 0 then
         sub:CreateTitle(("|cff%s%s Checklist|r"):format(classInfo.hex, classInfo.name))
         for _, tip in ipairs(tips) do
-            local tipLabel = self:SpellIcon(tip.spellID, 16) .. " " .. tip.name
+            local tipLabel = self:SpellIcon(tip.baseID, 16) .. " " .. tip.name
             local row = sub:CreateButton(tipLabel, function()
                 if linkSpell then linkSpell("spell", tip.spellID, tip.name) end
             end)
@@ -606,8 +659,15 @@ function Tactics:AddMenu(menu, boss, linkSpell)
     end
 
     sub:CreateDivider()
-    roleRow(sub, boss, ROLE_ICON.tank, "66b3ff", "Tank", self:FormatText(entry.t), dispels)
-    roleRow(sub, boss, ROLE_ICON.healer, "55ee66", "Healer", self:FormatText(entry.h), dispels)
-    roleRow(sub, boss, ROLE_ICON.dps, "ff6655", "DPS", self:FormatText(entry.d), dispels)
+    local assigned = playerRole()
+    if assigned then roleRow(sub, boss, assigned, entry, dispels) end
+    for _, token in ipairs(ROLE_ORDER) do
+        if ROLES[token] ~= assigned then roleRow(sub, boss, ROLES[token], entry, dispels) end
+    end
+    local casts = addon.bossCasts[boss.id]
+    if casts then
+        castMenu(sub, "Recorded Forever casts", casts.live)
+        castMenu(sub, "Reference spells", casts.reference)
+    end
     return sub
 end

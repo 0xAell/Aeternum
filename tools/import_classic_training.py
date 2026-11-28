@@ -17,12 +17,12 @@ COLUMNS = {
 }
 
 
-def extract(path):
+def extract(path, requested=COLUMNS):
     columns = {}
     with gzip.open(path, "rt", encoding="utf-8") as source:
         for line in source:
             schema = re.match(r'CREATE TABLE \x60(\w+)\x60', line)
-            if schema and schema[1] in COLUMNS:
+            if schema and schema[1] in requested:
                 table = schema[1]
                 names = []
                 for col in source:
@@ -31,7 +31,7 @@ def extract(path):
                     name = re.match(r'\s+\x60(\w+)\x60', col)
                     if name:
                         names.append(name[1])
-                columns[table] = [names.index(name) for name in COLUMNS[table]]
+                columns[table] = [names.index(name) for name in requested[table]]
             insert = re.match(r'INSERT INTO \x60(\w+)\x60 VALUES ', line)
             if insert and insert[1] in columns:
                 table = insert[1]

@@ -24,10 +24,21 @@ addon.tacticsData = {
         tags = {"humanoid"},
     },
     [644] = {
-        t = "Tank Rhahk'Zor and his two Defias Watchmen; brief stun from Rhahk'Zor Slam drops threat briefly.",
-        h = "Keep tank up through initial Watchmen burst and Rhahk'Zor Slam.",
-        d = "Kill the two Defias Watchmen first, then burn Rhahk'Zor (ease off briefly during his Slam stun).",
-        tags = {"adds","threatDrop","humanoid"},
+        t = "Pull Rhahk'Zor apart from the two Defias Watchmen if you can. If they join, hold the free "
+            .. "Watchman through Slam.",
+        h = "Top the tank before Rhahk'Zor Slam. The tank takes hits from any uncontrolled Watchmen during "
+            .. "the stun.",
+        d = "Control one Watchman and kill the other if both join. Turn back to Rhahk'Zor once the tank is "
+            .. "safe.",
+        tags = {"adds", "physicalBurst", "humanoid"},
+        c = {
+            MAGE = {
+                {118, "Polymorph one Defias Watchman if both follow Rhahk'Zor."},
+            },
+            ROGUE = {
+                {6770, "Sap a Watchman before the pull if your group will fight Rhahk'Zor with his guards."},
+            },
+        },
     },
     [645] = {
         t = "Hold Cookie below deck and interrupt Cookie's Cooking self-heal.",
@@ -37,19 +48,20 @@ addon.tacticsData = {
         kick = "Cookie's Cooking",
     },
     [646] = {
-        t = "Kill his two Defias Blackguards first; at 66% and 33% Smite Stomp stuns everyone while he swaps "
-            .. "weapons — re-aggro fast!",
-        h = "Top tank before 66% and 33% weapon swaps; he hits much harder with the 2H hammer (Thrash + Smite Slam).",
-        d = "Kill the two stealth Blackguards first; hold DPS for 1s after each Smite Stomp so the tank retakes "
-            .. "aggro.",
-        tags = {"adds","physicalBurst","threatDrop","disarmable","humanoid"},
+        t = "Hold both Blackguards while the group kills them. Keep Smite in front of you as he comes back "
+            .. "from the weapons chest.",
+        h = "Top the tank before Smite Stomp stuns the group. His two-handed swings can land in quick "
+            .. "succession after the swap.",
+        d = "Kill both Blackguards before pushing Smite into his first weapon swap. They can still attack "
+            .. "while the group is stunned.",
+        tags = {"adds", "physicalBurst", "humanoid"},
     },
     [647] = {
-        t = "Face Captain Greenskin away so Cleave never hits melee; grab his pirate adds cleanly.",
-        h = "Cleanse {poison} Poisoned Harpoon quickly and heal through add burst.",
-        d = "Kill his pirate adds first, stand behind Greenskin for Cleave, and cure {poison} Poisoned Harpoon.",
+        t = "Face Greenskin away from the party for Cleave and pick up his pirate crew.",
+        h = "Remove {poison} Poisoned Harpoon from the tank. Stay clear of Greenskin's frontal cleave.",
+        d = "Kill the low-health Companion, then attack Greenskin from behind. Control the remaining pirates.",
         dispels = {"poison"},
-        tags = {"adds","cleave","poison","humanoid"},
+        tags = {"adds", "cleave", "poison", "humanoid"},
     },
     [1663] = {
         t = "Clear adjacent cells first so Intimidating Shout fear cannot pull extra Defias!",
@@ -93,11 +105,16 @@ addon.tacticsData = {
         tags = {"humanoid"},
     },
     [1763] = {
-        t = "Clear goblin smelters in the foundry first; Molten Metal slows attack and move speed.",
-        h = "Top whoever gets hit by Molten Metal fire DoT.",
-        d = "Clear foundry adds first; interrupt Molten Metal if possible and burn Gilnid.",
-        tags = {"adds","interrupt","fire","humanoid"},
-        kick = "Molten Metal",
+        t = "Gather Gilnid and the workers who enter with him. Keep Gilnid in reach of melee when Molten "
+            .. "Metal slows someone.",
+        h = "Heal the player hit by Molten Metal. Give them room to reposition while they are slowed.",
+        d = "Focus Gilnid while the tank holds the workers. Move early if Molten Metal slows you.",
+        tags = {"adds", "snare", "fire", "humanoid"},
+        c = {
+            PALADIN = {
+                {1044, "Use Blessing of Freedom on the player slowed by Molten Metal."},
+            },
+        },
     },
     [1853] = {
         t = "Hold Gandling in the study; if teleported to a side room, kill the skeletons fast to reopen the door.",
@@ -122,10 +139,10 @@ addon.tacticsData = {
         tags = {"humanoid"},
     },
     [3653] = {
-        t = "Harmless turtle patrolling the water; straightforward tank-and-spank.",
-        h = "Light single-target tank healing.",
-        d = "Simple burn — high armor so spells hit hardest.",
-        tags = {"beast"},
+        t = "Hold Kresh facing you and keep your mitigation up for Bite.",
+        h = "Watch the tank for sudden Bite damage. Kresh's high armor can prolong the fight.",
+        d = "Stay on Kresh. His shell reduces physical damage, so keep spell damage going if you have it.",
+        tags = {"physicalBurst", "beast"},
     },
     [3654] = {
         t = "Spawns after Naralex escort: prepare for Terrify fear, Naralex's Nightmare sleep, and Thundercrack "
@@ -297,11 +314,13 @@ addon.tacticsData = {
         tags = {"adds","magic","aoe","humanoid"},
     },
     [4421] = {
-        t = "Clear Charlga's guards first; hold her while interrupts handle Chain Bolt and Renew is dispelled.",
-        h = "Spread out from Chain Bolt bounces and heal through Mana Spike.",
-        d = "Spread out for Chain Bolt, interrupt casts, and strip {magicBuff} Renew immediately!",
+        t = "Use the hut to break line of sight and bring Charlga down to the group. Keep distance between "
+            .. "her ranged targets.",
+        h = "Spread out to limit Chain Bolt bounces. Help remove {magicBuff} Renew if you have an offensive "
+            .. "dispel.",
+        d = "Interrupt Chain Bolt and remove Renew. Hold damage during Purity's short immunity, then resume.",
         dispels = {"magicBuff"},
-        tags = {"adds","magicBuff","interrupt","nature","aoe","humanoid"},
+        tags = {"magicBuff", "interrupt", "nature", "aoe", "humanoid"},
         kick = "Chain Bolt",
         purge = "Renew",
     },
@@ -357,11 +376,12 @@ addon.tacticsData = {
         kick = "Flame Spike / Shadow Bolt",
     },
     [4627] = {
-        t = "Hold Arugal's Voidwalker steady; interrupt Dark Offering self-heal if possible.",
-        h = "Light single-target healing.",
-        d = "Interrupt Dark Offering heal and burn down.",
-        tags = {"interrupt","demon"},
-        kick = "Dark Offering",
+        t = "Keep the Voidwalkers apart where possible. Dark Offering lets one heal an ally.",
+        h = "Stay in sight of the tank if the Voidwalkers are separated. Expect a longer fight if they heal "
+            .. "each other.",
+        d = "Focus one Voidwalker at a time. Dark Offering is instant, so separating the healers matters more "
+            .. "than a kick.",
+        tags = {"demon"},
     },
     [4829] = {
         t = "Move Aku'mai immediately out of Poison Cloud; brace for Frenzied Rage attack speed at low HP.",
@@ -768,12 +788,18 @@ addon.tacticsData = {
         tags = {"cleave","humanoid"},
     },
     [7800] = {
-        t = "Tank Thermaplugg against a wall/pillar for Knock Away; hold him steady while ranged handle bomb "
-            .. "buttons.",
-        h = "Stay near a button if assigned; heal tank through Knock Away bursts and any bomb blasts.",
-        d = "Click the flashing gnome-face buttons immediately to stop Walking Bombs, or kill/CC bombs before "
-            .. "they explode!",
-        tags = {"adds","knockback","fire","aoe"},
+        t = "Keep your back to a pillar or wall. Recover threat after Knock Away while your ranged player "
+            .. "handles the bomb switches.",
+        h = "Stay clear of Walking Bombs. Watch the first player Thermaplugg turns toward after Knock Away.",
+        d = "Assign one ranged player to press the switch under each active bomb chute. Kill any Walking Bomb "
+            .. "that gets through.",
+        tags = {"adds", "knockback", "fire", "aoe"},
+        c = {
+            PALADIN = {
+                {1022, "If Knock Away sends Thermaplugg after a cloth wearer, use Blessing of Protection "
+                    .. "while the tank regains threat."},
+            },
+        },
     },
     [8127] = {
         t = "Tank Antu'sul and incoming basilisks; smash Earthgrab Totem and interrupt Flash Heal/Chain Lightning.",
@@ -948,7 +974,7 @@ addon.tacticsData = {
     [9042] = {
         t = "Hold Verek while DPS kill Stilgiss; pop defensives when Verek Enrages.",
         h = "Heal tank hard during {enrage} Enrage; decurse {curse} Curse of Blood (+physical damage taken).",
-        d = "Kill after Stilgiss; decurse {curse} Curse of Blood and strip {enrage} Enrage if able.",
+        d = "Kill after Stilgiss; decurse {curse} Curse of Blood and save a defensive for Enrage.",
         dispels = {"curse","enrage"},
         tags = {"curse","enrage","demon"},
     },
@@ -1016,10 +1042,13 @@ addon.tacticsData = {
         purge = "Bloodlust",
     },
     [9476] = {
-        t = "Clear the Vault before opening the 12th Relic Coffer; pick up Doomgrip and his guards at once.",
-        h = "Heavy initial burst healing when Doomgrip spawns with guards after the 12th coffer.",
-        d = "Focus Doomgrip and his guards down to unlock the hidden Secret Safe behind the Dark Coffer.",
-        tags = {"adds","physicalBurst","humanoid"},
+        t = "Clear the vault before the last coffer. Pick up the Warbringer Constructs and use a defensive as "
+            .. "Sunder Armor stacks.",
+        h = "Have mana for the final coffer. Armor loss on the tank makes the constructs' melee hits more "
+            .. "dangerous.",
+        d = "Finish Doomgrip after he drinks his healing potion. Let the tank gather the constructs before "
+            .. "using area damage.",
+        tags = {"adds", "physicalBurst", "humanoid"},
     },
     [9499] = {
         t = "Pull Plugger into the side room/corridor because attacking him aggros the entire Grim Guzzler.",
@@ -1248,13 +1277,14 @@ addon.tacticsData = {
         tags = {"adds","cleave","physicalBurst","shadow","aoe","undead"},
     },
     [10502] = {
-        t = "Hold Illucia while DPS interrupt Dominate Mind/Fear and CC any charmed ally.",
-        h = "Stay out of Silence range; dispel {magic} Dominate Mind, Fear, Silence and decurse {curse} Curse "
-            .. "of Agony!",
-        d = "Kick Dominate Mind/Fear/Silence, CC any charmed ally, and decurse {curse} Curse of Agony.",
-        dispels = {"magic","curse"},
-        tags = {"charm","fear","magic","curse","interrupt","shadow","undead"},
-        kick = "Dominate Mind / Fear / Silence",
+        t = "Keep Illucia away from your healer. Be ready to control a party member if Dominate Mind lands.",
+        h = "Stay outside her area Silence. Remove {magic} Dominate Mind or Fear, and ask for a decurse on "
+            .. "Curse of Agony.",
+        d = "Interrupt Dominate Mind or Fear. If one lands, control the charmed player and remove {curse} "
+            .. "Curse of Agony where possible.",
+        dispels = {"magic", "curse"},
+        tags = {"charm", "fear", "magic", "curse", "interrupt", "shadow", "undead"},
+        kick = "Dominate Mind or Fear",
     },
     [10503] = {
         t = "Hold Jandice; when she vanishes into illusions, gather them for AoE (real Jandice takes normal damage).",
@@ -1412,11 +1442,14 @@ addon.tacticsData = {
         tags = {"fire","humanoid"},
     },
     [11121] = {
-        t = "Spawns outside Anastari's ziggurat; hold steady and watch Banshee Curse.",
-        h = "Decurse {curse} Banshee Curse (-hit) and heal melee damage.",
-        d = "Decurse {curse} Banshee Curse and burn Black Guard Swordsmith down.",
+        t = "Wait beside the cleared ziggurat before someone reads the Blacksmithing Plans. Take the "
+            .. "Swordsmith off the reader.",
+        h = "Protect the reader on the pull and call for a decurse on the tank if Banshee Curse is causing "
+            .. "misses.",
+        d = "Wait for the tank's pickup, then remove {curse} Banshee Curse from weapon users so their attacks "
+            .. "land.",
         dispels = {"curse"},
-        tags = {"curse","undead"},
+        tags = {"curse", "undead"},
     },
     [11143] = {
         t = "Spawns on the 3rd postbox alongside Undead Postmen; pick up Malown and control the adds while "
@@ -1694,11 +1727,13 @@ addon.tacticsData = {
         kick = "Frostbolt Volley / Fear",
     },
     [14686] = {
-        t = "Scourge Invasion event boss: hold steady and watch Shadow/Fear casts.",
-        h = "Heal shadow AoE and prepare Fear dispels.",
-        d = "Interrupt shadow casts and burn down.",
-        dispels = {"magic"},
-        tags = {"fear","magic","shadow","undead"},
+        t = "Keep Lady Falther'ess away from your healers so Banshee Shriek cannot silence them.",
+        h = "Stay outside Shriek. Dispel {magic} Dominate Mind on a party member and remove Banshee Curse if "
+            .. "your class can.",
+        d = "Control a charmed ally until freed. Remove {curse} Banshee Curse from damage dealers so their "
+            .. "attacks can land.",
+        dispels = {"magic", "curse"},
+        tags = {"charm", "magic", "curse", "shadow", "undead"},
     },
     [14690] = {
         t = "Scourge Invasion event boss: hold steady and watch Frost Nova roots.",
@@ -1708,18 +1743,21 @@ addon.tacticsData = {
         tags = {"magic","root","frost","undead"},
     },
     [14695] = {
-        t = "Scourge Invasion event boss: hold steady and face away from party.",
-        h = "Steady tank healing through undead melee damage.",
-        d = "Burn down cleanly.",
-        tags = {"undead"},
+        t = "Face Lord Blackwood away from the party. Recover control when the Smoke Bomb stun ends.",
+        h = "Stand clear of Smoke Bomb and away from other ranged players for Multi-Shot. Dispel the {magic} "
+            .. "stun if safe.",
+        d = "Spread out for Multi-Shot. Ranged can keep attacking from beyond Smoke Bomb's radius.",
+        dispels = {"magic"},
+        tags = {"magic", "aoe", "undead"},
     },
     [16042] = {
-        t = "Dungeon Set 2 summoned boss: tank Valthalak and pick up Spectral Assassins; save defensives for "
-            .. "low-HP Shadow Wrath.",
-        h = "Heavy raid/group shadow healing at low HP (Shadow Wrath AoE) and watch Spectral Assassin bursts.",
-        d = "Kill Spectral Assassins immediately, kick Shadow Bolt Volley, and burn Valthalak fast below 40%.",
-        tags = {"adds","interrupt","shadow","aoe","humanoid"},
-        kick = "Shadow Bolt Volley",
+        t = "Pick up Spectral Assassins and keep them off the healer. Save a defensive for Valthalak's final "
+            .. "phase.",
+        h = "Keep the group healthy as Valthalak's shadow volleys become frequent. Watch for an Assassin "
+            .. "reaching a caster.",
+        d = "Kill Spectral Assassins when they appear. Save burst for Valthalak's final phase and use "
+            .. "defensives through the volleys.",
+        tags = {"adds", "shadow", "aoe", "humanoid"},
     },
     [16118] = {
         t = "Summoned via brazier in Ras's room; pick up Bone Mages and Bone Minions as they spawn.",
@@ -1750,12 +1788,14 @@ addon.tacticsData = {
         kick = "Debilitate",
     },
     [246016] = {
-        t = "Tank Enigma and its two Mana Burn adds; pull away so healer stays outside Silence range.",
-        h = "Stay out of Silence range; dispel {magic} Manamorph (8s polymorph) and Silence immediately!",
-        d = "Interrupt and kill the two Mana Burn adds first; kick Manamorph/Silence and AoE Arcane Manalings.",
+        t = "Pull the two Mana Phantoms with Enigma. Keep the boss far enough from your healer to avoid its "
+            .. "area Silence.",
+        h = "Stand outside Silence. Dispel {magic} Manamorph and watch for Mana Burn from either Phantom.",
+        d = "Interrupt Mana Burn on the two Phantoms and kill them first. Pick up or clear summoned Manalings "
+            .. "as they arrive.",
         dispels = {"magic"},
-        tags = {"adds","magic","interrupt","aoe","elemental"},
-        kick = "Mana Burn / Manamorph",
+        tags = {"adds", "magic", "interrupt", "aoe", "elemental"},
+        kick = "the Mana Phantoms' Mana Burn",
     },
     [246017] = {
         t = "Clear Angry Tomes first; face Arcing Smash away and back out during 2s Malfunction cast (6s AoE pulse).",
@@ -1775,11 +1815,11 @@ addon.tacticsData = {
         kick = "Mass Polymorph / Evocation",
     },
     [246931] = {
-        t = "Hold the Mana Wraith steady and pull clear of neighboring Dalaran patrols.",
-        h = "Watch caster mana drain and steady arcane damage.",
-        d = "Interrupt arcane casts and burn the Mana Wraith down quickly.",
-        tags = {"interrupt","elemental"},
-        kick = "Arcane Bolt",
+        t = "Separate the Mana Wraith from other enemies before Reflection Field can protect them.",
+        h = "Watch casters for reflected damage while Reflection Field is active. Keep healing the tank.",
+        d = "Pause harmful spells against targets protected by Reflection Field. Resume casting when it "
+            .. "expires.",
+        tags = {"elemental"},
     },
     [247032] = {
         t = "Summoned via Tome of Dalaran; pick up rising skeletons quickly and pause swings if Curse of Thorns "
@@ -1799,11 +1839,18 @@ addon.tacticsData = {
         purge = "Unholy Frenzy",
     },
     [247195] = {
-        t = "Pick up Flesh Maggots as they spawn and clear the cave first so Intimidating Roar fear is safe.",
-        h = "Cleanse {disease} debuffs, heal tank through Maul, and expect Fear from Intimidating Roar.",
-        d = "AoE Flesh Maggots quickly and prepare Fear breaks for Intimidating Roar.",
-        dispels = {"disease"},
-        tags = {"fear","disease","adds","physicalBurst","beast"},
+        t = "Clear nearby patrols before Withermaw. Gather the Flesh Maggots and use a defensive for Maul.",
+        h = "Top the party before Intimidating Roar. Protect yourself from fear if possible so you can heal "
+            .. "Maul on the tank.",
+        d = "Kill the Flesh Maggots as they gather. Stay away from patrols and use a fear break for "
+            .. "Intimidating Roar.",
+        tags = {"fear", "adds", "physicalBurst", "beast"},
+        c = {
+            PRIEST = {
+                {6346, "Ward the healer before Intimidating Roar so the tank can still receive heals "
+                    .. "during the fear."},
+            },
+        },
     },
     [247198] = {
         t = "Clear all four ritualists first (each gives him -25% damage taken); expect Stomp stun and Trample.",
@@ -1846,13 +1893,15 @@ addon.tacticsData = {
         kick = "Fireball",
     },
     [247234] = {
-        t = "Move Varrox out of every Nightmare Detonation shadow pool; prepare Fear breaks and shadow mitigation.",
-        h = "Dispel {magic} Fear quickly; top group for Shadow Bolt Volley and Nightmare Detonation bursts.",
-        d = "When pulled in by Crimson Wrest, spread away before Nightmare Detonation leaves a pool; kick "
-            .. "Shadow Bolt Volley/Fear.",
+        t = "Tank near the edge. When Crimson Wrest pulls someone in, leave room for them to escape and move "
+            .. "Varrox out of the pool.",
+        h = "Top the group before Shadow Bolt Volley. Dispel {magic} Fear and move away from the player "
+            .. "pulled in by Crimson Wrest.",
+        d = "If marked by Nightmare Detonation, move out as soon as Crimson Wrest ends. Everyone else clears "
+            .. "the target early. Kick Volley or Fear.",
         dispels = {"magic"},
-        tags = {"fear","magic","interrupt","shadow","aoe","demon"},
-        kick = "Shadow Bolt Volley / Fear",
+        tags = {"fear", "magic", "interrupt", "shadow", "aoe", "demon"},
+        kick = "Shadow Bolt Volley or Fear",
     },
     [250034] = {
         t = "Clear nearby spiders in Festering Grotto before engaging this rare elite.",
@@ -1899,16 +1948,21 @@ addon.tacticsData = {
         tags = {"fear","knockback","physicalBurst","beast"},
     },
     [253214] = {
-        t = "Tank both patrolling raptors and pick up Ravasaur Stalker adds that join at low health.",
-        h = "Watch burst tank damage while both raptors and low-HP Ravasaur Stalkers are active.",
-        d = "Kill the fire raptor (no Frost Armor) first, then cleave Ravasaur Stalkers and finish the frost raptor.",
-        tags = {"adds","fire","frost","beast"},
+        t = "Pick up both raptors together. Hold Izha'Rel while the party focuses Tor'Rel and prepare for its "
+            .. "low-health Berserk.",
+        h = "Dispel {magic} Fiery Talons before the fire stacks build up. Clear the frost slow when melee "
+            .. "need to move.",
+        d = "Focus Tor'Rel first to end the stacking fire damage, then finish Izha'Rel. Stay on one target.",
+        dispels = {"magic"},
+        tags = {"magic", "fire", "frost", "beast"},
     },
     [255391] = {
-        t = "Clear southern cell blocks first; pop defensives during Mortal Strike healing debuff.",
-        h = "Heavy tank healing through Mortal Strike (-50% healing taken) and Battle Shout damage.",
-        d = "Clear surrounding cells before pulling; burn Wrex cleanly to loot the Questioner keyring.",
-        tags = {"physicalBurst","disarmable","humanoid"},
+        t = "Clear the three side rooms and the central area before pulling Wrex. Use a defensive for Mortal "
+            .. "Strike.",
+        h = "Keep the tank healthy before Mortal Strike lands. Healing is reduced while the wound lasts.",
+        d = "Help clear all three rooms while Wrex patrols. When engaged, he calls the surviving enemies into "
+            .. "the fight.",
+        tags = {"physicalBurst", "humanoid"},
     },
     [255699] = {
         t = "Horde-only rare patrol appearing in the west after other bosses fall; standard melee tanking.",
@@ -1917,14 +1971,14 @@ addon.tacticsData = {
         tags = {"humanoid"},
     },
     [255702] = {
-        t = "Interrupt Fireball in human form; in dragon phase face Flame Breath away and prepare for Fear + Enrage.",
-        h = "Dispel {magic} Fear in dragon phase; heavy tank healing during Enrage and party fire aura (Searing "
-            .. "Scales).",
-        d = "Interrupt Fireball/Flamestrike in human form; dodge Flamestrike, stay behind dragon, burn through "
-            .. "Enrage.",
-        dispels = {"magic","enrage"},
-        tags = {"fear","magic","enrage","interrupt","cleave","fire","aoe","dragonkin"},
-        kick = "Fireball / Flamestrike",
+        t = "Use a pillar to draw Zarla out of Flamestrike. After she transforms, face Blazeroar's Flame "
+            .. "Breath away from the group.",
+        h = "Heal the Fireballs in phase one. In dragon form, cover Thrash on the tank and Searing Scales on "
+            .. "the party. Break {magic} Fear.",
+        d = "Step out of Flamestrike. Save burst for the dragon, stay off her front and keep a fear break "
+            .. "ready.",
+        dispels = {"magic", "enrage"},
+        tags = {"fear", "magic", "enrage", "cleave", "fire", "aoe", "dragonkin"},
     },
     [255997] = {
         t = "Tank Ca'zass and two Enchantresses cleanly; pull out of Blizzard patches immediately.",
@@ -1957,10 +2011,15 @@ addon.tacticsData = {
         kick = "Drain Life",
     },
     [257016] = {
-        t = "Hold Katerina while DPS kill the two Alcaz Chaplains first; watch her Ambush jumps onto ranged.",
-        h = "Keep ranged topped when she shadowsteps behind them; dispel Chaplain magic if needed.",
-        d = "Kill the two Alcaz Chaplains first; ranged expect shadowstep ambushes and stay near the group.",
-        tags = {"adds","humanoid","threatDrop"},
+        t = "Hold Katerina and both Alcaz Chaplains. Keep uncontrolled Chaplains within reach of the group's "
+            .. "interrupts.",
+        h = "Heal the Garrote target above 90% health to stop the {bleed}. Cleanse Deadly Poison from the "
+            .. "tank.",
+        d = "Control or kill the Chaplains and interrupt their heals. Use a personal defensive if Grievous "
+            .. "Garrote hits you.",
+        dispels = {"poison", "bleed"},
+        tags = {"adds", "interrupt", "humanoid", "poison", "bleed"},
+        kick = "the Alcaz Chaplains' heals",
     },
     [258905] = {
         t = "Hold Zul'Alai steady; expect 3s Monstrous Slam stuns and heavy healing/haste during Undying Oath "
@@ -2040,14 +2099,14 @@ addon.tacticsData = {
         tags = {"adds","humanoid"},
     },
     [260243] = {
-        t = "Two phases: hold Troll form through Drench/Deluge; after Transform (full heal), stay in "
-            .. "Tremor/dispel range and brace for Fatal Bite.",
-        h = "Top party for Deluge at low Troll HP; in serpent phase cleanse {poison} Poison Bolt Volley and "
-            .. "{magic} Fear immediately!",
-        d = "Kick Drench and Fear; save cooldowns for serpent phase after Transform heals him to full.",
-        dispels = {"poison","magic"},
-        tags = {"fear","poison","magic","interrupt","frost","aoe","beast"},
-        kick = "Drench / Fear",
+        t = "Expect Drench on you in troll form. When Min'loth refills his health as a serpent, keep the "
+            .. "party in cleanse range.",
+        h = "Top the tank between Drench hits. Heal the party through Deluge, then clear {poison} Poison Bolt "
+            .. "Volley in serpent form.",
+        d = "Save burst for the serpent's full health bar. Clear Poison Bolt Volley first if you can, and "
+            .. "have a fear break ready.",
+        dispels = {"poison", "magic"},
+        tags = {"fear", "poison", "magic", "aoe", "beast"},
     },
     [260322] = {
         t = "Pull Saltspine to a cleared dry spot; expect Tendon Rip slow and Dust Storm hit-chance debuff.",
@@ -2064,18 +2123,28 @@ addon.tacticsData = {
         tags = {"fear","bleed","enrage","adds","beast"},
     },
     [260326] = {
-        t = "Activate the titan device; face Arcing Smash away and keep your back away from edges for Knock Away!",
-        h = "Dispel {magic} Thunderclap slow; stay away from ledges and behind Arcing Smash.",
-        d = "Stand behind Arcing Smash and away from drop-offs for Knock Away.",
-        dispels = {"magic"},
-        tags = {"magic","cleave","knockback","aoe","elemental"},
+        t = "Face Arcing Smash away from the party, away from ledges. Recover threat after Knock Away or kite "
+            .. "when melee damage builds.",
+        h = "Stand beyond War Stomp range, with clear ground behind you. Watch whoever gains threat after "
+            .. "Knock Away.",
+        d = "Stay behind Arcing Smash. Check threat after Knock Away and give ranged players room to kite if "
+            .. "needed.",
+        tags = {"cleave", "knockback", "aoe", "elemental"},
+        c = {
+            SHAMAN = {
+                {2484, "Place Earthbind Totem along the tank's escape path if the group needs to kite "
+                    .. "Relic Guardian."},
+            },
+            HUNTER = {
+                {5116, "Use Concussive Shot to slow Relic Guardian when the tank calls for a kite."},
+            },
+        },
     },
     [260468] = {
-        t = "Rare elite in the pirate section; clear nearby pirates before pulling.",
-        h = "Heal fire spell bursts.",
-        d = "Optional rare elite; interrupt fire casts and burn down.",
-        tags = {"interrupt","fire","humanoid"},
-        kick = "Fireball",
+        t = "Pull Braxton clear of other pirates. Be ready for Head Smash to stun you.",
+        h = "Keep the tank healthy before Head Smash. The tank can keep taking melee hits through the stun.",
+        d = "Clear nearby pirates before engaging Braxton and stay on him through Head Smash.",
+        tags = {"physicalBurst", "humanoid"},
     },
     [260808] = {
         t = "Pull Highland Horror clear of Oil Slimes; interrupt Wild Regeneration.",
@@ -2108,39 +2177,50 @@ addon.tacticsData = {
         tags = {"adds","magic","fire","aoe","elemental"},
     },
     [261319] = {
-        t = "Clear the Reliquary first so Intimidating Shout fear cannot pull packs! Break his Lesser Stone "
-            .. "Golems first.",
-        h = "Heal {bleed} Rend and heavy Heroic Strike hits; prepare for AoE Fear.",
-        d = "Clear room first, kill Lesser Stone Golems first, break Intimidating Shout fear, then burn Durgen.",
+        t = "Clear the Looters before Durgen's fear can send players into them. Hold both Lesser Stone Golems "
+            .. "while DPS focus him.",
+        h = "Top the tank before Intimidating Shout and keep healing the {bleed} Rend while the golems are "
+            .. "alive.",
+        d = "Once the Looters are clear, focus Durgen while the tank holds his golems. Break Intimidating "
+            .. "Shout if you can.",
         dispels = {"bleed"},
-        tags = {"fear","bleed","adds","physicalBurst","humanoid"},
+        tags = {"fear", "bleed", "adds", "physicalBurst", "humanoid"},
     },
     [261809] = {
-        t = "Final boss (all 4 panels lit): hold Nanaya through elemental crystal swaps and periodic AoE stuns; "
-            .. "save defensives!",
-        h = "Heavy sustained party healing through elemental transitions and periodic AoE stuns.",
-        d = "Save major cooldowns for Nanaya; adapt positioning to crystal element phases and watch AoE stuns.",
-        tags = {"aoe","fire","frost","nature","physicalBurst","elemental"},
+        t = "Face Sonic Screech away. Move Nanaya out of green poison or blue Blizzard so melee have "
+            .. "somewhere to stand.",
+        h = "Stay outside Powerful Slam. Spread on yellow for Chain Lightning and stay back from red Blast "
+            .. "Wave.",
+        d = "Watch the active crystal. Spread on yellow, keep range on red, and leave green pools or blue "
+            .. "Blizzard immediately.",
+        tags = {"aoe", "cleave", "fire", "frost", "nature", "elemental"},
     },
     [261812] = {
-        t = "Hold Thunderhoof on the southern rim; interrupt lightning casts and expect Thunderclap nature pulses.",
-        h = "Heal sudden party drops from Thunderclap and use Nature resistance if available.",
-        d = "Assign an interrupt rotation for Thunderhoof's lightning casts and stack Nature resistance.",
-        tags = {"interrupt","snare","nature","aoe","beast"},
-        kick = "Lightning Bolt / Chain Lightning",
+        t = "Move Thunderhoof out of Lightning Cloud. Face him so the party can spread without standing in "
+            .. "the cloud.",
+        h = "Stay at range and move out of Lightning Cloud first. Spot-heal anyone hit by Chain Lightning.",
+        d = "Spread for Chain Lightning and leave the Lightning Cloud. Stay outside Thunderclap if attacking "
+            .. "at range.",
+        tags = {"nature", "aoe", "beast"},
     },
     [261813] = {
-        t = "Hold Venomridge steady; face her cleanly so DPS stay off her tail while curing heavy poison.",
-        h = "Heavy party-wide {poison} cleansing and AoE healing!",
-        d = "Cleanse {poison} aggressively and burn Venomridge down.",
+        t = "Hold Venomridge where the whole party is in cleanse range. Tendon Rip can make repositioning "
+            .. "slower.",
+        h = "Remove {poison} Poison Bolt Volley quickly across the party and heal through any remaining "
+            .. "ticks.",
+        d = "Help cleanse the volley before returning to damage. Stay in range of the healer if Tendon Rip "
+            .. "slows you.",
         dispels = {"poison"},
-        tags = {"poison","nature","aoe","beast"},
+        tags = {"poison", "snare", "nature", "aoe", "beast"},
     },
     [261974] = {
-        t = "Red crystal console boss (15 Red Crystals): clear fire elementals first and move out of ground fire.",
-        h = "Heavy fire damage healing; use Fire resistance buffs/auras/totems and dodge ground fire.",
-        d = "Clear fire elementals first, move out of fire patches immediately, and use Fire resistance.",
-        tags = {"fire","aoe","elemental"},
+        t = "Face Cinder away from the group. When Conflagration incapacitates you, be ready to take the boss "
+            .. "back as it ends.",
+        h = "Watch the player second on threat. Cinder can hit them while the tank is trapped in "
+            .. "Conflagration.",
+        d = "Stay clear of Radiating Heat when attacking at range. Watch threat before Conflagration and lead "
+            .. "Cinder back to the tank.",
+        tags = {"threatDrop", "fire", "aoe", "elemental"},
     },
     [261993] = {
         t = "Rare white gorilla in the Prismatic Talus cave; clear nearby gorillas before pulling.",
@@ -2149,25 +2229,28 @@ addon.tacticsData = {
         tags = {"beast"},
     },
     [262081] = {
-        t = "Yellow crystal console boss (15 Yellow Crystals): hold Bolt steady while ranged spread out.",
-        h = "Spread far apart from party members to prevent Chain Lightning bounces!",
-        d = "Spread out cleanly for Chain Lightning, interrupt lightning casts, and stack Nature resistance.",
-        tags = {"interrupt","nature","aoe","elemental"},
-        kick = "Chain Lightning",
+        t = "Hold Bolt away from the ranged group. Thunderclap slows players close to the boss.",
+        h = "Spread away from other ranged players so Chain Lightning has fewer targets to hit.",
+        d = "Leave space between players for Chain Lightning. Ranged can stand outside Thunderclap.",
+        tags = {"nature", "aoe", "elemental"},
     },
     [262127] = {
-        t = "Face Direhorn Matriarch cleanly and hold tight threat; stay ready to re-grab after random charges.",
-        h = "Stay grouped near her sides (NOT behind her tail!) so random charges don't scatter the group.",
-        d = "NEVER stand behind her tail (tail AoE!); stay grouped at her flank for charges and burn down.",
-        tags = {"cleave","aoe","physicalBurst","beast"},
+        t = "Keep the Matriarch facing away from the group. Puncture stacks make each new hit hurt more.",
+        h = "Stand close to one flank to avoid charges and Tail Lash. Save tank healing for higher Puncture "
+            .. "stacks.",
+        d = "Fight within ten yards on either flank. The tail hits directly behind her and distant players "
+            .. "can trigger Trihorn Charge.",
+        tags = {"cleave", "physicalBurst", "beast"},
     },
     [262297] = {
-        t = "Blue crystal console boss (15 Blue Crystals): pull Snowtalon OUT of the cave and face Cone of Cold "
-            .. "away!",
-        h = "Dispel {magic} Frost Nova roots immediately and heal burst frost damage.",
-        d = "Pull out of the cave, stay behind Cone of Cold, and dispel/break {magic} Frost Nova.",
+        t = "Give your group space to fight Snowtalon outside melee range. Frost Nova roots anyone caught "
+            .. "near the boss.",
+        h = "Stand beyond Howling Blast and remove {magic} Frost Nova from players caught close. Keep the "
+            .. "tank healthy first.",
+        d = "Ranged stay outside Howling Blast. Melee step out between hits if your healer needs time to "
+            .. "catch up.",
         dispels = {"magic"},
-        tags = {"magic","root","cleave","frost","aoe","beast"},
+        tags = {"magic", "root", "frost", "aoe", "beast"},
     },
     [263886] = {
         t = "Kill all Undying Offerings in Ataal'Byzal to spawn it; interrupt Waterbolt and stay mobile through "
@@ -2191,13 +2274,15 @@ addon.tacticsData = {
         tags = {"fire","aoe","humanoid"},
     },
     [264773] = {
-        t = "Survive ogre pairs on the bridges, then tank Toof and two Krol'dok Shamans; pop defensives for "
-            .. "Mortal Strike.",
-        h = "Dispel {magic} Thunderclap; heavy tank healing through Mortal Strike (-50% healing taken).",
-        d = "Kill bridge waves, then kill/interrupt the two Krol'dok Shamans before burning Bossman Toof.",
-        dispels = {"magic"},
-        tags = {"adds","magic","interrupt","physicalBurst","humanoid"},
-        kick = "Shaman Heals / Lightning",
+        t = "Keep moving across the bridge between Brute waves. Gather Toof and his shamans, then use a "
+            .. "defensive for Mortal Strike.",
+        h = "Mortal Strike reduces healing on the tank. Watch for a Bloodlust buff and a new pair of Brutes "
+            .. "during the fight.",
+        d = "Kill the two shamans first and strip their {magicBuff} Bloodlust from Toof. Control any Brutes "
+            .. "that reach your healer.",
+        dispels = {"magicBuff"},
+        tags = {"adds", "magicBuff", "physicalBurst", "humanoid"},
+        purge = "Bloodlust",
     },
     [269104] = {
         t = "Clear the thicket corner around this rare owlbeast before pulling; standard melee tanking.",
@@ -2206,18 +2291,20 @@ addon.tacticsData = {
         tags = {"beast"},
     },
     [269111] = {
-        t = "Clear nearby Felfire Imps around this rare spawn before pulling.",
-        h = "Heal fire/shadow caster damage and imp burst.",
-        d = "Optional rare elite; focus down Felfire Imps first and interrupt caster spells.",
-        tags = {"adds","interrupt","fire","demon"},
-        kick = "Fireball / Shadow Bolt",
+        t = "Pull Gortek clear of nearby enemies. Earth Shock strikes his primary target.",
+        h = "Keep the tank healthy through Earth Shock and any Lightning Bolts that finish casting.",
+        d = "Interrupt Lightning Bolt. Earth Shock is instant, so save the interrupt for the bolt.",
+        tags = {"interrupt", "nature"},
+        kick = "Lightning Bolt",
     },
     [272561] = {
-        t = "Green crystal console boss (15 Green Crystals; skippable if only lighting panel): hold steady "
-            .. "while party spreads for Poison Shock.",
-        h = "Spread out from Poison Shock splash and cleanse {poison} aggressively; high party damage!",
-        d = "Do NOT stack — Poison Shock splashes hard! Cure {poison} and use full cooldowns if fighting.",
+        t = "Turn Vitrix away and leave space between you and the group. Keep a defensive ready for Poison "
+            .. "Shock.",
+        h = "Top the tank before the instant Poison Shock and clear {poison} Leech Poison to stop Vitrix "
+            .. "draining health.",
+        d = "Stay clear of the tank for Poison Shock. If you can remove poison, clear Leech Poison from the "
+            .. "tank.",
         dispels = {"poison"},
-        tags = {"poison","nature","aoe","beast"},
+        tags = {"poison", "nature", "cleave", "beast"},
     },
 }

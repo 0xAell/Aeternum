@@ -65,7 +65,7 @@ if mode == "roster" then
     return
 end
 
-if mode == "ez" or mode == "ez-positions" then
+if mode == "ez" or mode == "ez-positions" or mode == "ez-mechanics" then
     local ns = {}
     loadData(first, {ipairs=ipairs}, ns)
     if mode == "ez-positions" then loadData(second, {ipairs=ipairs}, ns) end
@@ -74,7 +74,11 @@ if mode == "ez" or mode == "ez-positions" then
             for _, id in ipairs(step.npc or {}) do
                 -- A shared step can have different loot on each individual corpse.
                 local loot = #step.npc == 1 and step.loot or {}
-                if mode == "ez" then
+                if mode == "ez-mechanics" then
+                    if not step.outside and step.tip and step.tip.en and step.tip.en ~= "" then
+                        emit("guide", d.slug, id)
+                    end
+                elseif mode == "ez" then
                     emit("ez", d.slug, id, step.kind, step.outside and "outside", table.concat(loot or {}, ","),
                         step.name.en, table.concat(step.npc, ","), table.concat(step.loot or {}, ","))
                 elseif d.bliz and not step.outside and #step.npc == 1 then

@@ -1,5 +1,7 @@
 # WoW Forever dungeon boss audit
 
+For combat mechanics, the companion audit covers tank, healer and DPS tactics, class counters and the source of each recorded or referenced spell. [Boss mechanics](mechanics.md)
+
 On November 27, 2026, we checked every one of Aeternum 0.5.2’s **287 roster entries and 1,554 boss–item links** across 34 dungeon and wing entries. The revised roster has 302 entries. It includes every named encounter in the pinned client-derived encounter list for those instances. Rare enemies, optional events and phases have different coverage. [Boss-by-boss results](by-dungeon.md) · [Roster decisions and source IDs](bosses.tsv) · [Item-by-item evidence](drops.tsv)
 
 | What appears in Aeternum | Boss–item links | Evidence |

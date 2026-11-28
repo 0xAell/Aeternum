@@ -22,6 +22,8 @@ Click the floor name to change floors, check which dungeon keys are in your bags
 
 Click a boss skull to see its drops. If bosses share a spot, choose one. The floor menu’s **Boss loot** list also includes bosses whose positions are unknown. Hover an item for its tooltip, Shift-click to link it, or Ctrl-click to preview it.
 
+Hover a skull for your assigned role and relevant abilities from your character's spellbook. Open **Tactics** to read the tank, healer and DPS plans, even when playing solo. You can hover a class spell for its native tooltip and the action to take. Magic, Curse, Disease and Poison have text labels and Blizzard's aura colors. **Recorded Forever casts** shows abilities seen in that dungeon. **Reference spells** covers additional abilities from encounter guides or databases. [Mechanics coverage by boss](boss-audit/mechanics.md)
+
 Item tooltips anywhere in the game, such as your bags, chat links, and the auction house, name the bosses that drop the item. Only recorded drops and encounter rolls count. Guide-listed items stay off the tooltip until a player drop confirms them.
 
 Both boss menus and loot search use your class and trained weapon and armor proficiencies. Higher-level gear stays visible if you already use that equipment type. Recipes appear when you have the profession, rank, and specialization to learn them. Learning a recipe removes it from the list. Other recorded drops, encounter rolls, and guide-listed drops have separate submenus when they contain a match.

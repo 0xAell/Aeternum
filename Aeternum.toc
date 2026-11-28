@@ -17,6 +17,7 @@ OverviewData.lua
 LootData.lua
 FloorData.lua
 TacticsData.lua
+BossCasts.lua
 ClassicTraining.lua
 ForeverTraining.lua
 Core.lua
