@@ -522,6 +522,29 @@ test("adjacent Razorfen entrances have distinct click targets in the zone overvi
     check(locate(env, kraul) ~= locate(env, downs), "each door gets its own target at higher zoom")
 end)
 
+test("native pin scale regroups close entrances and a tracked member keeps its group's anchor", function()
+    local addon, env = load({mapID=1413, playerMap=1413})
+    local map = env.WorldMapFrame
+    map.ScrollContainer:SetSize(400, 320)
+    map:Show()
+    local function kraul(e) return e.source.id == "razorfen-kraul" end
+    local function downs(e) return e.source.id == "razorfen-downs" end
+    check(locate(env, kraul) ~= locate(env, downs))
+    map:SetGlobalPinScale(1.5)
+    Wow.flushTimers()
+    local pin, door = locate(env, kraul)
+    equal(pin, locate(env, downs), "the larger hitboxes overlap")
+    equal(pin.scale, 3, "pooled pin adopts the current canvas and native pin scales immediately")
+    local x, y = pin.x, pin.y
+    addon.Navigation:Start(door.title, door.point, door.source.id)
+    addon.UpdateRoutePins()
+    check(pin.tracked:IsShown())
+    equal(pin.x, x); equal(pin.y, y)
+    map:SetGlobalPinScale(1)
+    Wow.flushTimers()
+    check(locate(env, kraul) ~= locate(env, downs), "the smaller targets separate")
+end)
+
 test("shared entrances retain the chosen wing for both buttons", function()
     local addon, env, state = load({mapID=1420, viewWidth=.5, playerMap=1420, playerX=.2, playerY=.2})
     env.WorldMapFrame:Show()
@@ -556,8 +579,13 @@ test("Dire Maul wing portals agree with the zone map and alternate doors carry d
     state.viewWidth = .125
     env.WorldMapFrame.providers[1]:OnCanvasScaleChanged()
     Wow.flushTimers()
-    local a = locate(env, function(e) return e.source.id == "dm-west" and e.y == .2968 end)
-    local b = locate(env, function(e) return e.source.id == "dm-west" and e.y == .3175 end)
+    local function backDoor(e) return e.source.id == "dm-west" and e.y == .2968 end
+    local function frontDoor(e) return e.source.id == "dm-west" and e.y == .3175 end
+    equal(locate(env, backDoor), locate(env, frontDoor), "these targets still overlap on the letterboxed terrain")
+    state.viewWidth = .10
+    env.WorldMapFrame.providers[1]:OnCanvasScaleChanged()
+    Wow.flushTimers()
+    local a, b = locate(env, backDoor), locate(env, frontDoor)
     check(a ~= b and a.tracked:IsShown() and not b.tracked:IsShown(), "zoom separates the two doorways")
 end)
 
@@ -1013,6 +1041,17 @@ test("world and continent entrance pins keep tight hitboxes and route to their o
     check(pin.tracked:IsShown() and pin.tracked:GetWidth() < pin.icon:GetWidth(), "compact route badge fits the pin")
 end)
 
+local function entranceMenuLabel(addon, pin, entry)
+    for _, other in ipairs(pin.entries) do
+        if other ~= entry and other.category == "dungeon" and other.title == entry.title then
+            local point = entry.point
+            local zone = point.mapID ~= entry.mapID and addon.ZoneName(point.mapID) .. " " or ""
+            return ("%s · %s%.1f, %.1f"):format(entry.title, zone, point.x * 100, point.y * 100)
+        end
+    end
+    return entry.title
+end
+
 test("all dungeon entrances are selectable on unzoomed overviews even without client rectangles", function()
     local addon, env, state = load({mapID=947, playerMap=1420, playerX=.63, playerY=.62})
     local types = env.Enum.UIMapType
@@ -1056,7 +1095,9 @@ test("all dungeon entrances are selectable on unzoomed overviews even without cl
                 equal(addon.DungeonMap.dungeon, pin.entries[1].source, "pin opens the dungeon")
                 addon.DungeonMap:Close()
             else
-                for _, entry in ipairs(pin.entries) do state.menu:Find(entry.title) end
+                for _, entry in ipairs(pin.entries) do
+                    state.menu:Find(entranceMenuLabel(addon, pin, entry))
+                end
             end
         end
         for door, dungeon in pairs(original) do
@@ -1076,6 +1117,78 @@ test("all dungeon entrances are selectable on unzoomed overviews even without cl
     equal(env.AeternumRouteDB.mapID, 1420, "route still leads to the outdoor entrance")
     equal(env.AeternumRouteDB.x, world.point.x)
     equal(env.AeternumRouteDB.y, world.point.y)
+end)
+
+test("every zone and city exposes exactly its doors at both zoom levels and honors the map filter", function()
+    local addon, env, state = load({mapID=1436, playerX=.2, playerY=.2})
+    local map, expected = env.WorldMapFrame, {}
+    local surrounding = {[1453]=1429, [1454]=1411, [1455]=1426}
+    local function expect(id, point, dungeon)
+        expected[id] = expected[id] or {}
+        expected[id][point] = dungeon
+    end
+    for _, dungeon in ipairs(addon.Data.dungeons) do
+        for _, point in ipairs(dungeon.entrances) do
+            expect(point.mapID, point, dungeon)
+            if surrounding[point.mapID] then expect(surrounding[point.mapID], point, dungeon) end
+        end
+    end
+    map:Show()
+    for id, doors in pairs(expected) do
+        map:SetMapID(id)
+        for _, side in ipairs({"Alliance", "Horde"}) do
+            state.faction = side
+            for _, width in ipairs({1, .45}) do
+                state.viewWidth = width
+                addon.RefreshMap()
+                local seen = {}
+                for pin in map:EnumeratePinsByTemplate("AeternumEntrancePinTemplate") do
+                    local close = width < .6
+                    equal(pin.icon:GetWidth(), close and 44 or 34)
+                    equal(pin:GetWidth(), close and 48 or 22)
+                    for _, entry in ipairs(pin.entries) do
+                        if entry.category == "dungeon" then
+                            equal(entry.source, doors[entry.point], "right door on map " .. id)
+                            check(not seen[entry.point], "duplicate door")
+                            seen[entry.point] = true
+                        end
+                    end
+                end
+                for point, dungeon in pairs(doors) do check(seen[point], side .. " / " .. dungeon.name) end
+                Wow.trackingMenu():Find("Dungeon entrances"):Click()
+                equal(map:GetNumActivePinsByTemplate("AeternumEntrancePinTemplate"), 0)
+                Wow.trackingMenu():Find("Dungeon entrances"):Click()
+                check(map:GetNumActivePinsByTemplate("AeternumEntrancePinTemplate") > 0)
+            end
+        end
+    end
+end)
+
+test("both mouse buttons select each recorded entrance from its home map", function()
+    local addon, env, state = load({playerX=.2, playerY=.2})
+    local map = env.WorldMapFrame
+    map:Show()
+    for _, dungeon in ipairs(addon.Data.dungeons) do
+        for _, door in ipairs(dungeon.entrances) do
+            map:SetMapID(door.mapID)
+            local pin, entry = locate(env, function(e) return e.point == door end)
+            local label = entranceMenuLabel(addon, pin, entry)
+            map:ClickPin(pin, "LeftButton")
+            if #pin.entries > 1 then
+                state.menu:Find(label):Click()
+                Wow.flushTimers()
+            end
+            equal(addon.DungeonMap.dungeon, dungeon, label)
+            equal(addon.DungeonMap.entrance, door, label)
+            addon.DungeonMap:Close()
+            map:ClickPin(pin, "RightButton")
+            state.menu:Find("Show path to " .. label):Click()
+            equal(env.AeternumRouteDB.mapID, door.mapID, label)
+            equal(env.AeternumRouteDB.x, door.x, label)
+            equal(env.AeternumRouteDB.y, door.y, label)
+            addon.Navigation:Stop()
+        end
+    end
 end)
 
 test("capital entrances open from the surrounding zone and route to the real city door", function()
