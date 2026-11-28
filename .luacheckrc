@@ -26,6 +26,7 @@ read_globals = {
     "hooksecurefunc", "strtrim", "wipe",
     "InputUtil", "LEVEL", "MAP_AREA_LABEL_TYPE", "QuestDifficultyColors", "GetQuestDifficultyColor",
     "GetRelativeDifficultyColor", "TooltipDataProcessor", "ItemRefTooltip",
+    "AuraUtil", "UnitGroupRolesAssigned",
 }
 
 files["tests/**"] = { std = "+luajit", globals = { "setfenv" } }

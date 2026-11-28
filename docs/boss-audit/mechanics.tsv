@@ -1,0 +1,303 @@
+dungeon	npc	boss	observed_in_builds	observed_spell_ids	reference_spell_ids	journal_spell_ids	classic_spell_ids	ezwow_note	naowh_note	field_guide	azeroth_db
+alcaz-prison	255391	Overseer Wrex	1.60.1.71037	9128,16856		9128,16856		1	0	https://www.method.gg/wow-forever/dungeons/alcaz-prison	
+alcaz-prison	255702	Blazeroar	1.60.1.71037	3391,9573,12466,15716,18399,1271593,1271604,1275847		3391,9573,12466,15716,18399,1271593,1271604,1275847		1	0	https://www.method.gg/wow-forever/dungeons/alcaz-prison	
+alcaz-prison	255997	Tidemistress Ca'zass	1.60.1.71037	8398,15532,1271375		8398,15532,1271375		1	0	https://www.method.gg/wow-forever/dungeons/alcaz-prison	
+alcaz-prison	256236	The Questioner	1.60.1.71037	12054,17620		12054,17620		1	0	https://www.method.gg/wow-forever/dungeons/alcaz-prison	
+alcaz-prison	257016	Katerina the Cleaner			3583,1271761	3583,1271761		1	0	https://www.method.gg/wow-forever/dungeons/alcaz-prison	
+blackfathom-deeps	4829	Aku'mai	1.60.1.70862,1.60.1.70959,1.60.1.71037	3490,3815		3490,3815	3490,3815	1	1	https://www.method.gg/wow-forever/dungeons/blackfathom-deeps	https://azeroth.wiki/forever/dungeons/blackfathom-deeps/aku-mai
+blackfathom-deeps	4830	Old Serra'kis				1604,8433		1	1	https://www.method.gg/wow-forever/dungeons/blackfathom-deeps	https://azeroth.wiki/forever/dungeons/blackfathom-deeps/old-serra-kis
+blackfathom-deeps	4831	Lady Sarevess	1.60.1.70862,1.60.1.70959	246,865,6660,8435		246,865,6660,8435	246,865,6660,8435	1	1	https://www.method.gg/wow-forever/dungeons/blackfathom-deeps	https://azeroth.wiki/forever/dungeons/blackfathom-deeps/lady-sarevess
+blackfathom-deeps	4832	Twilight Lord Kelris	1.60.1.70862,1.60.1.70959,1.60.1.71037	8399	15587	8092,8399	8399,15587	1	1	https://www.method.gg/wow-forever/dungeons/blackfathom-deeps	https://azeroth.wiki/forever/dungeons/blackfathom-deeps/twilight-lord-kelris
+blackfathom-deeps	4887	Ghamoo-ra	1.60.1.70862,1.60.1.70959	5568		5568	5568	1	1	https://www.method.gg/wow-forever/dungeons/blackfathom-deeps	https://azeroth.wiki/forever/dungeons/blackfathom-deeps/ghamoo-ra
+blackfathom-deeps	6243	Gelihast	1.60.1.70862,1.60.1.70959,1.60.1.71037	6533,7165		6533,7165	6533	1	1	https://www.method.gg/wow-forever/dungeons/blackfathom-deeps	
+blackfathom-deeps	12902	Lorgus Jett	1.60.1.70862,1.60.1.70959,1.60.1.71037	12167,12550		12167,12550	12167,12550	1	1		
+blackmaw-hold	247195	Withermaw	1.60.1.71037	1242884,1242907,1302783		1242884,1242907,1302780		1	0	https://www.method.gg/wow-forever/dungeons/blackmaw-hold	
+blackmaw-hold	247198	Bonesnout the Unbroken	1.60.1.71037	5568,1244416		5568,1244416,1277406		1	0	https://www.method.gg/wow-forever/dungeons/blackmaw-hold	
+blackmaw-hold	247206	Impaan the Imprisoner	1.60.1.71037	1243089,1243312		1243067,1243076,1243079,1243080,1243088,1243089,1243312		1	0	https://www.method.gg/wow-forever/dungeons/blackmaw-hold	
+blackmaw-hold	247207	Blackmaw Behemoth	1.60.1.71037	1244484,1245095,1245119,1245154,1245164				1	0	https://www.method.gg/wow-forever/dungeons/blackmaw-hold	
+blackmaw-hold	247209	Elder Shaman Bloodmane	1.60.1.71037	1245324,1245338,1245883		1245324,1245338,1245883		1	0	https://www.method.gg/wow-forever/dungeons/blackmaw-hold	
+blackmaw-hold	247231	Unbound Spirit	1.60.1.71037	1248008,1248131		1247169,1248008,1248131		1	0	https://www.method.gg/wow-forever/dungeons/blackmaw-hold	
+blackmaw-hold	247234	Varrox Bleakhoof	1.60.1.71037	9081,1246362,1246456,1247087		9081,1246362,1246456,1247087		1	0	https://www.method.gg/wow-forever/dungeons/blackmaw-hold	
+blackmaw-hold	250034	Tunnelweb Matriarch				745		1	0	https://www.method.gg/wow-forever/dungeons/blackmaw-hold	
+blackmaw-hold	269104	Moontouched Wanderer				8599,15798		1	0	https://www.method.gg/wow-forever/dungeons/blackmaw-hold	
+blackmaw-hold	269111	Gortek the Apprentice						1	0	https://www.method.gg/wow-forever/dungeons/blackmaw-hold	
+blackrock-depths	8923	Panzor the Invincible				403233		1	0		
+blackrock-depths	8929	Princess Moira Bronzebeard			8362,15586,15587	8362,15537,15586,15587,15654	8362,15586,15587	1	0		https://azeroth.wiki/forever/dungeons/blackrock-depths/princess-moira-bronzebeard
+blackrock-depths	8983	Golem Lord Argelmach			15305,15507,15605	15305,15507,15605	15305,15507,15605	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/golem-lord-argelmach
+blackrock-depths	9016	Bael'Gar			13895	13895,23379	13895,23378	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/bael-gar
+blackrock-depths	9017	Lord Incendius			13899,13900,14099,26977	13899,13900,14099,26977	13899,13900,14099,26977	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/lord-incendius
+blackrock-depths	9018	High Interrogator Gerstahn			12040,13704,14032,14033	12040,13704,14032,14033	12040,13704,14032,14033	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/high-interrogator-gerstahn
+blackrock-depths	9019	Emperor Dagran Thaurissan			15636,17492	15636,15643,17492	15636,17492	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/emperor-dagran-thaurissan
+blackrock-depths	9024	Pyromancer Loregrain			15038,15041,15095,15616	15038,15041,15095,15616	15038,15041,15095,15616	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/pyromancer-loregrain
+blackrock-depths	9025	Lord Roccor			6524,13728,13729	6524,13728,13729	6524,13728,13729	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/lord-roccor
+blackrock-depths	9027	Gorosh the Dervish			13736,15708,21049	13736,15708,21049	13736,15708,21049	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/ring-of-law
+blackrock-depths	9028	Grizzle			6524,8269	6524,8269,15579	6524,8269	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/ring-of-law
+blackrock-depths	9029	Eviscerator			7121,14331,15245	7121,14331,15245	7121,14331,15245	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/ring-of-law
+blackrock-depths	9030	Ok'thor the Breaker				13323,13747,15254,15453		1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/ring-of-law
+blackrock-depths	9031	Anub'shiah			8994,12493,13787,15470,15471,15472	8994,12493,13787,15470,15471,15472	8994,12493,13787,15470,15471,15472	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/ring-of-law
+blackrock-depths	9032	Hedrum the Creeper			15475	15475	745,3609,6751,15474,15475	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/ring-of-law
+blackrock-depths	9033	General Angerforge			15572	15061,15572,17687		1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/general-angerforge
+blackrock-depths	9039	Doom'rel					12493,12742,13787,15092,15245	1	0		https://azeroth.wiki/forever/dungeons/blackrock-depths/the-seven
+blackrock-depths	9041	Warder Stilgiss			12544,12674,12675,15044	6136,12544,12674,12675,15044	12544,12556,12674,12675,15044	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/warder-stilgiss
+blackrock-depths	9042	Verek			15042	15042	8599,15042	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/warder-stilgiss
+blackrock-depths	9056	Fineous Darkvire			8258,11978,13953,15346,15493	8258,11978,13953,15346,15493	8258,11978,13953,15346,15493	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/fineous-darkvire
+blackrock-depths	9156	Ambassador Flamelash			14744	14744,15574		1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/ambassador-flamelash
+blackrock-depths	9319	Houndmaster Grebmar			13730,15615,21049	13730,15615,21049	13730,15615,21049	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/houndmaster-grebmar
+blackrock-depths	9476	Watchman Doomgrip			11971,15504		11971,15504	0	0		https://azeroth.wiki/forever/dungeons/blackrock-depths/the-vault
+blackrock-depths	9499	Plugger Spazzring			12739,12742,13338,13787	8994,12739,12742,13338,13787	12739,12742,13338,13787	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/plugger-spazzring
+blackrock-depths	9502	Phalanx			14099,15285,15588	14099,15285,15588	14099,15285,15588	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/phalanx
+blackrock-depths	9537	Hurley Blackbreath			9573	9573,14872		1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/hurley-blackbreath
+blackrock-depths	9543	Ribbly Screwspigot			9080,12540	9080,12540,12907	9080,12540	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/ribbly-screwspigot
+blackrock-depths	9938	Magmus			15593,15668	15593,15668	15593,15668	1	1		https://azeroth.wiki/forever/dungeons/blackrock-depths/magmus
+city-of-dalaran	245999	Arcane Anomaly	1.60.1.70888,1.60.1.71091	1240682,1241501,1241514	15230	15230,1241501,1303458		1	1	https://www.method.gg/wow-forever/dungeons/city-of-dalaran	https://azeroth.wiki/forever/dungeons/city-of-dalaran/arcane-anomaly
+city-of-dalaran	246003	Fel Ancient	1.60.1.70888,1.60.1.71091	1240687,1240688,1240692,1240694	22994,1240706	22994,1240687,1240706		1	0	https://www.method.gg/wow-forever/dungeons/city-of-dalaran	https://azeroth.wiki/forever/dungeons/city-of-dalaran/fel-ancient
+city-of-dalaran	246008	Mana Devourer	1.60.1.70888,1.60.1.71091	1240738,1240750		1240738,1240750		1	0	https://www.method.gg/wow-forever/dungeons/city-of-dalaran	https://azeroth.wiki/forever/dungeons/city-of-dalaran/mana-devourer
+city-of-dalaran	246016	Arcanic Enigma	1.60.1.70888,1.60.1.71091	8988,1240869,1304455	1224125	1224125,1240869,1304455		1	1	https://www.method.gg/wow-forever/dungeons/city-of-dalaran	https://azeroth.wiki/forever/dungeons/city-of-dalaran/mana-elemental
+city-of-dalaran	246017	Unstable Sentinel	1.60.1.70888,1.60.1.71091	16169,1241329	8374	8374,1241325,1241329		1	1	https://www.method.gg/wow-forever/dungeons/city-of-dalaran	https://azeroth.wiki/forever/dungeons/city-of-dalaran/unstable-sentinel
+city-of-dalaran	246020	Shade of the Archmage	1.60.1.70888,1.60.1.71091	1241506,1241515,1303350,1303598,1303599,1304398	15230,28450	15230,28450,1241515,1303350,1303598,1303599		1	1	https://www.method.gg/wow-forever/dungeons/city-of-dalaran	https://azeroth.wiki/forever/dungeons/city-of-dalaran/shade-of-the-archmage
+city-of-dalaran	246931	Mana Wraith			1303458	1293451,1303458		0	0		
+city-of-dalaran	247032	Lyn the Ignored	1.60.1.70888	17228,1303266,1304473		17228,1303266,1304473		1	1	https://www.method.gg/wow-forever/dungeons/city-of-dalaran	https://azeroth.wiki/forever/dungeons/city-of-dalaran/lyn-the-ignored
+city-of-dalaran	247126	Atrexis the Grave Knight	1.60.1.70888,1.60.1.71091	3391,6713,12057,1303264,1303266		3391,6713,12057,1303264,1303266		1	1	https://www.method.gg/wow-forever/dungeons/city-of-dalaran	https://azeroth.wiki/forever/dungeons/city-of-dalaran/atrexis-the-grave-knight
+deadmines	639	Edwin VanCleef	1.60.1.70862,1.60.1.70888,1.60.1.70938	3391,5200		3391,5200	674,5200,12787	1	1	https://www.method.gg/wow-forever/dungeons/the-deadmines	https://azeroth.wiki/forever/dungeons/the-deadmines/edwin-vancleef
+deadmines	642	Sneed's Shredder	1.60.1.70862,1.60.1.70888,1.60.1.70938	3603,5141,7399		3603,5141,7399	3603,5141,7399	1	1	https://www.method.gg/wow-forever/dungeons/the-deadmines	https://azeroth.wiki/forever/dungeons/the-deadmines/sneed
+deadmines	643	Sneed	1.60.1.70862,1.60.1.70888,1.60.1.70938	6713		6713	6713	1	1	https://www.method.gg/wow-forever/dungeons/the-deadmines	https://azeroth.wiki/forever/dungeons/the-deadmines/sneed
+deadmines	644	Rhahk'Zor	1.60.1.70862,1.60.1.70888,1.60.1.70938	6304		6304	6304	1	1	https://www.method.gg/wow-forever/dungeons/the-deadmines	https://azeroth.wiki/forever/dungeons/the-deadmines/rhahk-zor
+deadmines	645	Cookie	1.60.1.70862,1.60.1.70888,1.60.1.70938	5174,6306		5174,6306	5174,6306	1	1	https://www.method.gg/wow-forever/dungeons/the-deadmines	https://azeroth.wiki/forever/dungeons/the-deadmines/cookie
+deadmines	646	Mr. Smite	1.60.1.70862,1.60.1.70888,1.60.1.70938	3391,6432,6435	6264	3391,6264,6432,6435	6264,6432,6435	1	1	https://www.method.gg/wow-forever/dungeons/the-deadmines	https://azeroth.wiki/forever/dungeons/the-deadmines/mr-smite
+deadmines	647	Captain Greenskin	1.60.1.70862,1.60.1.70888,1.60.1.70938	5208,5532		5208,5532	5208,5532	1	1	https://www.method.gg/wow-forever/dungeons/the-deadmines	https://azeroth.wiki/forever/dungeons/the-deadmines/captain-greenskin
+deadmines	1763	Gilnid	1.60.1.70862,1.60.1.70888,1.60.1.70938	5213		5213	5213	1	1	https://www.method.gg/wow-forever/dungeons/the-deadmines	https://azeroth.wiki/forever/dungeons/the-deadmines/gilnid
+deadmines	3586	Miner Johnson			12097		12097	1	1	https://www.method.gg/wow-forever/dungeons/the-deadmines	https://azeroth.wiki/forever/dungeons/the-deadmines/miner-johnson
+dm-east	11490	Zevrim Thornhoof	1.60.1.71139	22478,22651		22478,22651	22478,22651	1	1		https://azeroth.wiki/forever/dungeons/dire-maul/zevrim-thornhoof
+dm-east	11492	Alzzin the Wildshaper	1.60.1.71139	7948,19319,22128,22660,22661,22662,22688,22689	10101,22691	7948,10101,19319,22128,22660,22661,22662,22688,22689,22691	7948,10101,19319,22128,22660,22661,22662,22688,22689,22691	1	1		https://azeroth.wiki/forever/dungeons/dire-maul/alzzin-the-wildshaper
+dm-east	13280	Hydrospawn	1.60.1.71139	22419,22420,22421,22714		22419,22420,22421,22714	22419,22420,22421,22714	1	1		https://azeroth.wiki/forever/dungeons/dire-maul/hydrospawn
+dm-east	14327	Lethtendris	1.60.1.71139	12742,17228,22709,22710	13338,16247	12742,13338,16247,17228,22709,22710	11668,12742,13338,14887,16247,17228,22709,22710	1	1		https://azeroth.wiki/forever/dungeons/dire-maul/lethtendris
+dm-east	14354	Pusillin	1.60.1.71139	14145,15228,22424,22735		14145,15228,22424,22735	14145,15228,15242,17145,22424	1	1		https://azeroth.wiki/forever/dungeons/dire-maul/pusillin
+dm-north	11501	King Gordok			15572,15708,16727,22886	15572,15708,16727,22886	15572,15708,16727,22886	1	1		https://azeroth.wiki/forever/dungeons/dire-maul/king-gordok
+dm-north	14321	Guard Fengus			8269,10101,11972,15580,15749	22817	8269,10101,11972,15580,15655,15749,20691,22572	1	1		https://azeroth.wiki/forever/dungeons/dire-maul/guard-fengus
+dm-north	14322	Stomper Kreeg			8269,15577,16740,22833,22835	8269,15577,16740,22833,22835	8269,15577,16740,22833,22835	1	1		https://azeroth.wiki/forever/dungeons/dire-maul/stomper-kreeg
+dm-north	14323	Guard Slip'kik			8269,10101,11972,15580,15749	22820	8269,10101,11972,15580,15749,17307,20691	1	1		https://azeroth.wiki/forever/dungeons/dire-maul/guard-slip-kik
+dm-north	14324	Cho'Rush the Observer			8376,13745,15234,15305,15531,15982,16170,17139,17194,17290,22884	8376,13745,15234,15305,15531,15982,16170,17139,17194,17290,22883,22884	8376,10151,10947,13745,15234,15305,15531,15982,16170,17139,17194,17290,22884	1	0		https://azeroth.wiki/forever/dungeons/dire-maul/cho-rush-the-observer
+dm-north	14325	Captain Kromcrush			8599,19134,22857,22859,22860	8599,19134,22857,22859,22860	5246,8599,19134,22857,22859,22860	1	1		https://azeroth.wiki/forever/dungeons/dire-maul/captain-kromcrush
+dm-north	14326	Guard Mol'dar			10101	22818	8269,10101,11972,15580,15655,15749,20691	1	1		https://azeroth.wiki/forever/dungeons/dire-maul/guard-mol-dar
+dm-west	11467	Tsu'zee			12540,15581,15582,21060	12540,15581,15582,21060	12540,14873,15581,21060	1	0		https://azeroth.wiki/forever/dungeons/dire-maul/tsu-zee
+dm-west	11486	Prince Tortheldrin			3391,15589,20537,22920,22995	3391,15589,20537,22920,22995,1270782	8876,15589,20537,20691,22920,22995	1	1		https://azeroth.wiki/forever/dungeons/dire-maul/prince-tortheldrin
+dm-west	11487	Magister Kalendris			7645,17146,17287,22917,22919	7645,13810,17146,17287,22917,22919	7645,17146,17287,22917,22919	1	1		https://azeroth.wiki/forever/dungeons/dire-maul/magister-kalendris
+dm-west	11488	Illyanna Ravenoak			20735,22908,22910,22914	14301,20735,22908,22910,22914,22915	5116,14290,14295,20735,20904,22908,22910,22914	1	1		https://azeroth.wiki/forever/dungeons/dire-maul/illyanna-ravenoak
+dm-west	11489	Tendris Warpwood			5568,22916,22924,22994	5568,22916,22924,22994	5568,22916,22924,22994	1	1		https://azeroth.wiki/forever/dungeons/dire-maul/tendris-warpwood
+dm-west	11496	Immol'thar			5568,8269,16128,22899,22950	5568,8269,16128,22899,22950	5568,8269,15550,16128,22899,22950	1	1		https://azeroth.wiki/forever/dungeons/dire-maul/immol-thar
+dm-west	14506	Lord Hel'nurath			17146,18670,20989,23224	17146,18670,20989,23224	17146,18670,20989,23224	0	0		https://azeroth.wiki/forever/dungeons/dire-maul/lord-hel-nurath
+dm-west	14690	Revanchion			14907,15245	6136,14907,15245	12544,14907,15245,28126,29849	0	0		
+drowned-city	258905	Zul'Alai	1.60.1.70938,1.60.1.70959	1282504,1282511,1282519				1	0	https://www.method.gg/wow-forever/dungeons/the-drowned-city	
+drowned-city	258924	Var'Taka	1.60.1.70938,1.60.1.70959	15284,1282615,1282746				1	0	https://www.method.gg/wow-forever/dungeons/the-drowned-city	
+drowned-city	260042	Captain Dreadrise	1.60.1.70938,1.60.1.70959	1282842,1282860				1	0	https://www.method.gg/wow-forever/dungeons/the-drowned-city	
+drowned-city	260202	Deathless Marrow	1.60.1.70938,1.60.1.70959	1283027,1283034				1	0	https://www.method.gg/wow-forever/dungeons/the-drowned-city	
+drowned-city	260213	Deathless Guardians	1.60.1.70938,1.60.1.70959	1283081				0	0		
+drowned-city	260243	Min'loth the Serpent	1.60.1.70938,1.60.1.70959	1283233,1283250,1283295,1283313,1283327,1313471				1	0	https://www.method.gg/wow-forever/dungeons/the-drowned-city	
+drowned-city	260468	"""Pyromancer"" Braxton"			1291712	1291712		1	0		
+drowned-city	263886	Primeval Elemental	1.60.1.70938,1.60.1.70959	1290978,1290980				1	0	https://www.method.gg/wow-forever/dungeons/the-drowned-city	
+drowned-city	264172	Umbra				1283423		1	0	https://www.method.gg/wow-forever/dungeons/the-drowned-city	
+drowned-city	264177	Gill	1.60.1.70959	1291692				1	0	https://www.method.gg/wow-forever/dungeons/the-drowned-city	
+excavation-site-wetlands	260322	Saltspine	1.60.1.70862	3604,1316382	16495	3604,16495,1316382		1	1	https://www.method.gg/wow-forever/dungeons/excavation-site-wetlands	https://azeroth.wiki/forever/dungeons/excavation-site-wetlands/saltspine
+excavation-site-wetlands	260325	Shadetooth	1.60.1.70862	13445,14100,1284435		13445,14100,1284435		1	1	https://www.method.gg/wow-forever/dungeons/excavation-site-wetlands	https://azeroth.wiki/forever/dungeons/excavation-site-wetlands/shadetooth
+excavation-site-wetlands	260326	Relic Guardian	1.60.1.70862	8078,8374,10101	11876	8078,8374,10101,11876,1284450		1	1	https://www.method.gg/wow-forever/dungeons/excavation-site-wetlands	https://azeroth.wiki/forever/dungeons/excavation-site-wetlands/relic-guardian
+excavation-site-wetlands	260808	Highland Horror			9616,1316480	9616,1309071,1316480		1	1	https://www.method.gg/wow-forever/dungeons/excavation-site-wetlands	https://azeroth.wiki/forever/dungeons/excavation-site-wetlands/highland-horror
+gnomeregan	6228	Dark Iron Ambassador			184,3053,9053,10870	184,2601,3053,9053,10870,22425	184,3053,9053,10870,12544,16412	1	0	https://www.method.gg/wow-forever/dungeons/gnomeregan	
+gnomeregan	6229	Crowd Pummeler 9-60	1.60.1.70862	5568,8374,10887		5568,8374,10887	5568,8374,10887,16169	1	1	https://www.method.gg/wow-forever/dungeons/gnomeregan	https://azeroth.wiki/forever/dungeons/gnomeregan/crowd-pummeler-9-60
+gnomeregan	6235	Electrocutioner 6000	1.60.1.70862	11082	11084,11085	11082,11084,11085	11082,11084,11085,15605	1	1	https://www.method.gg/wow-forever/dungeons/gnomeregan	https://azeroth.wiki/forever/dungeons/gnomeregan/electrocutioner-6000
+gnomeregan	7079	Viscous Fallout				1604		1	1	https://www.method.gg/wow-forever/dungeons/gnomeregan	https://azeroth.wiki/forever/dungeons/gnomeregan/viscous-fallout
+gnomeregan	7361	Grubbis						1	1	https://www.method.gg/wow-forever/dungeons/gnomeregan	https://azeroth.wiki/forever/dungeons/gnomeregan/grubbis
+gnomeregan	7800	Mekgineer Thermaplugg	1.60.1.70862,1.60.1.70938	10101,11130,11518,11524,11526,11798		10101,11518,11521,11524,11526,11527,11798	10101	1	1	https://www.method.gg/wow-forever/dungeons/gnomeregan	https://azeroth.wiki/forever/dungeons/gnomeregan/mekgineer-thermaplugg
+hall-of-thanes	261306	Faldrim Anvilmar	1.60.1.70862	13860,1292602		13860,1292602		1	1	https://www.method.gg/wow-forever/dungeons/hall-of-thanes	https://azeroth.wiki/forever/dungeons/hall-of-thanes/faldrim-anvilmar
+hall-of-thanes	261311	Plunder	1.60.1.70862	11130,21055,22911		11130,21055,22911		1	1	https://www.method.gg/wow-forever/dungeons/hall-of-thanes	https://azeroth.wiki/forever/dungeons/hall-of-thanes/plunder
+hall-of-thanes	261316	Magmatus	1.60.1.70862	11970,1293228		11970,1293228		1	1	https://www.method.gg/wow-forever/dungeons/hall-of-thanes	
+hall-of-thanes	261319	Durgen Dirgehammer	1.60.1.70862	11977,19134,25710		11977,19134,25710,43958		1	1	https://www.method.gg/wow-forever/dungeons/hall-of-thanes	https://azeroth.wiki/forever/dungeons/hall-of-thanes/durgen-dirgehammer
+kroldok-stronghold	258964	Nar'gurk	1.60.1.70938,1.60.1.70959,1.60.1.71037	1280259,1280356		770,2974,3043,3355,5246,5484,7321,8380,8492,9490,11572,13810,13812,14324,14914,15258,19281,19974,20066,20186,20301,412609,414644,1280259,1280353,1280356,1293696,1314281		1	0	https://www.method.gg/wow-forever/dungeons/kroldok-stronghold	
+kroldok-stronghold	258966	Slavecrusher Grox	1.60.1.70938,1.60.1.70959,1.60.1.71037	11428,21049,1280085		11428,21049,1280085		1	0	https://www.method.gg/wow-forever/dungeons/kroldok-stronghold	
+kroldok-stronghold	258968	Overlord Mugg	1.60.1.70938,1.60.1.70959,1.60.1.71037	1282393,1282394,1282397		1282387,1282393,1282394,1282397		1	0	https://www.method.gg/wow-forever/dungeons/kroldok-stronghold	
+kroldok-stronghold	258972	Twilight Commander Zarmok	1.60.1.70938,1.60.1.70959,1.60.1.71037	8599,12057,1280011,1296130		8599,12057,1280011		1	0	https://www.method.gg/wow-forever/dungeons/kroldok-stronghold	
+kroldok-stronghold	259281	War Handler Ashka	1.60.1.70938,1.60.1.70959,1.60.1.71037	9128,12057,1282076		9128,12057,1282076		1	0	https://www.method.gg/wow-forever/dungeons/kroldok-stronghold	
+kroldok-stronghold	264773	Bossman Toof	1.60.1.70938,1.60.1.70959,1.60.1.71037	15548,16244,16856		15548,16244,16856		1	0	https://www.method.gg/wow-forever/dungeons/kroldok-stronghold	
+lbrs	9196	Highlord Omokk			8269,10101	8269,10101	8269,10101	1	1		https://azeroth.wiki/forever/dungeons/blackrock-spire/highlord-omokk
+lbrs	9217	Spirestone Lord Magus			8365,13323,15230,16170	8365,13323,15230,16170,403233	6742,8365,13323,15230,16170	1	0		
+lbrs	9218	Spirestone Battle Lord				403233		1	0		
+lbrs	9219	Spirestone Butcher				1604,403233		1	0		
+lbrs	9236	Shadow Hunter Vosh'gajin			16097,16098	16098	16097,16098,16708	1	1		https://azeroth.wiki/forever/dungeons/blackrock-spire/shadow-hunter-vosh-gajin
+lbrs	9237	War Master Voone			3391,10966,15284,15615,15618,15708,16075	3391,10966,15615,15618,15708,15754,16075	10966,15284,15615,15618,15708,16075	1	1		https://azeroth.wiki/forever/dungeons/blackrock-spire/war-master-voone
+lbrs	9568	Overlord Wyrmthalak			12887,16244	12887,15663,16244		1	1		https://azeroth.wiki/forever/dungeons/blackrock-spire/overlord-wyrmthalak
+lbrs	9596	Bannok Grimaxe				403233	13737	1	0		
+lbrs	9718	Ghok Bashguud				403233	8269,11972	1	0		
+lbrs	9736	Quartermaster Zigris			15504,15609,16496,16497	15504,15609,16496,16497	15504,15609,16496,16497	1	1		https://azeroth.wiki/forever/dungeons/blackrock-spire/quartermaster-zigris
+lbrs	10220	Halycon			3391,13738	3391,13738	8876,13738	1	1		https://azeroth.wiki/forever/dungeons/blackrock-spire/halycon
+lbrs	10263	Burning Felguard			15548,15580,16046,16074	15548,15580,16046,16074	15548,15580,15588,16046,16074	0	0		
+lbrs	10268	Gizrul the Slavener			8269,16128,16495	8269,16128,16495	8269,16128,16495	1	1		https://azeroth.wiki/forever/dungeons/blackrock-spire/gizrul-the-slavener
+lbrs	10376	Crystal Fang				16416		1	0		
+lbrs	10584	Urok Doomhowl			15580,16508,16509	15580,16508,16509	15580,16473,16508,16509	1	1		https://azeroth.wiki/forever/dungeons/blackrock-spire/urok-doomhowl
+lbrs	10596	Mother Smolderweb			16103,16104,16468	16103,16104,16468	16103,16104,16468	1	1		https://azeroth.wiki/forever/dungeons/blackrock-spire/mother-smolderweb
+maraudon	12201	Princess Theradras	1.60.1.70938,1.60.1.71091,1.60.1.71139	3391,21832,21869,21909		3391,21832,21869,21909,22592	8876,21832,21869,21909	1	1		
+maraudon	12203	Landslide	1.60.1.70938,1.60.1.71091,1.60.1.71139	5568,18670,21727,21808		5568,18670,21727,21808	5568,18670,21808	1	1		https://azeroth.wiki/forever/dungeons/maraudon/landslide
+maraudon	12225	Celebras the Cursed	1.60.1.70938,1.60.1.71091,1.60.1.71139	12747,21807,21968	21793	12747,21793,21807,21968	12747,21793,21807,21968	1	1		https://azeroth.wiki/forever/dungeons/maraudon/celebras-the-cursed
+maraudon	12236	Lord Vyletongue	1.60.1.70938,1.60.1.71091,1.60.1.71139	7964,16100,21390,21655		7964,16100,21390,21655	674,7964,8817,16100,21080,21390,21655	1	1		https://azeroth.wiki/forever/dungeons/maraudon/lord-vyletongue
+maraudon	12237	Meshlok the Harvester	1.60.1.71091,1.60.1.71139	13446,15593		13446,15593	13446,15580,15593,24375	1	1		
+maraudon	12258	Razorlash	1.60.1.70938,1.60.1.71091,1.60.1.71139	11427	15976	11427,15976	8876,12787,15584,15976,15978	1	1		https://azeroth.wiki/forever/dungeons/maraudon/razorlash
+maraudon	13282	Noxxion	1.60.1.70938,1.60.1.71091,1.60.1.71139	10966,21687,21707		10966,21687,21707	21547,21687,21707	1	1		https://azeroth.wiki/forever/dungeons/maraudon/noxxion
+maraudon	13596	Rotgrip			15976,16495	15976,16495	15978,16495	1	1		https://azeroth.wiki/forever/dungeons/maraudon/rotgrip
+maraudon	13601	Tinkerer Gizlock	1.60.1.70938,1.60.1.71091,1.60.1.71139	9143,16100,21833,29419		9143,16100,21833,29419	9143,16100,21833,29419	1	1		https://azeroth.wiki/forever/dungeons/maraudon/tinkerer-gizlock
+ragefire-chasm	11517	Oggleflint	1.60.1.70790,1.60.1.70862,1.60.1.70888,1.60.1.70938	5532		5532	15584	1	1	https://www.method.gg/wow-forever/dungeons/ragefire-chasm	https://azeroth.wiki/forever/dungeons/ragefire-chasm/oggleflint
+ragefire-chasm	11518	Jergosh the Invoker	1.60.1.70790,1.60.1.70862,1.60.1.70888,1.60.1.70938	18267,20800		18267,20800	18267,20800	1	1	https://www.method.gg/wow-forever/dungeons/ragefire-chasm	
+ragefire-chasm	11519	Bazzalan	1.60.1.70790,1.60.1.70862,1.60.1.70888,1.60.1.70938	14873		744,14873	3616,14873	1	1	https://www.method.gg/wow-forever/dungeons/ragefire-chasm	https://azeroth.wiki/forever/dungeons/ragefire-chasm/bazzalan
+ragefire-chasm	11520	Taragaman the Hungerer	1.60.1.70790,1.60.1.70862,1.60.1.70888,1.60.1.70938	11970,18072		11970,18072	11970,18072	1	1	https://www.method.gg/wow-forever/dungeons/ragefire-chasm	https://azeroth.wiki/forever/dungeons/ragefire-chasm/taragaman-the-hungerer
+razorfen-downs	7354	Ragglesnout			7645,11639,12039,12471	7645,11639,12039,12471	7645,10892,11639,11659,12039,12471	1	1	https://www.method.gg/wow-forever/dungeons/razorfen-downs	https://azeroth.wiki/forever/dungeons/razorfen-downs/ragglesnout
+razorfen-downs	7355	Tuten'kash	1.60.1.70888,1.60.1.70959	12252,12255		12255	12252,12254,12255	1	1	https://www.method.gg/wow-forever/dungeons/razorfen-downs	https://azeroth.wiki/forever/dungeons/razorfen-downs/tuten-kash
+razorfen-downs	7356	Plaguemaw the Rotting	1.60.1.70888,1.60.1.70959	12946	11442	11442,12946	12946,12947	1	0	https://www.method.gg/wow-forever/dungeons/razorfen-downs	https://azeroth.wiki/forever/dungeons/razorfen-downs/plaguemaw-the-rotting
+razorfen-downs	7357	Mordresh Fire Eye	1.60.1.70888,1.60.1.70959	12466,12470		12466,12470	12466,12470	1	1	https://www.method.gg/wow-forever/dungeons/razorfen-downs	https://azeroth.wiki/forever/dungeons/razorfen-downs/mordresh-fire-eye
+razorfen-downs	7358	Amnennar the Coldbringer	1.60.1.70888,1.60.1.70959	12642,13009,15530,15531		6136,12642,13009,15530,15531	12642,13009,15530,15531	1	1	https://www.method.gg/wow-forever/dungeons/razorfen-downs	https://azeroth.wiki/forever/dungeons/razorfen-downs/amnennar-the-coldbringer
+razorfen-downs	8567	Glutton	1.60.1.70888,1.60.1.70959	12795	12627	12627,12795	8876,12627,12787,12795,16345	1	1	https://www.method.gg/wow-forever/dungeons/razorfen-downs	https://azeroth.wiki/forever/dungeons/razorfen-downs/glutton
+razorfen-downs	14686	Lady Falther'ess			16838,17105,22743,429688	16838,17105,22743,429688	7645,16838,17105,22743,28126,28533	0	0		
+razorfen-kraul	4420	Overlord Ramtusk	1.60.1.70862,1.60.1.70888,1.60.1.70938	7165,9128,15548		7165,9128,15548	7165,9128,15548	1	1	https://www.method.gg/wow-forever/dungeons/razorfen-kraul	https://azeroth.wiki/forever/dungeons/razorfen-kraul/overlord-ramtusk
+razorfen-kraul	4421	Charlga Razorflank	1.60.1.70862,1.60.1.70888,1.60.1.70938	6077,8292,8361	8358	6077,8292,8358,8361	6077,8292,8358,8361	1	1	https://www.method.gg/wow-forever/dungeons/razorfen-kraul	https://azeroth.wiki/forever/dungeons/razorfen-kraul/charlga-razorflank
+razorfen-kraul	4422	Agathelos the Raging	1.60.1.70862,1.60.1.70888,1.60.1.70938	8285	8260,8269	8260,8269,8285,8359	8260,8269,8285,8555	1	1	https://www.method.gg/wow-forever/dungeons/razorfen-kraul	https://azeroth.wiki/forever/dungeons/razorfen-kraul/agathelos-the-raging
+razorfen-kraul	4424	Aggem Thorncurse	1.60.1.70862,1.60.1.70888,1.60.1.70938	8286,14900	6192	6192,8286,14900	6192,8286,14900	1	1	https://www.method.gg/wow-forever/dungeons/razorfen-kraul	https://azeroth.wiki/forever/dungeons/razorfen-kraul/aggem-thorncurse
+razorfen-kraul	4425	Blind Hunter				14920,17260,23147,24577		1	1	https://www.method.gg/wow-forever/dungeons/razorfen-kraul	
+razorfen-kraul	4428	Death Speaker Jargba	1.60.1.70862,1.60.1.70888,1.60.1.70938	9613,14515		8053,9613,14515,1293451	9613,14515	1	1	https://www.method.gg/wow-forever/dungeons/razorfen-kraul	https://azeroth.wiki/forever/dungeons/razorfen-kraul/death-speaker-jargba
+razorfen-kraul	4438	Razorfen Spearhide	1.60.1.70862,1.60.1.70888,1.60.1.70938	8148,8259		8148,8259	8148,8259	0	0		
+razorfen-kraul	4842	Earthcaller Halmgar			2484,8270,9532	2484,8270,9532	2484,8270,9532	1	1	https://www.method.gg/wow-forever/dungeons/razorfen-kraul	
+razorfen-kraul	6168	Roogug	1.60.1.70888,1.60.1.70938	9532	8270	8270,9532	8270,9532	1	0	https://www.method.gg/wow-forever/dungeons/razorfen-kraul	https://azeroth.wiki/forever/dungeons/razorfen-kraul/roogug
+ruins-of-lordaeron	250483	Witherfang	1.60.1.70790,1.60.1.70862	3358		3358		1	1	https://www.method.gg/wow-forever/dungeons/ruins-of-lordaeron	https://azeroth.wiki/forever/dungeons/ruins-of-lordaeron/witherfang
+ruins-of-lordaeron	250631	The Abandoned	1.60.1.70790,1.60.1.70862	14907,1266011		6136,14907,1266011		1	1	https://www.method.gg/wow-forever/dungeons/ruins-of-lordaeron	https://azeroth.wiki/forever/dungeons/ruins-of-lordaeron/the-abandoned
+ruins-of-lordaeron	250657	Rath'mael	1.60.1.70790,1.60.1.70862	18399		13376,18399		1	1	https://www.method.gg/wow-forever/dungeons/ruins-of-lordaeron	https://azeroth.wiki/forever/dungeons/ruins-of-lordaeron/rath-mael
+ruins-of-lordaeron	250660	The Baron	1.60.1.70790,1.60.1.70862	5568,17307,1326990		5568,17307,1326990		1	1	https://www.method.gg/wow-forever/dungeons/ruins-of-lordaeron	
+ruins-of-lordaeron	255699	Lordaeron Captain				5532,7165,9080,1266050		1	0		
+ruins-of-lordaeron	256035	Viktor the Vile	1.60.1.70790,1.60.1.70862	3358		3358		1	1	https://www.method.gg/wow-forever/dungeons/ruins-of-lordaeron	https://azeroth.wiki/forever/dungeons/ruins-of-lordaeron/viktor-the-vile
+ruins-of-lordaeron	256097	Bjork	1.60.1.70790,1.60.1.70862	14099,1301635		14099,1301635		1	1	https://www.method.gg/wow-forever/dungeons/ruins-of-lordaeron	https://azeroth.wiki/forever/dungeons/ruins-of-lordaeron/bjork
+scholomance	1853	Darkmaster Gandling	1.60.1.71139	12040,17950,18702	15791	12040,15791,17950,18702	10212,18116,18702	1	1		https://azeroth.wiki/forever/dungeons/scholomance/darkmaster-gandling
+scholomance	10432	Vectus			16046,18399	13376,16046,18399	16046,18399	1	1		https://azeroth.wiki/forever/dungeons/scholomance/vectus
+scholomance	10433	Marduk Blackpool			12040,17228,17695	12040,15754,17228,17697	12040,15284,17228,17695	1	1		https://azeroth.wiki/forever/dungeons/scholomance/marduk-blackpool
+scholomance	10502	Lady Illucia Barov	1.60.1.71139	12528,12542,14515,17289,18671		12528,12542,14515,17289,18671,19755	6215,12528,12542,14515,15487,17289,18116,18671,19460	1	1		https://azeroth.wiki/forever/dungeons/scholomance/lady-illucia-barov
+scholomance	10503	Jandice Barov	1.60.1.71139	8994,16098,17773		16098	18116,18270,24673	1	1		https://azeroth.wiki/forever/dungeons/scholomance/jandice-barov
+scholomance	10504	Lord Alexei Barov	1.60.1.71139	17467,17820	15570	15570,17467,17820	11668,11700,17467,17820,18116	1	1		https://azeroth.wiki/forever/dungeons/scholomance/lord-alexei-barov
+scholomance	10505	Instructor Malicia	1.60.1.71139	8362,13747,15586,17831,17843,18376		8362,13747,15586,17831,17843,18376	8362,11672,12020,13747,15586,17831,17843,18116,18376	1	1		https://azeroth.wiki/forever/dungeons/scholomance/instructor-malicia
+scholomance	10506	Kirtonos the Herald	1.60.1.71139	6016,8379,12882,16467,18144	12889,14515,17228	2974,6016,8379,12882,12889,14325,14515,16467,17228,18144	6016,8379,12882,12889,14515,16467,17228,18116,18144,20741	1	1		https://azeroth.wiki/forever/dungeons/scholomance/kirtonos
+scholomance	10507	The Ravenian	1.60.1.71139	15550,15584,17963,18670		15550,15584,17963,18670	15550,15584,17963,18670	1	1		https://azeroth.wiki/forever/dungeons/scholomance/the-ravenian
+scholomance	10508	Ras Frostwhisper	1.60.1.71139	8398,12096,18099,18100,18763	11130	8398,11130,12096,18099,18100,18101,18763	8398,11130,12096,18099,18100,18763	1	1		https://azeroth.wiki/forever/dungeons/scholomance/ras-frostwhisperer
+scholomance	10901	Lorekeeper Polkelt	1.60.1.71139	8245,18149,18151		8245	3584,8245,16359,18116,18149,18151	1	1		https://azeroth.wiki/forever/dungeons/scholomance/lorekeeper-polkelt
+scholomance	11261	Doctor Theolen Krastinov	1.60.1.71139	8269,16509,18103		8269,16509,18103	8269,16509,18103	1	1		https://azeroth.wiki/forever/dungeons/scholomance/doctor-theolen-krastinov
+scholomance	11622	Rattlegore	1.60.1.71139	10101,16727,18368		10101,16727,18368	10101,16727,18116,18368	1	1		https://azeroth.wiki/forever/dungeons/scholomance/rattlegore
+scholomance	14516	Death Knight Darkreaver	1.60.1.71139	15754,17393,22644,23261,429688		15754,17393,22644,23261,429688	7645,15284,17393,22644,23261	0	0		
+scholomance	14695	Lord Blackwood			7964,11972,16496,21390	7964,11972,16496,21390,403233	7964,11972,16496,20733,21390,28126	0	0		
+scholomance	16118	Kormok			8269,17228,27687,27688,27689,27695	8269,17228,27687,27688,27689,27695	8269,20741,27687,27688,27689,27695	1	0		https://azeroth.wiki/forever/dungeons/scholomance/kormok
+shadowfang-keep	3864	Fel Steed	1.60.1.70790,1.60.1.70862	7139		7139	7139	0	0		
+shadowfang-keep	3872	Deathsworn Captain			7165,9080	5532,7165,9080	7165,9080,15584	0	1	https://www.method.gg/wow-forever/dungeons/shadowfang-keep	
+shadowfang-keep	3886	Razorclaw the Butcher					7485	1	1	https://www.method.gg/wow-forever/dungeons/shadowfang-keep	https://azeroth.wiki/forever/dungeons/shadowfang-keep/razorclaw-the-butcher
+shadowfang-keep	3887	Baron Silverlaine	1.60.1.70790,1.60.1.70862	7068		7068	7068	1	1	https://www.method.gg/wow-forever/dungeons/shadowfang-keep	https://azeroth.wiki/forever/dungeons/shadowfang-keep/baron-silverlaine
+shadowfang-keep	3914	Rethilgore	1.60.1.70790,1.60.1.70862	7295		7295	7295	1	1	https://www.method.gg/wow-forever/dungeons/shadowfang-keep	https://azeroth.wiki/forever/dungeons/shadowfang-keep/rethilgore
+shadowfang-keep	3927	Wolf Master Nandos	1.60.1.70790,1.60.1.70862	7487,7488	7489	7487,7488,7489	7487,7488,7489	1	1	https://www.method.gg/wow-forever/dungeons/shadowfang-keep	https://azeroth.wiki/forever/dungeons/shadowfang-keep/wolf-master-nandos
+shadowfang-keep	4274	Fenrus the Devourer	1.60.1.70790,1.60.1.70862	7125		7125	7125	1	1	https://www.method.gg/wow-forever/dungeons/shadowfang-keep	
+shadowfang-keep	4275	Archmage Arugal	1.60.1.70790,1.60.1.70862	7588,7621,7803		99,770,1978,2974,3355,5211,5246,6547,7588,7621,7803,8050,8198,13797,14323,19675,19974,20184,20185,20188,20232,412609,1280353,1291663,1328617	7803,22709	1	1	https://www.method.gg/wow-forever/dungeons/shadowfang-keep	https://azeroth.wiki/forever/dungeons/shadowfang-keep/archmage-arugal
+shadowfang-keep	4278	Commander Springvale	1.60.1.70790,1.60.1.70862	642,1026,5588		642,1026,5588,25771	1026,5588	1	1	https://www.method.gg/wow-forever/dungeons/shadowfang-keep	https://azeroth.wiki/forever/dungeons/shadowfang-keep/commander-springvale
+shadowfang-keep	4279	Odo the Blindwatcher	1.60.1.70790,1.60.1.70862	7481,7483,7484		7481	7481,7483,7484	1	1	https://www.method.gg/wow-forever/dungeons/shadowfang-keep	https://azeroth.wiki/forever/dungeons/shadowfang-keep/odo-the-blindwatcher
+shadowfang-keep	4627	Arugal's Voidwalker	1.60.1.70790,1.60.1.70862	7154		7154		0	0		
+shapers-terrace	253201	Titanosaur			1294313	1294313		1	0	https://www.wowhead.com/forever/guide/the-shapers-terrace-dungeon-overview-location-rewards	
+shapers-terrace	253214	Ravasaur Hunters						1	0	https://www.wowhead.com/forever/guide/the-shapers-terrace-dungeon-overview-location-rewards	
+shapers-terrace	261809	Nanaya			1290463,1290464,1291274,1291380	1290463,1290464,1290508,1290512,1291274,1291301,1291380		1	0	https://www.wowhead.com/forever/guide/the-shapers-terrace-dungeon-overview-location-rewards	
+shapers-terrace	261812	Thunderhoof			6535,8078,12553,1310513	6535,8078,12553,1310513		1	0	https://www.wowhead.com/forever/guide/the-shapers-terrace-dungeon-overview-location-rewards	
+shapers-terrace	261813	Venomridge			3604,1310365	3604,1310365		1	0	https://www.wowhead.com/forever/guide/the-shapers-terrace-dungeon-overview-location-rewards	
+shapers-terrace	261974	Cinder			1310251,1310267,1310512	1310251,1310267,1310512		1	0	https://www.wowhead.com/forever/guide/the-shapers-terrace-dungeon-overview-location-rewards	
+shapers-terrace	261993	King Op				12553		1	0		
+shapers-terrace	262081	Bolt			15588,1310513	15588,1310513		1	0	https://www.wowhead.com/forever/guide/the-shapers-terrace-dungeon-overview-location-rewards	
+shapers-terrace	262127	Direhorn Matriarch			1287872,1287876,1287886	1287872,1287876,1287886		1	0	https://www.wowhead.com/forever/guide/the-shapers-terrace-dungeon-overview-location-rewards	
+shapers-terrace	262297	Snowtalon			1310354,1310514	1310354,1310514		1	0	https://www.wowhead.com/forever/guide/the-shapers-terrace-dungeon-overview-location-rewards	
+shapers-terrace	272561	Vitrix			1312869,1312870	1312869,1312870		1	0	https://www.wowhead.com/forever/guide/the-shapers-terrace-dungeon-overview-location-rewards	
+sm-armory	3975	Herod	1.60.1.70888,1.60.1.70959	8260,8269,8989,22540		8260,8269,8989,22540	6268,8599,15579	1	1	https://www.method.gg/wow-forever/dungeons/scarlet-monastery-armory	https://azeroth.wiki/forever/dungeons/scarlet-monastery/herod
+sm-cathedral	3976	Scarlet Commander Mograine	1.60.1.70938,1.60.1.70959	1020,5589,8990,9257,14518		1020,5589,8990,9257,14518,25771	1020,5589,8990,14518	1	1	https://www.method.gg/wow-forever/dungeons/scarlet-monastery-cathedral	https://azeroth.wiki/forever/dungeons/scarlet-monastery/high-inquisitor-whitemane
+sm-cathedral	3977	High Inquisitor Whitemane	1.60.1.70938,1.60.1.70959	9232,9256,9481,12039,22187		770,9232,9256,9481,10458,12039,14515,22187	9256,9481,12039,22187	1	1	https://www.method.gg/wow-forever/dungeons/scarlet-monastery-cathedral	https://azeroth.wiki/forever/dungeons/scarlet-monastery/high-inquisitor-whitemane
+sm-cathedral	4542	High Inquisitor Fairbanks	1.60.1.70938,1.60.1.70959	8282,8399,11647,12039,12096,15090		8282,8399,11647,12039,12096,15090	8278,8279,8282,8399,11647,12039,12096,15090	1	1	https://www.method.gg/wow-forever/dungeons/scarlet-monastery-cathedral	https://azeroth.wiki/forever/dungeons/scarlet-monastery/high-inquisitor-fairbanks
+sm-graveyard	3983	Interrogator Vishas	1.60.1.70888,1.60.1.70959	2767	14032	2767,9034	8981,14032	1	1	https://www.method.gg/wow-forever/dungeons/scarlet-monastery-graveyard	https://azeroth.wiki/forever/dungeons/scarlet-monastery/interrogator-vishas
+sm-graveyard	4543	Bloodmage Thalnos	1.60.1.70888,1.60.1.70959	8053,8814,9613	12470	8053,8814,9613,12470	8053,8814,9613,12470	1	1	https://www.method.gg/wow-forever/dungeons/scarlet-monastery-graveyard	https://azeroth.wiki/forever/dungeons/scarlet-monastery/bloodmage-thalnos
+sm-graveyard	6488	Fallen Champion			7366,15496	5308,7366,15496,403233	7160,7366,15496,19642,19644,21949	1	1	https://www.method.gg/wow-forever/dungeons/scarlet-monastery-graveyard	
+sm-graveyard	6489	Ironspine	1.60.1.70888	3815,21007		3815,21007	3815,21007	1	1	https://www.method.gg/wow-forever/dungeons/scarlet-monastery-graveyard	
+sm-graveyard	6490	Azshir the Sleepless			5137,7399,9373	5137,7399,9373	5137,7399,9373	1	1	https://www.method.gg/wow-forever/dungeons/scarlet-monastery-graveyard	
+sm-library	3974	Houndmaster Loksey	1.60.1.70888,1.60.1.70959	6742	6192	6192,6742	6192,6742	1	1	https://www.method.gg/wow-forever/dungeons/scarlet-monastery-library	
+sm-library	6487	Arcanist Doan	1.60.1.70888,1.60.1.70959	8988,9433,9435,9438,13323		8988,9433,9435,9438,13323		1	1	https://www.method.gg/wow-forever/dungeons/scarlet-monastery-library	https://azeroth.wiki/forever/dungeons/scarlet-monastery/arcanist-doan
+stockade	1663	Dextren Ward	1.60.1.70938	7165,11976,19134	5246	7165,11976,19134	2457,5246,7165,11976,19134	1	1	https://www.method.gg/wow-forever/dungeons/the-stockade	https://azeroth.wiki/forever/dungeons/the-stockade/dextren-ward
+stockade	1666	Kam Deepfury	1.60.1.70938	7164,8242	3419	3419,7164,8242	7164,8242	1	1	https://www.method.gg/wow-forever/dungeons/the-stockade	https://azeroth.wiki/forever/dungeons/the-stockade/kam-deepfury
+stockade	1696	Targorr the Dread	1.60.1.70938	3391,8599		3391,8599	674,8599,8876	1	1	https://www.method.gg/wow-forever/dungeons/the-stockade	https://azeroth.wiki/forever/dungeons/the-stockade/targorr-the-dread
+stockade	1716	Bazil Thredd	1.60.1.70938	7964,9128		7964,9128	674,7964,9128	1	1	https://www.method.gg/wow-forever/dungeons/the-stockade	https://azeroth.wiki/forever/dungeons/the-stockade/bazil-thredd
+stockade	1717	Hamhock	1.60.1.70938	421,6742		421,6742	421,6742	1	1	https://www.method.gg/wow-forever/dungeons/the-stockade	https://azeroth.wiki/forever/dungeons/the-stockade/hamhock
+stockade	1720	Bruegal Ironknuckle				1604		1	1	https://www.method.gg/wow-forever/dungeons/the-stockade	
+stratholme	10393	Skul			12544,15230,15499,16799	6136,12544,15230,15499,16799	12544,15230,15499,16799	1	1		https://azeroth.wiki/forever/dungeons/stratholme/skul
+stratholme	10435	Magistrate Barthilas	1.60.1.71139	14099,16791,16793	10887,16792	10887,14099,16791,16793	10887,14099,16791,16792,16793,16794	1	1		https://azeroth.wiki/forever/dungeons/stratholme/magistrate-barthilas
+stratholme	10436	Baroness Anastari	1.60.1.71139	16565,16867,18327	17244	8053,10893,16565,16867,17244,18327,19755,402791	16565,16867,17244,18327	1	1		https://azeroth.wiki/forever/dungeons/stratholme/baroness-anastari
+stratholme	10437	Nerub'enkan	1.60.1.71139	4962,6016,16795,17235	16418	4962,6016,16795,17235	4962,6016,16418,17235	1	1		https://azeroth.wiki/forever/dungeons/stratholme/nerub-enkan
+stratholme	10438	Maleki the Pallid	1.60.1.71139	16869,17238,17243,17503		6136,16869,17238,17243,17503	16869,17238,17243,17503	1	1		https://azeroth.wiki/forever/dungeons/stratholme/maleki-the-pallid
+stratholme	10439	Ramstein the Gorger	1.60.1.71139	5568,17307		5568,17307,17687	5568,6788,17307	1	1		https://azeroth.wiki/forever/dungeons/stratholme/ramstein-the-gorger
+stratholme	10440	Baron Rivendare	1.60.1.71139	15708,15754,17393,17434,17435	17467,17473	15708,15754,17393,17467	15284,15708,17393,17467,17473,17475,17476,17477,17478,17479,17480	1	1		https://azeroth.wiki/forever/dungeons/stratholme/baron-rivendare
+stratholme	10516	The Unforgiven			14907	6136,14907	8822,14907,22766	1	1		https://azeroth.wiki/forever/dungeons/stratholme/the-unforgiven
+stratholme	10558	Hearthsinger Forresten			14443,16100,16244,16331,16798	14443,16100,16244,16798	14443,16100,16244,16331,16798	1	1		https://azeroth.wiki/forever/dungeons/stratholme/hearthsinger-forresten
+stratholme	10808	Timmy the Cruel			8599,12787,17470	8599,17470	8599,12787,17470	1	1		https://azeroth.wiki/forever/dungeons/stratholme/timmy-the-cruel
+stratholme	10809	Stonespine			14331	14331	14331	1	1		https://azeroth.wiki/forever/dungeons/stratholme/stonespine
+stratholme	10811	Archivist Galford			17274,17293,17366	17274,17293,17366	17274,17293,17366,23462	1	1		https://azeroth.wiki/forever/dungeons/stratholme/archivist-galford
+stratholme	10813	Balnazzar					9256,15398,20603,20741	1	1		https://azeroth.wiki/forever/dungeons/stratholme/balnazzar
+stratholme	10997	Cannon Master Willey			10101,15615,16496,17279	10101,15615,16496,17279	10101,11729,16615	1	1		https://azeroth.wiki/forever/dungeons/stratholme/cannon-master-willey
+stratholme	11032	Malor the Zealous			12734,15493,16172,17233	12734,15493,16172,17233	10310,12734,15493,16172,17233	1	0		https://azeroth.wiki/forever/dungeons/stratholme/malor-the-zealous
+stratholme	11058	Ezra Grimm			7964,17294		7964,17294,20712,23511	0	0		https://azeroth.wiki/forever/dungeons/stratholme/ezra-grimm
+stratholme	11120	Crimson Hammersmith			17445		17445	1	0		https://azeroth.wiki/forever/dungeons/stratholme/crimson-hammersmith
+stratholme	11121	Black Guard Swordsmith			16867		5884,16867	0	0		https://azeroth.wiki/forever/dungeons/stratholme/black-guard-swordsmith
+stratholme	11143	Postmaster Malown			6253,12542,12741,13338	6253,12542,12741,13338	3417,6253,12542,12741,13338	1	0		https://azeroth.wiki/forever/dungeons/stratholme/postmaster-malown
+stratholme	14684	Balzaphon			8398,12096,16799	8398,12096,15244,16799,403233	8398,12096,12557,16799,28126	0	0		
+sunken-temple	5708	Spawn of Hakkar	1.60.1.71037	12280		12280,17260,23148,25011,403233	12280	0	0		
+sunken-temple	5709	Shade of Eranikus	1.60.1.71037	3391,11876,12890,12891		3391,11876,12890,12891	8876,11876,12535,12890,12891	1	1		https://azeroth.wiki/forever/dungeons/sunken-temple/shade-of-eranikus
+sunken-temple	5710	Jammal'an the Prophet	1.60.1.71037	8376,12468,12480,12492		770,8376,12468,12480,12492,14314	8376,10893,12468,12479,12480,12492,13540	1	1		https://azeroth.wiki/forever/dungeons/sunken-temple/jammal-an-the-prophet
+sunken-temple	5711	Ogom the Wretched	1.60.1.71037	11639,12471,12493		11639,12471,12493	11639,11660,12471,12493,15654	1	1		https://azeroth.wiki/forever/dungeons/sunken-temple/jammal-an-the-prophet
+sunken-temple	5712	Zolo	1.60.1.71037	12058,12506			12058,12506,13540	1	0		
+sunken-temple	5713	Gasher					13540,15580	1	0		
+sunken-temple	5714	Loro	1.60.1.71037	8242			3639,8242,9205,12782,13540,15655	1	0		
+sunken-temple	5715	Hukku	1.60.1.71037	12471,12790			9081,12279,12471,12790,13540	1	0		
+sunken-temple	5716	Zul'Lor	1.60.1.71037	5532,12530			12530,13540,15584	1	0		
+sunken-temple	5717	Mijan	1.60.1.71037	8148,11899,12492			8148,8362,11899,12492,13540	1	0		
+sunken-temple	5719	Morphaz	1.60.1.71037	12882,12884		12882,12884	12882,12884	1	1		https://azeroth.wiki/forever/dungeons/sunken-temple/morphaz
+sunken-temple	5720	Weaver	1.60.1.71037	12882,12884		12882,12884	12882,12884,16359	1	1		https://azeroth.wiki/forever/dungeons/sunken-temple/weaver
+sunken-temple	5721	Dreamscythe	1.60.1.71037	12882,12884		12882,12884	12882,12884,16359	1	1		https://azeroth.wiki/forever/dungeons/sunken-temple/dreamscythe
+sunken-temple	5722	Hazzas	1.60.1.71037	12882,12884		12882,12884	12882,12884	1	1		https://azeroth.wiki/forever/dungeons/sunken-temple/hazzas
+sunken-temple	8440	Avatar of Hakkar	1.60.1.71037	6607,12639,12888,12889			6607,9617,12888,12889	0	0		
+sunken-temple	8580	Atal'alarion	1.60.1.71037	6524,12887		6524,12887	6524,12887	1	1		https://azeroth.wiki/forever/dungeons/sunken-temple/atal-alarion
+ubrs	9816	Pyroguard Emberseer			16079,16536	13376,16078,16079,16536	16079,16536	1	1		https://azeroth.wiki/forever/dungeons/blackrock-spire/pyroguard-emberseer
+ubrs	10264	Solakar Flamewreath			16727	16727	16556,16727	1	1		
+ubrs	10339	Gyth				10101,16328,16350,16359,16390	18763,20667,20712	1	1		https://azeroth.wiki/forever/dungeons/blackrock-spire/warchief-rend-blackhand
+ubrs	10363	General Drakkisath			16805	15588	12097,15284,15548,16419,16789,16805,20691,23023,23462,23931	1	1		https://azeroth.wiki/forever/dungeons/blackrock-spire/general-drakkisath
+ubrs	10429	Warchief Rend Blackhand			8269,13736,15708	8269,13736,15708,15754	8269,13736,15284,15589,15708,20691,23931	1	1		https://azeroth.wiki/forever/dungeons/blackrock-spire/warchief-rend-blackhand
+ubrs	10430	The Beast			14100,16144,16636,16785,16788,20477	14100,15570,16144,16636,16785,16788,20477	14100,15506,16144,16636,16785,16788,20477	1	1		https://azeroth.wiki/forever/dungeons/blackrock-spire/the-beast
+ubrs	10509	Jed Runewatcher			11972,14516,15749	11972,14516,15749,403233	11972,14516,15749	1	1		
+ubrs	10899	Goraluk Anvilcrack			6253,15580,16172	6253,15580,16172,403233	6253,15580,16172	1	1		
+ubrs	16042	Lord Valthalak			27249,27286,27382	27249,27286,27338,27382	8269,27249,27286,27382	0	0		https://azeroth.wiki/forever/dungeons/blackrock-spire/lord-valthalak
+uldaman	2748	Archaedas	1.60.1.70938,1.60.1.71037,1.60.1.71091	6524,10252,10258		6524,8269,10252,10258		1	1	https://www.method.gg/wow-forever/dungeons/uldaman	https://azeroth.wiki/forever/dungeons/uldaman/archaedas
+uldaman	4854	Grimlok	1.60.1.70938,1.60.1.71037,1.60.1.71091	6742,8292,9532,11892	8143	6742,8143,8292,9532,11892	6742,8143,8292,9532,11892	1	1	https://www.method.gg/wow-forever/dungeons/uldaman	https://azeroth.wiki/forever/dungeons/uldaman/grimlok
+uldaman	6906	Baelog	1.60.1.70938,1.60.1.71037,1.60.1.71091	14516,15620		14516,15620	14516,15620	1	0		https://azeroth.wiki/forever/dungeons/uldaman/the-lost-dwarves
+uldaman	6907	"Eric ""The Swift"""	1.60.1.70938,1.60.1.71037,1.60.1.71091	6268		6268	6268	1	0		https://azeroth.wiki/forever/dungeons/uldaman/the-lost-dwarves
+uldaman	6908	Olaf	1.60.1.70938,1.60.1.71037	8242		8242	8242	1	0		https://azeroth.wiki/forever/dungeons/uldaman/the-lost-dwarves
+uldaman	6910	Revelosh	1.60.1.70938,1.60.1.71037,1.60.1.71091	15801	16006	15801,16006	15117,15801,16006	1	1	https://www.method.gg/wow-forever/dungeons/uldaman	https://azeroth.wiki/forever/dungeons/uldaman/revelosh
+uldaman	7023	Obsidian Sentinel	1.60.1.71037,1.60.1.71091	10061,10072		10061,10072	10061,10072	1	1	https://www.method.gg/wow-forever/dungeons/uldaman	https://azeroth.wiki/forever/dungeons/uldaman/obsidian-sentinel
+uldaman	7206	Ancient Stone Keeper	1.60.1.70938,1.60.1.71037,1.60.1.71091	10094,10132		10094	10094,10132	1	1	https://www.method.gg/wow-forever/dungeons/uldaman	https://azeroth.wiki/forever/dungeons/uldaman/ancient-stone-keeper
+uldaman	7228	Ironaya	1.60.1.70938,1.60.1.71037,1.60.1.71091	8374,10101	11876	8374,10101,11876	8374,10101,11876	1	1	https://www.method.gg/wow-forever/dungeons/uldaman	https://azeroth.wiki/forever/dungeons/uldaman/ironaya
+uldaman	7291	Galgann Firehammer	1.60.1.70938,1.60.1.71037,1.60.1.71091	3356,8053,9482,11969		3356,8053,9482,11969	3356,8053,9482,11969	1	1	https://www.method.gg/wow-forever/dungeons/uldaman	https://azeroth.wiki/forever/dungeons/uldaman/galgann-firehammer
+wailing-caverns	3653	Kresh				14917,17256,26064		1	1	https://www.method.gg/wow-forever/dungeons/wailing-caverns	https://azeroth.wiki/forever/dungeons/wailing-caverns/kresh
+wailing-caverns	3654	Mutanus the Devourer	1.60.1.70790,1.60.1.70862	7399,7967,8150		122,7399,7967,8150,13810,43958,1280353	7399,7967,8150	1	1	https://www.method.gg/wow-forever/dungeons/wailing-caverns	https://azeroth.wiki/forever/dungeons/wailing-caverns/mutanus-the-devourer
+wailing-caverns	3669	Lord Cobrahn	1.60.1.70790,1.60.1.70862	5188,7965,8040,9532		744,5188,7965,8040,9532,43958	3616,5188,7965,8040,9532	1	1	https://www.method.gg/wow-forever/dungeons/wailing-caverns	https://azeroth.wiki/forever/dungeons/wailing-caverns/lord-cobrahn
+wailing-caverns	3670	Lord Pythas	1.60.1.70790,1.60.1.70862	700,5187,8147,9532		700,5187,8147,9532,43958	700,5187,8147,9532	1	1	https://www.method.gg/wow-forever/dungeons/wailing-caverns	https://azeroth.wiki/forever/dungeons/wailing-caverns/lord-pythas
+wailing-caverns	3671	Lady Anacondra	1.60.1.70790,1.60.1.70862	700,5187,8148,9532		700,5187,8148,9532,43958	700,5187,8148,9532	1	1	https://www.method.gg/wow-forever/dungeons/wailing-caverns	https://azeroth.wiki/forever/dungeons/wailing-caverns/lady-anacondra
+wailing-caverns	3673	Lord Serpentis	1.60.1.70790,1.60.1.70862	700,6778,9532		700,6778,9532,43958	700,6778,9532	1	1	https://www.method.gg/wow-forever/dungeons/wailing-caverns	https://azeroth.wiki/forever/dungeons/wailing-caverns/lord-serpentis
+wailing-caverns	3674	Skum	1.60.1.70790,1.60.1.70862	6254		6254	6254	1	1	https://www.method.gg/wow-forever/dungeons/wailing-caverns	https://azeroth.wiki/forever/dungeons/wailing-caverns/skum
+wailing-caverns	5775	Verdan the Everliving	1.60.1.70790,1.60.1.70862	8142		8142	8142	1	1	https://www.method.gg/wow-forever/dungeons/wailing-caverns	https://azeroth.wiki/forever/dungeons/wailing-caverns/verdan-the-everliving
+wailing-caverns	5912	Deviate Faerie Dragon						1	1	https://www.method.gg/wow-forever/dungeons/wailing-caverns	
+zulfarrak	7267	Chief Ukorz Sandscalp	1.60.1.70938,1.60.1.71091	7366,11837,15623	8269	7366,8269,11837,15623	7366,8269,11837,11838,11904,15496	1	1		https://azeroth.wiki/forever/dungeons/zul-farrak/chief-ukorz-sandscalp
+zulfarrak	7271	Witch Doctor Zum'rah	1.60.1.70938,1.60.1.71091	11086,12491,12739,15245		11086,12491,12739,15245	11086,12491,12739,15245	1	1		https://azeroth.wiki/forever/dungeons/zul-farrak/witch-doctor-zum-rah
+zulfarrak	7272	Theka the Martyr	1.60.1.70938,1.60.1.71091	8600	11089	8600	8600,11089	1	1		https://azeroth.wiki/forever/dungeons/zul-farrak/theka-the-martyr
+zulfarrak	7273	Gahz'rilla	1.60.1.70938,1.60.1.71091	11131,11836,11902		11131,11836,11902	11131,11836,11902	1	1		https://azeroth.wiki/forever/dungeons/zul-farrak/gahz-rilla
+zulfarrak	7275	Shadowpriest Sezz'ziz	1.60.1.70938,1.60.1.71091	8362,12039,13704,15537		8362,12039,13704,15537	8362,12039,13704,15537	1	1		https://azeroth.wiki/forever/dungeons/zul-farrak/shadowpriest-sezz-ziz
+zulfarrak	7604	Sergeant Bly	1.60.1.70938,1.60.1.71091	11972,12170		3639,11972,12170,403233	11972,12170	1	1		
+zulfarrak	7795	Hydromancer Velratha	1.60.1.70938,1.60.1.71091	11086,12491,12739,15245		11086,12491,12739,15245	11086,12491,12739,15245	1	1		https://azeroth.wiki/forever/dungeons/zul-farrak/hydromancer-velratha
+zulfarrak	7796	Nekrum Gutchewer	1.60.1.70938,1.60.1.71091	8600		8600	8600	1	1		https://azeroth.wiki/forever/dungeons/zul-farrak/nekrum-gutchewer
+zulfarrak	7797	Ruuzlu	1.60.1.70938,1.60.1.71091	7366,15623	7160	7160,7366,15623	7160,7366,15496	1	0		https://azeroth.wiki/forever/dungeons/zul-farrak/chief-ukorz-sandscalp
+zulfarrak	8127	Antu'sul	1.60.1.70938,1.60.1.71091	8376,11893,11894,13281,15659,17843	11895,11899	2860,8376,10413,10915,11893,11894,11895,11899	8376,11894,11895,11899	1	1		https://azeroth.wiki/forever/dungeons/zul-farrak/antu-sul
+zulfarrak	10080	Sandarr Dunereaver			13730,14516,15615	13730,14516,15615	11976,12555,13730,14516,15615	1	0		
+zulfarrak	10081	Dustwraith			15667	12251,15667	12254,15667	1	0		
+zulfarrak	10082	Zerillis	1.60.1.71091	6533,15547	12551	6533,12551,15547,403233	6533,12551,15547	1	1		

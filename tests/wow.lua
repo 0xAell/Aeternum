@@ -540,6 +540,7 @@ function Wow.new(state)
     env.GetTrainerServiceCost = function(i) return state.services[i].cost end
     env.GetTrainerServiceSkillReq = function(i) return state.services[i].skill, state.services[i].need end
     env.Enum = {TooltipDataType = {Item = 0, Spell = 1}, UIMapType = {World = 1, Continent = 2, Zone = 3}}
+    env.Enum.SpellBookSpellBank = {Player=0, Pet=1}
     state.tooltipPostCalls = {}
     env.TooltipDataProcessor = {AddTooltipPostCall = function(kind, hook)
         state.tooltipPostCalls[kind] = state.tooltipPostCalls[kind] or {}
@@ -624,7 +625,14 @@ function Wow.new(state)
     env.UnitPosition = function()
         return state.playerNorth, state.playerWest, 0, state.positionInstance or state.instanceID
     end
-    env.C_SpellBook = {IsSpellKnown=function(id) return (state.knownSpells or {})[id] or false end}
+    env.C_SpellBook = {IsSpellKnown=function(id, bank)
+        if bank == env.Enum.SpellBookSpellBank.Pet then
+            return (state.petSpells or {})[id] or state.allClassSpells or false
+        end
+        if state.knownSpells then return state.knownSpells[id] or false end
+        return state.allClassSpells or false
+    end}
+    env.UnitGroupRolesAssigned = function() return state.role or "NONE" end
     env.C_Spell = {GetSpellTexture=function(id) return state.spellTextures and state.spellTextures[id] or nil end}
     env.C_RaidLocks = {IsEncounterComplete=function(_, id) return (state.lockedEncounters or {})[id] or false end}
     env.UnitFactionGroup = function() return state.faction or "Alliance" end

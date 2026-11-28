@@ -2102,7 +2102,7 @@ end)
 
 test("all 302 bosses provide role TLDRs, color-coded dispels, and tips across all nine classes", function()
     local classes = {"WARRIOR", "PALADIN", "HUNTER", "ROGUE", "PRIEST", "SHAMAN", "MAGE", "WARLOCK", "DRUID"}
-    local addon, _, state = load({class="SHAMAN", level=60})
+    local addon, env, state = load({class="SHAMAN", level=60, allClassSpells=true, role="DAMAGER"})
     local seen = {}
     for _, dungeon in ipairs(addon.Data.dungeons) do
         for _, boss in ipairs(dungeon.bosses) do
@@ -2125,7 +2125,14 @@ test("all 302 bosses provide role TLDRs, color-coded dispels, and tips across al
             for _, boss in ipairs(dungeon.bosses) do
                 local tips, token, info = addon.Tactics:ClassTips(boss.id)
                 equal(token, cls)
-                check(info and #tips >= 1 and #tips <= 4, cls .. " tips for " .. boss.name)
+                check(info and #tips <= 4, cls .. " tips for " .. boss.name)
+                if #tips == 0 then
+                    env.GameTooltip:SetText(boss.name)
+                    addon.Tactics:AddTooltip(env.GameTooltip, boss, false)
+                    local plan = addon.Tactics:FormatText(addon.Tactics:ForBoss(boss.id).d)
+                    check(findEntry(env.GameTooltip.lines, function(l) return l:find(plan, 1, true) end),
+                        cls .. " needs its role plan for " .. boss.name)
+                end
                 for _, tip in ipairs(tips) do
                     check(tip.icon:find("|T", 1, true), "missing icon for spell " .. tip.spellID)
                     check(not tip.text:find("{", 1, true), "unformatted token in " .. cls .. " " .. boss.name)
@@ -2136,7 +2143,7 @@ test("all 302 bosses provide role TLDRs, color-coded dispels, and tips across al
 end)
 
 test("shaman, priest, paladin, mage, hunter, and racial mechanics show icons and dispel colors", function()
-    local addon, env, state = load({class="SHAMAN", level=60})
+    local addon, env, state = load({class="SHAMAN", level=60, allClassSpells=true})
     -- Blazeroar (255702): Fear + Enrage + Magic + Interrupt -> Tremor Totem icon (136108)
     local tips = addon.Tactics:ClassTips(255702)
     equal(tips[1].spellID, 8143, "Tremor Totem prioritized for Blazeroar Fear")
@@ -2167,14 +2174,17 @@ test("shaman, priest, paladin, mage, hunter, and racial mechanics show icons and
 
     -- Paladin chooses Purify below level 42 on poison/disease-only bosses, Cleanse at 60 or for Magic.
     state.class, state.race, state.raceID, state.level = "PALADIN", "Human", 1, 20
+    state.knownSpells = {[1152]=true}
     local akumai = addon.Tactics:ClassTips(4829) -- Aku'mai (BFD): Poison + Enrage, no Magic
     check(akumai and findEntry(akumai, function(t) return t.spellID == 1152 end), "low-level Paladin uses Purify")
     state.level = 60
+    state.knownSpells = {[4987]=true}
     local akumai60 = addon.Tactics:ClassTips(4829)
     check(findEntry(akumai60, function(t) return t.spellID == 4987 end), "level 60 Paladin uses Cleanse")
 
     -- Mage decurse shows purple Curse tag and Remove Lesser Curse icon; Hunter shows Drakkisath kite override.
     state.class, state.level = "MAGE", 60
+    state.knownSpells = nil
     local lynTips = addon.Tactics:ClassTips(247032)
     local decurse = findEntry(lynTips, function(t) return t.spellID == 475 end)
     check(decurse and decurse.icon:find("|T136082:", 1, true) and decurse.text:find("|cffb566ffCurse|r", 1, true))
@@ -2219,6 +2229,144 @@ test("shaman, priest, paladin, mage, hunter, and racial mechanics show icons and
     ddBoss.tooltip(env.GameTooltip)
     check(findEntry(env.GameTooltip.lines, function(l) return l:find("Blazeroar — Tactics", 1, true) end))
 end)
+
+test("the shipped cast menus match every observed and reference spell in the encounter audit", function()
+    local addon, env, state = load()
+    local roster = {}
+    for _, dungeon in ipairs(addon.Data.dungeons) do
+        for _, boss in ipairs(dungeon.bosses) do roster[boss.id] = {dungeon.id, boss} end
+    end
+    local seen, used = {}, {}
+    local rows, liveBosses, liveSpells = 0, 0, 0
+    for line in io.lines("docs/boss-audit/mechanics.tsv") do
+        local fields = {}
+        for value in (line .. "\t"):gmatch("(.-)\t") do fields[#fields+1] = value end
+        local id = tonumber(fields[2])
+        if id then
+            local record = assert(roster[id])
+            equal(record[1], fields[1])
+            local name = fields[3]:match('^"(.*)"$')
+            equal(record[2].name, name and name:gsub('""', '"') or fields[3])
+            check(not seen[id], "duplicate audit NPC " .. id)
+            seen[id], rows = true, rows + 1
+            addon.UI:Boss(env.WorldMapFrame, record[2])
+            local tactics = assert(menuRow(state.menu, "Tactics"))
+            local cast = addon.bossCasts[id] or {}
+            local both = {}
+            for _, section in ipairs({{"live", 5, "Recorded Forever casts"}, {"reference", 6, "Reference spells"}}) do
+                local ids = cast[section[1]] or {}
+                equal(table.concat(ids, ","), fields[section[2]], record[2].name .. " " .. section[1])
+                local menu = menuRow(tactics, section[3])
+                if #ids == 0 then
+                    check(not menu, "empty spell menu for " .. fields[3])
+                else
+                    equal(#menu.children, #ids, "spell count")
+                    for i, spellID in ipairs(ids) do
+                        check(not both[spellID], "duplicate observed/reference spell")
+                        both[spellID], used[spellID] = true, true
+                        local spell = assert(addon.castSpells[spellID])
+                        check(spell[2] > 0 and menu.children[i].label:find(spell[1], 1, true), "spell and icon")
+                        menu.children[i].tooltip(env.GameTooltip)
+                        equal(env.GameTooltip.lines[1], "spell:" .. spellID)
+                    end
+                end
+            end
+            if cast.live then
+                check(fields[4] ~= "", "observed cast without a build")
+                liveBosses, liveSpells = liveBosses + 1, liveSpells + #cast.live
+            else
+                equal(fields[4], "")
+            end
+        end
+    end
+    for id in pairs(roster) do check(seen[id], "missing audit NPC " .. id) end
+    for id in pairs(addon.bossCasts) do check(seen[id], "extra cast profile " .. id) end
+    for id in pairs(addon.castSpells) do check(used[id], "orphan spell " .. id) end
+    equal(rows, 302); equal(liveBosses, 176); equal(liveSpells, 481)
+end)
+
+test("bosses name the actual fear and only recommend learned counters from the correct spellbook", function()
+    local addon, env, state = load({class="SHAMAN", knownSpells={[8143]=true}, role="HEALER"})
+    local tactics = addon.Tactics
+    local tips = tactics:ClassTips(642)
+    equal(#tips, 1); equal(tips[1].spellID, 8143)
+    check(tips[1].text:find("Terrify", 1, true) and tips[1].icon:find("|T136108:", 1, true))
+    equal(#tactics:ClassTips(643), 0, "the shredder's fear does not belong to the pilot")
+    tips = tactics:ClassTips(247195)
+    check(tips[1].text:find("Intimidating Roar", 1, true), "physical fear can still be broken by Tremor")
+    check(not tactics:DispelText(tactics:ForBoss(247195), 247195), "physical fear is not dispellable Magic")
+    state.knownSpells = {}
+    equal(#tactics:ClassTips(642), 0, "untrained totem hidden")
+    local dye = {GetAuraBorderColor=function(k)
+        return {WrapTextInColorCode=function(_, label) return "[" .. k .. "]" .. label end}
+    end}
+    env.AuraUtil = dye
+    equal(tactics:FormatText("{magic} {magicBuff} {curse} {poison} {disease} {bleed}"),
+        "[Magic]Magic [Magic]Magic buff [Curse]Curse [Poison]Poison [Disease]Disease [Bleed]Bleed")
+    local kat = assert(findEntry(dungeonNamed(addon, "alcaz-prison").bosses, function(b) return b.id == 257016 end))
+    env.GameTooltip:SetText(kat.name)
+    tactics:AddTooltip(env.GameTooltip, kat, false)
+    check(findEntry(env.GameTooltip.lines, function(l)
+        return l:find("Healer:", 1, true) and l:find("90%", 1, true)
+    end))
+    addon.UI:Boss(env.WorldMapFrame, kat)
+    local menu = menuRow(state.menu, "Tactics")
+    check(menuRow(menu, "Healer TLDR") and menuRow(menu, "DPS TLDR") and menuRow(menu, "Tank TLDR"))
+    check(not menuRow(menu, "Checklist") and not menuRow(menu, "Recorded Forever casts"))
+    local refs = assert(menuRow(menu, "Reference spells"))
+    check(menuRow(refs, "Deadly Poison").label:find("[Poison]Poison", 1, true))
+    check(menuRow(refs, "Grievous Garrote").label:find("[Bleed]Bleed", 1, true))
+    menu.tooltip(env.GameTooltip)
+    check(findEntry(env.GameTooltip.lines, function(l) return l:find("Guide-based tactics", 1, true) end))
+    state.class, state.knownSpells = "WARLOCK", {[19244]=true}
+    equal(#tactics:ClassTips(269111), 0, "player spellbank does not represent a Felhunter")
+    state.petSpells = {[19244]=true}
+    tips = tactics:ClassTips(269111)
+    equal(#tips, 1); equal(tips[1].spellID, 19244)
+    check(tips[1].text:find("Lightning Bolt", 1, true))
+    state.class, state.knownSpells = "HUNTER", {[19801]=true}
+    equal(#tactics:ClassTips(255702), 0, "an undispellable Enrage must not prompt Tranquilizing Shot")
+end)
+
+test("trained ranks, mixed dispels, role order and missing or secret client data are handled safely", function()
+    local addon, env, state = load({class="PALADIN", level=60, knownSpells={[1152]=true}, role="HEALER"})
+    local tactics = addon.Tactics
+    local tips = tactics:ClassTips(3670)
+    equal(#tips, 0, "Purify cannot remove Sleep")
+    tips = tactics:ClassTips(3671)
+    equal(#tips, 0, "no untrained spell suggested")
+    tips = tactics:ClassTips(3673)
+    equal(#tips, 0, "Purify cannot clear Magic")
+    tips = tactics:ClassTips(260243)
+    equal(#tips, 1); equal(tips[1].baseID, 1152)
+    check(tips[1].text:find("Poison", 1, true) and not tips[1].text:find("Magic", 1, true))
+    state.class, state.knownSpells = "MAGE", {[12824]=true}
+    env.C_Spell.GetSpellName = function(id) if id == 118 then return "Métamorphose" end end
+    env.C_Spell.GetSpellIDForSpellIdentifier = function(name) if name == "Métamorphose" then return 12824 end end
+    tips = tactics:ClassTips(644)
+    equal(#tips, 1); equal(tips[1].spellID, 12824); equal(tips[1].name, "Métamorphose")
+    local boss = assert(findEntry(dungeonNamed(addon, "deadmines").bosses, function(b) return b.id == 644 end))
+    addon.UI:Boss(env.WorldMapFrame, boss)
+    local menu = assert(menuRow(state.menu, "Tactics"))
+    menuRow(menu, "Métamorphose").tooltip(env.GameTooltip)
+    equal(env.GameTooltip.lines[1], "spell:12824")
+    local firstRole = findEntry(menu.children, function(row) return row.label:find(" TLDR", 1, true) end)
+    check(firstRole.label:find("Healer TLDR", 1, true), "assigned role displayed first")
+    env.C_SpellBook, env.UnitGroupRolesAssigned = nil, nil
+    equal(#tactics:ClassTips(644), 0)
+    tactics:AddTooltip(env.GameTooltip, boss, true)
+    check(findEntry(env.GameTooltip.lines, function(l) return l:find("DPS:", 1, true) end), "role fallback")
+    local unreadable = {}
+    env.issecretvalue = function(v) return v == unreadable end
+    env.UnitGroupRolesAssigned = function() return unreadable end
+    env.C_Spell.GetSpellName = function() return unreadable end
+    env.C_Spell.GetSpellTexture = function() return unreadable end
+    env.C_SpellBook = {IsSpellKnown=function() return unreadable end}
+    equal(#tactics:ClassTips(644), 0)
+    equal(tactics:SpellName(6304), "Rhahk'Zor Slam")
+    check(tactics:SpellIcon(6304):find("|T", 1, true))
+end)
+
 
 test("dungeon level ranges take the character's difficulty colour", function()
     for _, case in ipairs({{12, "ff1a1a"}, {20, "ffd100"}, {40, "808080"}}) do
