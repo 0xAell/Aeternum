@@ -110,9 +110,8 @@ end
 function UI:ItemLoaded(id, success)
     local loot = self.openLoot
     local row = loot and loot.rows and loot.rows[id]
-    if not row then return end
+    if not row or not success then return end
     loot.rows[id] = nil
-    if not success then return end
     MenuUtil.SetElementText(row, itemLabel(id))
     if loot.refreshPending then return end
     loot.refreshPending = true

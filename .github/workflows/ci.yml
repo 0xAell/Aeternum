@@ -18,8 +18,12 @@ jobs:
         run: luajit tests/run.lua
       - name: Check bundled data
         run: tools/check_data.sh "$RUNNER_TEMP/norgannondb"
-      - name: Package
-        run: tools/package.sh
+      - name: Package and verify license notices
+        run: |
+          touch "licenses/local copy 2.txt"
+          archive=$(tools/package.sh)
+          diff -u <(git ls-files licenses | sort) \
+            <(unzip -Z1 "$archive" | sed -n 's|^Aeternum/\(licenses/..*\)$|\1|p' | sort)
       - uses: actions/upload-artifact@v4
         with:
           name: Aeternum

@@ -128,7 +128,7 @@ function DungeonMap:NewVisit()
     if not IsInInstance or not IsInInstance() then
         local dead = UnitIsDeadOrGhost and UnitIsDeadOrGhost("player")
         if issecretvalue and issecretvalue(dead) then dead = false end
-        self.leftAlive = not dead
+        if not dead then self.leftAlive = true end
         return
     end
     local id = GetInstanceInfo and select(8, GetInstanceInfo())

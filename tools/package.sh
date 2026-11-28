@@ -4,17 +4,24 @@ set -eu
 cd "$(dirname "$0")/.."
 
 version=$(sed -n 's/^## Version: //p' Aeternum.toc)
-stage=$(mktemp -d)
+mkdir -p dist
+stage=$(mktemp -d "$PWD/dist/.aeternum-XXXXXXXX")
 trap 'rm -rf "$stage"' EXIT
 
-mkdir -p "$stage/Aeternum/licenses" dist
+mkdir -p "$stage/Aeternum/licenses"
 grep -v '^##' Aeternum.toc | grep . | while read -r file; do
     cp "$file" "$stage/Aeternum/"
 done
 cp Aeternum.toc LICENSE README.md DATA_SOURCES.md "$stage/Aeternum/"
-cp licenses/* "$stage/Aeternum/licenses/"
+cp licenses/AllTheThings-MIT.txt \
+    licenses/CMaNGOS-COPYRIGHT.md \
+    licenses/ForeverBossData-NOTICE.md \
+    licenses/ForeverDungeonRoutes-MIT.txt \
+    licenses/NorgannonDB-NOTICE.md \
+    licenses/WhatsTraining-MIT.txt \
+    licenses/pfQuest-MIT.txt "$stage/Aeternum/licenses/"
 
 archive="$PWD/dist/Aeternum-$version.zip"
-rm -f "$archive"
-(cd "$stage" && zip -qrX "$archive" Aeternum)
+(cd "$stage" && zip -qrX release.zip Aeternum)
+mv -f "$stage/release.zip" "$archive"
 echo "$archive"

@@ -1301,6 +1301,23 @@ test("only successful encounters or client lockouts dim the appropriate boss sku
     check(skull(639).complete and not skull(647).complete, "leaving alive forgets kills; the lockout still counts")
 end)
 
+test("outdoor ghost travel after a living exit cannot bring back the previous run's boss kills", function()
+    local addon, env, state = load({inInstance=true, instanceID=36, subzone="Ironclad Cove"})
+    env.WorldMapFrame:Show()
+    local function greenskin()
+        return findEntry(addon.DungeonMap.frame.pins, function(p) return p.boss and p.boss.id == 647 end)
+    end
+    Wow.fire("BOSS_KILL", 2744, "Captain Greenskin")
+    check(greenskin().complete)
+    state.inInstance = false
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    state.dead = true
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    state.inInstance, state.dead = true, false
+    Wow.fire("PLAYER_ENTERING_WORLD")
+    check(not greenskin().complete, "the new visit should show Captain Greenskin alive")
+end)
+
 test("dungeon keys report bag ownership and alternate doors remain individually selectable", function()
     local addon, env, state = load({inventory={[11000]=1}})
     env.WorldMapFrame:Show()
@@ -1540,6 +1557,22 @@ test("the open loot menu updates a cached item once and ignores late replies aft
     Wow.flushTimers()
     equal(proxy.refreshes, 1, "a closed menu is never refreshed")
     check(not addon.UI.openLoot and not env.GameTooltip:IsVisible())
+end)
+
+test("an open boss loot row recovers when the client retries a failed item load", function()
+    local addon, _, state = openDeadmines()
+    local boss = findEntry(addon.DungeonMap.dungeon.bosses, function(b) return b.id == 639 end)
+    addon.UI:Boss(addon.DungeonMap.frame, boss)
+    local row = assert(menuRow(state.menu, "Cruel Barb"))
+    local initial = row.label
+    Wow.fire("ITEM_DATA_LOAD_RESULT", 5191, false)
+    Wow.flushTimers()
+    equal(row.label, initial)
+    state.cached[5191] = true
+    Wow.fire("ITEM_DATA_LOAD_RESULT", 5191, true)
+    Wow.flushTimers()
+    check(row.label:find("Cached 5191", 1, true), "the same row should display the newly loaded information")
+    equal(state.menuProxy.refreshes, 1)
 end)
 
 test("missing floor textures clear incomplete artwork and keep boss controls available", function()
