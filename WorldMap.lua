@@ -42,11 +42,12 @@ function pins:UpdateStyle()
         local active = addon.Navigation:IsDestination(entry.point, dungeon)
         local score = 0
         if entry.category == "dungeon" then score = 10
+        elseif entry.role == "turnin" and addon.Quests:State(entry.questID) == "ready" then score = 6
         elseif entry.category ~= "quest" then score = 5
         elseif entry.role == "objective" then score = 3
         elseif entry.role == "turnin" then
             local state = addon.Quests:State(entry.questID)
-            score = state == "ready" and 4 or (state == "active" and 2 or 0)
+            score = state == "active" and 2 or 0
         end
         if active then tracked = true; score = score + 1 end
         if score > bestScore then best, bestScore = entry, score end
@@ -92,8 +93,22 @@ local function showTooltip(pin)
                     listed[other.title] = true
                 end
             end
+        else
+            local shown, extra = 0, 0
+            for _, other in ipairs(pin.entries) do
+                if other ~= entry then
+                    if shown < 6 then
+                        local _, _, sub = addon.Presentation(other)
+                        GameTooltip:AddLine(sub and (other.title .. " · " .. sub) or other.title, 1, 1, 1, true)
+                        shown = shown + 1
+                    else
+                        extra = extra + 1
+                    end
+                end
+            end
+            if extra > 0 then GameTooltip:AddLine(("+ %d more"):format(extra), .8, .8, .8) end
         end
-        GameTooltip:AddLine(("%d map entries · Click to choose"):format(#pin.entries))
+        GameTooltip:AddLine(("%d map entries · Click to choose"):format(#pin.entries), 1, .82, 0)
     end
     if pin.tracked:IsShown() then GameTooltip:AddLine(addon.Navigation:GetStatus(), .7, .85, 1, true) end
     if entry.category == "dungeon" then
@@ -104,14 +119,16 @@ local function showTooltip(pin)
             GameTooltip:AddLine("Keys · " .. table.concat(names, ", "), .85, .85, .85, true)
         end
         GameTooltip:AddLine("Click for floor map · Right-click for directions", 1, .82, 0)
-    elseif entry.category ~= "quest" then
-        GameTooltip:AddLine("Click for lessons and prices", 1, .82, 0)
-    else
-        if entry.role == "objective" and entry.subtitle ~= text then GameTooltip:AddLine(entry.subtitle) end
-        if entry.contact then GameTooltip:AddLine(entry.contact, 1, 1, 1) end
-        local requirement = addon.Quests:Requirement(entry.questID)
-        if requirement then GameTooltip:AddLine(requirement) end
-        addon.Quests:AddObjectives(GameTooltip, entry.questID, text)
+    elseif #pin.entries == 1 then
+        if entry.category ~= "quest" then
+            GameTooltip:AddLine("Click for lessons and prices", 1, .82, 0)
+        else
+            if entry.role == "objective" and entry.subtitle ~= text then GameTooltip:AddLine(entry.subtitle) end
+            if entry.contact then GameTooltip:AddLine(entry.contact, 1, 1, 1) end
+            local requirement = addon.Quests:Requirement(entry.questID)
+            if requirement then GameTooltip:AddLine(requirement) end
+            addon.Quests:AddObjectives(GameTooltip, entry.questID, text)
+        end
     end
     GameTooltip:Show()
 end

@@ -1795,7 +1795,7 @@ test("all shipped floors open and every boss menu shows its eligible recorded dr
         if not rule then unverified = unverified + 1
         elseif rule.teaches then learnable = learnable + 1 end
     end
-    equal(total, 1404); equal(unverified, 8); equal(learnable, 139)
+    equal(total, 1428); equal(unverified, 8); equal(learnable, 141)
 end)
 
 test("every trainer location opens its lesson list and every eligible reference pin survives grouping", function()
@@ -1981,6 +1981,86 @@ test("a focused location keeps its tooltip shut when the map redraws", function(
     Wow.flushTimers()
     check(not env.GameTooltip.shown, "redraw reopened the tooltip")
     check(env.WorldMapFrame:GetMapID() == 1436 and not env.WorldMapFrame.panX, "map left where it was")
+end)
+
+test("grouped trainer and quest pins list stacked entries and surface ready turn-ins", function()
+    local _, env, state = load({mapID=1455, class="SHAMAN", raceID=3, level=10})
+    env.WorldMapFrame:Show()
+    local pin = locate(env, function(e) return e.source and e.source.id == 258098 end)
+    check(pin and #pin.entries >= 2, "Eldrun Stormbreaker shares a pin with available Shaman quests")
+    equal(pin.entry.source.id, 258098, "trainer wins over an available quest start")
+    pin:OnMouseEnter()
+    check(findEntry(env.GameTooltip.lines, function(line) return line:find("Call of Fire", 1, true) end),
+        "stacked quest is named on hover")
+    check(findEntry(env.GameTooltip.lines, function(line) return line:find("Click to choose", 1, true) end),
+        "chooser prompt shown")
+    check(not findEntry(env.GameTooltip.lines, function(line) return line == "Click for lessons and prices" end),
+        "single-entry trainer prompt omitted when clicking opens a chooser")
+    state.log[97168], state.complete[97168] = 1, true
+    Wow.fire("QUEST_LOG_UPDATE")
+    Wow.flushTimers()
+    pin = locate(env, function(e) return e.questID == 97168 and e.role == "turnin" end)
+    check(pin, "ready turn-in pin at trainer")
+    equal(pin.entry.questID, 97168, "ready turn-in icon surfaces above the trainer")
+    equal(pin.icon.texture, 132048, "Blizzard turn-in question mark")
+    check(not pin.icon.desaturated, "ready turn-in is gold")
+end)
+
+test("weapon master relevance checks Forever training records as well as Classic references", function()
+    local addon = load({class="PALADIN"})
+    addon.foreverTraining.offers[999999] = "201::::1000:5:1"
+    check(addon.Trainers:Relevant({id=999999, kind="weapon"}), "Forever-only compatible weapon master shown")
+    addon.foreverTraining.offers[999998] = "266::::1000:5:1"
+    check(not addon.Trainers:Relevant({id=999998, kind="weapon"}), "Forever-only incompatible weapon master hidden")
+end)
+
+test("shared encounters and live rare drops appear while generic green world drops stay withheld", function()
+    local addon, env, state = load({class="WARRIOR", level=60, skillRanks={[55]=300, [413]=300, [414]=300, [293]=300},
+        professionIndices={1}, professionSkills={171}, professionRanks={[171]=300}})
+    env.WorldMapFrame:Show()
+
+    -- Stratholme: Balnazzar (10813) carries his full encounter drop table.
+    local strat = dungeonNamed(addon, "stratholme")
+    local balnazzar = assert(findEntry(strat.bosses, function(b) return b.id == 10813 end))
+    addon.UI:Boss(env.WorldMapFrame, balnazzar)
+    local guide = state.menu:Find("Guide-listed drops")
+    check(menuRow(guide, "Demonshear"), "Balnazzar 2H sword")
+    check(menuRow(guide, "Star of Mystaria"), "Balnazzar neck")
+    check(menuRow(guide, "Recipe: Flask of Distilled Wisdom"), "Balnazzar alchemy recipe")
+
+    -- Sunken Temple: shared drakes (5719-5722) and Atal'ai minibosses (5712-5717).
+    local st = dungeonNamed(addon, "sunken-temple")
+    local morphaz = assert(findEntry(st.bosses, function(b) return b.id == 5719 end))
+    addon.UI:Boss(env.WorldMapFrame, morphaz)
+    check(menuRow(state.menu:Find("Encounter rolls"), "Drakestone"), "Morphaz live encounter roll")
+    check(menuRow(state.menu:Find("Guide-listed drops"), "Drakeclaw Band"), "Morphaz drake ring")
+    for _, npc in ipairs({5720, 5721, 5722}) do
+        local drake = assert(findEntry(st.bosses, function(b) return b.id == npc end))
+        check(findEntry(drake.loot, function(id) return id == 12463 end), "drake shared drop " .. npc)
+    end
+    local zolo = assert(findEntry(st.bosses, function(b) return b.id == 5712 end))
+    addon.UI:Boss(env.WorldMapFrame, zolo)
+    check(menuRow(state.menu, "Atal'ai Breastplate"), "Zolo live verified drop featured")
+
+    -- Live repeated rare drops on Ruuzlu (7797) and Min'loth (260243).
+    local zf = dungeonNamed(addon, "zulfarrak")
+    local ruuzlu = assert(findEntry(zf.bosses, function(b) return b.id == 7797 end))
+    addon.UI:Boss(env.WorldMapFrame, ruuzlu)
+    check(menuRow(state.menu:Find("Other recorded drops"), "Embrace of the Lycan"), "Ruuzlu live rare drop")
+    local drowned = dungeonNamed(addon, "drowned-city")
+    local minloth = assert(findEntry(drowned.bosses, function(b) return b.id == 260243 end))
+    addon.UI:Boss(env.WorldMapFrame, minloth)
+    check(menuRow(state.menu:Find("Other recorded drops"), "Linken's Boots of Iron"), "Min'loth live rare drop")
+
+    -- Random green BoE world drops remain withheld.
+    local wc = dungeonNamed(addon, "wailing-caverns")
+    local mutanus = assert(findEntry(wc.bosses, function(b) return b.id == 3654 end))
+    check(not findEntry(mutanus.loot, function(id) return id == 6576 or id == 6581 end), "Mutanus world-drop greens")
+    local pythas = assert(findEntry(wc.bosses, function(b) return b.id == 3670 end))
+    check(not findEntry(pythas.loot, function(id) return id == 15506 end), "Pythas world-drop green")
+    local gnome = dungeonNamed(addon, "gnomeregan")
+    local thermaplugg = assert(findEntry(gnome.bosses, function(b) return b.id == 7800 end))
+    check(not findEntry(thermaplugg.loot, function(id) return id == 9855 end), "Thermaplugg world-drop green")
 end)
 
 print(("%d passed, %d failed"):format(passed, failed))

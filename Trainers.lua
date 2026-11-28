@@ -62,11 +62,19 @@ end
 function Trainers:Relevant(npc)
     if npc.kind == "class" then return npc.classToken == select(2, UnitClass("player")) end
     if npc.kind == "weapon" then
+        local forever = addon.foreverTraining and addon.foreverTraining.offers[npc.id]
         local data = addon.classicTraining
         local list = data.catalogues[data.trainers[npc.id]]
-        if not list then return true end
-        for id in list:gmatch("(%d+):%d+:%d+:%d+:%d+") do
-            if fitsClass(tonumber(id)) then return true end
+        if not forever and not list then return true end
+        if forever then
+            for id in forever:gmatch("(%d+):[^;]*") do
+                if fitsClass(tonumber(id)) then return true end
+            end
+        end
+        if list then
+            for id in list:gmatch("(%d+):%d+:%d+:%d+:%d+") do
+                if fitsClass(tonumber(id)) then return true end
+            end
         end
         return next((AeternumTrainerDB and AeternumTrainerDB[npc.id]) or {}) ~= nil
     end
