@@ -11,6 +11,8 @@ import subprocess
 ROOT = Path(__file__).resolve().parents[1]
 MAP_HASH = "1f4aac70eaac015b1d2d0ea0faf6e3d7fb2cf7afdf45e5bb6772d9b80a72346b"
 ASSIGNMENT_HASH = "79267e8be8034e47daab14350411b3acc0b1f64e86efc9d821a217497254ca0a"
+# Forever lists capitals alongside the outdoor zone that depicts them, under the same continent.
+CITY_SURROUNDINGS = {1453: 1429, 1454: 1411, 1455: 1426}  # Stormwind, Orgrimmar, Ironforge
 READ_DOORS = """
 local addon = {}
 assert(loadfile(arg[1]))("Aeternum", addon)
@@ -57,7 +59,10 @@ def main():
         continent_id = int(maps[zone_id]["ParentUiMapID"])
         world_id = int(maps[continent_id]["ParentUiMapID"])
         zone, = assignments[zone_id]
-        for overview_id in (continent_id, world_id):
+        targets = [continent_id, world_id]
+        if zone_id in CITY_SURROUNDINGS:
+            targets.append(CITY_SURROUNDINGS[zone_id])
+        for overview_id in targets:
             overview, = (row for row in assignments[overview_id] if row["MapID"] == zone["MapID"])
             rectangles[overview_id][zone_id] = map_rect(zone, overview)
 
@@ -65,7 +70,7 @@ def main():
         "-- Generated from Forever 1.60.1.71139 UiMap and UiMapAssignment. See DATA_SOURCES.md.",
         "local _, addon = ...",
         "",
-        "-- Overview map ID, then entrance zone ID. Rectangles are left, right, top, bottom.",
+        "-- Display map ID, then entrance zone or city ID. Rectangles are left, right, top, bottom.",
         "addon.overviewBounds = {",
     ]
     for overview_id, zones in sorted(rectangles.items()):

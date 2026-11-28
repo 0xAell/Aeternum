@@ -55,7 +55,7 @@ python3 tools/import_loot_requirements.py build LootData.lua
 python3 tools/forever_trainers.py build ForeverTraining.lua
 ```
 
-To rebuild the overview projections, save the two build 71139 exports and run `python3 tools/import_overview_bounds.py /path/to/UiMap.csv /path/to/UiMapAssignment.csv OverviewData.lua`. The importer checks both exports’ hashes and uses the entrance zones in `Data.lua`.
+To rebuild the overview projections, save the two build 71139 exports and run `python3 tools/import_overview_bounds.py /path/to/UiMap.csv /path/to/UiMapAssignment.csv OverviewData.lua`. The importer checks both exports’ hashes and uses the entrance zones in `Data.lua`. It also projects Stormwind, Orgrimmar, and Ironforge onto their surrounding outdoor maps using the same world coordinates. The client lists each capital and its surrounding zone as siblings.
 
 To refresh the numeric item snapshot, save the four linked build 71139 CSVs in a directory as `Item.csv`, `ItemSparse.csv`, `ItemXItemEffect.csv` and `ItemEffect.csv`. The extractor checks their hashes and reads the same build’s version 9 game-data cache. Review the snapshot diff before rebuilding because available hotfixes vary by client. [DB2 definitions](https://github.com/wowdev/WoWDBDefs/tree/master/definitions) · [Hotfix record format](https://github.com/fitzforge/polestar/blob/c0e768df4df867532f6334c1ed5464a8bc544021/rust/crates/forge-gamedata/src/hotfix.rs)
 

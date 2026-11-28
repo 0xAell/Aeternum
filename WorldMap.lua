@@ -1,7 +1,10 @@
 local _, addon = ...
 local POINT, ENTRANCE = "AeternumMapPinTemplate", "AeternumEntrancePinTemplate"
-local POINT_SIZE, ENTRANCE_SIZE, ENTRANCE_TARGET = 17, 30, 40
-local OVERVIEW_SCALE, CLOSE_ZONE_WIDTH = .25, .6
+local POINT_STYLE = {icon=17, target=17}
+local OVERVIEW_ENTRANCE = {icon=22, target=16}
+local ZONE_ENTRANCE = {icon=34, target=22}
+local CLOSE_ENTRANCE = {icon=44, target=48}
+local CLOSE_ZONE_WIDTH = .6
 local CELL_SIZE = 20
 local provider, focus, marked, highlighted, highlightedQuestState
 local pins = {}
@@ -9,13 +12,15 @@ AeternumMapPinMixin = {}
 
 local function sizePin(pin, focused)
     local entrance = pin.entry.category == "dungeon"
-    local compact = entrance and pin.compactEntrances
+    local style = entrance and pin.entranceStyle or POINT_STYLE
+    local compact = style == OVERVIEW_ENTRANCE
     local growth = focused and 6 or 0
-    local iconSize = ((entrance and ENTRANCE_SIZE or POINT_SIZE) + growth) * (compact and OVERVIEW_SCALE or 1)
-    local targetSize = entrance and not compact and (ENTRANCE_TARGET + growth) or iconSize
+    local iconSize = style.icon + growth
+    -- Focusing an entrance only expands its hitbox when already zoomed in close.
+    local targetSize = style.target + ((not entrance or style == CLOSE_ENTRANCE) and growth or 0)
     pin.icon:SetSize(iconSize, iconSize)
     pin:SetSize(targetSize, targetSize)
-    local badgeSize = compact and 5 or 10
+    local badgeSize = compact and 8 or 10
     pin.tracked:SetSize(badgeSize, badgeSize)
     pin.tracked:SetPoint("BOTTOMRIGHT", pin.icon, "BOTTOMRIGHT", compact and 0 or 3, compact and 0 or -2)
     if pin.hoverGlow and not entrance then pin.hoverGlow:Hide() end
@@ -55,9 +60,9 @@ function pins:UpdateStyle()
     self.tracked:SetShown(tracked)
 end
 
-function pins:OnAcquired(entries, compactEntrances)
+function pins:OnAcquired(entries, entranceStyle)
     self.entries, self.entry = entries, entries[1]
-    self.compactEntrances = compactEntrances ~= false
+    self.entranceStyle = entranceStyle or OVERVIEW_ENTRANCE
     self:UpdateStyle()
     sizePin(self, false)
     self:SetPosition(self.entry.x, self.entry.y)
@@ -171,21 +176,24 @@ local function layoutSize(map)
     local scale = math.max(1, math.floor(2 / range + .5) / 2)
     local types = Enum and Enum.UIMapType
     local info = mapID and types and types.Zone and C_Map.GetMapInfo(mapID)
-    local compact = not (info and info.mapType == types.Zone and range <= CLOSE_ZONE_WIDTH)
+    local style = OVERVIEW_ENTRANCE
+    if info and info.mapType == types.Zone then
+        style = range <= CLOSE_ZONE_WIDTH and CLOSE_ENTRANCE or ZONE_ENTRANCE
+    end
     local columns = math.max(1, math.floor(width * scale / CELL_SIZE))
     local rows = math.max(1, math.floor(height * scale / CELL_SIZE))
-    return columns, rows, compact
+    return columns, rows, style
 end
 
 function methods:Layout(entries)
     local map = self:GetMap()
     self:RemoveAllData()
     self.drawn = entries
-    self.columns, self.rows, self.compactEntrances = layoutSize(map)
+    self.columns, self.rows, self.entranceStyle = layoutSize(map)
     local positions, groups = {}, {}
     local cells, entrances = {}, {}
     -- Group entrances whose click targets overlap at the current zoom.
-    local entranceSpan = (self.compactEntrances and ENTRANCE_SIZE * OVERVIEW_SCALE or ENTRANCE_TARGET) / CELL_SIZE
+    local entranceSpan = self.entranceStyle.target / CELL_SIZE
     for _, entry in ipairs(entries) do
         local position = ("%.4f:%.4f"):format(entry.x, entry.y)
         local group = positions[position]
@@ -217,7 +225,7 @@ function methods:Layout(entries)
     end
     for _, group in ipairs(groups) do
         local template = group[1].category == "dungeon" and ENTRANCE or POINT
-        map:AcquirePin(template, group, self.compactEntrances)
+        map:AcquirePin(template, group, self.entranceStyle)
     end
     if highlighted then addon.FocusLocation(highlighted, true) end
 end
@@ -235,8 +243,8 @@ function methods:OnCanvasScaleChanged()
         self.layoutPending = nil
         local map = self:GetMap()
         if not map:IsShown() or not self.drawn then return end
-        local cols, rows, compact = layoutSize(map)
-        if cols ~= self.columns or rows ~= self.rows or compact ~= self.compactEntrances then
+        local cols, rows, style = layoutSize(map)
+        if cols ~= self.columns or rows ~= self.rows or style ~= self.entranceStyle then
             self:Layout(self.drawn)
         end
     end)
@@ -325,7 +333,7 @@ function addon.FocusLocation(entry, quiet)
             end
         end
     end
-    focus = map:AcquirePin(template, {entry}, provider.compactEntrances)
+    focus = map:AcquirePin(template, {entry}, provider.entranceStyle)
     sizePin(focus, true)
     if not quiet then showTooltip(focus) end
 end

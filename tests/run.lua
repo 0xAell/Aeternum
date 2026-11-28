@@ -442,48 +442,49 @@ test("Westfall entrance artwork has padding for either mouse button and survives
         equal(pin.icon:GetWidth(), icon); equal(pin.icon:GetHeight(), icon)
         equal(pin:GetWidth(), target); equal(pin:GetHeight(), target)
     end
-    size(30, 40)
+    size(44, 48)
     equal(pin.icon.points[1][1], "CENTER")
     equal(pin.tracked.points[1][2], pin.icon, "route badge follows the artwork")
     addon.FocusLocation(door)
-    size(36, 46)
+    size(50, 54)
     addon.FocusLocation(nil)
-    size(30, 40)
+    size(44, 48)
     addon.settings.filters.dungeon = false
     addon.RefreshMap()
     addon.FocusLocation(door)
     pin = locate(env, isDeadmines)
-    size(36, 46)
+    size(50, 54)
     addon.FocusLocation(nil)
     addon.settings.filters.dungeon = true
     addon.RefreshMap()
     equal(locate(env, isDeadmines), pin, "entrance frame reused")
-    size(30, 40)
-    map:ClickPin(pin, "LeftButton", 21, 0)
+    size(44, 48)
+    map:ClickPin(pin, "LeftButton", 25, 0)
     check(not addon.DungeonMap.dungeon, "outside the target")
-    map:ClickPin(pin, "RightButton", -19, 19)
+    map:ClickPin(pin, "RightButton", -23, 23)
     state.menu:Find("Show path to The Deadmines")
-    map:ClickPin(pin, "LeftButton", 19, -19)
+    map:ClickPin(pin, "LeftButton", 23, -23)
     equal(addon.DungeonMap.dungeon, door.source, "padding opens the floor map")
 end)
 
-test("a zone entrance grows only on close zoom and lights up only under the mouse", function()
+test("a zone entrance grows again on close zoom and lights up only under the mouse", function()
     local addon, env, state = load({mapID=1436, viewWidth=.61})
     local map = env.WorldMapFrame
     map:Show()
     local function deadmines(entry) return entry.source.id == "deadmines" end
     local pin, entrance = locate(env, deadmines)
-    equal(pin.icon:GetWidth(), 7.5, "zoomed-out artwork")
-    equal(pin:GetWidth(), 7.5, "no invisible padding at overview zoom")
+    equal(pin.icon:GetWidth(), 34, "zone artwork")
+    equal(pin:GetWidth(), 22, "only the center takes clicks")
     addon.FocusLocation(entrance)
-    equal(pin:GetWidth(), 9, "focused overview still uses quarter size")
+    equal(pin.icon:GetWidth(), 40, "focus enlarges the artwork")
+    equal(pin:GetWidth(), 22, "focus leaves nearby zone clicks free")
     check(env.GameTooltip:IsOwned(pin))
     check(not pin.hoverGlow or not pin.hoverGlow:IsShown(), "focus does not simulate a mouseover")
     addon.FocusLocation(nil)
     pin:OnMouseEnter()
     check(pin.hoverGlow and pin.hoverGlow:IsShown() and env.GameTooltip:IsOwned(pin), "glow and tooltip")
     equal(pin.hoverGlow.atlas, "UI-QuestPoi-OuterGlow")
-    equal(pin:GetWidth(), 7.5, "hover leaves click area alone")
+    equal(pin:GetWidth(), 22, "hover leaves click area alone")
     pin:OnMouseLeave()
     check(not pin.hoverGlow:IsShown() and not env.GameTooltip:IsShown(), "leave clears both")
     pin:OnMouseEnter()
@@ -491,13 +492,13 @@ test("a zone entrance grows only on close zoom and lights up only under the mous
     map.providers[1]:OnCanvasScaleChanged()
     Wow.flushTimers()
     pin = locate(env, deadmines)
-    equal(pin.icon:GetWidth(), 30, "close up even within the same layout grid size")
-    equal(pin:GetWidth(), 40, "close-up click padding")
+    equal(pin.icon:GetWidth(), 44, "close up even within the same layout grid size")
+    equal(pin:GetWidth(), 48, "close-up click padding")
     check(not pin.hoverGlow or not pin.hoverGlow:IsShown(), "recycled pin starts unhighlighted")
     state.viewWidth = .61
     map.providers[1]:OnCanvasScaleChanged()
     Wow.flushTimers()
-    equal(locate(env, deadmines):GetWidth(), 7.5, "zooming out restores the tight click area")
+    equal(locate(env, deadmines):GetWidth(), 22, "zooming out restores the tight click area")
 end)
 
 test("adjacent Razorfen entrances have distinct click targets in the zone overview", function()
@@ -990,14 +991,14 @@ test("world and continent entrance pins keep tight hitboxes and route to their o
     for _, overview in ipairs({{947, "deadmines"}, {1414, "ragefire-chasm"}, {1415, "deadmines"}}) do
         map:SetMapID(overview[1])
         local pin = locate(env, function(e) return e.source.id == overview[2] end)
-        equal(pin.icon:GetWidth(), 7.5, "overview artwork stays small even when zoomed")
-        equal(pin:GetWidth(), 7.5, "horizontal target matches artwork")
-        equal(pin:GetHeight(), 7.5, "vertical target matches artwork")
-        map:ClickPin(pin, "LeftButton", 4, 0)
+        equal(pin.icon:GetWidth(), 22, "readable overview artwork even when zoomed")
+        equal(pin:GetWidth(), 16, "tight horizontal target")
+        equal(pin:GetHeight(), 16, "tight vertical target")
+        map:ClickPin(pin, "LeftButton", 9, 0)
         check(not addon.DungeonMap.dungeon, "outside click misses entrance")
-        map:ClickPin(pin, "RightButton", 0, -4)
+        map:ClickPin(pin, "RightButton", 0, -9)
         check(not state.menu, "outside click leaves the native right click free")
-        map:ClickPin(pin, "LeftButton", 3, 3)
+        map:ClickPin(pin, "LeftButton", 7, 7)
         equal(addon.DungeonMap.dungeon.id, overview[2], "inside click opens the dungeon")
         addon.DungeonMap:Close()
     end
@@ -1039,7 +1040,7 @@ test("all dungeon entrances are selectable on unzoomed overviews even without cl
         map:SetMapID(mapID)
         local seen = {}
         for pin in map:EnumeratePinsByTemplate("AeternumEntrancePinTemplate") do
-            equal(pin:GetWidth(), 7.5, "overview target matches the entrance artwork")
+            equal(pin:GetWidth(), 16, "shared and single entrances keep a tight target")
             pin:OnMouseEnter()
             for _, entry in ipairs(pin.entries) do
                 equal(entry.source, original[entry.point], "the original door is used for navigation")
@@ -1075,6 +1076,43 @@ test("all dungeon entrances are selectable on unzoomed overviews even without cl
     equal(env.AeternumRouteDB.mapID, 1420, "route still leads to the outdoor entrance")
     equal(env.AeternumRouteDB.x, world.point.x)
     equal(env.AeternumRouteDB.y, world.point.y)
+end)
+
+test("capital entrances open from the surrounding zone and route to the real city door", function()
+    local addon, env, state = load({playerMap=1429, playerX=.4, playerY=.5})
+    local map = env.WorldMapFrame
+    map:Show()
+    for _, sample in ipairs({
+        {1429, 1453, "stockade", .20834, .37467},
+        {1411, 1454, "ragefire-chasm", .46447, .02},
+        {1426, 1455, "hall-of-thanes", .58063, .29437},
+    }) do
+        local zone, city, id, x, y = unpack(sample)
+        local function isDoor(entry) return entry.source.id == id end
+        map:SetMapID(zone)
+        local pin, projected = locate(env, isDoor)
+        check(pin and math.abs(projected.x - x) < .00001 and math.abs(projected.y - y) < .00001, id)
+        equal(projected.mapID, zone)
+        equal(projected.point.mapID, city)
+        equal(projected.subtitle:find("Beyond the map edge", 1, true) ~= nil, zone == 1411)
+        map:ClickPin(pin, "LeftButton")
+        equal(addon.DungeonMap.dungeon.id, id)
+        addon.DungeonMap:Close()
+        map:ClickPin(pin, "RightButton")
+        state.menu:Find("Show path to " .. projected.title):Click()
+        equal(env.AeternumRouteDB.mapID, city)
+        equal(env.AeternumRouteDB.x, projected.point.x)
+        equal(env.AeternumRouteDB.y, projected.point.y)
+        addon.Navigation:Stop()
+        map:SetMapID(city)
+        local _, original = locate(env, isDoor)
+        equal(original.point, projected.point)
+        local count = 0
+        for _, entry in ipairs(addon.MapRecords(city)) do if isDoor(entry) then count = count + 1 end end
+        equal(count, 1, "only one entrance on the city map")
+        map:SetMapID(1436)
+        check(not locate(env, isDoor), "does not appear in Westfall")
+    end
 end)
 
 test("focusing a second map location restores the first pin's style and size", function()
