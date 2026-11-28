@@ -30,6 +30,8 @@ Click any entrance on the Azeroth, continent, or zone map to browse all 34 dunge
 - Verified boss drops appear directly in the main menu, while other recorded corpse drops, encounter rolls, and guide-listed drops stay separated in submenus so you can see what has live player evidence.
 
 ### Entrances and minimap directions
+Hover over a zone to see its recommended levels, on the Azeroth, continent, and zone maps, including unexplored terrain.
+
 All 41 outdoor entrances appear on world, continent, and zone maps, including multi-door dungeons like Dire Maul, Uldaman, and Blackrock Mountain.
 
 - Right-click any entrance (or click a trainer or quest pin) for a minimap bearing to the door.
@@ -111,5 +113,7 @@ To contribute code or rebuild the bundled datasets locally, see **[CONTRIBUTING.
 <div align="center">
 
 [Data Sources & Credits](DATA_SOURCES.md) · [Contributing](CONTRIBUTING.md) · [GPL-3.0 License](LICENSE)
+
+<sub>README by Neon 4</sub>
 
 </div>

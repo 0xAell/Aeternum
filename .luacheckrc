@@ -22,7 +22,8 @@ read_globals = {
     "MapCanvasDataProviderMixin", "MapCanvasPinMixin", "Minimap", "Mixin", "SetItemRef",
     "OpenWorldMap", "UIParent", "UnitClass", "UnitFactionGroup", "UnitIsDeadOrGhost", "UnitLevel",
     "UnitQuestTrivialLevelRange", "UnitRace", "WorldMapFrame", "canaccesstable", "issecretvalue",
-    "strtrim", "wipe",
+    "hooksecurefunc", "strtrim", "wipe",
+    "InputUtil", "LEVEL", "MAP_AREA_LABEL_TYPE", "QuestDifficultyColors", "GetQuestDifficultyColor",
 }
 
 files["tests/**"] = { std = "+luajit", globals = { "setfenv" } }

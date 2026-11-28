@@ -298,6 +298,15 @@ function MapCanvas:SetMouseWheelZoomMode(mode)
     self.ScrollContainer.mouseWheelZoomMode = mode
 end
 function MapCanvas:GetMapID() return self.mapID end
+function MapCanvas:HasZoomLevels() return self.ScrollContainer.zoomLevels ~= nil end
+function MapCanvas:GetCanvasZoomPercent() return Wow.state.zoomPercent or 0 end
+function MapCanvas:GetGlobalPinScale() return Wow.state.globalPinScale or 1 end
+function MapCanvas:SetGlobalPinScale(scale)
+    Wow.state.globalPinScale = scale
+    for _, pool in pairs(self.pools) do
+        for _, pin in ipairs(pool.active) do pin:ApplyCurrentScale() end
+    end
+end
 function MapCanvas:PanTo(x, y)
     blizzardWrite("scroll position")
     self.panX, self.panY = x, y
@@ -312,6 +321,7 @@ function MapCanvas:SetMapID(mapID)
     end
 end
 function MapCanvas:AddDataProvider(provider)
+    self.dataProviders[provider] = true
     self.providers[#self.providers + 1] = provider
     provider:OnAdded(self)
 end
@@ -698,6 +708,11 @@ function Wow.new(state)
             if self.OnMouseClickAction then self:OnMouseClickAction(...) end
         end,
         OnReleased = noop,
+        ApplyCurrentScale = function(self)
+            local map = env.WorldMapFrame
+            local scale = map:GetGlobalPinScale() * (1 + .2 * map:GetCanvasZoomPercent())
+            self:SetScale(scale / map.ScrollContainer:GetCanvasScale())
+        end,
         UseFrameLevelType = noop,
         ShouldMouseButtonBePassthrough = function(_, button) return button == "RightButton" end,
         CheckMouseButtonPassthrough = function(self, ...)
@@ -711,6 +726,7 @@ function Wow.new(state)
         SetPosition = function(self, x, y) self.x, self.y = x, y end,
     }
     local map = Wow.region(MapCanvas, env.UIParent)
+    map.dataProviders = {}
     map.providers, map.pools = {}, setmetatable({}, {
         __index = function(pools, template)
             local pool = { active = {}, free = {} }

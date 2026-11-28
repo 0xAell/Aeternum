@@ -6,6 +6,18 @@ on:
   pull_request:
 
 jobs:
+  readme-signature:
+    name: README signature
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Check the Neon 4 credit
+        run: |
+          if ! grep -Fxq '<sub>README by Neon 4</sub>' README.md; then
+            echo "::error file=README.md::Restore the README by Neon 4 signature in the footer."
+            exit 1
+          fi
+
   check:
     runs-on: ubuntu-latest
     steps:
