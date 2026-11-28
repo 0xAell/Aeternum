@@ -11,12 +11,14 @@ Data.lua
 OverviewData.lua
 LootData.lua
 FloorData.lua
+TacticsData.lua
 ClassicTraining.lua
 ForeverTraining.lua
 Core.lua
 Quests.lua
 Trainers.lua
 Loot.lua
+Tactics.lua
 Navigation.lua
 DungeonMap.lua
 UI.lua

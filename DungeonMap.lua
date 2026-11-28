@@ -224,7 +224,10 @@ local function bossPin(frame, index)
         elseif self.stop.approximate then
             GameTooltip:AddLine("Approximate location", .8, .8, .8)
         end
-        GameTooltip:AddLine("Click for loot", 1, .82, 0)
+        if #self.members == 1 and addon.Tactics then
+            addon.Tactics:AddTooltip(GameTooltip, self.boss, false)
+        end
+        GameTooltip:AddLine("Click for tactics & loot", 1, .82, 0)
         GameTooltip:Show()
     end)
     pin:SetScript("OnLeave", function(self) if GameTooltip:IsOwned(self) then GameTooltip:Hide() end end)
@@ -312,7 +315,7 @@ local function floorMenu(_, menu)
     local bosses = menu:CreateButton("Boss loot")
     bosses:SetScrollMode(300)
     for _, boss in ipairs(dungeon.bosses) do
-        bosses:CreateButton(boss.name, function()
+        local row = bosses:CreateButton(boss.name, function()
             C_Timer.After(0, function()
                 if DungeonMap.dungeon ~= dungeon then return end
                 local index = bossFloor(dungeon, boss)
@@ -323,6 +326,9 @@ local function floorMenu(_, menu)
                 addon.UI:Boss(DungeonMap.frame, boss)
             end)
         end)
+        if boss.id and addon.Tactics and addon.Tactics:ForBoss(boss.id) then
+            row:SetTooltip(function(tooltip) addon.Tactics:AddTooltip(tooltip, boss, true) end)
+        end
     end
     if #dungeon.quests > 0 then addon.UI:QuestMenu(menu:CreateButton("Dungeon quests"), dungeon) end
     if #dungeon.keys > 0 then addon.UI:Keys(menu:CreateButton("Dungeon keys"), dungeon) end
